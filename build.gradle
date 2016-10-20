@@ -1,0 +1,53 @@
+buildscript {
+  version = System.getProperty('swarmVersion') ?: '2016.10.0'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "io.spring.gradle:dependency-management-plugin:0.5.6.RELEASE"
+    classpath "org.wildfly.swarm:wildfly-swarm-plugin:$version"
+  }
+}
+
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'wildfly-swarm'
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'org.wildfly.swarm.examples.gradle.Main'
+
+swarm {
+  properties {
+    swarm.http.port = 8181
+  }
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven {
+    url 'https://maven.repository.redhat.com/nexus/content/repositories/thirdparty-releases/'
+  }
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.wildfly.swarm:bom-all:$version"
+  }
+}
+
+dependencies {
+  compile "org.wildfly.swarm:jaxrs"
+}
+
+task runJar(dependsOn:"wildfly-swarm-package") << {
+  javaexec {
+    main="-jar";
+    args=[
+            "build/libs/example-gradle-swarm.jar"
+    ]
+  }
+}
