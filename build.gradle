@@ -16,6 +16,7 @@ apply plugin: "io.spring.dependency-management"
 apply plugin: 'wildfly-swarm'
 apply plugin: 'java'
 apply plugin: 'application'
+//apply plugin: 'war'
 
 mainClassName = 'org.wildfly.swarm.examples.gradle.Main'
 
@@ -29,6 +30,9 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven {
+    url 'https://maven.repository.redhat.com/nexus/content/repositories/releases/'
+  }
+  maven {
     url 'https://maven.repository.redhat.com/nexus/content/repositories/thirdparty-releases/'
   }
 }
@@ -40,7 +44,10 @@ dependencyManagement {
 }
 
 dependencies {
+  compile group: 'org.biojava', name: 'biojava-core', version: '4.2.4'
+  compile group: 'org.biojava', name: 'biojava-structure', version: '4.2.4'
   compile "org.wildfly.swarm:jaxrs"
+  compile group: 'org.wildfly.swarm', name: 'undertow', version: '2016.10.0'
 }
 
 task runJar(dependsOn:"wildfly-swarm-package") << {
