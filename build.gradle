@@ -16,9 +16,9 @@ apply plugin: "io.spring.dependency-management"
 apply plugin: 'wildfly-swarm'
 apply plugin: 'java'
 apply plugin: 'application'
-//apply plugin: 'war'
+apply plugin: 'war'
 
-mainClassName = 'org.wildfly.swarm.examples.gradle.Main'
+//mainClassName = 'org.siret.prank.webapp.rest.Main'
 
 swarm {
   properties {
@@ -50,11 +50,21 @@ dependencies {
   compile group: 'org.wildfly.swarm', name: 'undertow', version: '2016.10.0'
 }
 
+task debugJar(dependsOn:"wildfly-swarm-package") << {
+  javaexec {
+    main="-jar";
+    args=[
+            "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006",
+            "build/libs/prank-webapp-swarm.jar"
+    ]
+  }
+}
+
 task runJar(dependsOn:"wildfly-swarm-package") << {
   javaexec {
     main="-jar";
     args=[
-            "build/libs/example-gradle-swarm.jar"
+            "build/libs/prank-webapp-swarm.jar"
     ]
   }
 }
