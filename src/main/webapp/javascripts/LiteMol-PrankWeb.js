@@ -1,3 +1,8 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 /*
  * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
@@ -42,7 +47,7 @@ var LiteMol;
                     description: 'Download a molecule from PDBe.',
                     defaultId: '1cbs',
                     specificFormat: LiteMol.Core.Formats.Molecule.SupportedFormats.mmCIF,
-                    urlTemplate: function (id) { return ("https://www.ebi.ac.uk/pdbe/static/entry/" + id.toLowerCase() + "_updated.cif"); }
+                    urlTemplate: function (id) { return "https://www.ebi.ac.uk/pdbe/static/entry/" + id.toLowerCase() + "_updated.cif"; }
                 });
                 Data.DownloadBinaryCIFFromCoordinateServer = Bootstrap.Tree.Transformer.action({
                     id: 'molecule-download-bcif-from-coordinate-server',
@@ -82,9 +87,13 @@ var LiteMol;
                         id: 'Fo-Fc(-ve)',
                         isoSigmaMin: -5,
                         isoSigmaMax: 0,
+                        minRadius: 0,
+                        maxRadius: 10,
                         radius: 5,
+                        showFull: false,
                         style: Visualization.Density.Style.create({
-                            isoSigma: -3,
+                            isoValue: -3,
+                            isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
                             color: LiteMol.Visualization.Color.fromHex(0xBB3333),
                             isWireframe: true,
                             transparency: { alpha: 1.0 }
@@ -95,9 +104,13 @@ var LiteMol;
                         id: 'Fo-Fc(+ve)',
                         isoSigmaMin: 0,
                         isoSigmaMax: 5,
+                        minRadius: 0,
+                        maxRadius: 10,
                         radius: 5,
+                        showFull: false,
                         style: Visualization.Density.Style.create({
-                            isoSigma: 3,
+                            isoValue: 3,
+                            isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
                             color: LiteMol.Visualization.Color.fromHex(0x33BB33),
                             isWireframe: true,
                             transparency: { alpha: 1.0 }
@@ -110,16 +123,20 @@ var LiteMol;
                         id: '2Fo-Fc',
                         isoSigmaMin: 0,
                         isoSigmaMax: 2,
+                        minRadius: 0,
+                        maxRadius: 10,
                         radius: 5,
+                        showFull: false,
                         style: Visualization.Density.Style.create({
-                            isoSigma: 1.5,
+                            isoValue: 1.5,
+                            isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
                             color: LiteMol.Visualization.Color.fromHex(0x3362B2),
                             isWireframe: false,
                             transparency: { alpha: 0.45 }
                         })
                     });
                     return action;
-                }, "Electron density loaded, click on a residue or atom to display it.");
+                }, "Electron density loaded, click on a residue or an atom to view the data.");
             })(Data = PDBe.Data || (PDBe.Data = {}));
         })(PDBe = Viewer.PDBe || (Viewer.PDBe = {}));
     })(Viewer = LiteMol.Viewer || (LiteMol.Viewer = {}));
@@ -379,6 +396,383 @@ var LiteMol;
         })(PDBe = Viewer.PDBe || (Viewer.PDBe = {}));
     })(Viewer = LiteMol.Viewer || (LiteMol.Viewer = {}));
 })(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Bootstrap = LiteMol.Bootstrap;
+        var Entity = Bootstrap.Entity;
+        PrankWeb.Sequence = Entity.create({
+            name: 'Protein sequence',
+            typeClass: 'Data',
+            shortName: 'PS',
+            description: 'Represents sequence of the protein.'
+        });
+        PrankWeb.CreateSequence = Bootstrap.Tree.Transformer.create({
+            id: 'protein-sequence-create',
+            name: 'Protein sequence',
+            description: 'Create protein sequence from string.',
+            from: [Entity.Data.String],
+            to: [PrankWeb.Sequence],
+            defaultParams: function () { return ({}); }
+        }, function (context, a, t) {
+            return Bootstrap.Task.create("Create sequence entity", 'Normal', function (ctx) {
+                ctx.update('Creating sequence entity...');
+                ctx.schedule(function () {
+                    var seq = a.props.data;
+                    console.log("Sekvence: " + seq);
+                    ctx.resolve(PrankWeb.Sequence.create(t, { label: 'Sequence', seq: seq }));
+                });
+            }).setReportTime(true);
+        });
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Bootstrap = LiteMol.Bootstrap;
+        var Entity = Bootstrap.Entity;
+        PrankWeb.Prediction = Entity.create({
+            name: 'Pocket prediction',
+            typeClass: 'Data',
+            shortName: 'PP',
+            description: 'Represents predicted protein-ligand binding pockets.'
+        });
+        PrankWeb.ParseAndCreatePrediction = Bootstrap.Tree.Transformer.create({
+            id: 'protein-pocket-prediction-parse',
+            name: 'Protein predicted pockets',
+            description: 'Parse protein pocket prediction.',
+            from: [Entity.Data.String],
+            to: [PrankWeb.Prediction],
+            defaultParams: function () { return ({}); }
+        }, function (context, a, t) {
+            return Bootstrap.Task.create("Parse protein prediction entity.", 'Normal', function (ctx) {
+                ctx.update('Parsing prediction data...');
+                ctx.schedule(function () {
+                    var csvData = a.props.data;
+                    var result = [];
+                    try {
+                        var lines = csvData.split('\n');
+                        var h = 0;
+                        var HSVtoRGB = function (h, s, v) {
+                            var r, g, b, i, f, p, q, t;
+                            // if (arguments.length === 1) {
+                            //     s = h.s, v = h.v, h = h.h;
+                            // }
+                            i = Math.floor(h * 6);
+                            f = h * 6 - i;
+                            p = v * (1 - s);
+                            q = v * (1 - f * s);
+                            t = v * (1 - (1 - f) * s);
+                            switch (i % 6) {
+                                case 0:
+                                    r = v, g = t, b = p;
+                                    break;
+                                case 1:
+                                    r = q, g = v, b = p;
+                                    break;
+                                case 2:
+                                    r = p, g = v, b = t;
+                                    break;
+                                case 3:
+                                    r = p, g = q, b = v;
+                                    break;
+                                case 4:
+                                    r = t, g = p, b = v;
+                                    break;
+                                case 5:
+                                    r = v, g = p, b = q;
+                                    break;
+                            }
+                            console.log(r * 255, g * 255, b * 255);
+                            return LiteMol.Visualization.Color.fromRgb(r * 255, g * 255, b * 255);
+                        };
+                        var _loop_1 = function (i) {
+                            h = h + (1 / 6);
+                            if (h >= 1) {
+                                h = h - 1;
+                            }
+                            var fields = lines[i].split(',');
+                            if (fields.length < 10)
+                                return "continue";
+                            var resIds = [];
+                            fields[8].split(' ').forEach(function (value) { resIds.push(parseInt(value)); });
+                            var surfAtoms = [];
+                            fields[9].split(' ').forEach(function (value) { surfAtoms.push(parseInt(value)); });
+                            result.push({
+                                name: fields[0],
+                                rank: parseFloat(fields[1]),
+                                score: parseFloat(fields[2]),
+                                conollyPoints: parseFloat(fields[3]),
+                                surfAtoms: parseFloat(fields[4]),
+                                centerX: parseFloat(fields[5]),
+                                centerY: parseFloat(fields[6]),
+                                centerZ: parseFloat(fields[7]),
+                                residueIds: resIds,
+                                surfAtomIds: surfAtoms,
+                                color: HSVtoRGB(h, 1, 1)
+                            });
+                        };
+                        for (var i = 1; i < lines.length; i++) {
+                            _loop_1(i);
+                        }
+                    }
+                    catch (e) {
+                        console.log("Exception catched during parsing.");
+                    }
+                    ctx.resolve(PrankWeb.Prediction.create(t, { label: 'Sequence', pockets: result }));
+                });
+            }).setReportTime(true);
+        });
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Bootstrap = LiteMol.Bootstrap;
+        var SequenceController = (function (_super) {
+            __extends(SequenceController, _super);
+            function SequenceController(context) {
+                var _this = _super.call(this, context, { seq: "", pockets: [] }) || this;
+                Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(function (e) {
+                    if (e.data.type === PrankWeb.Sequence) {
+                        _this.setState({ seq: e.data.props.seq, pockets: _this.latestState.pockets });
+                    }
+                    else if (e.data.type === PrankWeb.Prediction) {
+                        _this.setState({ seq: _this.latestState.seq, pockets: e.data.props.pockets });
+                    }
+                });
+                return _this;
+            }
+            return SequenceController;
+        }(Bootstrap.Components.Component));
+        PrankWeb.SequenceController = SequenceController;
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Plugin = LiteMol.Plugin;
+        var Views = Plugin.Views;
+        var Bootstrap = LiteMol.Bootstrap;
+        var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
+        var CacheItem = (function () {
+            function CacheItem(query, selectionInfo) {
+                this.query = query;
+                this.selectionInfo = selectionInfo;
+            }
+            return CacheItem;
+        }());
+        var SequenceView = (function (_super) {
+            __extends(SequenceView, _super);
+            function SequenceView() {
+                return _super.apply(this, arguments) || this;
+            }
+            SequenceView.prototype.getResidue = function (seqNumber, model) {
+                var ctx = this.controller.context;
+                var cache = ctx.entityCache;
+                var cacheId = "__resSelectionInfo-" + seqNumber;
+                var item = cache.get(model, cacheId);
+                if (!item) {
+                    var selectionQ = LiteMol.Core.Structure.Query.residuesById(seqNumber); //Core.Structure.Query.chains({ authAsymId: 'A' })
+                    var elements = model.props.model.query(selectionQ).unionAtomIndices();
+                    var selection = Bootstrap.Interactivity.Info.selection(model, elements);
+                    var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
+                    item = new CacheItem(selectionQ, selectionInfo);
+                    cache.set(model, cacheId, item);
+                }
+                return item;
+            };
+            SequenceView.prototype.componentWillMount = function () {
+                _super.prototype.componentWillMount.call(this);
+                //this.subscribe(Bootstrap.Event.Common.LayoutChanged.getStream(this.controller.context), () => this.scrollToBottom());
+            };
+            SequenceView.prototype.componentDidUpdate = function () {
+                //this.scrollToBottom();
+            };
+            SequenceView.prototype.onLetterMouseEnter = function (seqNumber, letter, isOn) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                // Get the sequence selection
+                var seqSel = this.getResidue(seqNumber, model);
+                // Highlight in the 3D Visualization
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: isOn });
+                if (isOn) {
+                    // Show tooltip
+                    var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
+                }
+                else {
+                    // Hide tooltip
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
+                }
+            };
+            SequenceView.prototype.onLetterClick = function (seqNumber, letter) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                var query = this.getResidue(seqNumber, model).query;
+                Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
+            };
+            SequenceView.prototype.render = function () {
+                var _this = this;
+                var seq = this.controller.latestState.seq.split('');
+                var pockets = this.controller.latestState.pockets;
+                var ctx = this.controller.context;
+                var seqToPrint = [];
+                seq.forEach(function (letter, i) {
+                    seqToPrint.push(letter);
+                    if ((i + 1) % 10 == 0) {
+                        seqToPrint.push(' ');
+                    }
+                });
+                var getColor = function (seqId) {
+                    var color = LiteMol.Visualization.Color.fromRgb(255, 255, 255);
+                    var colorSet = false;
+                    pockets.forEach(function (pocket) {
+                        if (pocket.residueIds.indexOf(seqId) >= 0) {
+                            if (!colorSet) {
+                                color = pocket.color;
+                                colorSet = true;
+                            }
+                            else {
+                                console.log(seqId.toString() + " is in at least two pockets!");
+                            }
+                        }
+                    });
+                    return color;
+                };
+                var colorToString = function (color) {
+                    return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
+                };
+                var seqId = -1;
+                return (React.createElement("div", { className: 'protein-seq', style: { fontFamily: 'Consolas, "Courier New", monospace', fontSize: 'large' } }, seqToPrint.map(function (letter, i) {
+                    if (letter === ' ') {
+                        return React.createElement("span", { className: "space" }, " ");
+                    }
+                    else {
+                        seqId++;
+                        return React.createElement("span", { id: 'res' + seqId.toString(), onMouseEnter: _this.onLetterMouseEnter.bind(_this, seqId, letter, true), onMouseLeave: _this.onLetterMouseEnter.bind(_this, seqId, letter, false), onClick: _this.onLetterClick.bind(_this, seqId, letter), style: { color: colorToString(getColor(seqId)) } }, letter);
+                    }
+                })));
+            };
+            return SequenceView;
+        }(Views.View));
+        PrankWeb.SequenceView = SequenceView;
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Plugin = LiteMol.Plugin;
+        var Views = Plugin.Views;
+        var Bootstrap = LiteMol.Bootstrap;
+        var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
+        var PocketController = (function (_super) {
+            __extends(PocketController, _super);
+            function PocketController(context) {
+                var _this = _super.call(this, context, { pockets: [] }) || this;
+                Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(function (e) {
+                    if (e.data.type === PrankWeb.Prediction) {
+                        _this.setState({ pockets: e.data.props.pockets });
+                    }
+                });
+                return _this;
+            }
+            return PocketController;
+        }(Bootstrap.Components.Component));
+        PrankWeb.PocketController = PocketController;
+        var CacheItem = (function () {
+            function CacheItem(query, selectionInfo) {
+                this.query = query;
+                this.selectionInfo = selectionInfo;
+            }
+            return CacheItem;
+        }());
+        var PocketList = (function (_super) {
+            __extends(PocketList, _super);
+            function PocketList() {
+                return _super.apply(this, arguments) || this;
+            }
+            PocketList.prototype.getPocket = function (pocket, model) {
+                var ctx = this.controller.context;
+                var cache = ctx.entityCache;
+                var cacheId = "__pocketSelectionInfo-" + pocket.name;
+                var item = cache.get(model, cacheId);
+                if (!item) {
+                    var selectionQ = LiteMol.Core.Structure.Query.atomsById.apply(null, pocket.surfAtomIds); //Core.Structure.Query.chains({ authAsymId: 'A' })
+                    var elements = model.props.model.query(selectionQ).unionAtomIndices();
+                    var selection = Bootstrap.Interactivity.Info.selection(model, elements);
+                    var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
+                    item = new CacheItem(selectionQ, selectionInfo);
+                    cache.set(model, cacheId, item);
+                }
+                return item;
+            };
+            PocketList.prototype.componentWillMount = function () {
+                _super.prototype.componentWillMount.call(this);
+                //this.subscribe(Bootstrap.Event.Common.LayoutChanged.getStream(this.controller.context), () => this.scrollToBottom());
+            };
+            PocketList.prototype.componentDidUpdate = function () {
+                //this.scrollToBottom();
+            };
+            PocketList.prototype.onLetterMouseEnter = function (pocket, isOn) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                // Get the sequence selection
+                var pocketSel = this.getPocket(pocket, model);
+                // Highlight in the 3D Visualization
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: pocketSel.query, isOn: isOn });
+                if (isOn) {
+                    // Show tooltip
+                    var label = Bootstrap.Interactivity.Molecule.formatInfo(pocketSel.selectionInfo);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label, "" + pocket.name]);
+                }
+                else {
+                    // Hide tooltip
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
+                }
+            };
+            PocketList.prototype.onLetterClick = function (pocket) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                var query = this.getPocket(pocket, model).query;
+                Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
+            };
+            PocketList.prototype.render = function () {
+                var _this = this;
+                var pockets = this.controller.latestState.pockets;
+                var ctx = this.controller.context;
+                var colorToString = function (color) {
+                    return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
+                };
+                return (React.createElement("div", { className: "pocket-list" }, pockets.map(function (pocket, i) {
+                    return React.createElement("div", { className: "pocket col-sm-6 col-xs-12", style: { borderColor: colorToString(pocket.color) }, onMouseEnter: _this.onLetterMouseEnter.bind(_this, pocket, true), onMouseLeave: _this.onLetterMouseEnter.bind(_this, pocket, false), onClick: _this.onLetterClick.bind(_this, pocket) },
+                        React.createElement("dl", null,
+                            React.createElement("dt", null, "Pocket name"),
+                            React.createElement("dd", null, pocket.name),
+                            React.createElement("dt", null, "Pocket rank"),
+                            React.createElement("dd", null, pocket.rank),
+                            React.createElement("dt", null, "Pocket score"),
+                            React.createElement("dd", null, pocket.score)));
+                })));
+            };
+            return PocketList;
+        }(Views.View));
+        PrankWeb.PocketList = PocketList;
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
 /*
  * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
@@ -419,7 +813,8 @@ var LiteMol;
                 ],
                 components: [
                     Plugin.Components.Visualization.HighlightInfo(LayoutRegion.Main, true),
-                    Plugin.Components.Context.Log(LayoutRegion.Bottom, true),
+                    //Plugin.Components.Context.Log(LayoutRegion.Bottom, true),
+                    Plugin.Components.create('PrankWeb.SequenceView', function (s) { return new PrankWeb.SequenceController(s); }, PrankWeb.SequenceView)(LayoutRegion.Top, true),
                     Plugin.Components.Context.Overlay(LayoutRegion.Root),
                     Plugin.Components.Context.BackgroundTasks(LayoutRegion.Main, true)
                 ],
@@ -430,51 +825,24 @@ var LiteMol;
                 layoutView: Views.Layout,
                 tree: { region: LayoutRegion.Left, view: Views.Entity.Tree }
             };
-            var plugin = new Plugin.Instance(spec, target);
+            var plugin = Plugin.create({ target: target, customSpecification: spec });
             plugin.context.logger.message("LiteMol " + Plugin.VERSION.number);
             return plugin;
         }
         PrankWeb.create = create;
-        var parsePredictionCsv = function (csvFileContents) {
-            var result = [];
-            try {
-                var lines = csvFileContents.split('\n');
-                var _loop_1 = function(i) {
-                    var fields = lines[i].split(',');
-                    if (fields.length < 10)
-                        return "continue";
-                    var resIds = [];
-                    fields[8].split(' ').forEach(function (value) { resIds.push(parseInt(value)); });
-                    var surfAtoms = [];
-                    fields[9].split(' ').forEach(function (value) { surfAtoms.push(parseInt(value)); });
-                    result.push({
-                        name: fields[0],
-                        rank: parseFloat(fields[1]),
-                        score: parseFloat(fields[2]),
-                        conollyPoints: parseFloat(fields[3]),
-                        surfAtoms: parseFloat(fields[4]),
-                        centerX: parseFloat(fields[5]),
-                        centerY: parseFloat(fields[6]),
-                        centerZ: parseFloat(fields[7]),
-                        residueIds: resIds,
-                        surfAtomIds: surfAtoms
-                    });
-                };
-                for (var i = 1; i < lines.length; i++) {
-                    _loop_1(i);
-                }
-            }
-            catch (e) {
-                console.log("Exception catched during parsing.");
-            }
-            return result;
-        };
         var appNode = document.getElementById('app');
+        var pocketNode = document.getElementById('pockets');
         var pdbId = appNode.getAttribute("data-pdbid");
-        console.log(pdbId);
         var plugin = create(appNode);
-        var downloadCsv = Bootstrap.Utils.ajaxGetString("/api/csv/" + pdbId).run(plugin.context).then(function (csvData) {
-            var pockets = parsePredictionCsv(csvData);
+        LiteMol.Plugin.ReactDOM.render(LiteMol.Plugin.React.createElement(PrankWeb.PocketList, { controller: new PrankWeb.PocketController(plugin.context) }), pocketNode);
+        var downloadAction = Bootstrap.Tree.Transform.build()
+            .add(plugin.root, Transformer.Data.Download, { url: "/api/csv/" + pdbId, type: 'String' }, { isHidden: true })
+            .then(PrankWeb.ParseAndCreatePrediction, {}, { ref: 'pockets', isHidden: true })
+            .add(plugin.root, Transformer.Data.Download, { url: "/api/seq/" + pdbId, type: 'String' }, { isHidden: true })
+            .then(PrankWeb.CreateSequence, {}, { ref: 'sequence', isHidden: true });
+        plugin.applyTransform(downloadAction).then(function () {
+            var pockets = plugin.context.select('pockets')[0].props.pockets;
+            var seqData = plugin.context.select('sequence')[0].props.data;
             LiteMol.Bootstrap.Command.Layout.SetState.dispatch(plugin.context, {
                 isExpanded: false,
                 hideControls: false
@@ -484,10 +852,10 @@ var LiteMol;
              */
             var selectionQueries = [];
             var allPocketIds = [];
-            var colors = [0xffff00, 0xff9900, 0xff0000, 0x660066, 0x0000ff, 0x660066, 0x003300];
             pockets.forEach(function (pocket) {
                 selectionQueries.push(Query.atomsById.apply(null, pocket.surfAtomIds));
                 pocket.surfAtomIds.forEach(function (id) { allPocketIds.push(id); });
+                // __LiteMolReact.__DOM.render(__LiteMolReact.createElement('p', {}, 'Ahoj'), pocketNode)   
             });
             var selectionColors = Bootstrap.Immutable.Map()
                 .set('Uniform', LiteMol.Visualization.Color.fromHex(0xff0000))
@@ -506,8 +874,8 @@ var LiteMol;
             // Represent an action to perform on the app state.
             var action = Bootstrap.Tree.Transform.build();
             // This loads the model from PDBe
-            var modelAction = action.add(plugin.context.tree.root, Transformer.Data.Download, { url: "http://www.ebi.ac.uk/pdbe/static/entry/" + pdbId + "_updated.cif", type: 'String', pdbId: pdbId })
-                .then(Transformer.Data.ParseCif, { id: pdbId }, { isBinding: true })
+            var modelAction = action.add(plugin.context.tree.root, Transformer.Data.Download, { url: "/api/mmcif/" + pdbId, type: 'String', description: pdbId })
+                .then(Transformer.Data.ParseCif, { id: pdbId, description: pdbId }, { isBinding: true })
                 .then(Transformer.Molecule.CreateFromMmCif, { blockIndex: 0 }, { isBinding: true })
                 .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false, ref: 'model' });
             // Create a selection on the model and then create a visual for it...
@@ -515,7 +883,7 @@ var LiteMol;
                 .then(Transformer.Molecule.CreateSelectionFromQuery, { query: complementQ, name: 'Protein', silent: true }, {})
                 .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: true });
             selectionQueries.forEach(function (selectionQuery, i) {
-                var selectionColor = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(colors[i]));
+                var selectionColor = selectionColors.set('Uniform', pockets[i].color);
                 var selectionStyle = {
                     type: 'Surface',
                     params: { probeRadius: 0.5, density: 1.25, smoothing: 3, isWireframe: false },
@@ -532,7 +900,6 @@ var LiteMol;
                 var model = plugin.context.select('model')[0];
                 if (!model)
                     return;
-                console.log(model.props.model);
                 //Bootstrap.Command.Molecule.FocusQuery.dispatch(plugin.context, { model, query: selectionQueries });
             });
         });

@@ -1045,7 +1045,7 @@ if (typeof window !== 'undefined' && window && window.Promise) {
  */
 var CIFTools;
 (function (CIFTools) {
-    CIFTools.VERSION = { number: "1.0.1", date: "Oct 24 2016" };
+    CIFTools.VERSION = { number: "1.0.3", date: "Nov 15 2016" };
 })(CIFTools || (CIFTools = {}));
 /*
  * Copyright (c) 2016 David Sehnal, licensed under MIT License, See LICENSE file for more info.
@@ -2470,21 +2470,21 @@ var CIFTools;
                 return;
             }
             var escape = false, escapeCharStart = '\'', escapeCharEnd = '\' ';
-            var whitespace = false;
+            var hasWhitespace = false;
             var hasSingle = false;
             var hasDouble = false;
             for (var i = 0, _l = val.length - 1; i < _l; i++) {
                 var c = val.charCodeAt(i);
                 switch (c) {
                     case 9:
-                        whitespace = true;
+                        hasWhitespace = true;
                         break; // \t
                     case 10:
                         StringWriter.writeSafe(writer, '\n;' + val);
                         StringWriter.writeSafe(writer, '\n; ');
                         return;
                     case 32:
-                        whitespace = true;
+                        hasWhitespace = true;
                         break; // ' '
                     case 34:
                         if (hasSingle) {
@@ -2510,7 +2510,8 @@ var CIFTools;
                         break;
                 }
             }
-            if (!escape && (val.charCodeAt(0) === 59 /* ; */ || whitespace)) {
+            var fst = val.charCodeAt(0);
+            if (!escape && (fst === 35 /* # */ || fst === 59 /* ; */ || hasWhitespace)) {
                 escapeCharStart = '\'';
                 escapeCharEnd = '\' ';
                 escape = true;
@@ -2573,6 +2574,10 @@ var CIFTools;
     (function (Binary) {
         var MessagePack;
         (function (MessagePack) {
+            /*
+             * Adapted from https://github.com/rcsb/mmtf-javascript
+             * by Alexander Rose <alexander.rose@weirdbyte.de>, MIT License, Copyright (c) 2016
+             */
             /**
              * decode all key-value pairs of a map into an object
              * @param  {Integer} length - number of key-value pairs
@@ -3571,7 +3576,6 @@ var CIFTools;
             return Encoder;
         }());
         Binary.Encoder = Encoder;
-        var Encoder;
         (function (Encoder) {
             function by(f) {
                 return new Encoder([f]);
@@ -11118,7 +11122,7 @@ var LiteMol;
 (function (LiteMol) {
     var Core;
     (function (Core) {
-        Core.VERSION = { number: "2.4.8", date: "Oct 25 2016" };
+        Core.VERSION = { number: "2.4.10", date: "Nov 12 2016" };
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -11166,7 +11170,6 @@ var LiteMol;
             return Computation;
         }());
         Core.Computation = Computation;
-        var Computation;
         (function (Computation) {
             function create(computation) {
                 return new Computation(computation);
@@ -11176,6 +11179,18 @@ var LiteMol;
                 return create(function (ctx) { return ctx.resolve(a); });
             }
             Computation.resolve = resolve;
+            function schedule(ctx, f, afterMs) {
+                if (afterMs === void 0) { afterMs = 0; }
+                return new LiteMol.Core.Promise(function (res) { return ctx.schedule(function () {
+                    try {
+                        res(f());
+                    }
+                    finally {
+                        res(undefined);
+                    }
+                }, afterMs); });
+            }
+            Computation.schedule = schedule;
             var Context = (function () {
                 function Context() {
                     var _this = this;
@@ -11822,17 +11837,34 @@ var LiteMol;
             "use strict";
             var FormatInfo;
             (function (FormatInfo) {
+                function is(o) {
+                    return o.name && o.parse;
+                }
+                FormatInfo.is = is;
+                function fromShortcut(all, name) {
+                    name = name.toLowerCase().trim();
+                    for (var _i = 0, all_1 = all; _i < all_1.length; _i++) {
+                        var f = all_1[_i];
+                        for (var _a = 0, _b = f.shortcuts; _a < _b.length; _a++) {
+                            var s = _b[_a];
+                            if (s.toLowerCase() === name)
+                                return f;
+                        }
+                    }
+                    return void 0;
+                }
+                FormatInfo.fromShortcut = fromShortcut;
                 function formatRegExp(info) {
-                    return new RegExp(info.extensions.map(function (e) { return ("(\\" + e + ")"); }).join('|') + '(\\.gz){0,1}$', 'i');
+                    return new RegExp(info.extensions.map(function (e) { return "(\\" + e + ")"; }).join('|') + '(\\.gz){0,1}$', 'i');
                 }
                 FormatInfo.formatRegExp = formatRegExp;
                 function formatFileFilters(all) {
-                    return all.map(function (info) { return info.extensions.map(function (e) { return (e + "," + e + ".gz"); }).join(','); }).join(',');
+                    return all.map(function (info) { return info.extensions.map(function (e) { return e + "," + e + ".gz"; }).join(','); }).join(',');
                 }
                 FormatInfo.formatFileFilters = formatFileFilters;
                 function getFormat(filename, all) {
-                    for (var _i = 0, all_1 = all; _i < all_1.length; _i++) {
-                        var f = all_1[_i];
+                    for (var _i = 0, all_2 = all; _i < all_2.length; _i++) {
+                        var f = all_2[_i];
                         if (formatRegExp(f).test(filename))
                             return f;
                     }
@@ -12161,8 +12193,13 @@ var LiteMol;
                     function isResidueNucleotide(atoms, residues, entities, index) {
                         if (aminoAcidNames[residues.name[index]] || entities.entityType[residues.entityIndex[index]] !== Core.Structure.EntityType.Polymer)
                             return false;
-                        var o5 = false, c3 = false, n3 = false, names = atoms.name, assigned = 0;
-                        for (var i = residues.atomStartIndex[index], max = residues.atomEndIndex[index]; i < max; i++) {
+                        var o5 = false, c3 = false, n3 = false, p = false, names = atoms.name, assigned = 0;
+                        var start = residues.atomStartIndex[index], end = residues.atomEndIndex[index];
+                        // test for single atom instances
+                        if (end - start === 1 && !residues.isHet[start] && names[start] === 'P') {
+                            return true;
+                        }
+                        for (var i = start; i < end; i++) {
                             var n = names[i];
                             if (!o5 && n === "O5'") {
                                 o5 = true;
@@ -12176,10 +12213,14 @@ var LiteMol;
                                 n3 = true;
                                 assigned++;
                             }
-                            if (assigned === 3)
+                            else if (!p && n === 'P') {
+                                p = true;
+                                assigned++;
+                            }
+                            if (assigned === 4)
                                 break;
                         }
-                        return o5 && c3 && n3;
+                        return o5 && c3 && n3 && p;
                     }
                     function analyzeSecondaryStructure(atoms, residues, entities, start, end, elements) {
                         var asymId = residues.asymId, entityIndex = residues.entityIndex, currentType = 0 /* None */, currentElementStartIndex = start, currentResidueIndex = start, residueCount = end;
@@ -12478,7 +12519,8 @@ var LiteMol;
                             [la, lb * Math.cos(ac), lc * Math.cos(ab), 0.0],
                             [0.0, lb * Math.sin(ac), lc * (Math.cos(aa) - Math.cos(ab) * Math.cos(ac)) / Math.sin(ac), 0.0],
                             [0.0, 0.0, v / (la * lb * Math.sin(ac)), 0.0],
-                            [0.0, 0.0, 0.0, 1.0]]);
+                            [0.0, 0.0, 0.0, 1.0]
+                        ]);
                         var toFracComputed = Core.Geometry.LinearAlgebra.Matrix4.identity();
                         Core.Geometry.LinearAlgebra.Matrix4.invert(toFracComputed, fromFrac);
                         if (_atom_sites) {
@@ -12669,17 +12711,17 @@ var LiteMol;
                             //56 - 66       LString        Space group       
                             //67 - 70       Integer        Z value           
                             var data = [
-                                ("_cell.entry_id           '" + id + "'"),
-                                ("_cell.length_a           " + this.record.substr(6, 9).trim()),
-                                ("_cell.length_b           " + this.record.substr(15, 9).trim()),
-                                ("_cell.length_c           " + this.record.substr(24, 9).trim()),
-                                ("_cell.angle_alpha        " + this.record.substr(33, 7).trim()),
-                                ("_cell.angle_beta         " + this.record.substr(40, 7).trim()),
-                                ("_cell.angle_gamma        " + this.record.substr(48, 7).trim()),
-                                ("_cell.Z_PDB              " + this.record.substr(66, 4).trim()),
+                                "_cell.entry_id           '" + id + "'",
+                                "_cell.length_a           " + this.record.substr(6, 9).trim(),
+                                "_cell.length_b           " + this.record.substr(15, 9).trim(),
+                                "_cell.length_c           " + this.record.substr(24, 9).trim(),
+                                "_cell.angle_alpha        " + this.record.substr(33, 7).trim(),
+                                "_cell.angle_beta         " + this.record.substr(40, 7).trim(),
+                                "_cell.angle_gamma        " + this.record.substr(48, 7).trim(),
+                                "_cell.Z_PDB              " + this.record.substr(66, 4).trim(),
                                 "_cell.pdbx_unique_axis   ?",
-                                ("_symmetry.entry_id                         '" + id + "'"),
-                                ("_symmetry.space_group_name_H-M             '" + this.record.substr(55, 11).trim() + "'"),
+                                "_symmetry.entry_id                         '" + id + "'",
+                                "_symmetry.space_group_name_H-M             '" + this.record.substr(55, 11).trim() + "'",
                                 "_symmetry.pdbx_full_space_group_name_H-M   ?",
                                 "_symmetry.cell_setting                     ?",
                                 "_symmetry.Int_Tables_number                ?",
@@ -12844,36 +12886,36 @@ var LiteMol;
                                 this.writeRange(modelToken, cifTokens);
                             }
                         };
-                        ModelData.COLUMNS = [
-                            "_atom_site.group_PDB",
-                            "_atom_site.id",
-                            "_atom_site.type_symbol",
-                            "_atom_site.label_atom_id",
-                            "_atom_site.label_alt_id",
-                            "_atom_site.label_comp_id",
-                            "_atom_site.label_asym_id",
-                            "_atom_site.label_entity_id",
-                            "_atom_site.label_seq_id",
-                            "_atom_site.pdbx_PDB_ins_code",
-                            "_atom_site.Cartn_x",
-                            "_atom_site.Cartn_y",
-                            "_atom_site.Cartn_z",
-                            "_atom_site.occupancy",
-                            "_atom_site.B_iso_or_equiv",
-                            "_atom_site.Cartn_x_esd",
-                            "_atom_site.Cartn_y_esd",
-                            "_atom_site.Cartn_z_esd",
-                            "_atom_site.occupancy_esd",
-                            "_atom_site.B_iso_or_equiv_esd",
-                            "_atom_site.pdbx_formal_charge",
-                            "_atom_site.auth_seq_id",
-                            "_atom_site.auth_comp_id",
-                            "_atom_site.auth_asym_id",
-                            "_atom_site.auth_atom_id",
-                            "_atom_site.pdbx_PDB_model_num"
-                        ];
                         return ModelData;
                     }());
+                    ModelData.COLUMNS = [
+                        "_atom_site.group_PDB",
+                        "_atom_site.id",
+                        "_atom_site.type_symbol",
+                        "_atom_site.label_atom_id",
+                        "_atom_site.label_alt_id",
+                        "_atom_site.label_comp_id",
+                        "_atom_site.label_asym_id",
+                        "_atom_site.label_entity_id",
+                        "_atom_site.label_seq_id",
+                        "_atom_site.pdbx_PDB_ins_code",
+                        "_atom_site.Cartn_x",
+                        "_atom_site.Cartn_y",
+                        "_atom_site.Cartn_z",
+                        "_atom_site.occupancy",
+                        "_atom_site.B_iso_or_equiv",
+                        "_atom_site.Cartn_x_esd",
+                        "_atom_site.Cartn_y_esd",
+                        "_atom_site.Cartn_z_esd",
+                        "_atom_site.occupancy_esd",
+                        "_atom_site.B_iso_or_equiv_esd",
+                        "_atom_site.pdbx_formal_charge",
+                        "_atom_site.auth_seq_id",
+                        "_atom_site.auth_comp_id",
+                        "_atom_site.auth_asym_id",
+                        "_atom_site.auth_atom_id",
+                        "_atom_site.pdbx_PDB_model_num"
+                    ];
                     PDB.ModelData = ModelData;
                     var ModelsData = (function () {
                         function ModelsData(models) {
@@ -13206,10 +13248,8 @@ var LiteMol;
                         var molHeaderInfo = lines[1];
                         var molHeaderComment = lines[2];
                         var cTabInfo = lines[3];
-                        console.log(lines);
                         var atomCount = +cTabInfo.substr(0, 3);
                         var bondCount = +cTabInfo.substr(3, 3);
-                        console.log(molHeaderInfo, molHeaderComment, cTabInfo, atomCount, bondCount);
                         return {
                             id: customId ? customId : id,
                             atomCount: atomCount,
@@ -13321,9 +13361,7 @@ var LiteMol;
                             var state = initState(data, id);
                             readAtoms(state);
                             readBonds(state);
-                            console.log(state);
                             var model = buildModel(state);
-                            console.log(model);
                             if (state.error) {
                                 return Formats.ParserResult.error(state.error, state.currentLine + 1);
                             }
@@ -13354,7 +13392,10 @@ var LiteMol;
                 var SupportedFormats;
                 (function (SupportedFormats) {
                     SupportedFormats.mmCIF = {
-                        name: 'mmCIF', extensions: ['.cif'], parse: function (data) {
+                        name: 'mmCIF',
+                        shortcuts: ['mmcif', 'cif'],
+                        extensions: ['.cif'],
+                        parse: function (data) {
                             return Core.Computation.create(function (ctx) {
                                 ctx.update('Parsing...');
                                 ctx.schedule(function () {
@@ -13383,7 +13424,11 @@ var LiteMol;
                         }
                     };
                     SupportedFormats.mmBCIF = {
-                        name: 'mmCIF (Binary)', extensions: ['.bcif'], isBinary: true, parse: function (data) {
+                        name: 'mmCIF (Binary)',
+                        shortcuts: ['mmbcif', 'bcif', 'binarycif'],
+                        extensions: ['.bcif'],
+                        isBinary: true,
+                        parse: function (data) {
                             return Core.Computation.create(function (ctx) {
                                 ctx.update('Parsing...');
                                 ctx.schedule(function () {
@@ -13412,7 +13457,10 @@ var LiteMol;
                         }
                     };
                     SupportedFormats.PDB = {
-                        name: 'PDB', extensions: ['.pdb', '.ent'], parse: function (data, options) {
+                        name: 'PDB',
+                        shortcuts: ['pdb', 'ent'],
+                        extensions: ['.pdb', '.ent'],
+                        parse: function (data, options) {
                             return Core.Computation.create(function (ctx) {
                                 ctx.update('Parsing...');
                                 ctx.schedule(function () {
@@ -13441,7 +13489,10 @@ var LiteMol;
                         }
                     };
                     SupportedFormats.SDF = {
-                        name: 'SDF', extensions: ['.sdf', '.mol'], parse: function (data, options) {
+                        name: 'SDF',
+                        shortcuts: ['sdf', 'mol'],
+                        extensions: ['.sdf', '.mol'],
+                        parse: function (data, options) {
                             return Core.Computation.create(function (ctx) {
                                 ctx.update('Parsing...');
                                 ctx.schedule(function () {
@@ -14043,8 +14094,8 @@ var LiteMol;
                 }
                 var SupportedFormats;
                 (function (SupportedFormats) {
-                    SupportedFormats.CCP4 = { name: 'CCP4', extensions: ['.ccp4', '.map'], isBinary: true, parse: function (data) { return parse(data, 'CCP4', function (d) { return Density.CCP4.parse(d); }); } };
-                    SupportedFormats.DSN6 = { name: 'DSN6', extensions: ['.dsn6'], isBinary: true, parse: function (data) { return parse(data, 'DSN6', function (d) { return Density.DSN6.parse(d); }); } };
+                    SupportedFormats.CCP4 = { name: 'CCP4', shortcuts: ['ccp4', 'map'], extensions: ['.ccp4', '.map'], isBinary: true, parse: function (data) { return parse(data, 'CCP4', function (d) { return Density.CCP4.parse(d); }); } };
+                    SupportedFormats.DSN6 = { name: 'DSN6', shortcuts: ['dsn6'], extensions: ['.dsn6'], isBinary: true, parse: function (data) { return parse(data, 'DSN6', function (d) { return Density.DSN6.parse(d); }); } };
                     SupportedFormats.All = [SupportedFormats.CCP4, SupportedFormats.DSN6];
                 })(SupportedFormats = Density.SupportedFormats || (Density.SupportedFormats = {}));
             })(Density = Formats.Density || (Formats.Density = {}));
@@ -14675,38 +14726,45 @@ var LiteMol;
             "use strict";
             var Surface;
             (function (Surface) {
+                function computeNormalsImmediate(surface) {
+                    if (surface.normals)
+                        return;
+                    var normals = new Float32Array(surface.vertices.length), v = surface.vertices, triangles = surface.triangleIndices, len = triangles.length, f, i;
+                    for (i = 0; i < triangles.length; i += 3) {
+                        var a = 3 * triangles[i], b = 3 * triangles[i + 1], c = 3 * triangles[i + 2];
+                        var nx = v[a + 2] * (v[b + 1] - v[c + 1]) + v[b + 2] * v[c + 1] - v[b + 1] * v[c + 2] + v[a + 1] * (-v[b + 2] + v[c + 2]), ny = -(v[b + 2] * v[c]) + v[a + 2] * (-v[b] + v[c]) + v[a] * (v[b + 2] - v[c + 2]) + v[b] * v[c + 2], nz = v[a + 1] * (v[b] - v[c]) + v[b + 1] * v[c] - v[b] * v[c + 1] + v[a] * (-v[b + 1] + v[b + 1]);
+                        normals[a] += nx;
+                        normals[a + 1] += ny;
+                        normals[a + 2] += nz;
+                        normals[b] += nx;
+                        normals[b + 1] += ny;
+                        normals[b + 2] += nz;
+                        normals[c] += nx;
+                        normals[c + 1] += ny;
+                        normals[c + 2] += nz;
+                    }
+                    for (i = 0; i < normals.length; i += 3) {
+                        var nx = normals[i];
+                        var ny = normals[i + 1];
+                        var nz = normals[i + 2];
+                        f = 1.0 / Math.sqrt(nx * nx + ny * ny + nz * nz);
+                        normals[i] *= f;
+                        normals[i + 1] *= f;
+                        normals[i + 2] *= f;
+                    }
+                    surface.normals = normals;
+                }
+                Surface.computeNormalsImmediate = computeNormalsImmediate;
                 function computeNormals(surface) {
                     return Core.Computation.create(function (ctx) {
                         if (surface.normals) {
                             ctx.resolve(surface);
+                            return;
                         }
                         ;
                         ctx.update('Computing normals...');
                         ctx.schedule(function () {
-                            var normals = new Float32Array(surface.vertices.length), v = surface.vertices, triangles = surface.triangleIndices, len = triangles.length, f, i;
-                            for (i = 0; i < triangles.length; i += 3) {
-                                var a = 3 * triangles[i], b = 3 * triangles[i + 1], c = 3 * triangles[i + 2];
-                                var nx = v[a + 2] * (v[b + 1] - v[c + 1]) + v[b + 2] * v[c + 1] - v[b + 1] * v[c + 2] + v[a + 1] * (-v[b + 2] + v[c + 2]), ny = -(v[b + 2] * v[c]) + v[a + 2] * (-v[b] + v[c]) + v[a] * (v[b + 2] - v[c + 2]) + v[b] * v[c + 2], nz = v[a + 1] * (v[b] - v[c]) + v[b + 1] * v[c] - v[b] * v[c + 1] + v[a] * (-v[b + 1] + v[b + 1]);
-                                normals[a] += nx;
-                                normals[a + 1] += ny;
-                                normals[a + 2] += nz;
-                                normals[b] += nx;
-                                normals[b + 1] += ny;
-                                normals[b + 2] += nz;
-                                normals[c] += nx;
-                                normals[c + 1] += ny;
-                                normals[c + 2] += nz;
-                            }
-                            for (i = 0; i < normals.length; i += 3) {
-                                var nx = normals[i];
-                                var ny = normals[i + 1];
-                                var nz = normals[i + 2];
-                                f = 1.0 / Math.sqrt(nx * nx + ny * ny + nz * nz);
-                                normals[i] *= f;
-                                normals[i + 1] *= f;
-                                normals[i + 2] *= f;
-                            }
-                            surface.normals = normals;
+                            computeNormalsImmediate(surface);
                             ctx.resolve(surface);
                         });
                     });
@@ -14810,24 +14868,28 @@ var LiteMol;
                     });
                 }
                 Surface.computeBoundingSphere = computeBoundingSphere;
+                function transformImmediate(surface, t) {
+                    var p = { x: 0.1, y: 0.1, z: 0.1 };
+                    var m = Geometry.LinearAlgebra.Matrix4.transformVector3;
+                    var vertices = surface.vertices;
+                    for (var i = 0, _c = surface.vertices.length; i < _c; i += 3) {
+                        p.x = vertices[i];
+                        p.y = vertices[i + 1];
+                        p.z = vertices[i + 2];
+                        m(p, p, t);
+                        vertices[i] = p.x;
+                        vertices[i + 1] = p.y;
+                        vertices[i + 2] = p.z;
+                    }
+                    surface.normals = void 0;
+                    surface.boundingSphere = void 0;
+                }
+                Surface.transformImmediate = transformImmediate;
                 function transform(surface, t) {
                     return Core.Computation.create(function (ctx) {
                         ctx.update('Updating surface...');
                         ctx.schedule(function () {
-                            var p = { x: 0.1, y: 0.1, z: 0.1 };
-                            var m = Geometry.LinearAlgebra.Matrix4.transformVector3;
-                            var vertices = surface.vertices;
-                            for (var i = 0, _c = surface.vertices.length; i < _c; i += 3) {
-                                p.x = vertices[i];
-                                p.y = vertices[i + 1];
-                                p.z = vertices[i + 2];
-                                m(p, p, t);
-                                vertices[i] = p.x;
-                                vertices[i + 1] = p.y;
-                                vertices[i + 2] = p.z;
-                            }
-                            surface.normals = void 0;
-                            surface.boundingSphere = void 0;
+                            transformImmediate(surface, t);
                             ctx.resolve(surface);
                         });
                     });
@@ -15752,43 +15814,23 @@ var LiteMol;
             }());
             Structure.DataTableColumnDescriptor = DataTableColumnDescriptor;
             var DataTable = (function () {
-                function DataTable(count, source) {
+                function DataTable(count, srcColumns, srcData) {
                     this.count = count;
                     this.indices = new Int32Array(count);
                     this.columns = [];
                     for (var i = 0; i < count; i++) {
                         this.indices[i] = i;
                     }
-                    if (source) {
-                        for (var _i = 0, _a = source.columns; _i < _a.length; _i++) {
-                            var col = _a[_i];
-                            var data = source[col.name];
-                            if (Core.Utils.ChunkedArray.is(data)) {
-                                data = Core.Utils.ChunkedArray.compact(data);
-                            }
-                            Object.defineProperty(this, col.name, { enumerable: true, configurable: false, writable: false, value: data });
-                            this.columns[this.columns.length] = col;
+                    for (var _i = 0, srcColumns_1 = srcColumns; _i < srcColumns_1.length; _i++) {
+                        var col = srcColumns_1[_i];
+                        var data = srcData[col.name];
+                        if (Core.Utils.ChunkedArray.is(data)) {
+                            data = Core.Utils.ChunkedArray.compact(data);
                         }
+                        Object.defineProperty(this, col.name, { enumerable: true, configurable: false, writable: false, value: data });
+                        this.columns[this.columns.length] = col;
                     }
                 }
-                DataTable.prototype.clone = function () {
-                    var b = new DataTableBuilder(this.count), cols = [];
-                    for (var _i = 0, _a = this.columns; _i < _a.length; _i++) {
-                        var c = _a[_i];
-                        cols[cols.length] = {
-                            src: this[c.name],
-                            trg: b.addColumn(c.name, c.creator)
-                        };
-                    }
-                    for (var _c = 0, cols_1 = cols; _c < cols_1.length; _c++) {
-                        var c = cols_1[_c];
-                        var s = c.src, t = c.trg;
-                        for (var i = 0, m = this.count; i < m; i++) {
-                            t[i] = s[i];
-                        }
-                    }
-                    return b.seal();
-                };
                 DataTable.prototype.getBuilder = function (count) {
                     var b = new DataTableBuilder(count);
                     for (var _i = 0, _a = this.columns; _i < _a.length; _i++) {
@@ -15824,7 +15866,7 @@ var LiteMol;
                  * use internal class instead of dictionary representation.
                  */
                 DataTableBuilder.prototype.seal = function () {
-                    return new DataTable(this.count, this);
+                    return new DataTable(this.count, this.columns, this);
                 };
                 return DataTableBuilder;
             }());
@@ -16159,6 +16201,52 @@ var LiteMol;
                 return Molecule;
             }());
             Structure.Molecule = Molecule;
+            (function (MoleculeModel) {
+                function cloneAtomsXYZ(model) {
+                    var data = {};
+                    var atoms = model.atoms;
+                    for (var _i = 0, _a = atoms.columns; _i < _a.length; _i++) {
+                        var c = _a[_i];
+                        if (c.name === 'x' || c.name === 'y' || c.name === 'z') {
+                            data[c.name] = c.creator(atoms.count);
+                        }
+                        else {
+                            data[c.name] = atoms[c.name];
+                        }
+                    }
+                    return new DataTable(atoms.count, atoms.columns, data);
+                }
+                function withTransformedXYZ(model, ctx, transform) {
+                    var _a = model.atoms, x = _a.x, y = _a.y, z = _a.z;
+                    var tAtoms = cloneAtomsXYZ(model);
+                    var tX = tAtoms.x, tY = tAtoms.y, tZ = tAtoms.z;
+                    var t = { x: 0.0, y: 0.0, z: 0.0 };
+                    for (var i = 0, _l = model.atoms.count; i < _l; i++) {
+                        transform(ctx, x[i], y[i], z[i], t);
+                        tX[i] = t.x;
+                        tY[i] = t.y;
+                        tZ[i] = t.z;
+                    }
+                    return new MoleculeModel({
+                        id: model.id,
+                        modelId: model.modelId,
+                        atoms: tAtoms,
+                        residues: model.residues,
+                        chains: model.chains,
+                        entities: model.entities,
+                        covalentBonds: model.covalentBonds,
+                        nonCovalentbonds: model.nonCovalentbonds,
+                        componentBonds: model.componentBonds,
+                        secondaryStructure: model.secondaryStructure,
+                        symmetryInfo: model.symmetryInfo,
+                        assemblyInfo: model.assemblyInfo,
+                        parent: model.parent,
+                        source: model.source,
+                        operators: model.operators
+                    });
+                }
+                MoleculeModel.withTransformedXYZ = withTransformedXYZ;
+            })(MoleculeModel = Structure.MoleculeModel || (Structure.MoleculeModel = {}));
         })(Structure = Core.Structure || (Core.Structure = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -17629,7 +17717,7 @@ var LiteMol;
                 function createSymmetryTransform(i, j, k, opIndex, transform) {
                     return {
                         isIdentity: !i && !j && !k && !opIndex,
-                        id: (opIndex + 1) + "_" + (5 + i) + (5 + j) + (5 + k),
+                        id: opIndex + 1 + "_" + (5 + i) + (5 + j) + (5 + k),
                         transform: transform
                     };
                 }
@@ -17995,8 +18083,8 @@ var LiteMol;
                             atomResidue[atomOffset] = residueOffset;
                             atomChain[atomOffset] = chainOffset;
                             atomEntity[atomOffset] = entityOffset;
-                            for (var _b = 0, cols_2 = cols; _b < cols_2.length; _b++) {
-                                var c = cols_2[_b];
+                            for (var _b = 0, cols_1 = cols; _b < cols_1.length; _b++) {
+                                var c = cols_1[_b];
                                 c.target[atomOffset] = c.src[aI];
                             }
                             atomOffset++;
@@ -18369,7 +18457,6 @@ var LiteMol;
                     return Context;
                 }());
                 Query.Context = Context;
-                var Context;
                 (function (Context) {
                     var Mask;
                     (function (Mask) {
@@ -18818,7 +18905,7 @@ var LiteMol;
                     function parse(query) {
                         if (typeof window === 'undefined')
                             throw 'parse can only be called from a browser.';
-                        (0, eval)("with (LiteMol.Core.Structure.Query) { window.__LiteMol_query = " + query + "; }");
+                        (function () { }(), eval)("with (LiteMol.Core.Structure.Query) { window.__LiteMol_query = " + query + "; }");
                         var q = window.__LiteMol_query;
                         window.__LiteMol_query = void 0;
                         return q.compile();
@@ -19109,11 +19196,15 @@ var LiteMol;
                     function compileSequence(seqEntityId, seqAsymId, start, end) {
                         return function (ctx) {
                             var residues = ctx.structure.residues, chains = ctx.structure.chains, seqNumber = residues.seqNumber, insCode = residues.insCode, chainIndex = residues.chainIndex, atomStartIndex = residues.atomStartIndex, atomEndIndex = residues.atomEndIndex, entityId = chains.entityId, asymId = chains.asymId, count = chains.count, residueStartIndex = chains.residueStartIndex, residueEndIndex = chains.residueEndIndex, fragments = new Query.FragmentSeqBuilder(ctx);
-                            var parent = ctx.structure.parent, sourceChainIndex = ctx.structure.chains.sourceChainIndex, parentAsymId = parent ? parent.chains.asymId : undefined, isComputed = parent && sourceChainIndex;
+                            var parent = ctx.structure.parent, sourceChainIndex = ctx.structure.chains.sourceChainIndex, isComputed = parent && sourceChainIndex;
+                            var targetAsymId = typeof seqAsymId === 'string' ? { asymId: seqAsymId } : seqAsymId;
+                            var optTargetAsymId = new OptimizedId(targetAsymId, isComputed ? parent.chains : ctx.structure.chains);
+                            //optAsymId.isSatisfied();
                             for (var cI = 0; cI < count; cI++) {
-                                var aId = isComputed ? parentAsymId[sourceChainIndex[cI]] : asymId[cI];
-                                if (entityId[cI] !== seqEntityId || aId !== seqAsymId)
+                                if (entityId[cI] !== seqEntityId
+                                    || !optTargetAsymId.isSatisfied(isComputed ? sourceChainIndex[cI] : cI)) {
                                     continue;
+                                }
                                 var i = residueStartIndex[cI], last = residueEndIndex[cI], startIndex = -1, endIndex = -1;
                                 for (; i < last; i++) {
                                     if (seqNumber[i] >= start.seqNumber) {
@@ -19392,7 +19483,7 @@ var LiteMol;
                         var _where = Builder.toQuery(where);
                         return function (ctx) {
                             var src = _where(ctx), tree = ctx.tree, radiusCtx = Core.Geometry.SubdivisionTree3D.createContextRadius(tree, radius, false), buffer = radiusCtx.buffer, ret = new Query.HashFragmentSeqBuilder(ctx), x = ctx.structure.atoms.x, y = ctx.structure.atoms.y, z = ctx.structure.atoms.z, residueIndex = ctx.structure.atoms.residueIndex, atomStart = ctx.structure.residues.atomStartIndex, atomEnd = ctx.structure.residues.atomEndIndex, residues = new Set(), treeData = tree.data;
-                            var _loop_1 = function(f) {
+                            var _loop_1 = function (f) {
                                 residues.clear();
                                 for (var _i = 0, _a = f.atomIndices; _i < _a.length; _i++) {
                                     var i = _a[_i];
@@ -19413,8 +19504,8 @@ var LiteMol;
                                 Array.prototype.sort.call(indices, function (a, b) { return a - b; });
                                 ret.add(Query.Fragment.ofArray(ctx, indices[0], indices));
                             };
-                            for (var _c = 0, _d = src.fragments; _c < _d.length; _c++) {
-                                var f = _d[_c];
+                            for (var _i = 0, _a = src.fragments; _i < _a.length; _i++) {
+                                var f = _a[_i];
                                 _loop_1(f);
                             }
                             return ret.getSeq();
@@ -19425,7 +19516,7 @@ var LiteMol;
                         var _where = Builder.toQuery(where);
                         return function (ctx) {
                             var src = _where(ctx), ret = new Query.HashFragmentSeqBuilder(ctx), residueIndex = ctx.structure.atoms.residueIndex, atomStart = ctx.structure.residues.atomStartIndex, atomEnd = ctx.structure.residues.atomEndIndex, residues = new Set();
-                            var _loop_2 = function(f) {
+                            var _loop_2 = function (f) {
                                 residues.clear();
                                 for (var _i = 0, _a = f.atomIndices; _i < _a.length; _i++) {
                                     var i = _a[_i];
@@ -19442,8 +19533,8 @@ var LiteMol;
                                 Array.prototype.sort.call(indices, function (a, b) { return a - b; });
                                 ret.add(Query.Fragment.ofArray(ctx, indices[0], indices));
                             };
-                            for (var _c = 0, _d = src.fragments; _c < _d.length; _c++) {
-                                var f = _d[_c];
+                            for (var _i = 0, _a = src.fragments; _i < _a.length; _i++) {
+                                var f = _a[_i];
                                 _loop_2(f);
                             }
                             return ret.getSeq();
@@ -54728,7 +54819,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        Visualization.VERSION = { number: "1.3.2", date: "Oct 14 2016" };
+        Visualization.VERSION = { number: "1.5.2", date: "Nov 30 2016" };
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -54771,6 +54862,35 @@ var LiteMol;
                 buffer[offset] = r / 255.0;
                 buffer[offset + 1] = g / 255.0;
                 buffer[offset + 2] = b / 255.0;
+            };
+            GeometryHelper.toSurface = function (source) {
+                var bufferSize = source.vertices.length * 3, vertexBuffer = new Float32Array(bufferSize), normalBuffer = new Float32Array(bufferSize), indexBuffer = new Uint32Array(source.faces.length * 3), normals = Array(source.vertices.length);
+                for (var i = 0; i < source.faces.length; i++) {
+                    var f = source.faces[i];
+                    normals[f.a] = f.vertexNormals[0];
+                    normals[f.b] = f.vertexNormals[1];
+                    normals[f.c] = f.vertexNormals[2];
+                    indexBuffer[3 * i] = f.a;
+                    indexBuffer[3 * i + 1] = f.b;
+                    indexBuffer[3 * i + 2] = f.c;
+                }
+                for (var i = 0; i < source.vertices.length; i++) {
+                    var v = source.vertices[i];
+                    vertexBuffer[3 * i] = v.x;
+                    vertexBuffer[3 * i + 1] = v.y;
+                    vertexBuffer[3 * i + 2] = v.z;
+                    var n = normals[i];
+                    normalBuffer[3 * i] = n.x;
+                    normalBuffer[3 * i + 1] = n.y;
+                    normalBuffer[3 * i + 2] = n.z;
+                }
+                return {
+                    vertices: vertexBuffer,
+                    vertexCount: source.vertices.length,
+                    triangleIndices: indexBuffer,
+                    triangleCount: source.faces.length,
+                    normals: normalBuffer
+                };
             };
             GeometryHelper.getIndexedBufferGeometry = function (source) {
                 var bufferSize = source.vertices.length * 3, vertexBuffer = new Float32Array(bufferSize), normalBuffer = new Float32Array(bufferSize), indexBuffer = new Uint32Array(source.faces.length * 3), normals = Array(source.vertices.length);
@@ -54909,12 +55029,31 @@ var LiteMol;
                 return { r: ((v >> 16) & 0xFF) / 255.0, g: ((v >> 8) & 0xFF) / 255.0, b: (v & 0xFF) / 255.0 };
             }
             Color.fromHex = fromHex;
+            /**
+             * Parse color in formats #rgb and #rrggbb
+             */
+            function fromHexString(s) {
+                if (s[0] !== '#')
+                    return fromHex(0);
+                if (s.length === 4) {
+                    return fromHexString("#" + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]);
+                }
+                else if (s.length === 7) {
+                    return fromHex(parseInt(s.substr(1), 16));
+                }
+                return fromHex(0);
+            }
+            Color.fromHexString = fromHexString;
             function interpolate(a, b, t, target) {
                 target.r = a.r + (b.r - a.r) * t;
                 target.g = a.g + (b.g - a.g) * t;
                 target.b = a.b + (b.b - a.b) * t;
             }
             Color.interpolate = interpolate;
+            function isColor(c) {
+                return c.r !== void 0 && c.g !== void 0 && c.b !== void 0;
+            }
+            Color.isColor = isColor;
         })(Color = Visualization.Color || (Visualization.Color = {}));
         var Theme;
         (function (Theme) {
@@ -54941,7 +55080,7 @@ var LiteMol;
             Theme.getColor = getColor;
             function createUniform(props) {
                 if (props === void 0) { props = {}; }
-                var _a = props.colors, colors = _a === void 0 ? new Map() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c;
+                var _a = props.colors, colors = _a === void 0 ? new Map() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c, _d = props.disableFog, disableFog = _d === void 0 ? false : _d;
                 var uniform = colors.get('Uniform');
                 if (!uniform) {
                     colors.set('Uniform', Default.UniformColor);
@@ -54951,6 +55090,7 @@ var LiteMol;
                     colors: colors,
                     transparency: transparency,
                     interactive: interactive,
+                    disableFog: disableFog,
                     setElementColor: function (index, target) {
                         Color.copy(uniform, target);
                     }
@@ -54959,13 +55099,14 @@ var LiteMol;
             Theme.createUniform = createUniform;
             function createMapping(mapping, props) {
                 if (props === void 0) { props = {}; }
-                var _a = props.colors, colors = _a === void 0 ? new Map() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c;
+                var _a = props.colors, colors = _a === void 0 ? new Map() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c, _d = props.disableFog, disableFog = _d === void 0 ? false : _d;
                 //let prop = mapping.getProperty;
                 // let set = mapping.setColor;
                 return {
                     colors: colors,
                     transparency: transparency ? transparency : Default.Transparency,
                     interactive: interactive,
+                    disableFog: disableFog,
                     setElementColor: function (index, target) {
                         mapping.setColor(mapping.getProperty(index), target);
                     }
@@ -55050,7 +55191,7 @@ var LiteMol;
             };
             MaterialsHelper.updateMaterial = function (material, theme, object) {
                 var changed = false;
-                if (MaterialsHelper.updateTransparency(material, theme, object))
+                if (MaterialsHelper.updateTransparencyAndFog(material, theme, object))
                     changed = true;
                 if (material instanceof Visualization.THREE.ShaderMaterial && MaterialsHelper.updateHighlightColor(material, theme))
                     changed = true;
@@ -55073,7 +55214,7 @@ var LiteMol;
                 }
                 return changed;
             };
-            MaterialsHelper.updateTransparency = function (material, theme, object) {
+            MaterialsHelper.updateTransparencyAndFog = function (material, theme, object) {
                 var transparency = theme.transparency;
                 var opacity = +transparency.alpha;
                 if (isNaN(opacity))
@@ -55098,6 +55239,10 @@ var LiteMol;
                     }
                     if (material.opacity !== opacity) {
                         material.opacity = opacity;
+                        changed = true;
+                    }
+                    if (material.fog !== !theme.disableFog) {
+                        material.fog = !theme.disableFog;
                         changed = true;
                     }
                     if (material instanceof Visualization.THREE.ShaderMaterial) {
@@ -55131,10 +55276,10 @@ var LiteMol;
                 return ret;
             };
             MaterialsHelper.getPhongVertexColorMaterial = function () {
-                return new Visualization.THREE.MeshPhongMaterial({ specular: 0xAAAAAA, shininess: 2, shading: Visualization.THREE.SmoothShading, vertexColors: Visualization.THREE.VertexColors, side: Visualization.THREE.DoubleSide, metal: true });
+                return new Visualization.THREE.MeshPhongMaterial({ specular: 0xAAAAAA, /*ambient: 0xffffff, */ shininess: 2, shading: Visualization.THREE.SmoothShading, vertexColors: Visualization.THREE.VertexColors, side: Visualization.THREE.DoubleSide, metal: true });
             };
             MaterialsHelper.getDefaultHighlightMaterial = function () {
-                return new Visualization.THREE.MeshPhongMaterial({ color: 0xFFFFFF, specular: 0xAAAAAA, shininess: 2, shading: Visualization.THREE.SmoothShading, side: Visualization.THREE.DoubleSide, metal: true });
+                return new Visualization.THREE.MeshPhongMaterial({ color: 0xFFFFFF, specular: 0xAAAAAA, /* ambient: 0xffffff,*/ shininess: 2, shading: Visualization.THREE.SmoothShading, side: Visualization.THREE.DoubleSide, metal: true });
             };
             MaterialsHelper.applyColorToMap = function (map, indices, bufferAttribute, getter) {
                 var buffer = bufferAttribute.array, color = { r: 0.45, g: 0.45, b: 0.45 }, vertexRanges = map.vertexRanges;
@@ -55156,123 +55301,130 @@ var LiteMol;
                 }
                 bufferAttribute.needsUpdate = true;
             };
-            MaterialsHelper.pickVertexShader = [
-                "attribute vec4 pColor;",
-                "varying vec4 pC;",
-                "void main() {",
-                "pC = pColor;",
-                "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-                "}"].join('\n');
-            MaterialsHelper.pickFragmentShader = [
-                "varying vec4 pC;",
-                "void main() {",
-                "gl_FragColor = pC;",
-                "}"].join('\n');
-            MaterialsHelper.shader = {
-                uniforms: Visualization.THREE.UniformsUtils.merge([
-                    Visualization.THREE.UniformsLib["common"],
-                    Visualization.THREE.UniformsLib["bump"],
-                    Visualization.THREE.UniformsLib["normalmap"],
-                    Visualization.THREE.UniformsLib["fog"],
-                    Visualization.THREE.UniformsLib["lights"],
-                    Visualization.THREE.UniformsLib["shadowmap"],
-                    {
-                        "emissive": { type: "c", value: new Visualization.THREE.Color(0x000000) },
-                        "specular": { type: "c", value: new Visualization.THREE.Color(0x111111) },
-                        "shininess": { type: "f", value: 2 },
-                        "wrapRGB": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 1) },
-                        "highlightColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 0) },
-                        "selectionColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 0, 0) },
-                    }
-                ]),
-                vertexShader: [
-                    "#define PHONG",
-                    "varying vec3 vViewPosition;",
-                    "#ifndef FLAT_SHADED",
-                    "	varying vec3 vNormal;",
-                    "#endif",
-                    Visualization.THREE.ShaderChunk["common"],
-                    Visualization.THREE.ShaderChunk["map_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["lightmap_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["envmap_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["lights_phong_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["color_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["morphtarget_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["skinning_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["shadowmap_pars_vertex"],
-                    Visualization.THREE.ShaderChunk["logdepthbuf_pars_vertex"],
-                    "attribute float vState;",
-                    "varying float vS;",
-                    "void main() {",
-                    "   vS = vState;",
-                    Visualization.THREE.ShaderChunk["map_vertex"],
-                    Visualization.THREE.ShaderChunk["lightmap_vertex"],
-                    Visualization.THREE.ShaderChunk["color_vertex"],
-                    Visualization.THREE.ShaderChunk["morphnormal_vertex"],
-                    Visualization.THREE.ShaderChunk["skinbase_vertex"],
-                    Visualization.THREE.ShaderChunk["skinnormal_vertex"],
-                    Visualization.THREE.ShaderChunk["defaultnormal_vertex"],
-                    "#ifndef FLAT_SHADED",
-                    "	vNormal = normalize( transformedNormal );",
-                    "#endif",
-                    Visualization.THREE.ShaderChunk["morphtarget_vertex"],
-                    Visualization.THREE.ShaderChunk["skinning_vertex"],
-                    Visualization.THREE.ShaderChunk["default_vertex"],
-                    Visualization.THREE.ShaderChunk["logdepthbuf_vertex"],
-                    "	vViewPosition = -mvPosition.xyz;",
-                    Visualization.THREE.ShaderChunk["worldpos_vertex"],
-                    Visualization.THREE.ShaderChunk["envmap_vertex"],
-                    Visualization.THREE.ShaderChunk["lights_phong_vertex"],
-                    Visualization.THREE.ShaderChunk["shadowmap_vertex"],
-                    "}"
-                ].join("\n"),
-                fragmentShader: [
-                    "#define PHONG",
-                    "uniform vec3 diffuse;",
-                    "uniform vec3 emissive;",
-                    "uniform vec3 specular;",
-                    "uniform float shininess;",
-                    "uniform float opacity;",
-                    "uniform vec3 highlightColor;",
-                    "uniform vec3 selectionColor;",
-                    Visualization.THREE.ShaderChunk["common"],
-                    Visualization.THREE.ShaderChunk["color_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["map_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["alphamap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["lightmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["envmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["fog_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["lights_phong_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["shadowmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["bumpmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["normalmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["specularmap_pars_fragment"],
-                    Visualization.THREE.ShaderChunk["logdepthbuf_pars_fragment"],
-                    "varying float vS;",
-                    "void main() {",
-                    "	vec3 outgoingLight = vec3( 0.0 );",
-                    "	vec4 diffuseColor;",
-                    "   if (vS < 0.33) { diffuseColor = vec4( vColor, opacity ); }",
-                    "   else if (vS - floor(vS + 0.1) > 0.33) { diffuseColor = vec4(highlightColor, opacity); }",
-                    "	else { diffuseColor = vec4(selectionColor, opacity); }",
-                    Visualization.THREE.ShaderChunk["logdepthbuf_fragment"],
-                    Visualization.THREE.ShaderChunk["map_fragment"],
-                    //THREE.ShaderChunk["color_fragment"], 
-                    Visualization.THREE.ShaderChunk["alphamap_fragment"],
-                    Visualization.THREE.ShaderChunk["alphatest_fragment"],
-                    Visualization.THREE.ShaderChunk["specularmap_fragment"],
-                    Visualization.THREE.ShaderChunk["lights_phong_fragment"],
-                    Visualization.THREE.ShaderChunk["lightmap_fragment"],
-                    Visualization.THREE.ShaderChunk["envmap_fragment"],
-                    Visualization.THREE.ShaderChunk["shadowmap_fragment"],
-                    Visualization.THREE.ShaderChunk["linear_to_gamma_fragment"],
-                    Visualization.THREE.ShaderChunk["fog_fragment"],
-                    "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
-                    "}"
-                ].join("\n")
-            };
             return MaterialsHelper;
         }());
+        MaterialsHelper.pickVertexShader = [
+            "attribute vec4 pColor;",
+            "varying vec4 pC;",
+            "void main() {",
+            "pC = pColor;",
+            "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+            "}"
+        ].join('\n');
+        MaterialsHelper.pickFragmentShader = [
+            "varying vec4 pC;",
+            "void main() {",
+            "gl_FragColor = pC;",
+            "}"
+        ].join('\n');
+        MaterialsHelper.shader = {
+            uniforms: Visualization.THREE.UniformsUtils.merge([
+                Visualization.THREE.UniformsLib["common"],
+                Visualization.THREE.UniformsLib["bump"],
+                Visualization.THREE.UniformsLib["normalmap"],
+                Visualization.THREE.UniformsLib["fog"],
+                Visualization.THREE.UniformsLib["lights"],
+                Visualization.THREE.UniformsLib["shadowmap"],
+                {
+                    "emissive": { type: "c", value: new Visualization.THREE.Color(0x000000) },
+                    "specular": { type: "c", value: new Visualization.THREE.Color(0x111111) },
+                    "shininess": { type: "f", value: 2 },
+                    "wrapRGB": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 1) },
+                    "highlightColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 0) },
+                    "selectionColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 0, 0) },
+                }
+            ]),
+            vertexShader: [
+                "#define PHONG",
+                "varying vec3 vViewPosition;",
+                "#ifndef FLAT_SHADED",
+                "	varying vec3 vNormal;",
+                "#endif",
+                Visualization.THREE.ShaderChunk["common"],
+                Visualization.THREE.ShaderChunk["map_pars_vertex"],
+                Visualization.THREE.ShaderChunk["lightmap_pars_vertex"],
+                Visualization.THREE.ShaderChunk["envmap_pars_vertex"],
+                Visualization.THREE.ShaderChunk["lights_phong_pars_vertex"],
+                Visualization.THREE.ShaderChunk["color_pars_vertex"],
+                Visualization.THREE.ShaderChunk["morphtarget_pars_vertex"],
+                Visualization.THREE.ShaderChunk["skinning_pars_vertex"],
+                Visualization.THREE.ShaderChunk["shadowmap_pars_vertex"],
+                Visualization.THREE.ShaderChunk["logdepthbuf_pars_vertex"],
+                "attribute float vState;",
+                "varying float vS;",
+                "void main() {",
+                "   vS = vState;",
+                Visualization.THREE.ShaderChunk["map_vertex"],
+                Visualization.THREE.ShaderChunk["lightmap_vertex"],
+                Visualization.THREE.ShaderChunk["color_vertex"],
+                Visualization.THREE.ShaderChunk["morphnormal_vertex"],
+                Visualization.THREE.ShaderChunk["skinbase_vertex"],
+                Visualization.THREE.ShaderChunk["skinnormal_vertex"],
+                Visualization.THREE.ShaderChunk["defaultnormal_vertex"],
+                "#ifndef FLAT_SHADED",
+                "	vNormal = normalize( transformedNormal );",
+                "#endif",
+                Visualization.THREE.ShaderChunk["morphtarget_vertex"],
+                Visualization.THREE.ShaderChunk["skinning_vertex"],
+                Visualization.THREE.ShaderChunk["default_vertex"],
+                Visualization.THREE.ShaderChunk["logdepthbuf_vertex"],
+                "	vViewPosition = -mvPosition.xyz;",
+                Visualization.THREE.ShaderChunk["worldpos_vertex"],
+                Visualization.THREE.ShaderChunk["envmap_vertex"],
+                Visualization.THREE.ShaderChunk["lights_phong_vertex"],
+                Visualization.THREE.ShaderChunk["shadowmap_vertex"],
+                "}"
+            ].join("\n"),
+            fragmentShader: [
+                "#define PHONG",
+                "uniform vec3 diffuse;",
+                "uniform vec3 emissive;",
+                "uniform vec3 specular;",
+                "uniform float shininess;",
+                "uniform float opacity;",
+                "uniform vec3 highlightColor;",
+                "uniform vec3 selectionColor;",
+                Visualization.THREE.ShaderChunk["common"],
+                Visualization.THREE.ShaderChunk["color_pars_fragment"],
+                Visualization.THREE.ShaderChunk["map_pars_fragment"],
+                Visualization.THREE.ShaderChunk["alphamap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["lightmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["envmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["fog_pars_fragment"],
+                Visualization.THREE.ShaderChunk["lights_phong_pars_fragment"],
+                Visualization.THREE.ShaderChunk["shadowmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["bumpmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["normalmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["specularmap_pars_fragment"],
+                Visualization.THREE.ShaderChunk["logdepthbuf_pars_fragment"],
+                "varying float vS;",
+                "void main() {",
+                "	vec3 outgoingLight = vec3( 0.0 );",
+                "	vec4 diffuseColor;",
+                "   if (vS < 0.33) { diffuseColor = vec4( vColor, opacity ); }",
+                "   else if (vS - floor(vS + 0.1) > 0.33) { diffuseColor = vec4(highlightColor, opacity); }",
+                "	else { diffuseColor = vec4(selectionColor, opacity); }",
+                Visualization.THREE.ShaderChunk["logdepthbuf_fragment"],
+                Visualization.THREE.ShaderChunk["map_fragment"],
+                //THREE.ShaderChunk["color_fragment"], 
+                Visualization.THREE.ShaderChunk["alphamap_fragment"],
+                Visualization.THREE.ShaderChunk["alphatest_fragment"],
+                Visualization.THREE.ShaderChunk["specularmap_fragment"],
+                Visualization.THREE.ShaderChunk["lights_phong_fragment"],
+                Visualization.THREE.ShaderChunk["lightmap_fragment"],
+                Visualization.THREE.ShaderChunk["envmap_fragment"],
+                Visualization.THREE.ShaderChunk["shadowmap_fragment"],
+                Visualization.THREE.ShaderChunk["linear_to_gamma_fragment"],
+                Visualization.THREE.ShaderChunk["fog_fragment"],
+                "#ifdef USE_FOG",
+                "   if (diffuseColor.a > 0.99) { gl_FragColor = vec4( outgoingLight, diffuseColor.a ); }",
+                "   else { gl_FragColor = vec4( outgoingLight, (1.0 - fogFactor) * diffuseColor.a ); }",
+                "#else",
+                "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
+                "#endif",
+                "}"
+            ].join("\n")
+        };
         Visualization.MaterialsHelper = MaterialsHelper;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
@@ -55367,6 +55519,9 @@ var LiteMol;
                 var changed = this.applySelectionInternal(indices, action);
                 this.dirty = this.dirty || changed;
                 return changed;
+            };
+            Model.prototype.getBoundingSphereOfSelection = function (indices) {
+                return undefined;
             };
             Model.prototype.getPickObjectVisibility = function (visible) {
                 return visible && this.theme.interactive;
@@ -55490,6 +55645,102 @@ var LiteMol;
             CameraType[CameraType["Orthographic"] = 1] = "Orthographic";
         })(Visualization.CameraType || (Visualization.CameraType = {}));
         var CameraType = Visualization.CameraType;
+        var SlabControls = (function () {
+            function SlabControls(element) {
+                var _this = this;
+                this.touchSlabOn = false;
+                this.touchStartPosition = { x: 0, y: 0 };
+                this.touchPosition = { x: 0, y: 0 };
+                this.radius = 0;
+                this.slabWheelRate = 1 / 15;
+                this._planeDelta = new LiteMol.Core.Rx.Subject();
+                this.subs = [];
+                this.planeDelta = this._planeDelta;
+                var events = {
+                    wheel: function (e) { return _this.handleMouseWheel(e); },
+                    touchStart: function (e) { return _this.touchstart(e); },
+                    touchEnd: function (e) { return _this.touchend(e); },
+                    touchMove: function (e) { return _this.touchmove(e); },
+                };
+                element.addEventListener('mousewheel', events.wheel);
+                element.addEventListener('DOMMouseScroll', events.wheel); // firefox   
+                element.addEventListener('touchstart', events.touchStart, false);
+                element.addEventListener('touchend', events.touchEnd, false);
+                element.addEventListener('touchmove', events.touchMove, false);
+                this.subs.push(function () { return element.removeEventListener('mousewheel', events.wheel); });
+                this.subs.push(function () { return element.removeEventListener('DOMMouseScroll', events.wheel); });
+                this.subs.push(function () { return element.removeEventListener('touchstart', events.touchStart, false); });
+                this.subs.push(function () { return element.removeEventListener('touchend', events.touchEnd, false); });
+                this.subs.push(function () { return element.removeEventListener('touchmove', events.touchMove, false); });
+            }
+            SlabControls.prototype.updateSize = function (w, h) { this.width = w; this.height = h; };
+            SlabControls.prototype.updateRadius = function (r) { this.radius = r; };
+            SlabControls.prototype.destroy = function () {
+                for (var _i = 0, _a = this.subs; _i < _a.length; _i++) {
+                    var s = _a[_i];
+                    s();
+                }
+                this.subs = [];
+                this._planeDelta.onCompleted();
+            };
+            SlabControls.prototype.handleMouseWheel = function (event) {
+                //if (!this.options.enableFrontClip) return;
+                if (event.stopPropagation) {
+                    event.stopPropagation();
+                }
+                if (event.preventDefault) {
+                    event.preventDefault();
+                }
+                var delta = 0;
+                if (event.wheelDelta) {
+                    delta = event.wheelDelta;
+                }
+                else if (event.detail) {
+                    delta = -event.detail;
+                }
+                //if (delta < -0.5) delta = -0.5;
+                //else if (delta > 0.5) delta = 0.5;
+                var sign = delta < 0 ? 1 : -1;
+                delta = this.radius * this.slabWheelRate * sign;
+                this._planeDelta.onNext(delta);
+            };
+            SlabControls.prototype.touchstart = function (event) {
+                switch (event.touches.length) {
+                    case 3: {
+                        this.touchStartPosition.x = 0;
+                        this.touchStartPosition.y = 0;
+                        for (var i = 0; i < 3; i++) {
+                            this.touchStartPosition.x += event.touches[i].clientX / 3;
+                            this.touchStartPosition.y += event.touches[i].clientY / 3;
+                        }
+                        this.touchSlabOn = true;
+                        break;
+                    }
+                    default:
+                        this.touchSlabOn = false;
+                        break;
+                }
+            };
+            SlabControls.prototype.touchend = function (event) {
+                this.touchSlabOn = false;
+            };
+            SlabControls.prototype.touchmove = function (event) {
+                if (!this.touchSlabOn)
+                    return;
+                this.touchPosition.x = 0;
+                this.touchPosition.y = 0;
+                for (var i = 0; i < 3; i++) {
+                    this.touchPosition.x += event.touches[i].clientX / 3;
+                    this.touchPosition.y += event.touches[i].clientY / 3;
+                }
+                var delta = -5 * this.radius * (this.touchPosition.y - this.touchStartPosition.y) / this.height;
+                this.touchStartPosition.x = this.touchPosition.x;
+                this.touchStartPosition.y = this.touchPosition.y;
+                this._planeDelta.onNext(delta);
+            };
+            return SlabControls;
+        }());
+        Visualization.SlabControls = SlabControls;
         var Camera = (function () {
             function Camera(scene, domElement) {
                 this.scene = scene;
@@ -55551,6 +55802,7 @@ var LiteMol;
                     radius = Math.max(radius, center.distanceTo(m.centroid) + m.radius);
                 }
                 this.focusRadius = radius;
+                this.slabControls.updateRadius(this.focusRadius);
             };
             Camera.prototype.focus = function () {
                 this.controls.reset();
@@ -55588,6 +55840,7 @@ var LiteMol;
                 this.focusPoint.y = center.y;
                 this.focusPoint.z = center.z;
                 this.focusRadius = radius;
+                this.slabControls.updateRadius(this.focusRadius);
                 this.nearPlaneDelta = 0;
                 this.fogDelta = 0;
                 this.controls.panAndMoveToDistance(this.focusPoint, radius * 4);
@@ -55600,6 +55853,7 @@ var LiteMol;
                 if (camera instanceof Visualization.THREE.PerspectiveCamera) {
                     camera.aspect = w / h;
                 }
+                this.slabControls.updateSize(w, h);
                 this.camera.updateProjectionMatrix();
                 //this.controls.handleResize();
             };
@@ -55618,6 +55872,10 @@ var LiteMol;
                 configurable: true
             });
             Camera.prototype.dispose = function () {
+                if (this.slabControls) {
+                    this.slabControls.destroy();
+                    this.slabControls = void 0;
+                }
                 if (this.unbindCamera) {
                     this.unbindCamera();
                     this.unbindCamera = void 0;
@@ -55627,25 +55885,7 @@ var LiteMol;
                     this.controls = void 0;
                 }
             };
-            Camera.prototype.handleMouseWheel = function (event) {
-                //if (!this.options.enableFrontClip) return;
-                if (event.stopPropagation) {
-                    event.stopPropagation();
-                }
-                if (event.preventDefault) {
-                    event.preventDefault();
-                }
-                var delta = 0;
-                if (event.wheelDelta) {
-                    delta = event.wheelDelta;
-                }
-                else if (event.detail) {
-                    delta = -event.detail;
-                }
-                if (delta < -0.5)
-                    delta = -0.5;
-                else if (delta > 0.5)
-                    delta = 0.5;
+            Camera.prototype.planeDeltaUpdate = function (delta) {
                 var dist = this.computeNearDistance();
                 var near = dist + this.nearPlaneDelta + delta;
                 if (delta > 0 && near > this.targetDistance)
@@ -55718,15 +55958,13 @@ var LiteMol;
                 var cc = this.scene.options.clearColor;
                 this.fog.color.setRGB(cc.r, cc.g, cc.b);
                 this.scene.scene.fog = this.fog;
-                var wheelEvent = function (e) { return _this.handleMouseWheel(e); };
                 var cameraUpdated = function () { return _this.cameraUpdated(); };
-                this.domElement.addEventListener('mousewheel', wheelEvent);
-                this.domElement.addEventListener('DOMMouseScroll', wheelEvent); // firefox              
+                this.slabControls = new SlabControls(this.domElement);
+                var deltaUpdate = this.slabControls.planeDelta.subscribe(function (delta) { return _this.planeDeltaUpdate(delta); });
                 this.controls.events.addEventListener('change', cameraUpdated);
                 this.unbindCamera = function () {
                     _this.controls.events.removeEventListener('change', cameraUpdated);
-                    _this.domElement.removeEventListener('mousewheel', wheelEvent);
-                    _this.domElement.removeEventListener('DOMMouseScroll', wheelEvent);
+                    deltaUpdate.dispose();
                     _this.observers = [];
                 };
                 this.reset();
@@ -55872,8 +56110,8 @@ var LiteMol;
         Visualization.RenderState = RenderState;
         var Scene = (function () {
             function Scene(element, options) {
-                var _this = this;
                 if (options === void 0) { options = {}; }
+                var _this = this;
                 this.renderState = new RenderState();
                 this.pickInfo = new Visualization.Selection.Pick();
                 this.selectInfo = null;
@@ -56174,10 +56412,10 @@ var LiteMol;
                 while (this.parentElement.lastChild)
                     this.parentElement.removeChild(this.parentElement.lastChild);
             };
-            Scene.hoverEvent = 'hover';
-            Scene.selectEvent = 'select';
             return Scene;
         }());
+        Scene.hoverEvent = 'hover';
+        Scene.selectEvent = 'select';
         Visualization.Scene = Scene;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
@@ -56855,7 +57093,7 @@ var LiteMol;
                 var currentStart = start;
                 var currentEnd = start + 1;
                 while (currentStart < end) {
-                    while (currentEnd <= end && indices[currentEnd] - indices[currentEnd - 1] < 1.1)
+                    while (currentEnd < end && indices[currentEnd] - indices[currentEnd - 1] < 1.1)
                         currentEnd++;
                     map.addVertexRange(indices[currentStart], indices[currentEnd - 1] + 1);
                     currentStart = currentEnd;
@@ -56865,7 +57103,7 @@ var LiteMol;
             function createVertexMap(ctx) {
                 var indices = sortAnnotation(ctx);
                 var annotation = ctx.data.annotation;
-                var count = 0;
+                var count = 1;
                 for (var i = 0, _b = indices.length - 1; i < _b; i++) {
                     if (annotation[indices[i]] !== annotation[indices[i + 1]])
                         count++;
@@ -57090,15 +57328,16 @@ var LiteMol;
             var Geometry = (function (_super) {
                 __extends(Geometry, _super);
                 function Geometry() {
-                    _super.call(this);
-                    this.geometry = void 0;
-                    this.vertexToElementMap = void 0;
-                    this.elementToVertexMap = void 0;
-                    this.pickGeometry = void 0;
-                    this.pickPlatesGeometry = void 0;
-                    this.vertexStateBuffer = void 0;
-                    this.center = new Visualization.THREE.Vector3(0, 0, 0);
-                    this.radius = 0;
+                    var _this = _super.call(this) || this;
+                    _this.geometry = void 0;
+                    _this.vertexToElementMap = void 0;
+                    _this.elementToVertexMap = void 0;
+                    _this.pickGeometry = void 0;
+                    _this.pickPlatesGeometry = void 0;
+                    _this.vertexStateBuffer = void 0;
+                    _this.center = new Visualization.THREE.Vector3(0, 0, 0);
+                    _this.radius = 0;
+                    return _this;
                 }
                 Geometry.prototype.dispose = function () {
                     this.geometry.dispose();
@@ -57129,7 +57368,7 @@ var LiteMol;
             var Model = (function (_super) {
                 __extends(Model, _super);
                 function Model() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Model.prototype.applySelectionInternal = function (indices, action) {
                     var buffer = this.geometry.vertexStateBuffer, array = buffer.array, map = this.geometry.elementToVertexMap, vertexRanges = map.vertexRanges, changed = false;
@@ -57158,6 +57397,59 @@ var LiteMol;
                 };
                 Model.prototype.getPickElements = function (pickId) {
                     return [pickId];
+                };
+                Model.prototype.getBoundingSphereOfSelection = function (indices) {
+                    if (!this.geometry.vertexToElementMap)
+                        return { radius: this.radius, center: this.centroid };
+                    var vs = this.geometry.geometry.attributes.position.array;
+                    var center = new Visualization.THREE.Vector3(), count = 0;
+                    var map = this.geometry.elementToVertexMap, vertexRanges = map.vertexRanges;
+                    for (var _i = 0, indices_2 = indices; _i < indices_2.length; _i++) {
+                        var index = indices_2[_i];
+                        if (!map.elementMap.has(index))
+                            continue;
+                        var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
+                        if (rangeStart === rangeEnd)
+                            continue;
+                        for (var i = rangeStart; i < rangeEnd; i += 2) {
+                            var vStart = vertexRanges[i], vEnd = vertexRanges[i + 1];
+                            for (var j = vStart; j < vEnd; j++) {
+                                center.x += vs[3 * j];
+                                center.y += vs[3 * j + 1];
+                                center.z += vs[3 * j + 2];
+                                count++;
+                            }
+                        }
+                    }
+                    if (!count)
+                        return void 0;
+                    center.x = center.x / count;
+                    center.y = center.y / count;
+                    center.z = center.z / count;
+                    var t = new Visualization.THREE.Vector3();
+                    var radius = 0;
+                    for (var _a = 0, indices_3 = indices; _a < indices_3.length; _a++) {
+                        var index = indices_3[_a];
+                        if (!map.elementMap.has(index))
+                            continue;
+                        var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
+                        if (rangeStart === rangeEnd)
+                            continue;
+                        for (var i = rangeStart; i < rangeEnd; i += 2) {
+                            var vStart = vertexRanges[i], vEnd = vertexRanges[i + 1];
+                            for (var j = vStart; j < vEnd; j++) {
+                                t.x = vs[3 * j];
+                                t.y = vs[3 * j + 1];
+                                t.z = vs[3 * j + 2];
+                                radius = Math.max(radius, t.distanceToSquared(center));
+                            }
+                        }
+                    }
+                    radius = Math.sqrt(radius);
+                    return {
+                        radius: radius,
+                        center: { x: center.x, y: center.y, z: center.z }
+                    };
                 };
                 Model.prototype.applyThemeInternal = function (theme) {
                     var color = { r: 0, g: 0, b: 0 };
@@ -57257,10 +57549,11 @@ var LiteMol;
             var Geometry = (function (_super) {
                 __extends(Geometry, _super);
                 function Geometry() {
-                    _super.call(this);
-                    this.geometry = void 0;
-                    this.center = new Visualization.THREE.Vector3(0, 0, 0);
-                    this.radius = 0;
+                    var _this = _super.call(this) || this;
+                    _this.geometry = void 0;
+                    _this.center = new Visualization.THREE.Vector3(0, 0, 0);
+                    _this.radius = 0;
+                    return _this;
                 }
                 Geometry.prototype.dispose = function () {
                     this.geometry.dispose();
@@ -57311,7 +57604,7 @@ var LiteMol;
             var Model = (function (_super) {
                 __extends(Model, _super);
                 function Model() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Model.prototype.applySelectionInternal = function (indices, action) {
                     return false;
@@ -57386,12 +57679,12 @@ var LiteMol;
                 var Model = (function (_super) {
                     __extends(Model, _super);
                     function Model() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Model.prototype.applySelectionInternal = function (indices, action) {
                         var buffer = this.ballsAndSticks.vertexStateBuffer, array = buffer.array, map = this.ballsAndSticks.atomVertexMap, vertexRanges = map.vertexRanges, changed = false;
-                        for (var _i = 0, indices_2 = indices; _i < indices_2.length; _i++) {
-                            var index = indices_2[_i];
+                        for (var _i = 0, indices_4 = indices; _i < indices_4.length; _i++) {
+                            var index = indices_4[_i];
                             if (!map.elementMap.has(index))
                                 continue;
                             var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
@@ -58013,13 +58306,14 @@ var LiteMol;
                 var BallsAndSticksGeometry = (function (_super) {
                     __extends(BallsAndSticksGeometry, _super);
                     function BallsAndSticksGeometry() {
-                        _super.apply(this, arguments);
-                        this.atomsGeometry = void 0;
-                        this.bondsGeometry = void 0;
-                        this.pickGeometry = void 0;
-                        this.atomVertexMap = void 0;
-                        this.bondVertexMap = void 0;
-                        this.vertexStateBuffer = void 0;
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.atomsGeometry = void 0;
+                        _this.bondsGeometry = void 0;
+                        _this.pickGeometry = void 0;
+                        _this.atomVertexMap = void 0;
+                        _this.bondVertexMap = void 0;
+                        _this.vertexStateBuffer = void 0;
+                        return _this;
                     }
                     BallsAndSticksGeometry.prototype.dispose = function () {
                         this.atomsGeometry.dispose();
@@ -58049,11 +58343,12 @@ var LiteMol;
                     var Data = (function (_super) {
                         __extends(Data, _super);
                         function Data() {
-                            _super.apply(this, arguments);
-                            this.geometry = void 0;
-                            this.pickGeometry = void 0;
-                            this.vertexMap = void 0;
-                            this.vertexStateBuffer = void 0;
+                            var _this = _super.apply(this, arguments) || this;
+                            _this.geometry = void 0;
+                            _this.pickGeometry = void 0;
+                            _this.vertexMap = void 0;
+                            _this.vertexStateBuffer = void 0;
+                            return _this;
                         }
                         Data.prototype.dispose = function () {
                             this.geometry.dispose();
@@ -58159,24 +58454,47 @@ var LiteMol;
                                 }
                             }
                             else {
-                                for (var i = start; i < end; i++) {
-                                    if (!aU && name[i] === "O5'") {
-                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                if (end - start === 1) {
+                                    // has to be P atom
+                                    ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[start], arrays.y[start], arrays.z[start]);
+                                    aU = true;
+                                }
+                                else {
+                                    var pIndex = -1;
+                                    for (var i = start; i < end; i++) {
+                                        if (!aU && name[i] === "O5'") {
+                                            ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                            aU = true;
+                                        }
+                                        else if (!aV && name[i] === "C3'") {
+                                            ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                            aV = true;
+                                        }
+                                        if (name[i] === "P") {
+                                            pIndex = i;
+                                        }
+                                        if (aU && aV)
+                                            break;
+                                    }
+                                    if (!aU && !aV && pIndex >= 0) {
+                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[pIndex], arrays.y[pIndex], arrays.z[pIndex]);
                                         aU = true;
                                     }
-                                    else if (!aV && name[i] === "C3'") {
-                                        ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
-                                        aV = true;
-                                    }
-                                    if (aU && aV)
-                                        break;
                                 }
                             }
+                            var backboneOnly = false;
                             if (!aV) {
-                                var arr = this.pPositionsBuilder.array, len = arr.length;
+                                var arr = this.uPositionsBuilder.array, len = arr.length;
                                 ArrayBuilder.add3(this.vPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
+                                backboneOnly = true;
+                            }
+                            else if (!aU) {
+                                var arr = this.vPositionsBuilder.array, len = arr.length;
+                                ArrayBuilder.add3(this.uPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
+                                backboneOnly = true;
                             }
                             ArrayBuilder.add(this.typeBuilder, sType);
+                            return backboneOnly;
                         };
                         CartoonAsymUnitState.prototype.finishResidues = function () {
                             ArrayBuilder.add(this.typeBuilder, 0 /* None */);
@@ -58223,6 +58541,7 @@ var LiteMol;
                             this.structureEnds = new Set();
                             this.residueType = [];
                             this.residueIndex = new Int32Array(0);
+                            this.backboneOnly = false;
                             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                                 var e = _a[_i];
                                 this.residueCount += e.endResidueIndex - e.startResidueIndex;
@@ -58249,19 +58568,25 @@ var LiteMol;
                                 target[target.length] = current;
                             }
                         };
-                        CartoonAsymUnit.hasNames = function (atomIndices, start, end, name, a, b, isAmk) {
-                            var aU = false, aV = false;
+                        CartoonAsymUnit.isCartoonLike = function (atomIndices, start, end, name, a, b, isAmk) {
+                            var aU = false, aV = false, hasP = false;
                             for (var i = start; i < end; i++) {
-                                if (!aU && name[atomIndices[i]] === a) {
+                                var n = name[atomIndices[i]];
+                                if (!aU && n === a) {
                                     aU = true;
                                 }
-                                else if (!aV && name[atomIndices[i]] === b) {
+                                else if (!aV && n === b) {
                                     aV = true;
                                 }
                                 if (aU && aV)
                                     return true;
+                                if (n === 'P') {
+                                    hasP = true;
+                                }
                             }
-                            return isAmk && aU;
+                            if (isAmk)
+                                return aU;
+                            return hasP;
                         };
                         CartoonAsymUnit.createMask = function (model, atomIndices) {
                             var ret = new Uint8Array(model.residues.count);
@@ -58279,14 +58604,131 @@ var LiteMol;
                                 if (s === 0 /* None */)
                                     continue;
                                 if (s === 5 /* Strand */) {
-                                    ret[residue] = +CartoonAsymUnit.hasNames(atomIndices, rStart, i, name, "O5'", "C3'", false);
+                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "O5'", "C3'", false);
                                 }
                                 else {
-                                    ret[residue] = +CartoonAsymUnit.hasNames(atomIndices, rStart, i, name, "CA", "O", true);
+                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "CA", "O", true);
                                 }
                                 i--;
                             }
                             return ret;
+                        };
+                        CartoonAsymUnit.isUnknownSecondaryStructure = function (model) {
+                            var hasSeq = false;
+                            for (var _i = 0, _a = model.secondaryStructure; _i < _a.length; _i++) {
+                                var e = _a[_i];
+                                if (e.type === 1 /* Helix */
+                                    || e.type === 3 /* Sheet */
+                                    || e.type === 2 /* Turn */) {
+                                    return false;
+                                }
+                                if (e.type === 4 /* AminoSeq */) {
+                                    hasSeq = true;
+                                }
+                            }
+                            return hasSeq;
+                        };
+                        CartoonAsymUnit.approximateSecondaryStructure = function (model, parent) {
+                            if (parent.type !== 4 /* AminoSeq */)
+                                return [parent];
+                            var elements = [];
+                            var name = model.atoms.name;
+                            var _a = model.residues, atomStartIndex = _a.atomStartIndex, atomEndIndex = _a.atomEndIndex;
+                            var trace = new Int32Array(parent.endResidueIndex - parent.startResidueIndex), offset = 0;
+                            var isOk = true;
+                            for (var i = parent.startResidueIndex, _b = parent.endResidueIndex; i < _b; i++) {
+                                var foundCA = false, foundO = false;
+                                for (var j = atomStartIndex[i], _c = atomEndIndex[_b]; j < _c; j++) {
+                                    if (name[j] === 'CA') {
+                                        if (!foundCA)
+                                            trace[offset++] = j;
+                                        foundCA = true;
+                                    }
+                                    else if (name[j] === 'O') {
+                                        foundO = true;
+                                    }
+                                    if (foundO && foundCA)
+                                        break;
+                                }
+                                if (!foundCA || !foundO) {
+                                    isOk = false;
+                                    break;
+                                }
+                            }
+                            if (!isOk)
+                                return [parent];
+                            CartoonAsymUnit.zhangSkolnickSStrace(model, trace, parent, elements);
+                            return elements;
+                        };
+                        CartoonAsymUnit.zhangSkolnickSStrace = function (model, trace, parent, elements) {
+                            var mask = new Int32Array(trace.length);
+                            var hasSS = false;
+                            var residueIndex = model.atoms.residueIndex;
+                            for (var i = 0, _l = trace.length; i < _l; i++) {
+                                if (CartoonAsymUnit.zhangSkolnickSSresidue(model, trace, i, CartoonAsymUnit.ZhangHelixDistance, CartoonAsymUnit.ZhangHelixDelta)) {
+                                    mask[i] = 1 /* Helix */;
+                                    hasSS = true;
+                                }
+                                else if (CartoonAsymUnit.zhangSkolnickSSresidue(model, trace, i, CartoonAsymUnit.ZhangSheetDistance, CartoonAsymUnit.ZhangSheetDelta)) {
+                                    mask[i] = 3 /* Sheet */;
+                                    hasSS = true;
+                                }
+                                else {
+                                    mask[i] = parent.type;
+                                }
+                            }
+                            if (!hasSS) {
+                                elements.push(parent);
+                                return;
+                            }
+                            // filter 1-length elements
+                            for (var i = 0, _l = mask.length; i < _l; i++) {
+                                var m = mask[i];
+                                if (m === parent.type)
+                                    continue;
+                                var j = i + 1;
+                                while (j < _l && m === mask[j]) {
+                                    j++;
+                                }
+                                if (j - i > 1) {
+                                    i = j - 1;
+                                    continue;
+                                }
+                                for (var k = i; k < j; k++)
+                                    mask[k] = parent.type;
+                                i = j - 1;
+                            }
+                            for (var i = 0, _l = mask.length; i < _l; i++) {
+                                var m = mask[i];
+                                var j = i + 1;
+                                while (j < _l && m === mask[j]) {
+                                    j++;
+                                }
+                                var e = new LiteMol.Core.Structure.SecondaryStructureElement(m, new LiteMol.Core.Structure.PolyResidueIdentifier('', i, null), new LiteMol.Core.Structure.PolyResidueIdentifier('', j, null));
+                                e.startResidueIndex = residueIndex[trace[i]];
+                                e.endResidueIndex = residueIndex[trace[j - 1]] + 1;
+                                elements.push(e);
+                                i = j - 1;
+                            }
+                        };
+                        CartoonAsymUnit.zhangSkolnickSSresidue = function (model, trace, i, distances, delta) {
+                            var len = trace.length;
+                            var _a = model.atoms, x = _a.x, y = _a.y, z = _a.z;
+                            var u = CartoonAsymUnit.ZhangP1, v = CartoonAsymUnit.ZhangP2;
+                            for (var j = Math.max(0, i - 2); j <= i; j++) {
+                                for (var k = 2; k < 5; k++) {
+                                    if (j + k >= len) {
+                                        continue;
+                                    }
+                                    var a = trace[j], b = trace[j + k];
+                                    u.set(x[a], y[a], z[a]);
+                                    v.set(x[b], y[b], z[b]);
+                                    if (Math.abs(u.distanceTo(v) - distances[k - 2]) > delta) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
                         };
                         CartoonAsymUnit.throwIfEmpty = function (ss) {
                             if (ss.length === 0) {
@@ -58296,17 +58738,27 @@ var LiteMol;
                         CartoonAsymUnit.buildUnits = function (model, atomIndices, linearSegmentCount) {
                             var mask = CartoonAsymUnit.createMask(model, atomIndices);
                             var ss = [];
+                            var isUnknownSS = CartoonAsymUnit.isUnknownSecondaryStructure(model);
                             for (var _i = 0, _a = model.secondaryStructure; _i < _a.length; _i++) {
                                 var e = _a[_i];
-                                CartoonAsymUnit.maskSplit(e, mask, ss);
+                                if (isUnknownSS) {
+                                    var approx = CartoonAsymUnit.approximateSecondaryStructure(model, e);
+                                    for (var _d = 0, approx_1 = approx; _d < approx_1.length; _d++) {
+                                        var f = approx_1[_d];
+                                        CartoonAsymUnit.maskSplit(f, mask, ss);
+                                    }
+                                }
+                                else {
+                                    CartoonAsymUnit.maskSplit(e, mask, ss);
+                                }
                             }
                             CartoonAsymUnit.throwIfEmpty(ss);
                             var previous = ss[0], asymId = model.residues.asymId, authSeqNumber = model.residues.authSeqNumber, currentElements = [], units = [], none = 0 /* None */;
                             if (previous.type === none) {
                                 previous = null;
                             }
-                            for (var _c = 0, ss_1 = ss; _c < ss_1.length; _c++) {
-                                var e = ss_1[_c];
+                            for (var _e = 0, ss_1 = ss; _e < ss_1.length; _e++) {
+                                var e = ss_1[_e];
                                 if (e.type === none) {
                                     if (currentElements.length > 0) {
                                         units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
@@ -58358,13 +58810,13 @@ var LiteMol;
                                 this.structureStarts.add(e.startResidueIndex);
                                 this.structureEnds.add(e.endResidueIndex - 1);
                                 for (i = e.startResidueIndex; i < e.endResidueIndex; i++) {
-                                    state.addResidue(i, arrays, e.type);
+                                    this.backboneOnly = state.addResidue(i, arrays, e.type);
                                     residueType[residueType.length] = e.type;
                                 }
                             }
                             this.residueIndex = new Int32Array(this.residueCount);
-                            for (var _c = 0, _d = this.elements; _c < _d.length; _c++) {
-                                var e = _d[_c];
+                            for (var _d = 0, _e = this.elements; _d < _e.length; _d++) {
+                                var e = _e[_d];
                                 for (i = e.startResidueIndex; i < e.endResidueIndex; i++) {
                                     this.residueIndex[offset++] = i;
                                 }
@@ -58533,6 +58985,12 @@ var LiteMol;
                         };
                         return CartoonAsymUnit;
                     }());
+                    CartoonAsymUnit.ZhangHelixDistance = [5.45, 5.18, 6.37];
+                    CartoonAsymUnit.ZhangHelixDelta = 2.1;
+                    CartoonAsymUnit.ZhangSheetDistance = [6.1, 10.4, 13.0];
+                    CartoonAsymUnit.ZhangSheetDelta = 1.42;
+                    CartoonAsymUnit.ZhangP1 = new Visualization.THREE.Vector3(0, 0, 0);
+                    CartoonAsymUnit.ZhangP2 = new Visualization.THREE.Vector3(0, 0, 0);
                     Geometry.CartoonAsymUnit = CartoonAsymUnit;
                     var CartoonsGeometryParams = (function () {
                         function CartoonsGeometryParams() {
@@ -58547,9 +59005,9 @@ var LiteMol;
                             this.arrowWidth = 1.7;
                             this.tessalation = 2;
                         }
-                        CartoonsGeometryParams.Default = new CartoonsGeometryParams();
                         return CartoonsGeometryParams;
                     }());
+                    CartoonsGeometryParams.Default = new CartoonsGeometryParams();
                     Geometry.CartoonsGeometryParams = CartoonsGeometryParams;
                     var CartoonsGeometryState = (function () {
                         function CartoonsGeometryState(params, residueCount) {
@@ -58646,7 +59104,7 @@ var LiteMol;
                             state.residueIndex = index;
                             var start = unit.structureStarts.has(unit.residueIndex[index]);
                             var end = unit.structureEnds.has(unit.residueIndex[index]);
-                            if (ctx.isTrace) {
+                            if (ctx.isTrace || unit.backboneOnly) {
                                 switch (unit.residueType[index]) {
                                     case 5 /* Strand */:
                                         builder.addTube(unit, state, params.strandWidth, params.strandWidth);
@@ -58767,7 +59225,8 @@ var LiteMol;
                             this.tempVectors = [
                                 new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(),
                                 new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(),
-                                new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3()];
+                                new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3()
+                            ];
                         }
                         Builder.prototype.setVector = function (data, i, v) {
                             v.set(data[3 * i], data[3 * i + 1], data[3 * i + 2]);
@@ -58900,17 +59359,22 @@ var LiteMol;
                             state.addTriangles(addedVerticesCount, addedVerticesCount + 1, addedVerticesCount + 2, addedVerticesCount + 2, addedVerticesCount + 3, addedVerticesCount);
                         };
                         Builder.prototype.findN3 = function (index, arrays, target) {
-                            var start = arrays.startIndex[index], end = arrays.endIndex[index], name = arrays.name;
+                            var start = arrays.startIndex[index], end = arrays.endIndex[index];
+                            var name = arrays.name;
+                            var found = false;
                             for (var i = start; i < end; i++) {
                                 if (arrays.name[i] === "N3") {
                                     target.set(arrays.x[i], arrays.y[i], arrays.z[i]);
+                                    found = true;
                                     break;
                                 }
                             }
-                            return target;
+                            return found;
                         };
                         Builder.prototype.addStrandLine = function (element, state, template, arrays, residueIndex) {
-                            var p = this.tempVectors[0], n = this.tempVectors[1], i, vb = template.vertex, nb = template.normal, ib = template.index, vertexStart = state.verticesDone, vertexCount = vb.length, triangleCount = ib.length, elementOffset = state.residueIndex * element.linearSegmentCount + ((0.5 * element.linearSegmentCount + 1) | 0), elementPoint = this.setVector(element.controlPoints, elementOffset, this.tempVectors[2]), nDir = this.findN3(residueIndex, arrays, this.tempVectors[3]).sub(elementPoint), length = nDir.length();
+                            if (!this.findN3(residueIndex, arrays, this.tempVectors[3]))
+                                return;
+                            var p = this.tempVectors[0], n = this.tempVectors[1], i, vb = template.vertex, nb = template.normal, ib = template.index, vertexStart = state.verticesDone, vertexCount = vb.length, triangleCount = ib.length, elementOffset = state.residueIndex * element.linearSegmentCount + ((0.5 * element.linearSegmentCount + 1) | 0), elementPoint = this.setVector(element.controlPoints, elementOffset, this.tempVectors[2]), nDir = this.tempVectors[3].sub(elementPoint), length = nDir.length();
                             nDir.normalize();
                             state.translationMatrix.makeTranslation(elementPoint.x, elementPoint.y, elementPoint.z);
                             state.scaleMatrix.makeScale(1, 1, length);
@@ -58961,7 +59425,7 @@ var LiteMol;
                 var Model = (function (_super) {
                     __extends(Model, _super);
                     function Model() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Model.prototype.applySelectionInternal = function (indices, action) {
                         var buffer = this.cartoons.vertexStateBuffer, array = buffer.array, map = this.cartoons.vertexMap, vertexRanges = map.vertexRanges, changed = false, residueIndex = this.model.atoms.residueIndex;
@@ -59164,6 +59628,145 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
+        var Primitive;
+        (function (Primitive) {
+            "use strict";
+            var LA = LiteMol.Core.Geometry.LinearAlgebra;
+            function createSphereSurface(center, radius, tessalation) {
+                var geom = new Visualization.THREE.IcosahedronGeometry(radius, tessalation);
+                var surface = Visualization.GeometryHelper.toSurface(geom);
+                if (center.x !== 0 || center.y !== 0 || center.z !== 0) {
+                    LiteMol.Core.Geometry.Surface.transformImmediate(surface, LA.Matrix4.fromTranslation(LA.Matrix4.empty(), [center.x, center.y, center.z]));
+                }
+                return surface;
+            }
+            Primitive.createSphereSurface = createSphereSurface;
+        })(Primitive = Visualization.Primitive || (Visualization.Primitive = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Primitive;
+        (function (Primitive) {
+            'use strict';
+            var Surface = LiteMol.Core.Geometry.Surface;
+            function buildSurface(shapes) {
+                return LiteMol.Core.Computation.create(function (ctx) {
+                    ctx.update('Building surface...');
+                    ctx.schedule(function () {
+                        var uniqueSpheres = new Map();
+                        for (var _i = 0, shapes_1 = shapes; _i < shapes_1.length; _i++) {
+                            var s = shapes_1[_i];
+                            if (s.type !== 'Sphere' || uniqueSpheres.has(s.tessalation || 0))
+                                continue;
+                            var surf = Primitive.createSphereSurface({ x: 0, y: 0, z: 0 }, 1, s.tessalation || 0);
+                            uniqueSpheres.set(s.tessalation || 0, Primitive.createSphereSurface({ x: 0, y: 0, z: 0 }, 1, s.tessalation || 0));
+                        }
+                        var size = { vertexCount: 0, triangleCount: 0 };
+                        for (var _a = 0, shapes_2 = shapes; _a < shapes_2.length; _a++) {
+                            var s = shapes_2[_a];
+                            switch (s.type) {
+                                case 'Sphere':
+                                    var sphere = uniqueSpheres.get(s.tessalation || 0);
+                                    size.vertexCount += sphere.vertexCount;
+                                    size.triangleCount += sphere.triangleCount;
+                                    break;
+                                case 'Surface':
+                                    size.vertexCount += s.surface.vertexCount;
+                                    size.triangleCount += s.surface.triangleCount;
+                                    break;
+                            }
+                        }
+                        var vertices = new Float32Array(size.vertexCount * 3);
+                        var normals = new Float32Array(size.vertexCount * 3);
+                        var triangles = new Uint32Array(size.triangleCount * 3);
+                        var annotation = new Int32Array(size.vertexCount);
+                        var vOffset = 0, nOffset = 0, tOffset = 0, aOffset = 0;
+                        var v = new Visualization.THREE.Vector3();
+                        var transform = new Visualization.THREE.Matrix4();
+                        var vs;
+                        for (var _c = 0, shapes_3 = shapes; _c < shapes_3.length; _c++) {
+                            var s = shapes_3[_c];
+                            var surface = void 0;
+                            var startVOffset = (vOffset / 3) | 0;
+                            switch (s.type) {
+                                case 'Sphere':
+                                    surface = uniqueSpheres.get(s.tessalation || 0);
+                                    vs = surface.vertices;
+                                    for (var i = 0, _b = surface.vertexCount * 3; i < _b; i += 3) {
+                                        v.x = vs[i], v.y = vs[i + 1], v.z = vs[i + 2];
+                                        v.applyMatrix4(transform.makeScale(s.radius, s.radius, s.radius));
+                                        v.applyMatrix4(transform.makeTranslation(s.center.x, s.center.y, s.center.z));
+                                        vertices[vOffset++] = v.x;
+                                        vertices[vOffset++] = v.y;
+                                        vertices[vOffset++] = v.z;
+                                    }
+                                    break;
+                                case 'Surface':
+                                    surface = s.surface;
+                                    Surface.computeNormalsImmediate(surface);
+                                    vs = surface.vertices;
+                                    for (var i = 0, _b = vs.length; i < _b; i++) {
+                                        vertices[vOffset++] = vs[i];
+                                    }
+                                    break;
+                            }
+                            vs = surface.normals;
+                            for (var i = 0, _b = vs.length; i < _b; i++) {
+                                normals[nOffset++] = vs[i];
+                            }
+                            var ts = surface.triangleIndices;
+                            for (var i = 0, _b = ts.length; i < _b; i++) {
+                                triangles[tOffset++] = startVOffset + ts[i];
+                            }
+                            for (var i = 0, _b = surface.vertexCount; i < _b; i++) {
+                                annotation[aOffset++] = s.id;
+                            }
+                        }
+                        var ret = {
+                            vertices: vertices,
+                            vertexCount: size.vertexCount,
+                            triangleIndices: triangles,
+                            triangleCount: size.triangleCount,
+                            normals: normals,
+                            annotation: annotation
+                        };
+                        ctx.resolve(ret);
+                    });
+                });
+            }
+            var Builder = (function () {
+                function Builder() {
+                    this.shapes = [];
+                }
+                Builder.prototype.add = function (shape) {
+                    this.shapes.push(shape);
+                    return this;
+                };
+                Builder.prototype.buildSurface = function () {
+                    return buildSurface(this.shapes);
+                };
+                Builder.create = function () {
+                    return new Builder();
+                };
+                return Builder;
+            }());
+            Primitive.Builder = Builder;
+        })(Primitive = Visualization.Primitive || (Visualization.Primitive = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
         var Utils;
         (function (Utils) {
             "use strict";
@@ -59213,9 +59816,9 @@ var LiteMol;
                     ret.b = minColor.b + (maxColor.b - minColor.b) * t;
                     return ret;
                 };
-                Palette.previous = Palette.randomMix({ r: 0.75, g: 0, b: 0.25 }, { r: 1, g: 0.5, b: 0 }, { r: 0, g: 0.35, b: 1 }, 0.5);
                 return Palette;
             }());
+            Palette.previous = Palette.randomMix({ r: 0.75, g: 0, b: 0.25 }, { r: 1, g: 0.5, b: 0 }, { r: 0, g: 0.35, b: 1 }, 0.5);
             Utils.Palette = Palette;
         })(Utils = Visualization.Utils || (Visualization.Utils = {}));
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
@@ -64418,7 +65021,7 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        Bootstrap.VERSION = { number: "1.1.5", date: "Sep 30 2016" };
+        Bootstrap.VERSION = { number: "1.2.5", date: "Nov 30 2016" };
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -64432,6 +65035,7 @@ var LiteMol;
         Bootstrap.Immutable = __LiteMolImmutable;
         Bootstrap.Rx = LiteMol.Core.Rx;
         Bootstrap.Promise = LiteMol.Core.Promise;
+        Bootstrap.Zlib = LiteMolZlib;
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -64444,6 +65048,11 @@ var LiteMol;
         var Utils;
         (function (Utils) {
             "use strict";
+            (function (DataCompressionMethod) {
+                DataCompressionMethod[DataCompressionMethod["None"] = 0] = "None";
+                DataCompressionMethod[DataCompressionMethod["Gzip"] = 1] = "Gzip";
+            })(Utils.DataCompressionMethod || (Utils.DataCompressionMethod = {}));
+            var DataCompressionMethod = Utils.DataCompressionMethod;
             function readStringFromFile(file) {
                 return readFromFileInternal(file, false);
             }
@@ -64457,15 +65066,15 @@ var LiteMol;
             }
             Utils.readFromFile = readFromFile;
             function ajaxGetString(url) {
-                return ajaxGetInternal(url, false);
+                return ajaxGetInternal(url, false, false);
             }
             Utils.ajaxGetString = ajaxGetString;
             function ajaxGetArrayBuffer(url) {
-                return ajaxGetInternal(url, true);
+                return ajaxGetInternal(url, true, false);
             }
             Utils.ajaxGetArrayBuffer = ajaxGetArrayBuffer;
-            function ajaxGet(url, type) {
-                return ajaxGetInternal(url, type === 'Binary');
+            function ajaxGet(params) {
+                return ajaxGetInternal(params.url, params.type === 'Binary', params.compression === DataCompressionMethod.Gzip);
             }
             Utils.ajaxGet = ajaxGet;
             var __chars = function () {
@@ -64565,28 +65174,49 @@ var LiteMol;
                         this.pool.push();
                     }
                 };
-                RequestPool.pool = [];
-                RequestPool.poolSize = 15;
                 return RequestPool;
             }());
-            function processAjax(ctx, asArrayBuffer, e) {
+            RequestPool.pool = [];
+            RequestPool.poolSize = 15;
+            function processAjax(ctx, asArrayBuffer, decompressGzip, e) {
                 var req = e.target;
                 if (req.status >= 200 && req.status < 400) {
-                    if (asArrayBuffer)
-                        ctx.resolve(e.target.response);
-                    else
-                        ctx.resolve(e.target.responseText);
+                    if (asArrayBuffer) {
+                        var buff_1 = e.target.response;
+                        RequestPool.deposit(e.target);
+                        if (decompressGzip) {
+                            ctx.update('Decompressing...');
+                            ctx.schedule(function () {
+                                var gzip = new LiteMolZlib.Gunzip(new Uint8Array(buff_1));
+                                var data = gzip.decompress();
+                                ctx.resolve(data.buffer);
+                            });
+                        }
+                        else {
+                            ctx.resolve(buff_1);
+                        }
+                    }
+                    else {
+                        var text = e.target.responseText;
+                        RequestPool.deposit(e.target);
+                        ctx.resolve(text);
+                    }
                 }
                 else {
-                    ctx.reject(req.statusText);
+                    var status_1 = req.statusText;
+                    RequestPool.deposit(e.target);
+                    ctx.reject(status_1);
                 }
-                RequestPool.deposit(e.target);
             }
-            function ajaxGetInternal(url, asArrayBuffer) {
+            function ajaxGetInternal(url, asArrayBuffer, decompressGzip) {
                 return Bootstrap.Task.fromComputation('Download', 'Background', LiteMol.Core.Computation.create(function (ctx) {
+                    if (!asArrayBuffer && decompressGzip) {
+                        ctx.reject('Decompress is only available when downloading binary data.');
+                        return;
+                    }
                     var xhttp = RequestPool.get();
                     ctx.update('Waiting for server...', function () { return xhttp.abort(); });
-                    handleProgress(ctx, 'Downloading...', xhttp, asArrayBuffer, function (e) { return processAjax(ctx, asArrayBuffer, e); });
+                    handleProgress(ctx, 'Downloading...', xhttp, asArrayBuffer, function (e) { return processAjax(ctx, asArrayBuffer, decompressGzip, e); });
                     xhttp.open('get', url, true);
                     xhttp.responseType = asArrayBuffer ? "arraybuffer" : "text";
                     xhttp.send();
@@ -64660,7 +65290,6 @@ var LiteMol;
                     return ValueOrError;
                 }());
                 Query.ValueOrError = ValueOrError;
-                var ValueOrError;
                 (function (ValueOrError) {
                     function error(err) {
                         return new ValueOrError(true, void 0, err);
@@ -65043,174 +65672,6 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        var Utils;
-        (function (Utils) {
-            var Molecule;
-            (function (Molecule) {
-                "use strict";
-                function findModel(entity) {
-                    return Bootstrap.Tree.Node.findClosestNodeOfType(entity, [Bootstrap.Entity.Molecule.Model]);
-                }
-                Molecule.findModel = findModel;
-                function findMolecule(entity) {
-                    return Bootstrap.Tree.Node.findClosestNodeOfType(entity, [Bootstrap.Entity.Molecule.Molecule]);
-                }
-                Molecule.findMolecule = findMolecule;
-                function findQueryContext(entity) {
-                    var source = Bootstrap.Tree.Node.findClosestNodeOfType(entity, [Bootstrap.Entity.Molecule.Model, Bootstrap.Entity.Molecule.Selection]);
-                    if (Bootstrap.Entity.isMoleculeModel(source)) {
-                        return source.props.model.queryContext;
-                    }
-                    else {
-                        var cache = source.tree.context.entityCache;
-                        var ctx = cache.get(source, Bootstrap.Entity.Cache.Keys.QueryContext);
-                        if (ctx)
-                            return ctx;
-                        ctx = LiteMol.Core.Structure.Query.Context.ofAtomIndices(findModel(source).props.model, source.props.indices);
-                        return cache.set(source, Bootstrap.Entity.Cache.Keys.QueryContext, ctx);
-                    }
-                }
-                Molecule.findQueryContext = findQueryContext;
-                function getDistance(mA, startAtomIndexA, endAtomIndexA, mB, startAtomIndexB, endAtomIndexB) {
-                    var _a = mA.atoms, x = _a.x, y = _a.y, z = _a.z;
-                    var bX = mB.atoms.x, bY = mB.atoms.y, bZ = mB.atoms.z;
-                    var d = Number.POSITIVE_INFINITY;
-                    for (var i = startAtomIndexA; i < endAtomIndexA; i++) {
-                        for (var j = startAtomIndexB; j < endAtomIndexB; j++) {
-                            var dx = x[i] - bX[j], dy = y[i] - bY[j], dz = z[i] - bZ[j];
-                            d = Math.min(d, dx * dx + dy * dy + dz * dz);
-                        }
-                    }
-                    return Math.sqrt(d);
-                }
-                Molecule.getDistance = getDistance;
-                function getDistanceSet(mA, setA, mB, setB) {
-                    var _a = mA.atoms, x = _a.x, y = _a.y, z = _a.z;
-                    var bX = mB.atoms.x, bY = mB.atoms.y, bZ = mB.atoms.z;
-                    var d = Number.POSITIVE_INFINITY;
-                    for (var _i = 0, setA_1 = setA; _i < setA_1.length; _i++) {
-                        var i = setA_1[_i];
-                        for (var _c = 0, setB_1 = setB; _c < setB_1.length; _c++) {
-                            var j = setB_1[_c];
-                            var dx = x[i] - bX[j], dy = y[i] - bY[j], dz = z[i] - bZ[j];
-                            d = Math.min(d, dx * dx + dy * dy + dz * dz);
-                        }
-                    }
-                    return Math.sqrt(d);
-                }
-                Molecule.getDistanceSet = getDistanceSet;
-                function getModelAndIndicesFromQuery(m, query) {
-                    var model = findModel(m);
-                    if (!model) {
-                        console.warn('Could not find a model for query selection.');
-                        return void 0;
-                    }
-                    var queryContext = findQueryContext(m);
-                    try {
-                        var q = LiteMol.Core.Structure.Query.Builder.toQuery(query);
-                        return { model: model, indices: q(queryContext).unionAtomIndices(), queryContext: queryContext };
-                    }
-                    catch (e) {
-                        console.error('Query Execution', e);
-                        return void 0;
-                    }
-                }
-                Molecule.getModelAndIndicesFromQuery = getModelAndIndicesFromQuery;
-                function getResidueIndices(m, atom) {
-                    var rI = m.atoms.residueIndex;
-                    var idx = [];
-                    for (var i = m.residues.atomStartIndex[rI[atom]], _b = m.residues.atomEndIndex[rI[atom]]; i < _b; i++) {
-                        idx.push(i);
-                    }
-                    return idx;
-                }
-                Molecule.getResidueIndices = getResidueIndices;
-                function getBox(molecule, atomIndices, delta) {
-                    var atoms = molecule.atoms, atomCount = atoms.count, cCount = 0, x = atoms.x, y = atoms.y, z = atoms.z, min = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE], max = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
-                    for (var _i = 0, atomIndices_1 = atomIndices; _i < atomIndices_1.length; _i++) {
-                        var i = atomIndices_1[_i];
-                        min[0] = Math.min(x[i], min[0]);
-                        min[1] = Math.min(y[i], min[1]);
-                        min[2] = Math.min(z[i], min[2]);
-                        max[0] = Math.max(x[i], max[0]);
-                        max[1] = Math.max(y[i], max[1]);
-                        max[2] = Math.max(z[i], max[2]);
-                    }
-                    min[0] = min[0] - delta;
-                    min[1] = min[1] - delta;
-                    min[2] = min[2] - delta;
-                    max[0] = max[0] + delta;
-                    max[1] = max[1] + delta;
-                    max[2] = max[2] + delta;
-                    return {
-                        bottomLeft: min,
-                        topRight: max
-                    };
-                }
-                Molecule.getBox = getBox;
-                var CentroidHelper = (function () {
-                    function CentroidHelper(model) {
-                        this.model = model;
-                        this.center = { x: 0, y: 0, z: 0 };
-                        this.radiusSquared = 0;
-                        this.count = 0;
-                        this.x = model.atoms.x;
-                        this.y = model.atoms.y;
-                        this.z = model.atoms.z;
-                    }
-                    CentroidHelper.prototype.addAtom = function (i) {
-                        this.count++;
-                        this.center.x += this.x[i];
-                        this.center.y += this.y[i];
-                        this.center.z += this.z[i];
-                    };
-                    CentroidHelper.prototype.finishedAdding = function () {
-                        this.center.x /= this.count;
-                        this.center.y /= this.count;
-                        this.center.z /= this.count;
-                    };
-                    CentroidHelper.prototype.radiusVisit = function (i) {
-                        var dx = this.center.x - this.x[i], dy = this.center.y - this.y[i], dz = this.center.z - this.z[i];
-                        this.radiusSquared = Math.max(this.radiusSquared, dx * dx + dy * dy + dz * dz);
-                    };
-                    return CentroidHelper;
-                }());
-                Molecule.CentroidHelper = CentroidHelper;
-                function getCentroidAndRadius(m, indices, into) {
-                    into.x = 0;
-                    into.y = 0;
-                    into.z = 0;
-                    var _a = m.atoms, x = _a.x, y = _a.y, z = _a.z;
-                    for (var _i = 0, indices_1 = indices; _i < indices_1.length; _i++) {
-                        var i = indices_1[_i];
-                        into.x += x[i];
-                        into.y += y[i];
-                        into.z += z[i];
-                    }
-                    var c = indices.length;
-                    into.x /= c;
-                    into.y /= c;
-                    into.z /= c;
-                    var radius = 0;
-                    for (var _c = 0, indices_2 = indices; _c < indices_2.length; _c++) {
-                        var i = indices_2[_c];
-                        var dx = into.x - x[i], dy = into.y - y[i], dz = into.z - z[i];
-                        radius = Math.max(radius, dx * dx + dy * dy + dz * dz);
-                    }
-                    return Math.sqrt(radius);
-                }
-                Molecule.getCentroidAndRadius = getCentroidAndRadius;
-            })(Molecule = Utils.Molecule || (Utils.Molecule = {}));
-        })(Utils = Bootstrap.Utils || (Bootstrap.Utils = {}));
-    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
-})(LiteMol || (LiteMol = {}));
-/*
- * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
- */
-var LiteMol;
-(function (LiteMol) {
-    var Bootstrap;
-    (function (Bootstrap) {
         var Service;
         (function (Service) {
             "use strict";
@@ -65252,7 +65713,6 @@ var LiteMol;
                 return Dispatcher;
             }());
             Service.Dispatcher = Dispatcher;
-            var Dispatcher;
             (function (Dispatcher) {
                 (function (Lane) {
                     Lane[Lane["Slow"] = 0] = "Slow";
@@ -65299,7 +65759,6 @@ var LiteMol;
                 return Logger;
             }());
             Service.Logger = Logger;
-            var Logger;
             (function (Logger) {
                 (function (EntryType) {
                     EntryType[EntryType["Message"] = 0] = "Message";
@@ -65309,6 +65768,19 @@ var LiteMol;
                 })(Logger.EntryType || (Logger.EntryType = {}));
                 var EntryType = Logger.EntryType;
             })(Logger = Service.Logger || (Service.Logger = {}));
+        })(Service = Bootstrap.Service || (Bootstrap.Service = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Service;
+        (function (Service) {
+            "use strict";
         })(Service = Bootstrap.Service || (Bootstrap.Service = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
@@ -65370,7 +65842,6 @@ var LiteMol;
             return Task;
         }());
         Bootstrap.Task = Task;
-        var Task;
         (function (Task) {
             var Running = (function () {
                 function Running(p) {
@@ -65717,6 +66188,11 @@ var LiteMol;
                 Visual.ResetTheme = create('bs.cmd.Visual.ResetTheme', Lane.Slow);
                 Visual.UpdateBasicTheme = create('bs.cmd.Visual.UpdateBasicTheme', Lane.Slow);
             })(Visual = Command.Visual || (Command.Visual = {}));
+            var Toast;
+            (function (Toast) {
+                Toast.Show = create('bs.cmd.Toast.Show', Lane.Slow);
+                Toast.Hide = create('bs.cmd.Toast.Hide', Lane.Slow);
+            })(Toast = Command.Toast || (Command.Toast = {}));
         })(Command = Bootstrap.Command || (Bootstrap.Command = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
@@ -65894,6 +66370,8 @@ var LiteMol;
                 }
                 Node.is = is;
                 function hasAncestor(e, a) {
+                    if (!a)
+                        return false;
                     while (true) {
                         if (e === a)
                             return true;
@@ -66482,18 +66960,36 @@ var LiteMol;
         var Interactivity;
         (function (Interactivity) {
             "use strict";
+            var Info;
+            (function (Info) {
+                Info.empty = { kind: 0 /* Empty */ };
+                function selection(source, elements) {
+                    return { kind: 1 /* Selection */, source: source, elements: elements };
+                }
+                Info.selection = selection;
+            })(Info = Interactivity.Info || (Interactivity.Info = {}));
+            function isEmpty(info) {
+                return info.kind === 0 /* Empty */ || !info.source.tree;
+            }
+            Interactivity.isEmpty = isEmpty;
+            function isSelection(info) {
+                return info.kind === 1 /* Selection */ && !!info.source.tree;
+            }
+            Interactivity.isSelection = isSelection;
             function interactivityInfoEqual(a, b) {
                 if (!a && !b)
                     return true;
                 if (!a || !b)
                     return false;
-                if (a.visual !== b.visual || a.entity !== b.entity)
+                if (a.kind !== b.kind)
                     return false;
-                if (!a.elements && !b.elements)
+                if (a.kind === 0 /* Empty */)
                     return true;
-                if (!a.elements || !b.elements || a.elements.length !== b.elements.length)
+                if (a.source !== b.source)
                     return false;
                 var x = a.elements, y = b.elements;
+                if (x.length !== y.length)
+                    return false;
                 for (var i = 0, _l = x.length; i < _l; i++) {
                     if (x[i] !== y[i])
                         return false;
@@ -66501,6 +66997,17 @@ var LiteMol;
                 return true;
             }
             Interactivity.interactivityInfoEqual = interactivityInfoEqual;
+            function interactivitySelectionElementsEqual(a, b) {
+                var x = a.elements, y = b.elements;
+                if (x.length !== y.length)
+                    return false;
+                for (var i = 0, _l = x.length; i < _l; i++) {
+                    if (x[i] !== y[i])
+                        return false;
+                }
+                return true;
+            }
+            Interactivity.interactivitySelectionElementsEqual = interactivitySelectionElementsEqual;
         })(Interactivity = Bootstrap.Interactivity || (Bootstrap.Interactivity = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
@@ -66605,10 +67112,13 @@ var LiteMol;
                 }
                 Molecule.transformMoleculeAtomIndices = transformMoleculeAtomIndices;
                 function transformInteraction(info) {
-                    if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)))
+                    if (Interactivity.isEmpty(info))
                         return void 0;
-                    var context = Bootstrap.Utils.Molecule.findQueryContext(info.entity);
-                    var model = Bootstrap.Utils.Molecule.findModel(info.entity);
+                    var modelOrSelection = Bootstrap.Utils.Molecule.findModelOrSelection(info.source);
+                    if (!modelOrSelection)
+                        return void 0;
+                    var context = Bootstrap.Utils.Molecule.findQueryContext(modelOrSelection);
+                    var model = Bootstrap.Utils.Molecule.findModel(modelOrSelection);
                     if (!context || !model)
                         return void 0;
                     return transformMoleculeAtomIndices(model, context, info.elements);
@@ -66633,19 +67143,25 @@ var LiteMol;
                     return "<span>" + a.name + " " + a.elementSymbol + " " + a.id + formatAtomExtra(a) + "</span>";
                 }
                 function formatResidue(r) {
-                    return "<span>" + r.authName + " " + r.chain.asymId + " " + r.authSeqNumber + (r.insCode !== null ? ' i: ' + r.insCode : '') + "</span>";
+                    return "<span>" + r.authName + " " + r.chain.authAsymId + " " + r.authSeqNumber + (r.insCode !== null ? ' i: ' + r.insCode : '') + "</span>";
+                }
+                function formatMolecule(info) {
+                    if (info.modelId === '1') {
+                        return "<span><small>[" + info.moleculeId + "]</small></span>";
+                    }
+                    return "<span><small>[" + info.moleculeId + ":" + info.modelId + "]</small></span>";
                 }
                 function formatInfo(info) {
                     if (!info || !info.atoms.length)
                         return "";
                     if (info.atoms.length === 1) {
-                        return "<span>" + formatAtom(info.atoms[0]) + " on <b><small>" + formatResidue(info.residues[0]) + "</small></b></span>";
+                        return "<span>" + formatAtom(info.atoms[0]) + " on <b><small>" + formatResidue(info.residues[0]) + "</small></b> " + formatMolecule(info) + "</span>";
                     }
                     else if (info.residues.length === 1) {
-                        return "<span><b>" + formatResidue(info.residues[0]) + "</b></span>";
+                        return "<span><b>" + formatResidue(info.residues[0]) + "</b> " + formatMolecule(info) + "</span>";
                     }
                     else {
-                        return "<span><small>" + info.atoms.length + " atoms on</small> <b>" + info.residues.length + " residues</b></span>";
+                        return "<span><small>" + info.atoms.length + " atoms on</small> <b>" + info.residues.length + " residues</b> " + formatMolecule(info) + "</span>";
                     }
                 }
                 Molecule.formatInfo = formatInfo;
@@ -66653,18 +67169,21 @@ var LiteMol;
                     if (!info || !info.atoms.length)
                         return "";
                     if (info.atoms.length === 1) {
-                        return "<span><b>" + formatAtomShort(info.atoms[0]) + "<b></span>";
+                        return "<span><b>" + formatAtomShort(info.atoms[0]) + "<b> " + formatMolecule(info) + "</span>";
                     }
                     else if (info.residues.length === 1) {
-                        return "<span><b>" + formatResidue(info.residues[0]) + "</b></span>";
+                        return "<span><b>" + formatResidue(info.residues[0]) + "</b> " + formatMolecule(info) + "</span>";
                     }
                     else {
-                        return "<span><b>" + info.residues.length + " residues</b></span>";
+                        return "<span><b>" + info.residues.length + " residues</b> " + formatMolecule(info) + "</span>";
                     }
                 }
                 Molecule.formatInfoShort = formatInfoShort;
                 function isMoleculeModelInteractivity(info) {
-                    if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)))
+                    if (Interactivity.isEmpty(info))
+                        return false;
+                    var modelOrSelection = Bootstrap.Utils.Molecule.findModelOrSelection(info.source);
+                    if (!modelOrSelection)
                         return false;
                     return true;
                 }
@@ -66723,6 +67242,9 @@ var LiteMol;
                     Bootstrap.Command.Molecule.Highlight.getStream(context).subscribe(function (e) { return _this.highlightMoleculeModel(e.data); });
                     Bootstrap.Command.Visual.ResetTheme.getStream(context).subscribe(function (e) { return _this.resetThemesAndHighlight(e.data && e.data.selection); });
                 }
+                DisplayList.prototype.isEmpty = function () {
+                    return !this.entries.size;
+                };
                 DisplayList.prototype.add = function (v) {
                     if (this.entries.has(v.id) || !v.props.model)
                         return false;
@@ -66844,7 +67366,7 @@ var LiteMol;
                 SceneWrapper.prototype.resetScene = function () {
                     if (this._destroyed)
                         return;
-                    Bootstrap.Event.Visual.VisualSelectElement.dispatch(this.context, {});
+                    Bootstrap.Event.Visual.VisualSelectElement.dispatch(this.context, Bootstrap.Interactivity.Info.empty);
                     this.models.resetThemesAndHighlight();
                     this.scene.camera.reset();
                 };
@@ -66865,11 +67387,11 @@ var LiteMol;
                 };
                 SceneWrapper.prototype.handleEvent = function (e, event) {
                     var data = e.data;
-                    if (data && data.model) {
-                        event.dispatch(this.context, { entity: data.model.entity, visual: data.model.tag, elements: data.elements });
+                    if (data && data.model && data.elements) {
+                        event.dispatch(this.context, Bootstrap.Interactivity.Info.selection(data.model.tag, data.elements));
                     }
                     else {
-                        event.dispatch(this.context, {});
+                        event.dispatch(this.context, Bootstrap.Interactivity.Info.empty);
                     }
                 };
                 SceneWrapper.prototype.focusMoleculeModelSelection = function (sel) {
@@ -66911,6 +67433,13 @@ var LiteMol;
         (function (Visualization) {
             "use strict";
             var visualSerialId = 0;
+            var Style;
+            (function (Style) {
+                function create(style) {
+                    return style;
+                }
+                Style.create = create;
+            })(Style = Visualization.Style || (Visualization.Style = {}));
             var Theme;
             (function (Theme) {
                 function mergeProps(theme, props) {
@@ -66937,7 +67466,8 @@ var LiteMol;
                     return {
                         colors: colors,
                         transparency: theme.transparency,
-                        interactive: theme.interactive
+                        interactive: theme.interactive,
+                        disableFog: theme.disableFog
                     };
                 }
                 Theme.getProps = getProps;
@@ -67380,7 +67910,10 @@ var LiteMol;
                             ctx.reject({ warn: true, message: 'Empty box.' });
                             return;
                         }
-                        var isoValue = data.valuesInfo.mean + data.valuesInfo.sigma * params.isoSigma;
+                        var isSigma = params.isoValueType === void 0 || params.isoValueType === Density.IsoValueType.Sigma;
+                        var isoValue = isSigma
+                            ? data.valuesInfo.mean + data.valuesInfo.sigma * params.isoValue
+                            : params.isoValue;
                         var surface = Geom.MarchingCubes.compute({
                             isoLevel: isoValue,
                             scalarField: data.data,
@@ -67396,7 +67929,7 @@ var LiteMol;
                                 var surface = LiteMol.Visualization.Surface.Model.create(source, { surface: s, theme: theme, parameters: { isWireframe: style.params.isWireframe } }).run();
                                 surface.progress.subscribe(function (p) { return ctx.update("Density Surface (" + source.props.label + "): " + Bootstrap.Utils.formatProgress(p), p.requestAbort); });
                                 surface.result.then(function (model) {
-                                    var label = "Surface, " + Bootstrap.Utils.round(params.isoSigma, 2) + " \u03C3";
+                                    var label = "Surface, " + Bootstrap.Utils.round(params.isoValue, 2) + (isSigma ? ' \u03C3' : '');
                                     var visual = Bootstrap.Entity.Density.Visual.create(transform, { label: label, model: model, style: style, isSelectable: !style.isNotSelectable });
                                     ctx.resolve(visual);
                                 }).catch(ctx.reject);
@@ -67421,14 +67954,19 @@ var LiteMol;
             var Density;
             (function (Density) {
                 "use strict";
+                (function (IsoValueType) {
+                    IsoValueType[IsoValueType["Sigma"] = 0] = "Sigma";
+                    IsoValueType[IsoValueType["Absolute"] = 1] = "Absolute";
+                })(Density.IsoValueType || (Density.IsoValueType = {}));
+                var IsoValueType = Density.IsoValueType;
                 var Style;
                 (function (Style) {
                     function create(params) {
                         var colors = Default.Theme.colors.set('Uniform', params.color);
                         return {
                             type: {},
-                            params: { isoSigma: params.isoSigma, smoothing: 1, isWireframe: !!params.isWireframe },
-                            theme: { template: Default.Theme, colors: colors, transparency: params.transparency ? params.transparency : Default.Transparency, interactive: false }
+                            params: { isoValue: params.isoValue, isoValueType: params.isoValueType, smoothing: 1, isWireframe: !!params.isWireframe },
+                            theme: { template: Default.Theme, colors: colors, transparency: params.transparency ? params.transparency : Default.Transparency, interactive: false, disableFog: !!params.disableFog }
                         };
                     }
                     Style.create = create;
@@ -67436,7 +67974,8 @@ var LiteMol;
                 var Default;
                 (function (Default) {
                     Default.Params = {
-                        isoSigma: 0,
+                        isoValue: 0,
+                        isoValueType: IsoValueType.Sigma,
                         smoothing: 1,
                         isWireframe: false
                     };
@@ -67458,7 +67997,7 @@ var LiteMol;
                     ];
                     Default.Transparency = { alpha: 1.0, writeDepth: false };
                     Default.Theme = Default.Themes[0];
-                    Default.Style = { type: {}, params: Default.Params, theme: { template: Default.Theme, colors: Default.Theme.colors, transparency: Default.Transparency, interactive: false } };
+                    Default.Style = { type: {}, params: Default.Params, theme: { template: Default.Theme, colors: Default.Theme.colors, transparency: Default.Transparency, interactive: false, disableFog: false } };
                 })(Default = Density.Default || (Density.Default = {}));
             })(Density = Visualization.Density || (Visualization.Density = {}));
         })(Visualization = Bootstrap.Visualization || (Bootstrap.Visualization = {}));
@@ -67669,6 +68208,11 @@ var LiteMol;
                 Data.CifDictionary = Entity.create({ name: 'Cif Dictionary', typeClass: 'Data', shortName: 'CD', description: 'Represents parsed CIF data.' });
                 Data.Json = Entity.create({ name: 'JSON Data', typeClass: 'Data', shortName: 'JS_D', description: 'Represents JSON data.' });
             })(Data = Entity.Data || (Entity.Data = {}));
+            // /* Visual props */
+            var Visual;
+            (function (Visual) {
+                Visual.Surface = Entity.create({ name: 'Surface Visual', typeClass: 'Visual', shortName: 'V_S', description: 'A surface visual.' }, { isFocusable: true });
+            })(Visual = Entity.Visual || (Entity.Visual = {}));
             /* Molecule */
             var Molecule;
             (function (Molecule_1) {
@@ -67727,7 +68271,6 @@ var LiteMol;
                 return Cache;
             }());
             Entity.Cache = Cache;
-            var Cache;
             (function (Cache) {
                 var Keys;
                 (function (Keys) {
@@ -67830,7 +68373,7 @@ var LiteMol;
                             from: [Entity.Root],
                             to: [Entity.Action],
                             defaultParams: function (ctx) { return ({ id: params.defaultId, format: LiteMol.Core.Formats.Molecule.SupportedFormats.mmCIF }); },
-                            validateParams: function (p) { return (!p.id || !p.id.trim().length) ? [("Enter " + (params.isFullUrl ? 'URL' : 'Id'))] : void 0; }
+                            validateParams: function (p) { return (!p.id || !p.id.trim().length) ? ["Enter " + (params.isFullUrl ? 'URL' : 'Id')] : void 0; }
                         }, function (context, a, t) {
                             var format = params.specificFormat ? params.specificFormat : t.params.format;
                             return Bootstrap.Tree.Transform.build()
@@ -67848,7 +68391,7 @@ var LiteMol;
                         to: [Entity.Action],
                         defaultParams: function (ctx) { return ({ format: LiteMol.Core.Formats.Molecule.SupportedFormats.mmCIF }); },
                         validateParams: function (p) { return !p.file ? ['Select a file'] : !LiteMol.Core.Formats.FormatInfo.getFormat(p.file.name, LiteMol.Core.Formats.Molecule.SupportedFormats.All)
-                            ? [("Select a supported file format (" + [].concat(LiteMol.Core.Formats.Molecule.SupportedFormats.All.map(function (f) { return f.extensions; })).join(', ') + ").")]
+                            ? ["Select a supported file format (" + [].concat(LiteMol.Core.Formats.Molecule.SupportedFormats.All.map(function (f) { return f.extensions; })).join(', ') + ")."]
                             : void 0; }
                     }, function (context, a, t) {
                         var format = LiteMol.Core.Formats.FormatInfo.getFormat(t.params.file.name, LiteMol.Core.Formats.Molecule.SupportedFormats.All);
@@ -68048,6 +68591,36 @@ var LiteMol;
                             });
                         });
                     });
+                    Molecule.ModelTransform3D = Bootstrap.Tree.Transformer.create({
+                        id: 'molecule-model-transform3d',
+                        name: 'Transform 3D',
+                        description: 'Transform 3D coordinates of a model using a 4x4 matrix.',
+                        from: [Entity.Molecule.Model],
+                        to: [Entity.Molecule.Model],
+                        validateParams: function (p) { return !p || !p.transform || p.transform.length !== 16 ? ['Specify a 4x4 transform matrix.'] : void 0; },
+                        defaultParams: function (ctx, e) { return ({ transform: LiteMol.Core.Geometry.LinearAlgebra.Matrix4.identity() }); },
+                        isUpdatable: false
+                    }, function (ctx, a, t) {
+                        return Bootstrap.Task.create("Transform 3D (" + a.props.label + ")", 'Normal', function (ctx) {
+                            ctx.update('Transforming...');
+                            ctx.schedule(function () {
+                                var m = a.props.model;
+                                var tCtx = { t: t.params.transform, v: { x: 0, y: 0, z: 0 } };
+                                var transformed = LiteMol.Core.Structure.MoleculeModel.withTransformedXYZ(m, tCtx, function (ctx, x, y, z, out) {
+                                    var v = ctx.v;
+                                    v.x = x;
+                                    v.y = y;
+                                    v.z = z;
+                                    LiteMol.Core.Geometry.LinearAlgebra.Matrix4.transformVector3(out, v, ctx.t);
+                                });
+                                ctx.resolve(Entity.Molecule.Model.create(t, {
+                                    label: a.props.label,
+                                    description: t.params.description ? t.params.description : 'Transformed',
+                                    model: transformed
+                                }));
+                            });
+                        });
+                    });
                     Molecule.CreateVisual = Bootstrap.Tree.Transformer.create({
                         id: 'molecule-create-visual',
                         name: 'Visual',
@@ -68131,17 +68704,33 @@ var LiteMol;
                 var Data;
                 (function (Data) {
                     "use strict";
+                    (function (DownloadCompression) {
+                        DownloadCompression[DownloadCompression["None"] = 0] = "None";
+                        DownloadCompression[DownloadCompression["Gzip"] = 1] = "Gzip";
+                    })(Data.DownloadCompression || (Data.DownloadCompression = {}));
+                    var DownloadCompression = Data.DownloadCompression;
+                    function getDataType(type) {
+                        if (type === void 0 || type === null)
+                            return 'String';
+                        if (type.toLowerCase() === 'binary')
+                            return 'Binary';
+                        return 'String';
+                    }
+                    function hasResponseCompression(responseCompression) {
+                        var c = responseCompression === void 0 ? Bootstrap.Utils.DataCompressionMethod.None : responseCompression;
+                        return c !== Bootstrap.Utils.DataCompressionMethod.None;
+                    }
                     Data.Download = Bootstrap.Tree.Transformer.create({
                         id: 'data-download',
                         name: 'Download Data',
                         description: 'Downloads a string or binary data from the given URL (if the host server supports cross domain requests).',
                         from: [Entity.Root],
                         to: [Entity.Data.String, Entity.Data.Binary],
-                        validateParams: function (p) { return !p.url || !p.url.trim().length ? ['Enter URL'] : !p.type ? ['Specify type'] : void 0; },
-                        defaultParams: function () { return ({ id: '', description: '', type: 'String', url: '' }); }
+                        validateParams: function (p) { return !p.url || !p.url.trim().length ? ['Enter URL'] : !p.type ? ['Specify type'] : (p.type === 'String' && hasResponseCompression(p.responseCompression)) ? ['Decompression is only available for Binary data.'] : void 0; },
+                        defaultParams: function () { return ({ id: '', description: '', type: 'String', url: '', responseCompression: Bootstrap.Utils.DataCompressionMethod.None }); }
                     }, function (ctx, a, t) {
                         var params = t.params;
-                        return Bootstrap.Utils.ajaxGet(params.url, params.type).setReportTime(true)
+                        return Bootstrap.Utils.ajaxGet({ url: params.url, type: getDataType(params.type), compression: params.responseCompression }).setReportTime(true)
                             .map('ToEntity', 'Child', function (data) {
                             if (params.type === 'String')
                                 return Entity.Data.String.create(t, { label: params.id ? params.id : params.url, description: params.description, data: data });
@@ -68159,7 +68748,7 @@ var LiteMol;
                         defaultParams: function () { return ({ type: 'String', file: void 0 }); }
                     }, function (ctx, a, t) {
                         var params = t.params;
-                        return Bootstrap.Utils.readFromFile(params.file, params.type).setReportTime(true)
+                        return Bootstrap.Utils.readFromFile(params.file, getDataType(params.type)).setReportTime(true)
                             .map('ToEntity', 'Child', function (data) {
                             if (params.type === 'String')
                                 return Entity.Data.String.create(t, { label: params.id ? params.id : params.file.name, description: params.description, data: data });
@@ -68222,6 +68811,20 @@ var LiteMol;
                                 ctx.resolve(Entity.Data.Json.create(t, { label: t.params.id ? t.params.id : 'JSON Data', description: t.params.description, data: data }));
                             });
                         }).setReportTime(true);
+                    });
+                    Data.FromData = Bootstrap.Tree.Transformer.create({
+                        id: 'data-from-data',
+                        name: 'From Data',
+                        description: 'Creates a data entity from string or binary data',
+                        from: [Entity.Root],
+                        to: [Entity.Data.String, Entity.Data.Binary],
+                        defaultParams: function () { return ({}); }
+                    }, function (ctx, a, t) {
+                        var data = t.params.data;
+                        var e = data instanceof ArrayBuffer
+                            ? Entity.Data.Binary.create(t, { label: t.params.id ? t.params.id : "Binary Data", description: t.params.description, data: data })
+                            : Entity.Data.String.create(t, { label: t.params.id ? t.params.id : "String Data", description: t.params.description, data: data });
+                        return Bootstrap.Task.resolve("From Data", 'Silent', e);
                     });
                 })(Data = Transformer.Data || (Transformer.Data = {}));
             })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
@@ -68305,7 +68908,6 @@ var LiteMol;
                         var theme = ti.template.provider(parent, Bootstrap.Visualization.Theme.getProps(ti));
                         model.applyTheme(theme);
                         b.props.style.theme = ti;
-                        //Entity.forceUpdate(b);
                         Entity.nodeUpdated(b);
                         return Bootstrap.Task.resolve(t.transformer.info.name, 'Background', Bootstrap.Tree.Node.Null);
                     });
@@ -68316,15 +68918,17 @@ var LiteMol;
                         from: [Entity.Density.Data],
                         to: [Entity.Density.InteractiveSurface],
                         isUpdatable: true,
-                        defaultParams: function (ctx) { return ({ style: Bootstrap.Visualization.Density.Default.Style, radius: ctx.settings.get('density.defaultVisualBehaviourRadius') || 0, isoSigmaMin: -5, isoSigmaMax: 5 }); },
+                        defaultParams: function (ctx) { return ({ style: Bootstrap.Visualization.Density.Default.Style, radius: ctx.settings.get('density.defaultVisualBehaviourRadius') || 0, isoSigmaMin: -5, isoSigmaMax: 5, minRadius: 0, maxRadius: 10, showFull: false }); },
                         customController: function (ctx, t, e) { return new Bootstrap.Components.Transform.DensityVisual(ctx, t, e); },
                     }, function (ctx, a, t) {
                         var params = t.params;
-                        var b = new Bootstrap.Behaviour.Density.ShowElectronDensityAroundSelection(ctx, {
+                        var b = new Bootstrap.Behaviour.Density.ShowDynamicDensity(ctx, {
                             style: params.style,
-                            radius: params.radius
+                            radius: params.radius,
+                            showFull: params.showFull
                         });
-                        return Bootstrap.Task.resolve('Behaviour', 'Background', Entity.Density.InteractiveSurface.create(t, { label: (t.params.id ? t.params.id : 'Interactive') + ", " + Bootstrap.Utils.round(t.params.style.params.isoSigma, 2) + " \u03C3", behaviour: b }));
+                        var isSigma = params.style.params.isoValueType === void 0 || params.style.params.isoValueType === Bootstrap.Visualization.Density.IsoValueType.Sigma;
+                        return Bootstrap.Task.resolve('Behaviour', 'Background', Entity.Density.InteractiveSurface.create(t, { label: (params.id ? t.params.id : 'Interactive') + ", " + Bootstrap.Utils.round(params.style.params.isoValue, 2) + (isSigma ? ' \u03C3' : ''), behaviour: b }));
                     });
                 })(Density = Transformer.Density || (Transformer.Density = {}));
             })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
@@ -68409,6 +69013,200 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
+        var Entity;
+        (function (Entity) {
+            var Transformer;
+            (function (Transformer) {
+                var Visual;
+                (function (Visual) {
+                    "use strict";
+                })(Visual = Transformer.Visual || (Transformer.Visual = {}));
+            })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
+        })(Entity = Bootstrap.Entity || (Bootstrap.Entity = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Utils;
+        (function (Utils) {
+            var Molecule;
+            (function (Molecule) {
+                "use strict";
+                var __model = [Bootstrap.Entity.Molecule.Model];
+                function findModel(entity) {
+                    return Bootstrap.Tree.Node.findClosestNodeOfType(entity, __model);
+                }
+                Molecule.findModel = findModel;
+                var __modelOrSelection = [Bootstrap.Entity.Molecule.Model, Bootstrap.Entity.Molecule.Selection];
+                function findModelOrSelection(entity) {
+                    return Bootstrap.Tree.Node.findClosestNodeOfType(entity, __modelOrSelection);
+                }
+                Molecule.findModelOrSelection = findModelOrSelection;
+                var __molecule = [Bootstrap.Entity.Molecule.Molecule];
+                function findMolecule(entity) {
+                    return Bootstrap.Tree.Node.findClosestNodeOfType(entity, __molecule);
+                }
+                Molecule.findMolecule = findMolecule;
+                function findQueryContext(entity) {
+                    var source = Bootstrap.Tree.Node.findClosestNodeOfType(entity, __modelOrSelection);
+                    if (Bootstrap.Entity.isMoleculeModel(source)) {
+                        return source.props.model.queryContext;
+                    }
+                    else {
+                        var cache = source.tree.context.entityCache;
+                        var ctx = cache.get(source, Bootstrap.Entity.Cache.Keys.QueryContext);
+                        if (ctx)
+                            return ctx;
+                        ctx = LiteMol.Core.Structure.Query.Context.ofAtomIndices(findModel(source).props.model, source.props.indices);
+                        return cache.set(source, Bootstrap.Entity.Cache.Keys.QueryContext, ctx);
+                    }
+                }
+                Molecule.findQueryContext = findQueryContext;
+                function getDistance(mA, startAtomIndexA, endAtomIndexA, mB, startAtomIndexB, endAtomIndexB) {
+                    var _a = mA.atoms, x = _a.x, y = _a.y, z = _a.z;
+                    var bX = mB.atoms.x, bY = mB.atoms.y, bZ = mB.atoms.z;
+                    var d = Number.POSITIVE_INFINITY;
+                    for (var i = startAtomIndexA; i < endAtomIndexA; i++) {
+                        for (var j = startAtomIndexB; j < endAtomIndexB; j++) {
+                            var dx = x[i] - bX[j], dy = y[i] - bY[j], dz = z[i] - bZ[j];
+                            d = Math.min(d, dx * dx + dy * dy + dz * dz);
+                        }
+                    }
+                    return Math.sqrt(d);
+                }
+                Molecule.getDistance = getDistance;
+                function getDistanceSet(mA, setA, mB, setB) {
+                    var _a = mA.atoms, x = _a.x, y = _a.y, z = _a.z;
+                    var bX = mB.atoms.x, bY = mB.atoms.y, bZ = mB.atoms.z;
+                    var d = Number.POSITIVE_INFINITY;
+                    for (var _i = 0, setA_1 = setA; _i < setA_1.length; _i++) {
+                        var i = setA_1[_i];
+                        for (var _c = 0, setB_1 = setB; _c < setB_1.length; _c++) {
+                            var j = setB_1[_c];
+                            var dx = x[i] - bX[j], dy = y[i] - bY[j], dz = z[i] - bZ[j];
+                            d = Math.min(d, dx * dx + dy * dy + dz * dz);
+                        }
+                    }
+                    return Math.sqrt(d);
+                }
+                Molecule.getDistanceSet = getDistanceSet;
+                function getModelAndIndicesFromQuery(m, query) {
+                    var model = findModel(m);
+                    if (!model) {
+                        console.warn('Could not find a model for query selection.');
+                        return void 0;
+                    }
+                    var queryContext = findQueryContext(m);
+                    try {
+                        var q = LiteMol.Core.Structure.Query.Builder.toQuery(query);
+                        return { model: model, indices: q(queryContext).unionAtomIndices(), queryContext: queryContext };
+                    }
+                    catch (e) {
+                        console.error('Query Execution', e);
+                        return void 0;
+                    }
+                }
+                Molecule.getModelAndIndicesFromQuery = getModelAndIndicesFromQuery;
+                function getResidueIndices(m, atom) {
+                    var rI = m.atoms.residueIndex;
+                    var idx = [];
+                    for (var i = m.residues.atomStartIndex[rI[atom]], _b = m.residues.atomEndIndex[rI[atom]]; i < _b; i++) {
+                        idx.push(i);
+                    }
+                    return idx;
+                }
+                Molecule.getResidueIndices = getResidueIndices;
+                function getBox(molecule, atomIndices, delta) {
+                    var atoms = molecule.atoms, atomCount = atoms.count, cCount = 0, x = atoms.x, y = atoms.y, z = atoms.z, min = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE], max = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+                    for (var _i = 0, atomIndices_1 = atomIndices; _i < atomIndices_1.length; _i++) {
+                        var i = atomIndices_1[_i];
+                        min[0] = Math.min(x[i], min[0]);
+                        min[1] = Math.min(y[i], min[1]);
+                        min[2] = Math.min(z[i], min[2]);
+                        max[0] = Math.max(x[i], max[0]);
+                        max[1] = Math.max(y[i], max[1]);
+                        max[2] = Math.max(z[i], max[2]);
+                    }
+                    min[0] = min[0] - delta;
+                    min[1] = min[1] - delta;
+                    min[2] = min[2] - delta;
+                    max[0] = max[0] + delta;
+                    max[1] = max[1] + delta;
+                    max[2] = max[2] + delta;
+                    return {
+                        bottomLeft: min,
+                        topRight: max
+                    };
+                }
+                Molecule.getBox = getBox;
+                var CentroidHelper = (function () {
+                    function CentroidHelper(model) {
+                        this.model = model;
+                        this.center = { x: 0, y: 0, z: 0 };
+                        this.radiusSquared = 0;
+                        this.count = 0;
+                        this.x = model.atoms.x;
+                        this.y = model.atoms.y;
+                        this.z = model.atoms.z;
+                    }
+                    CentroidHelper.prototype.addAtom = function (i) {
+                        this.count++;
+                        this.center.x += this.x[i];
+                        this.center.y += this.y[i];
+                        this.center.z += this.z[i];
+                    };
+                    CentroidHelper.prototype.finishedAdding = function () {
+                        this.center.x /= this.count;
+                        this.center.y /= this.count;
+                        this.center.z /= this.count;
+                    };
+                    CentroidHelper.prototype.radiusVisit = function (i) {
+                        var dx = this.center.x - this.x[i], dy = this.center.y - this.y[i], dz = this.center.z - this.z[i];
+                        this.radiusSquared = Math.max(this.radiusSquared, dx * dx + dy * dy + dz * dz);
+                    };
+                    return CentroidHelper;
+                }());
+                Molecule.CentroidHelper = CentroidHelper;
+                function getCentroidAndRadius(m, indices, into) {
+                    into.x = 0;
+                    into.y = 0;
+                    into.z = 0;
+                    var _a = m.atoms, x = _a.x, y = _a.y, z = _a.z;
+                    for (var _i = 0, indices_1 = indices; _i < indices_1.length; _i++) {
+                        var i = indices_1[_i];
+                        into.x += x[i];
+                        into.y += y[i];
+                        into.z += z[i];
+                    }
+                    var c = indices.length;
+                    into.x /= c;
+                    into.y /= c;
+                    into.z /= c;
+                    var radius = 0;
+                    for (var _c = 0, indices_2 = indices; _c < indices_2.length; _c++) {
+                        var i = indices_2[_c];
+                        var dx = into.x - x[i], dy = into.y - y[i], dz = into.z - z[i];
+                        radius = Math.max(radius, dx * dx + dy * dy + dz * dz);
+                    }
+                    return Math.sqrt(radius);
+                }
+                Molecule.getCentroidAndRadius = getCentroidAndRadius;
+            })(Molecule = Utils.Molecule || (Utils.Molecule = {}));
+        })(Utils = Bootstrap.Utils || (Bootstrap.Utils = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
         var Behaviour;
         (function (Behaviour) {
             "use strict";
@@ -68416,8 +69214,8 @@ var LiteMol;
                 function Streams(context) {
                     this.context = context;
                     this.subjects = {
-                        select: new Bootstrap.Rx.BehaviorSubject({}),
-                        click: new Bootstrap.Rx.BehaviorSubject({}),
+                        select: new Bootstrap.Rx.BehaviorSubject(Bootstrap.Interactivity.Info.empty),
+                        click: new Bootstrap.Rx.BehaviorSubject(Bootstrap.Interactivity.Info.empty),
                         currentEntity: new Bootstrap.Rx.BehaviorSubject(void 0)
                     };
                     this.select = this.subjects.select.distinctUntilChanged(function (i) { return i; }, Bootstrap.Interactivity.interactivityInfoEqual);
@@ -68427,20 +69225,19 @@ var LiteMol;
                 }
                 Streams.prototype.init = function () {
                     var _this = this;
-                    var emptyClick = {};
-                    var latestClick = emptyClick;
+                    var latestClick = Bootstrap.Interactivity.Info.empty;
                     Bootstrap.Event.Tree.NodeRemoved.getStream(this.context).subscribe(function (e) {
-                        if ((latestClick !== emptyClick) && (latestClick.entity === e.data || latestClick.visual === e.data)) {
-                            latestClick = emptyClick;
-                            Bootstrap.Event.Visual.VisualSelectElement.dispatch(_this.context, {});
+                        if (Bootstrap.Interactivity.isSelection(latestClick) && latestClick.source === e.data) {
+                            latestClick = Bootstrap.Interactivity.Info.empty;
+                            Bootstrap.Event.Visual.VisualSelectElement.dispatch(_this.context, latestClick);
                         }
                     });
                     Bootstrap.Event.Visual.VisualSelectElement.getStream(this.context).subscribe(function (e) {
-                        latestClick = e.data.entity ? e.data : emptyClick;
-                        _this.subjects.click.onNext(e.data);
-                        if (e.data.visual && !e.data.visual.props.isSelectable)
+                        latestClick = e.data;
+                        _this.subjects.click.onNext(latestClick);
+                        if (Bootstrap.Interactivity.isSelection(latestClick) && Bootstrap.Entity.isVisual(latestClick.source) && !latestClick.source.props.isSelectable)
                             return;
-                        _this.subjects.select.onNext(e.data);
+                        _this.subjects.select.onNext(latestClick);
                     });
                     Bootstrap.Event.Entity.CurrentChanged.getStream(this.context).subscribe(function (e) { return _this.subjects.currentEntity.onNext(e.data); });
                 };
@@ -68508,22 +69305,24 @@ var LiteMol;
                         latestModel = void 0;
                         latestIndices = void 0;
                     }
-                    if (!info.entity || !info.visual)
+                    if (Bootstrap.Interactivity.isEmpty(info) || !Bootstrap.Entity.isVisual(info.source))
                         return;
-                    latestModel = info.visual.props.model;
+                    latestModel = info.source.props.model;
                     latestIndices = info.elements;
                     latestModel.applySelection(latestIndices, 1 /* Select */);
                 });
             }
             Behaviour.ApplyInteractivitySelection = ApplyInteractivitySelection;
             function UnselectElementOnRepeatedClick(context) {
-                var latest = null;
+                var latest = Bootstrap.Interactivity.Info.empty;
                 Bootstrap.Event.Visual.VisualSelectElement.getStream(context).subscribe(function (e) {
-                    if (e.data.visual && !e.data.visual.props.isSelectable)
+                    if (Bootstrap.Interactivity.isEmpty(e.data) || Bootstrap.Interactivity.isEmpty(latest)) {
+                        latest = e.data;
                         return;
-                    if (latest && latest.entity && Bootstrap.Interactivity.interactivityInfoEqual(e.data, latest)) {
-                        latest = null;
-                        Bootstrap.Event.Visual.VisualSelectElement.dispatch(context, {});
+                    }
+                    if ((Bootstrap.Tree.Node.hasAncestor(latest.source, e.data.source) || Bootstrap.Tree.Node.hasAncestor(e.data.source, latest.source)) && Bootstrap.Interactivity.interactivitySelectionElementsEqual(e.data, latest)) {
+                        latest = Bootstrap.Interactivity.Info.empty;
+                        setTimeout(function () { return Bootstrap.Event.Visual.VisualSelectElement.dispatch(context, Bootstrap.Interactivity.Info.empty); }, 0);
                     }
                     else {
                         latest = e.data;
@@ -68532,10 +69331,8 @@ var LiteMol;
             }
             Behaviour.UnselectElementOnRepeatedClick = UnselectElementOnRepeatedClick;
             var center = { x: 0, y: 0, z: 0 };
-            function update(context, info) {
-                if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)))
-                    return;
-                var model = Bootstrap.Tree.Node.findClosestNodeOfType(info.entity, [Bootstrap.Entity.Molecule.Model]).props.model;
+            function updateCameraModel(context, info) {
+                var model = Bootstrap.Utils.Molecule.findModel(info.source).props.model;
                 if (!model)
                     return;
                 var elems = info.elements;
@@ -68551,8 +69348,28 @@ var LiteMol;
                 }
                 context.scene.camera.focusOnPoint(center, Math.max(radius, 7));
             }
+            function updateCameraVisual(context, info) {
+                if (Bootstrap.Interactivity.isEmpty(info) || info.source.type.info.typeClass !== 'Visual')
+                    return;
+                var v = info.source;
+                var m = v.props.model;
+                if (!m)
+                    return;
+                var bs = m.getBoundingSphereOfSelection(info.elements);
+                if (bs) {
+                    context.scene.camera.focusOnPoint(bs.center, Math.max(bs.radius, 7));
+                }
+                else {
+                    context.scene.camera.focusOnModel(m);
+                }
+            }
             function FocusCameraOnSelect(context) {
-                context.behaviours.click.subscribe(function (e) { return update(context, e); });
+                context.behaviours.click.subscribe(function (e) {
+                    if (Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(e))
+                        updateCameraModel(context, e);
+                    else
+                        updateCameraVisual(context, e);
+                });
             }
             Behaviour.FocusCameraOnSelect = FocusCameraOnSelect;
         })(Behaviour = Bootstrap.Behaviour || (Bootstrap.Behaviour = {}));
@@ -68575,6 +69392,7 @@ var LiteMol;
                 function ShowInteractionOnSelect(radius) {
                     return function (context) {
                         var lastRef = void 0;
+                        var ambRef = void 0;
                         var ligandStyle = {
                             type: 'BallsAndSticks',
                             computeOnBackground: true,
@@ -68589,20 +69407,40 @@ var LiteMol;
                             theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate.colors.set('Uniform', { r: 0.4, g: 0.4, b: 0.4 }), transparency: { alpha: 0.75 } },
                             isNotSelectable: true
                         };
-                        context.behaviours.select.subscribe(function (info) {
+                        function clean() {
                             if (lastRef) {
                                 Bootstrap.Command.Tree.RemoveNode.dispatch(context, lastRef);
                                 lastRef = void 0;
+                                ambRef = void 0;
                             }
-                            if (!info.entity || !info.visual)
+                        }
+                        context.behaviours.click.subscribe(function (info) {
+                            if (Bootstrap.Interactivity.isEmpty(info)) {
+                                clean();
+                                return;
+                            }
+                            if (info.source.ref === ambRef) {
+                                var model = Bootstrap.Utils.Molecule.findModel(info.source);
+                                if (!model)
+                                    return;
+                                var query = Query.atomsFromIndices(info.elements);
+                                setTimeout(Bootstrap.Command.Molecule.CreateSelectInteraction.dispatch(context, { entity: model, query: query }), 0);
+                                return;
+                            }
+                            var isSelectable = Bootstrap.Entity.isVisual(info.source) ? info.source.props.isSelectable : true;
+                            if (!isSelectable)
+                                return;
+                            clean();
+                            if (Bootstrap.Interactivity.isEmpty(info) || !Bootstrap.Utils.Molecule.findModelOrSelection(info.source))
                                 return;
                             var ligandQ = Query.atomsFromIndices(info.elements).wholeResidues();
                             var ambQ = Query.atomsFromIndices(info.elements).wholeResidues().ambientResidues(radius);
                             var ref = Bootstrap.Utils.generateUUID();
-                            var action = Bootstrap.Tree.Transform.build().add(info.visual, Transforms.Basic.CreateGroup, { label: 'Interaction' }, { ref: ref, isHidden: true });
+                            var action = Bootstrap.Tree.Transform.build().add(info.source, Transforms.Basic.CreateGroup, { label: 'Interaction' }, { ref: ref, isHidden: true });
                             lastRef = ref;
+                            ambRef = Bootstrap.Utils.generateUUID();
                             action.then(Transforms.Molecule.CreateSelectionFromQuery, { query: ambQ, name: 'Ambience', silent: true, inFullContext: true }, { isBinding: true })
-                                .then(Transforms.Molecule.CreateVisual, { style: ambStyle });
+                                .then(Transforms.Molecule.CreateVisual, { style: ambStyle }, { ref: ambRef });
                             action.then(Transforms.Molecule.CreateSelectionFromQuery, { query: ligandQ, name: 'Ligand', silent: true, inFullContext: true }, { isBinding: true })
                                 .then(Transforms.Molecule.CreateVisual, { style: ligandStyle });
                             Bootstrap.Tree.Transform.apply(context, action).run(context);
@@ -68612,30 +69450,30 @@ var LiteMol;
                 Molecule.ShowInteractionOnSelect = ShowInteractionOnSelect;
                 function HighlightElementInfo(context) {
                     context.highlight.addProvider(function (info) {
-                        if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)))
-                            return undefined;
+                        if (!Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info))
+                            return void 0;
                         var data = Bootstrap.Interactivity.Molecule.transformInteraction(info);
                         return Bootstrap.Interactivity.Molecule.formatInfo(data);
                     });
                 }
                 Molecule.HighlightElementInfo = HighlightElementInfo;
                 function DistanceToLastClickedElement(context) {
-                    var lastInfo = void 0;
+                    var lastInfo = Bootstrap.Interactivity.Info.empty;
                     var lastSel = void 0;
                     var lastModel = void 0;
                     context.behaviours.click.subscribe(function (info) {
-                        if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)) || !info.elements || !info.elements.length) {
-                            lastInfo = undefined;
-                            lastModel = undefined;
-                            lastSel = undefined;
+                        if (!Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info)) {
+                            lastInfo = Bootstrap.Interactivity.Info.empty;
+                            lastModel = void 0;
+                            lastSel = void 0;
                         }
                         else {
                             lastInfo = info;
-                            var m = Bootstrap.Utils.Molecule.findModel(info.entity);
+                            var m = Bootstrap.Utils.Molecule.findModel(info.source);
                             if (!m) {
-                                lastInfo = undefined;
-                                lastModel = undefined;
-                                lastSel = undefined;
+                                lastInfo = Bootstrap.Interactivity.Info.empty;
+                                lastModel = void 0;
+                                lastSel = void 0;
                             }
                             else {
                                 lastModel = m.props.model;
@@ -68644,16 +69482,16 @@ var LiteMol;
                         }
                     });
                     context.highlight.addProvider(function (info) {
-                        if (!info.entity || !(Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Model) || Bootstrap.Tree.Node.is(info.entity, Bootstrap.Entity.Molecule.Selection)) || !info.elements || !info.elements.length)
-                            return undefined;
-                        if (!lastInfo)
-                            return undefined;
-                        var m = Bootstrap.Utils.Molecule.findModel(info.entity);
+                        if (!Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info))
+                            return void 0;
+                        if (Bootstrap.Interactivity.isEmpty(lastInfo))
+                            return void 0;
+                        var m = Bootstrap.Utils.Molecule.findModel(info.source);
                         if (!m)
-                            return undefined;
+                            return void 0;
                         var dist = Bootstrap.Utils.Molecule.getDistanceSet(lastModel, lastInfo.elements, m.props.model, info.elements);
                         if (dist < 0.0001)
-                            return undefined;
+                            return void 0;
                         return "<span><b>" + Bootstrap.Utils.round(dist, 2) + " \u212B</b> from <b>" + lastSel + "</b></span>";
                     });
                 }
@@ -68674,41 +69512,50 @@ var LiteMol;
             var Density;
             (function (Density) {
                 "use strict";
-                var ShowElectronDensityAroundSelection = (function () {
-                    function ShowElectronDensityAroundSelection(context, params) {
+                var ToastKey = '__ShowDynamicDensity-toast';
+                var ShowDynamicDensity = (function () {
+                    function ShowDynamicDensity(context, params) {
                         this.context = context;
                         this.params = params;
                         this.obs = [];
                         this.ref = Bootstrap.Utils.generateUUID();
                         this.isBusy = false;
                     }
-                    ShowElectronDensityAroundSelection.prototype.remove = function () {
+                    ShowDynamicDensity.prototype.remove = function () {
                         var v = this.getVisual();
                         if (v) {
                             Bootstrap.Tree.remove(v);
                         }
                     };
-                    ShowElectronDensityAroundSelection.prototype.getVisual = function () {
+                    ShowDynamicDensity.prototype.getVisual = function () {
                         return this.context.select(this.ref)[0];
                     };
-                    ShowElectronDensityAroundSelection.prototype.update = function (info) {
-                        if (!Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info)) {
+                    ShowDynamicDensity.prototype.update = function (info) {
+                        if (!this.params.showFull && !Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info)) {
                             this.remove();
                             return;
                         }
-                        var model = Bootstrap.Utils.Molecule.findModel(info.entity);
-                        var center = { x: 0, y: 0, z: 0 };
-                        var elems = info.elements;
-                        var m = model.props.model;
-                        if (info.elements.length === 1) {
-                            elems = Bootstrap.Utils.Molecule.getResidueIndices(m, info.elements[0]);
-                        }
-                        var box = Bootstrap.Utils.Molecule.getBox(m, elems, this.params.radius);
+                        Bootstrap.Command.Toast.Hide.dispatch(this.context, { key: ToastKey });
                         var style = Bootstrap.Utils.shallowClone(this.params.style);
                         style.params = Bootstrap.Utils.shallowClone(style.params);
-                        style.params.bottomLeft = box.bottomLeft;
-                        style.params.topRight = box.topRight;
-                        style.computeOnBackground = true;
+                        if (this.params.showFull) {
+                            style.params.bottomLeft = void 0;
+                            style.params.topRight = void 0;
+                            style.computeOnBackground = false;
+                        }
+                        else {
+                            var i = info;
+                            var model = Bootstrap.Utils.Molecule.findModel(i.source);
+                            var elems = i.elements;
+                            var m = model.props.model;
+                            if (i.elements.length === 1) {
+                                elems = Bootstrap.Utils.Molecule.getResidueIndices(m, i.elements[0]);
+                            }
+                            var box = Bootstrap.Utils.Molecule.getBox(m, elems, this.params.radius);
+                            style.params.bottomLeft = box.bottomLeft;
+                            style.params.topRight = box.topRight;
+                            style.computeOnBackground = true;
+                        }
                         var task;
                         var visual = this.getVisual();
                         if (!visual) {
@@ -68721,24 +69568,28 @@ var LiteMol;
                         //this.isBusy = true;
                         task.run(this.context);
                     };
-                    ShowElectronDensityAroundSelection.prototype.dispose = function () {
+                    ShowDynamicDensity.prototype.dispose = function () {
                         this.remove();
+                        Bootstrap.Command.Toast.Hide.dispatch(this.context, { key: ToastKey });
                         for (var _i = 0, _a = this.obs; _i < _a.length; _i++) {
                             var o = _a[_i];
                             o.dispose();
                         }
                         this.obs = [];
                     };
-                    ShowElectronDensityAroundSelection.prototype.register = function (behaviour) {
+                    ShowDynamicDensity.prototype.register = function (behaviour) {
                         var _this = this;
                         this.behaviour = behaviour;
+                        if (!this.params.showFull) {
+                            Bootstrap.Command.Toast.Show.dispatch(this.context, { key: ToastKey, title: 'Density', message: 'Click on a residue or an atom to view the data.', timeoutMs: 30 * 1000 });
+                        }
                         this.obs.push(this.context.behaviours.select.subscribe(function (e) {
                             _this.update(e);
                         }));
                     };
-                    return ShowElectronDensityAroundSelection;
+                    return ShowDynamicDensity;
                 }());
-                Density.ShowElectronDensityAroundSelection = ShowElectronDensityAroundSelection;
+                Density.ShowDynamicDensity = ShowDynamicDensity;
             })(Density = Behaviour.Density || (Behaviour.Density = {}));
         })(Behaviour = Bootstrap.Behaviour || (Bootstrap.Behaviour = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
@@ -68786,14 +69637,8 @@ var LiteMol;
                     };
                     CoordinateStreaming.prototype.isApplicable = function (info) {
                         if (!Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(info))
-                            return;
-                        var e = info.entity;
-                        while (e.parent !== e) {
-                            if (e === this.target)
-                                return true;
-                            e = e.parent;
-                        }
-                        return false;
+                            return false;
+                        return Bootstrap.Tree.Node.hasAncestor(info.source, this.target);
                     };
                     CoordinateStreaming.prototype.update = function (info) {
                         var _this = this;
@@ -68801,7 +69646,7 @@ var LiteMol;
                         if (!this.isApplicable(info)) {
                             return;
                         }
-                        var model = Bootstrap.Utils.Molecule.findModel(info.entity).props.model;
+                        var model = Bootstrap.Utils.Molecule.findModel(info.source).props.model;
                         var i = model.atoms.residueIndex[info.elements[0]];
                         var rs = model.residues;
                         var authAsymId = rs.authAsymId[i];
@@ -68813,7 +69658,7 @@ var LiteMol;
                             authAsymId = p.chains.authAsymId[chain];
                             transform = model.operators[model.chains.operatorIndex[cI]].matrix;
                         }
-                        var url = (this.server + "/")
+                        var url = this.server + "/"
                             + (model.id.toLocaleLowerCase() + "/ambientResidues?")
                             + ("modelId=" + encodeURIComponent(model.modelId) + "&")
                             + ("entityId=" + encodeURIComponent(rs.entityId[i]) + "&")
@@ -68861,7 +69706,6 @@ var LiteMol;
                     return CoordinateStreaming;
                 }());
                 Molecule.CoordinateStreaming = CoordinateStreaming;
-                var CoordinateStreaming;
                 (function (CoordinateStreaming) {
                     function normalizeServerName(s) {
                         if (s[s.length - 1] !== '/')
@@ -69092,6 +69936,12 @@ var LiteMol;
                 LayoutRegion[LayoutRegion["Root"] = 5] = "Root";
             })(Components.LayoutRegion || (Components.LayoutRegion = {}));
             var LayoutRegion = Components.LayoutRegion;
+            (function (CollapsedControlsLayout) {
+                CollapsedControlsLayout[CollapsedControlsLayout["Outside"] = 0] = "Outside";
+                CollapsedControlsLayout[CollapsedControlsLayout["Landscape"] = 1] = "Landscape";
+                CollapsedControlsLayout[CollapsedControlsLayout["Portrait"] = 2] = "Portrait";
+            })(Components.CollapsedControlsLayout || (Components.CollapsedControlsLayout = {}));
+            var CollapsedControlsLayout = Components.CollapsedControlsLayout;
             var LayoutTarget = (function () {
                 function LayoutTarget(cssClass) {
                     this.cssClass = cssClass;
@@ -69111,19 +69961,21 @@ var LiteMol;
             var Layout = (function (_super) {
                 __extends(Layout, _super);
                 function Layout(context, targets, root) {
-                    var _this = this;
-                    _super.call(this, context, {
+                    var _this = _super.call(this, context, {
                         isExpanded: false,
+                        collapsedControlsLayout: CollapsedControlsLayout.Outside,
+                        hiddenRegions: [],
                         hiddenComponentKeys: Bootstrap.Immutable.Set()
-                    });
-                    this.targets = targets;
-                    this.root = root;
-                    this.rootState = void 0;
-                    Bootstrap.Command.Layout.SetState.getStream(this.context).subscribe(function (e) { return _this.update(e.data); });
+                    }) || this;
+                    _this.targets = targets;
+                    _this.root = root;
+                    _this.rootState = void 0;
+                    Bootstrap.Command.Layout.SetState.getStream(_this.context).subscribe(function (e) { return _this.update(e.data); });
                     // <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-                    this.expandedViewport = document.createElement('meta');
-                    this.expandedViewport.name = 'viewport';
-                    this.expandedViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0';
+                    _this.expandedViewport = document.createElement('meta');
+                    _this.expandedViewport.name = 'viewport';
+                    _this.expandedViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0';
+                    return _this;
                 }
                 Layout.prototype.update = function (state) {
                     var _this = this;
@@ -69255,16 +70107,16 @@ var LiteMol;
                 var Controller = (function (_super) {
                     __extends(Controller, _super);
                     function Controller(context, transformer, entity) {
-                        var _this = this;
-                        _super.call(this, context, { params: transformer.info.defaultParams(context, entity), isDirty: false, isExpanded: true });
-                        this.transformer = transformer;
-                        this.entity = entity;
-                        this.updateTimeout = new Bootstrap.Rx.Subject();
-                        this.timeout = Bootstrap.Rx.Observable.timer(50);
-                        this.never = Bootstrap.Rx.Observable.never();
-                        this.anchorParams = this.latestState.params;
-                        this.updateParams(this.anchorParams);
-                        this.updateTimeout.flatMapLatest(function (t) { return t; }).forEach(function () { return _this.apply(); });
+                        var _this = _super.call(this, context, { params: transformer.info.defaultParams(context, entity), isDirty: false }) || this;
+                        _this.transformer = transformer;
+                        _this.entity = entity;
+                        _this.updateTimeout = new Bootstrap.Rx.Subject();
+                        _this.timeout = Bootstrap.Rx.Observable.timer(50);
+                        _this.never = Bootstrap.Rx.Observable.never();
+                        _this.anchorParams = _this.latestState.params;
+                        _this.updateParams(_this.anchorParams);
+                        _this.updateTimeout.flatMapLatest(function (t) { return t; }).forEach(function () { return _this.apply(); });
+                        return _this;
                     }
                     Controller.prototype._update = function () {
                         if (this.isUpdate && !this.latestState.isBusy) {
@@ -69327,9 +70179,6 @@ var LiteMol;
                         this.anchorParams = params;
                         this.updateParams(params);
                     };
-                    Controller.prototype.setExpanded = function (isExpanded) {
-                        this.setState({ isExpanded: isExpanded });
-                    };
                     return Controller;
                 }(Components.Component));
                 Transform.Controller = Controller;
@@ -69352,10 +70201,10 @@ var LiteMol;
                 var View = (function (_super) {
                     __extends(View, _super);
                     function View(context) {
-                        var _this = this;
-                        _super.call(this, context, { update: void 0, transforms: [] });
-                        this.update();
+                        var _this = _super.call(this, context, { update: void 0, transforms: [] }) || this;
+                        _this.update();
                         Bootstrap.Event.Entity.CurrentChanged.getStream(context).subscribe(function () { return _this.update(); });
+                        return _this;
                     }
                     // private setParams(c: Controller<any>) {
                     //     let prms = c.transformer.info.defaultParams(this.context, this.context.currentEntity);
@@ -69417,7 +70266,7 @@ var LiteMol;
                 var MoleculeVisual = (function (_super) {
                     __extends(MoleculeVisual, _super);
                     function MoleculeVisual() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     MoleculeVisual.prototype.updateTemplate = function (key, all) {
                         var s = all.get(key);
@@ -69479,7 +70328,7 @@ var LiteMol;
                 var DensityVisual = (function (_super) {
                     __extends(DensityVisual, _super);
                     function DensityVisual() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     DensityVisual.prototype.updateStyleParams = function (params) {
                         var s = Bootstrap.Utils.shallowClone(this.latestState.params.style);
@@ -69552,12 +70401,12 @@ var LiteMol;
                 var Updater = (function (_super) {
                     __extends(Updater, _super);
                     function Updater(ctx, selector, header) {
-                        var _this = this;
-                        _super.call(this, ctx, {});
-                        this.selector = selector;
-                        this.header = header;
+                        var _this = _super.call(this, ctx, {}) || this;
+                        _this.selector = selector;
+                        _this.header = header;
                         Bootstrap.Event.Tree.NodeAdded.getStream(ctx).subscribe(function () { return _this.added(); });
                         Bootstrap.Event.Tree.NodeRemoved.getStream(ctx).subscribe(function (e) { return _this.removed(e.data); });
+                        return _this;
                     }
                     Updater.prototype.removed = function (e) {
                         if (!this.latestState.controller)
@@ -69599,13 +70448,13 @@ var LiteMol;
                 var Action = (function (_super) {
                     __extends(Action, _super);
                     function Action(ctx, selector, transformer, header) {
-                        var _this = this;
-                        _super.call(this, ctx, {});
-                        this.selector = selector;
-                        this.transformer = transformer;
-                        this.header = header;
+                        var _this = _super.call(this, ctx, {}) || this;
+                        _this.selector = selector;
+                        _this.transformer = transformer;
+                        _this.header = header;
                         Bootstrap.Event.Tree.NodeAdded.getStream(ctx).subscribe(function () { return _this.added(); });
                         Bootstrap.Event.Tree.NodeRemoved.getStream(ctx).subscribe(function (e) { return _this.removed(e.data); });
+                        return _this;
                     }
                     Action.prototype.removed = function (e) {
                         if (!this.latestState.controller)
@@ -69647,10 +70496,10 @@ var LiteMol;
                 var Log = (function (_super) {
                     __extends(Log, _super);
                     function Log(context) {
-                        var _this = this;
-                        _super.call(this, context, { entries: Bootstrap.Immutable.List() });
-                        Bootstrap.Event.Log.getStream(this.context)
+                        var _this = _super.call(this, context, { entries: Bootstrap.Immutable.List() }) || this;
+                        Bootstrap.Event.Log.getStream(_this.context)
                             .subscribe(function (e) { return _this.setState({ entries: _this.latestState.entries.push(e.data) }); });
+                        return _this;
                     }
                     return Log;
                 }(Components.Component));
@@ -69671,21 +70520,105 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
+                var Toast = (function (_super) {
+                    __extends(Toast, _super);
+                    function Toast(context) {
+                        var _this = _super.call(this, context, { entries: Bootstrap.Immutable.Map() }) || this;
+                        _this.serialNumber = 0;
+                        _this.serialId = 0;
+                        Bootstrap.Command.Toast.Show.getStream(_this.context).subscribe(function (e) { return _this.show(e.data); });
+                        Bootstrap.Command.Toast.Hide.getStream(_this.context).subscribe(function (e) { return _this.hide(_this.findByKey(e.data.key)); });
+                        return _this;
+                    }
+                    Toast.prototype.findByKey = function (key) {
+                        return this.latestState.entries.find(function (e) { return !!e && e.key === key; });
+                    };
+                    Toast.prototype.show = function (toast) {
+                        var _this = this;
+                        var entries = this.latestState.entries;
+                        var e = void 0;
+                        var id = ++this.serialId;
+                        var serialNumber;
+                        if (toast.key && (e = this.findByKey(toast.key))) {
+                            if (e.timeout !== void 0)
+                                clearTimeout(e.timeout);
+                            serialNumber = e.serialNumber;
+                            entries = entries.remove(e.id);
+                        }
+                        else {
+                            serialNumber = ++this.serialNumber;
+                        }
+                        e = {
+                            id: id,
+                            serialNumber: serialNumber,
+                            key: toast.key,
+                            title: toast.title,
+                            message: toast.message,
+                            timeout: this.timeout(id, toast.timeoutMs),
+                            hide: function () { return _this.hideId(id); }
+                        };
+                        entries = entries.set(id, e);
+                        this.setState({ entries: entries });
+                    };
+                    Toast.prototype.timeout = function (id, delay) {
+                        var _this = this;
+                        if (delay === void 0)
+                            return void 0;
+                        if (delay < 0)
+                            delay = 500;
+                        return setTimeout(function () {
+                            var e = _this.latestState.entries.get(id);
+                            e.timeout = void 0;
+                            _this.hide(e);
+                        }, delay);
+                    };
+                    Toast.prototype.hideId = function (id) {
+                        this.hide(this.latestState.entries.get(id));
+                    };
+                    Toast.prototype.hide = function (e) {
+                        if (!e)
+                            return;
+                        if (e.timeout !== void 0)
+                            clearTimeout(e.timeout);
+                        e.hide = void 0;
+                        var entries = this.latestState.entries;
+                        entries = entries.delete(e.id);
+                        this.setState({ entries: entries });
+                    };
+                    return Toast;
+                }(Components.Component));
+                Context.Toast = Toast;
+            })(Context = Components.Context || (Components.Context = {}));
+        })(Components = Bootstrap.Components || (Bootstrap.Components = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Components;
+        (function (Components) {
+            var Context;
+            (function (Context) {
+                "use strict";
                 var TaskWatcher = (function (_super) {
                     __extends(TaskWatcher, _super);
                     function TaskWatcher(context, type) {
-                        var _this = this;
-                        _super.call(this, context, {
+                        var _this = _super.call(this, context, {
                             tasks: Bootstrap.Immutable.Map()
-                        });
-                        this.type = type;
-                        Bootstrap.Event.Task.StateUpdated.getStream(this.context)
+                        }) || this;
+                        _this.type = type;
+                        Bootstrap.Event.Task.StateUpdated.getStream(_this.context)
                             .subscribe(function (e) { return _this.updated(e.data); });
-                        Bootstrap.Event.Task.Started.getStream(this.context)
+                        Bootstrap.Event.Task.Started.getStream(_this.context)
                             .filter(function (e) { return e.data.type === type; })
                             .subscribe(function (e) { return _this.started(e.data); });
-                        Bootstrap.Event.Task.Completed.getStream(this.context)
+                        Bootstrap.Event.Task.Completed.getStream(_this.context)
                             .subscribe(function (e) { return _this.completed(e.data); });
+                        return _this;
                     }
                     TaskWatcher.prototype.updated = function (state) {
                         var isWatched = state.type === this.type;
@@ -69738,9 +70671,9 @@ var LiteMol;
                 var HighlightInfo = (function (_super) {
                     __extends(HighlightInfo, _super);
                     function HighlightInfo(context) {
-                        var _this = this;
-                        _super.call(this, context, { info: [] });
-                        Bootstrap.Event.Interactivity.Highlight.getStream(this.context).subscribe(function (e) { return _this.setState({ info: e.data }); });
+                        var _this = _super.call(this, context, { info: [] }) || this;
+                        Bootstrap.Event.Interactivity.Highlight.getStream(_this.context).subscribe(function (e) { return _this.setState({ info: e.data }); });
+                        return _this;
                     }
                     return HighlightInfo;
                 }(Components.Component));
@@ -69765,16 +70698,16 @@ var LiteMol;
                 var Viewport = (function (_super) {
                     __extends(Viewport, _super);
                     function Viewport(context) {
-                        var _this = this;
-                        _super.call(this, context, Bootstrap.Utils.shallowClone(Vis.DefaultSceneOptions));
-                        Bootstrap.Event.Common.LayoutChanged.getStream(this.context).subscribe(function (e) {
+                        var _this = _super.call(this, context, Bootstrap.Utils.shallowClone(Vis.DefaultSceneOptions)) || this;
+                        Bootstrap.Event.Common.LayoutChanged.getStream(_this.context).subscribe(function (e) {
                             if (_this._scene)
                                 _this._scene.scene.resized();
                         });
-                        Bootstrap.Command.Layout.SetViewportOptions.getStream(this.context).subscribe(function (e) { return _this.setState(e.data); });
-                        this.state.throttle(1000 / 30).subscribe(function (s) {
+                        Bootstrap.Command.Layout.SetViewportOptions.getStream(_this.context).subscribe(function (e) { return _this.setState(e.data); });
+                        _this.state.throttle(1000 / 30).subscribe(function (s) {
                             _this.scene.scene.updateOptions(s);
                         });
+                        return _this;
                     }
                     Object.defineProperty(Viewport.prototype, "scene", {
                         get: function () {
@@ -69836,7 +70769,7 @@ var LiteMol;
                 this.dispatcher = new Bootstrap.Service.Dispatcher();
                 this.logger = new Bootstrap.Service.Logger(this);
                 this.performance = new LiteMol.Core.Utils.PerformanceMonitor();
-                this.scene = void 0; // injected by the Viewpoer component.        
+                this.scene = void 0; // injected by the Viewport component.        
                 this.tree = Bootstrap.Tree.create(this, Bootstrap.Entity.Root.create(Bootstrap.Entity.RootTransform, { label: 'Root Entity' }));
                 this.currentEntity = void 0;
                 this.transforms = new Bootstrap.TransformManager(this);
@@ -69880,15 +70813,14 @@ var LiteMol;
     (function (Bootstrap) {
         "use strict";
         function createMoleculeModelSelectInteraction(context, what) {
-            if (!Bootstrap.Entity.isVisual(what.visual)) {
-                console.warn('Select: Trying to create a selection event on a non-molecule model visual entity, ignoring...');
+            if (!Bootstrap.Utils.Molecule.findModelOrSelection(what.entity)) {
+                console.warn('Select: Trying to create a selection event on a non-molecule related entity, ignoring...');
                 return;
             }
-            var q = Bootstrap.Utils.Molecule.getModelAndIndicesFromQuery(what.visual, what.query);
+            var q = Bootstrap.Utils.Molecule.getModelAndIndicesFromQuery(what.entity, what.query);
             if (!q || !q.indices.length)
                 return;
-            var entity = Bootstrap.Tree.Node.findClosestNodeOfType(what.visual, [Bootstrap.Entity.Molecule.Model, Bootstrap.Entity.Molecule.Selection]);
-            Bootstrap.Event.Visual.VisualSelectElement.dispatch(context, { entity: entity, visual: what.visual, elements: q.indices });
+            Bootstrap.Event.Visual.VisualSelectElement.dispatch(context, Bootstrap.Interactivity.Info.selection(what.entity, q.indices));
         }
         function initEventsAndCommands(context) {
             Bootstrap.Command.Entity.SetCurrent.getStream(context).subscribe(function (e) { return Bootstrap.Entity.setCurrent(e.data); });
@@ -69943,6 +70875,7 @@ var LiteMol;
                 this.byId = new Map();
                 this.bySourceType = new Map();
                 this.byTargetType = new Map();
+                this.persistentState = new Map();
                 Bootstrap.Event.Tree.NodeRemoved.getStream(context).subscribe(function (e) {
                     _this.controllerCache.delete(e.data.id);
                 });
@@ -69974,7 +70907,12 @@ var LiteMol;
                     c = new Bootstrap.Components.Transform.Controller(this.context, t, e);
                 var info = this.context.plugin && this.context.plugin.getTransformerInfo(t);
                 if (info && info.initiallyCollapsed) {
-                    c.setExpanded(false);
+                    if (!this.hasPersistentState(t, 'isExpanded'))
+                        this.setPersistentState(t, 'isExpanded', false);
+                }
+                else {
+                    if (!this.hasPersistentState(t, 'isExpanded'))
+                        this.setPersistentState(t, 'isExpanded', true);
                 }
                 if (e.transform.transformer === t) {
                     c.setParams(e.transform.params);
@@ -70001,6 +70939,31 @@ var LiteMol;
                     var x = _c[_b];
                     this.addType(x, t, this.byTargetType);
                 }
+            };
+            TransformManager.prototype.hasPersistentState = function (t, prop) {
+                var ps = this.persistentState.get(t.info.id);
+                if (!ps || !ps.has(prop))
+                    return false;
+                return true;
+            };
+            TransformManager.prototype.getPersistentState = function (t, prop, defaultValue) {
+                var ps = this.persistentState.get(t.info.id);
+                if (!ps || !ps.has(prop))
+                    return defaultValue;
+                return ps.get(prop);
+            };
+            /**
+             * returns whether the value changed or not
+             */
+            TransformManager.prototype.setPersistentState = function (t, prop, value) {
+                var ps = this.persistentState.get(t.info.id);
+                if (!ps) {
+                    ps = new Map();
+                    this.persistentState.set(t.info.id, ps);
+                }
+                var old = ps.get(prop);
+                ps.set(prop, value);
+                return old !== value;
             };
             return TransformManager;
         }());
@@ -74605,7 +75568,7 @@ var LiteMol;
 (function (LiteMol) {
     var Plugin;
     (function (Plugin) {
-        Plugin.VERSION = { number: "1.1.4", date: "Oct 2 2016" };
+        Plugin.VERSION = { number: "1.2.8", date: "Nov 30 2016" };
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -74620,6 +75583,8 @@ var LiteMol;
         Plugin.ReactDOM = __LiteMolReactDOM;
         var Controls;
         (function (Controls) {
+            //export const ColorPickerHelper: __LiteMolColorPicker.ColorPicker = <any>__LiteMolColorPicker.ColorPicker;
+            //export const AlphaPickerHelper: __LiteMolColorPicker.AlphaPicker = <any>(__LiteMolColorPicker as any).AlphaPicker;
         })(Controls = Plugin.Controls || (Plugin.Controls = {}));
         Controls.ChromePickerHelper = __LiteMolColorPicker.ChromePicker;
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
@@ -74638,7 +75603,7 @@ var LiteMol;
             var Pure = (function (_super) {
                 __extends(Pure, _super);
                 function Pure() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Pure.prototype.shouldComponentUpdate = function (nextProps, nextState) {
                     return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
@@ -74649,42 +75614,40 @@ var LiteMol;
             var Button = (function (_super) {
                 __extends(Button, _super);
                 function Button() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Button.prototype.render = function () {
                     var props = this.props;
-                    var className = 'btn';
+                    var className = 'lm-btn';
                     if (props.size && props.size !== 'normal')
-                        className += ' btn-' + props.size;
+                        className += ' lm-btn-' + props.size;
                     if (props.asBlock)
-                        className += ' btn-block';
+                        className += ' lm-btn-block';
                     if (props.disabled)
-                        className += ' btn-' + (props.disabledStyle || props.style || 'default');
+                        className += ' lm-btn-' + (props.disabledStyle || props.style || 'default');
                     else if (props.active)
-                        className += ' btn-' + (props.activeStyle || props.style || 'default');
+                        className += ' lm-btn-' + (props.activeStyle || props.style || 'default');
                     else
-                        className += ' btn-' + (props.style || 'default');
+                        className += ' lm-btn-' + (props.style || 'default');
                     if (props.customClass)
                         className += ' ' + props.customClass;
                     var icon = void 0;
                     if (props.icon) {
                         if (props.active && props.activeIcon)
-                            icon = Plugin.React.createElement("span", {className: "icon icon-" + props.activeIcon});
+                            icon = Plugin.React.createElement("span", { className: "lm-icon lm-icon-" + props.activeIcon });
                         else
-                            icon = Plugin.React.createElement("span", {className: "icon icon-" + props.icon});
+                            icon = Plugin.React.createElement("span", { className: "lm-icon lm-icon-" + props.icon });
                     }
                     //onTouchEnd={(e) => { (e.target as HTMLElement).blur() } }
-                    return Plugin.React.createElement("button", {title: props.title, className: className, style: props.customStyle, disabled: props.disabled, onClick: function (e) { props.onClick.call(null, e); e.target.blur(); }}, 
-                        icon, 
+                    return Plugin.React.createElement("button", { title: props.title, className: className, style: props.customStyle, disabled: props.disabled, onClick: function (e) { props.onClick.call(null, e); e.target.blur(); } },
+                        icon,
                         props.children);
                 };
                 return Button;
             }(Pure));
             Controls.Button = Button;
-            Controls.TextBox = function (props) {
-                return Plugin.React.createElement("input", {type: 'text', className: 'form-control', placeholder: props.placeholder, value: props.value, defaultValue: props.defaultValue, onBlur: function (e) { if (props.onBlur)
-                    props.onBlur.call(null, e); }, onChange: function (e) { return props.onChange.call(null, e.target.value); }, onKeyPress: props.onKeyPress});
-            };
+            Controls.TextBox = function (props) { return Plugin.React.createElement("input", { type: 'text', className: 'lm-form-control', placeholder: props.placeholder, value: props.value, defaultValue: props.defaultValue, onBlur: function (e) { if (props.onBlur)
+                    props.onBlur.call(null, e); }, onChange: function (e) { return props.onChange.call(null, e.target.value); }, onKeyPress: props.onKeyPress }); };
             function isEnter(e) {
                 if ((e.keyCode === 13 || e.charCode === 13)) {
                     return true;
@@ -74693,46 +75656,40 @@ var LiteMol;
             }
             Controls.isEnter = isEnter;
             function TextBoxGroup(props) {
-                return Plugin.React.createElement("div", {className: 'lm-control-row lm-options-group', title: props.title}, 
-                    Plugin.React.createElement("span", null, props.label), 
-                    Plugin.React.createElement("div", null, 
-                        Plugin.React.createElement(Controls.TextBox, {placeholder: props.placeholder, onChange: props.onChange, value: props.value, onKeyPress: function (e) {
-                            if (isEnter(e) && props.onEnter)
-                                props.onEnter.call(null, e);
-                        }})
-                    ));
+                return Plugin.React.createElement("div", { className: 'lm-control-row lm-options-group', title: props.title },
+                    Plugin.React.createElement("span", null, props.label),
+                    Plugin.React.createElement("div", null,
+                        Plugin.React.createElement(Controls.TextBox, { placeholder: props.placeholder, onChange: props.onChange, value: props.value, onKeyPress: function (e) {
+                                if (isEnter(e) && props.onEnter)
+                                    props.onEnter.call(null, e);
+                            } })));
             }
             Controls.TextBoxGroup = TextBoxGroup;
-            Controls.CommitButton = function (props) {
-                return Plugin.React.createElement("div", {style: { marginTop: '1px' }}, 
-                    Plugin.React.createElement("button", {onClick: function (e) { props.action(); e.target.blur(); }, className: 'btn btn-block btn-commit btn-commit-' + (props.isOn ? 'on' : 'off'), disabled: !props.isOn, title: props.title}, 
-                        Plugin.React.createElement("span", {className: "icon icon-" + (props.isOn ? 'ok' : 'cross')}), 
-                        props.isOn ? Plugin.React.createElement("b", null, props.on) : (props.off ? props.off : props.on))
-                );
-            };
+            Controls.CommitButton = function (props) { return Plugin.React.createElement("div", { style: { marginTop: '1px' } },
+                Plugin.React.createElement("button", { onClick: function (e) { props.action(); e.target.blur(); }, className: 'lm-btn lm-btn-block lm-btn-commit lm-btn-commit-' + (props.isOn ? 'on' : 'off'), disabled: !props.isOn, title: props.title },
+                    Plugin.React.createElement("span", { className: "lm-icon lm-icon-" + (props.isOn ? 'ok' : 'cross') }),
+                    props.isOn ? Plugin.React.createElement("b", null, props.on) : (props.off ? props.off : props.on))); };
             // <Controls.Button onClick={() => props.action() }
             //         style={props.isOn ? 'success' : 'default' } asBlock={true} disabled={!props.isOn} icon={props.isOn ? 'ok' : 'cross'} 
             //             customClass='lm-commit-button'>
             //             {props.isOn ? props.on : (props.off ? props.off : props.on) }
             //         </Controls.Button>  
-            Controls.Toggle = function (props) {
-                return Plugin.React.createElement("div", {className: 'lm-control-row lm-toggle-button', title: props.title}, 
-                    Plugin.React.createElement("span", null, props.label), 
-                    Plugin.React.createElement("div", null, 
-                        Plugin.React.createElement("button", {onClick: function (e) { props.onChange.call(null, !props.value); e.target.blur(); }}, 
-                            Plugin.React.createElement("span", {className: "icon icon-" + (props.value ? 'ok' : 'off')}), 
-                            " ", 
-                            props.value ? 'On' : 'Off')
-                    ));
-            };
+            Controls.Toggle = function (props) { return Plugin.React.createElement("div", { className: 'lm-control-row lm-toggle-button', title: props.title },
+                Plugin.React.createElement("span", null, props.label),
+                Plugin.React.createElement("div", null,
+                    Plugin.React.createElement("button", { onClick: function (e) { props.onChange.call(null, !props.value); e.target.blur(); } },
+                        Plugin.React.createElement("span", { className: "lm-icon lm-icon-" + (props.value ? 'ok' : 'off') }),
+                        " ",
+                        props.value ? 'On' : 'Off'))); };
             Controls.ControlGroupExpander = function (props) {
-                return Plugin.React.createElement(Controls.Button, {style: 'link', title: (props.isExpanded ? 'Less' : 'More') + " options", onClick: function () { return props.onChange.call(null, !props.isExpanded); }, icon: props.isExpanded ? 'minus' : 'plus', customClass: 'lm-conrol-group-expander'});
+                return Plugin.React.createElement(Controls.Button, { style: 'link', title: (props.isExpanded ? 'Less' : 'More') + " options", onClick: function () { return props.onChange.call(null, !props.isExpanded); }, icon: props.isExpanded ? 'minus' : 'plus', customClass: 'lm-conrol-group-expander' });
             };
-            Controls.RowText = function (props) {
-                return Plugin.React.createElement("div", {className: 'lm-control-row lm-row-text', title: props.title}, 
-                    Plugin.React.createElement("span", null, props.label), 
-                    Plugin.React.createElement("div", null, props.value));
-            };
+            Controls.RowText = function (props) { return Plugin.React.createElement("div", { className: 'lm-control-row lm-row-text', title: props.title },
+                Plugin.React.createElement("span", null, props.label),
+                Plugin.React.createElement("div", null, props.value)); };
+            Controls.HelpBox = function (props) { return Plugin.React.createElement("div", { className: 'lm-help-row' },
+                Plugin.React.createElement("span", null, props.title),
+                Plugin.React.createElement("div", null, props.content)); };
         })(Controls = Plugin.Controls || (Plugin.Controls = {}));
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
@@ -74749,8 +75706,9 @@ var LiteMol;
             var OptionsBox = (function (_super) {
                 __extends(OptionsBox, _super);
                 function OptionsBox() {
-                    _super.apply(this, arguments);
-                    this.current = void 0;
+                    var _this = _super.apply(this, arguments) || this;
+                    _this.current = void 0;
+                    return _this;
                 }
                 OptionsBox.prototype.get = function (i) {
                     var opts = this.props.options;
@@ -74764,11 +75722,11 @@ var LiteMol;
                     var idx = this.props.options.indexOf(this.props.current);
                     if (idx < 0)
                         idx = 0;
-                    return Plugin.React.createElement("select", {title: this.props.title, value: idx.toString(), className: 'form-control', onChange: function (e) {
-                        _this.current = _this.get(+e.target.value);
-                        _this.props.onChange(_this.current);
-                    }}, this.props.options.map(function (o, i) {
-                        return Plugin.React.createElement("option", {key: i, value: "" + i, selected: i === idx}, cap(o));
+                    return Plugin.React.createElement("select", { title: this.props.title, value: idx.toString(), className: 'lm-form-control', onChange: function (e) {
+                            _this.current = _this.get(+e.target.value);
+                            _this.props.onChange(_this.current);
+                        } }, this.props.options.map(function (o, i) {
+                        return Plugin.React.createElement("option", { key: i, value: "" + i, selected: i === idx }, cap(o));
                     }));
                 };
                 return OptionsBox;
@@ -74776,11 +75734,10 @@ var LiteMol;
             Controls.OptionsBox = OptionsBox;
             function OptionsGroup(props) {
                 var caption = props.caption ? props.caption : function (o) { return o; };
-                return Plugin.React.createElement("div", {className: 'lm-control-row lm-options-group', title: props.title}, 
-                    Plugin.React.createElement("span", null, props.label), 
-                    Plugin.React.createElement("div", null, 
-                        Plugin.React.createElement(Controls.OptionsBox, {options: props.options, caption: caption, current: props.current, onChange: props.onChange})
-                    ));
+                return Plugin.React.createElement("div", { className: 'lm-control-row lm-options-group', title: props.title },
+                    Plugin.React.createElement("span", null, props.label),
+                    Plugin.React.createElement("div", null,
+                        Plugin.React.createElement(Controls.OptionsBox, { options: props.options, caption: caption, current: props.current, onChange: props.onChange })));
             }
             Controls.OptionsGroup = OptionsGroup;
         })(Controls = Plugin.Controls || (Plugin.Controls = {}));
@@ -74799,40 +75756,40 @@ var LiteMol;
             var Panel = (function (_super) {
                 __extends(Panel, _super);
                 function Panel() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Panel.prototype.header = function () {
                     var _this = this;
                     var exp = this.props.isExpanded;
                     var title = this.props.title ? this.props.title : this.props.header;
                     var icon = exp ? 'collapse' : 'expand';
-                    var desc = Plugin.React.createElement("div", {className: 'lm-panel-description', onClick: function () { return _this.props.onExpand.call(null, !_this.props.isExpanded); }}, 
-                        Plugin.React.createElement("span", {className: 'icon icon-info'}), 
-                        Plugin.React.createElement("div", {className: 'lm-panel-description-content'}, 
-                            Plugin.React.createElement("span", {className: 'icon icon-info'}), 
+                    var desc = Plugin.React.createElement("div", { className: "lm-panel-description lm-panel-description-" + (this.props.topRightAction ? 'with-action' : 'standalone'), onClick: function () { return _this.props.onExpand.call(null, !_this.props.isExpanded); } },
+                        Plugin.React.createElement("span", { className: 'lm-icon lm-icon-info' }),
+                        Plugin.React.createElement("div", { className: 'lm-panel-description-content' },
+                            Plugin.React.createElement("span", { className: 'lm-icon lm-icon-info' }),
                             this.props.description));
-                    return Plugin.React.createElement("div", {className: 'lm-panel-header'}, 
-                        desc, 
-                        Plugin.React.createElement("div", {className: 'lm-panel-expander-wrapper'}, 
-                            Plugin.React.createElement(Controls.Button, {title: title, onClick: function () { return _this.props.onExpand.call(null, !_this.props.isExpanded); }, icon: icon, customClass: 'lm-panel-expander', style: 'link'}, 
-                                this.props.badge, 
-                                this.props.header)
-                        ));
+                    return Plugin.React.createElement("div", { className: 'lm-panel-header' },
+                        desc,
+                        this.props.topRightAction,
+                        Plugin.React.createElement("div", { className: 'lm-panel-expander-wrapper' },
+                            Plugin.React.createElement(Controls.Button, { title: title, onClick: function () { return _this.props.onExpand.call(null, !_this.props.isExpanded); }, icon: icon, customClass: 'lm-panel-expander', style: 'link' },
+                                this.props.badge,
+                                this.props.header)));
                 };
                 Panel.prototype.render = function () {
                     var cls = 'lm-panel' + (this.props.className ? ' ' + this.props.className : '') + (this.props.isExpanded ? ' lm-panel-expanded' : ' lm-panel-collapsed');
-                    return Plugin.React.createElement("div", {className: cls}, 
-                        this.header(), 
-                        Plugin.React.createElement("div", {className: 'lm-panel-body', style: { display: this.props.isExpanded ? 'block' : 'none' }}, this.props.children));
+                    return Plugin.React.createElement("div", { className: cls },
+                        this.header(),
+                        Plugin.React.createElement("div", { className: 'lm-panel-body', style: { display: this.props.isExpanded ? 'block' : 'none' } }, this.props.children));
                 };
                 return Panel;
             }(Plugin.React.Component));
             Controls.Panel = Panel;
             Controls.ExpandableGroup = function (props) {
-                return Plugin.React.createElement("div", {className: 'lm-control-group'}, 
-                    props.select, 
-                    props.options.length > 0 ? props.expander : void 0, 
-                    props.options.length > 0 ? Plugin.React.createElement("div", {style: { display: props.isExpanded ? 'block' : 'none' }, className: 'lm-control-subgroup'}, props.options) : void 0);
+                return Plugin.React.createElement("div", { className: 'lm-control-group' },
+                    props.select,
+                    props.options.length > 0 ? props.expander : void 0,
+                    props.options.length > 0 ? Plugin.React.createElement("div", { style: { display: props.isExpanded ? 'block' : 'none' }, className: 'lm-control-subgroup' }, props.options) : void 0);
             };
         })(Controls = Plugin.Controls || (Plugin.Controls = {}));
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
@@ -74850,8 +75807,10 @@ var LiteMol;
             var Slider = (function (_super) {
                 __extends(Slider, _super);
                 function Slider() {
-                    _super.apply(this, arguments);
-                    this.state = { value: '0' };
+                    var _this = _super.apply(this, arguments) || this;
+                    _this.state = { value: '0' };
+                    _this.firedValue = NaN;
+                    return _this;
                 }
                 Slider.prototype.componentWillMount = function () {
                     this.setState({ value: '' + this.props.value });
@@ -74882,33 +75841,33 @@ var LiteMol;
                     if (isNaN(v)) {
                         v = this.props.value;
                     }
-                    if (v !== this.props.value)
-                        this.props.onChange.call(null, v);
+                    if (v !== this.props.value) {
+                        if (this.firedValue !== v) {
+                            this.firedValue = v;
+                            this.props.onChange.call(null, v);
+                        }
+                    }
                 };
                 Slider.prototype.render = function () {
                     var _this = this;
                     var step = this.props.step;
                     if (step === void 0)
                         step = 1;
-                    return Plugin.React.createElement("div", {className: 'lm-control-row lm-slider', title: this.props.title}, 
-                        Plugin.React.createElement("span", null, this.props.label), 
-                        Plugin.React.createElement("div", null, 
-                            Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement("div", null, 
-                                    Plugin.React.createElement("form", {noValidate: true}, 
-                                        Plugin.React.createElement("input", {type: 'range', min: this.props.min, max: this.props.max, value: this.state.value, ref: 'slider', step: step, onInput: function (e) {
-                                            var s = e.target.value;
-                                            _this.setState({ value: s });
-                                        }, onSelect: function (e) { _this.fire(); e.target.blur(); }, onBlur: function () { return _this.fire(); }, onTouchEnd: function () { return _this.fire(); }})
-                                    )
-                                )
-                            ), 
-                            Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Controls.TextBox, {value: this.state.value, onChange: function (v) { return _this.updateValue(v); }, onBlur: function () { return _this.fire(); }, onKeyPress: function (e) {
-                                    if (Controls.isEnter(e))
-                                        _this.fire();
-                                }})
-                            )));
+                    return Plugin.React.createElement("div", { className: 'lm-control-row lm-slider', title: this.props.title },
+                        Plugin.React.createElement("span", null, this.props.label),
+                        Plugin.React.createElement("div", null,
+                            Plugin.React.createElement("div", null,
+                                Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("form", { noValidate: true },
+                                        Plugin.React.createElement("input", { type: 'range', min: this.props.min, max: this.props.max, value: this.state.value, ref: 'slider', step: step, onInput: function (e) {
+                                                var s = e.target.value;
+                                                _this.setState({ value: s });
+                                            }, onSelect: function (e) { _this.fire(); e.target.blur(); }, onBlur: function () { return _this.fire(); }, onTouchEnd: function () { return _this.fire(); } })))),
+                            Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Controls.TextBox, { value: this.state.value, onChange: function (v) { return _this.updateValue(v); }, onBlur: function () { return _this.fire(); }, onKeyPress: function (e) {
+                                        if (Controls.isEnter(e))
+                                            _this.fire();
+                                    } }))));
                 };
                 return Slider;
             }(Plugin.React.Component));
@@ -74930,7 +75889,7 @@ var LiteMol;
             var ColorPicker = (function (_super) {
                 __extends(ColorPicker, _super);
                 function ColorPicker() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 ColorPicker.prototype.shouldComponentUpdate = function (nextProps, nextState, nextContext) {
                     return !shallowEqual(this.props, nextProps);
@@ -74941,11 +75900,11 @@ var LiteMol;
                     var color = { a: 1, r: 255 * r, g: 255 * g, b: 255 * b };
                     var onChange = function (e) { return _this.props.onChange({ r: e.rgb.r / 255, g: e.rgb.g / 255, b: e.rgb.b / 255 }); };
                     //let type = this.props.type ? this.props.type : 'chrome';
-                    var picker = Plugin.React.createElement(Controls.ChromePickerHelper, {color: color, onChangeComplete: onChange});
+                    var picker = Plugin.React.createElement(Controls.ChromePickerHelper, { color: color, onChangeComplete: onChange });
                     //  type === 'slider'
                     //     ? <Controls.ColorPickerHelper color={color} onChange={onChange} />
                     //     : <Controls.ChromePickerHelper color={color} onChange={onChange} />;
-                    return Plugin.React.createElement("div", {className: 'lm-color-picker'}, picker);
+                    return Plugin.React.createElement("div", { className: 'lm-color-picker' }, picker);
                 };
                 return ColorPicker;
             }(Plugin.React.Component));
@@ -74953,8 +75912,9 @@ var LiteMol;
             var ToggleColorPicker = (function (_super) {
                 __extends(ToggleColorPicker, _super);
                 function ToggleColorPicker() {
-                    _super.apply(this, arguments);
-                    this.state = { isExpanded: false };
+                    var _this = _super.apply(this, arguments) || this;
+                    _this.state = { isExpanded: false };
+                    return _this;
                 }
                 ToggleColorPicker.prototype.render = function () {
                     var _this = this;
@@ -74962,14 +75922,13 @@ var LiteMol;
                     var clr = this.props.color;
                     var pos = this.props.position ? this.props.position : 'above';
                     //onMouseLeave={() => this.setState({isExpanded: false}) }>
-                    return Plugin.React.createElement("div", {className: 'lm-control-row lm-toggle-color-picker lm-toggle-color-picker-' + pos, onMouseLeave: function () { return _this.setState({ isExpanded: false }); }}, 
-                        Plugin.React.createElement("span", null, this.props.label), 
-                        Plugin.React.createElement("div", null, 
-                            Plugin.React.createElement(Controls.Button, {onClick: function () { _this.setState({ isExpanded: !_this.state.isExpanded }); }, asBlock: true, customStyle: {
-                                backgroundColor: "rgb(" + ((255 * clr.r) | 0) + ", " + ((255 * clr.g) | 0) + ", " + ((255 * clr.b) | 0) + ")",
-                                color: "rgb(" + ((255 * (1 - clr.r)) | 0) + "," + ((255 * (1 - clr.g)) | 0) + "," + ((255 * (1 - clr.b)) | 0) + ")",
-                            }})
-                        ), 
+                    return Plugin.React.createElement("div", { className: 'lm-control-row lm-toggle-color-picker lm-toggle-color-picker-' + pos, onMouseLeave: function () { return _this.setState({ isExpanded: false }); } },
+                        Plugin.React.createElement("span", null, this.props.label),
+                        Plugin.React.createElement("div", null,
+                            Plugin.React.createElement(Controls.Button, { onClick: function () { _this.setState({ isExpanded: !_this.state.isExpanded }); }, asBlock: true, customStyle: {
+                                    backgroundColor: "rgb(" + ((255 * clr.r) | 0) + ", " + ((255 * clr.g) | 0) + ", " + ((255 * clr.b) | 0) + ")",
+                                    color: "rgb(" + ((255 * (1 - clr.r)) | 0) + "," + ((255 * (1 - clr.g)) | 0) + "," + ((255 * (1 - clr.b)) | 0) + ")",
+                                } })),
                         picker);
                 };
                 return ToggleColorPicker;
@@ -74989,12 +75948,11 @@ var LiteMol;
         (function (Controls) {
             "use strict";
             function QueryEditor(props) {
-                return Plugin.React.createElement("div", {className: 'lm-control-row'}, 
-                    Plugin.React.createElement(Controls.TextBox, {placeholder: 'Enter query...', onChange: props.onChange, value: props.value, onKeyPress: function (e) {
-                        if (Controls.isEnter(e) && props.onEnter)
-                            props.onEnter.call(null, e);
-                    }})
-                );
+                return Plugin.React.createElement("div", { className: 'lm-control-row' },
+                    Plugin.React.createElement(Controls.TextBox, { placeholder: 'Enter query...', onChange: props.onChange, value: props.value, onKeyPress: function (e) {
+                            if (Controls.isEnter(e) && props.onEnter)
+                                props.onEnter.call(null, e);
+                        } }));
             }
             Controls.QueryEditor = QueryEditor;
         })(Controls = Plugin.Controls || (Plugin.Controls = {}));
@@ -75014,7 +75972,7 @@ var LiteMol;
             var PureView = (function (_super) {
                 __extends(PureView, _super);
                 function PureView() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 PureView.prototype.update = function (s) {
                     var ns = LiteMol.Bootstrap.Utils.merge(this.props.state, s);
@@ -75030,11 +75988,12 @@ var LiteMol;
             var Component = (function (_super) {
                 __extends(Component, _super);
                 function Component() {
-                    _super.apply(this, arguments);
                     // shouldComponentUpdate(nextProps: any, nextState: any) {
                     //     return !shallowEqual(this.props, nextProps);
                     // }
-                    this.subs = [];
+                    var _this = _super.apply(this, arguments) || this;
+                    _this.subs = [];
+                    return _this;
                 }
                 Component.prototype.subscribe = function (stream, obs) {
                     var sub = stream.subscribe(obs);
@@ -75062,8 +76021,9 @@ var LiteMol;
             var ObserverView = (function (_super) {
                 __extends(ObserverView, _super);
                 function ObserverView() {
-                    _super.apply(this, arguments);
-                    this.subs = [];
+                    var _this = _super.apply(this, arguments) || this;
+                    _this.subs = [];
+                    return _this;
                 }
                 ObserverView.prototype.subscribe = function (stream, obs) {
                     var sub = stream.subscribe(obs);
@@ -75091,7 +76051,7 @@ var LiteMol;
             var View = (function (_super) {
                 __extends(View, _super);
                 function View() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Object.defineProperty(View.prototype, "controller", {
                     // protected get latestState() {
@@ -75112,6 +76072,24 @@ var LiteMol;
                 return View;
             }(ObserverView));
             Views.View = View;
+            // export abstract class ControlView<Controller extends Bootstrap.Components.Control<any>, CustomProps> 
+            //     extends View<Controller, {}, CustomProps> implements IControlView {
+            //     header = '';
+            //     panelType = 'default';
+            //     // shouldComponentUpdate(nextProps: { controller: Controller }, nextState: {}, nextContext: any) {
+            //     //     return this.props.controller !== nextProps.controller;
+            //     // }
+            //     render() {
+            //         let state = this.controller.latestState;
+            //         if (state.isActive) {
+            //             return <Controls.Panel header={this.header} className={'lm-control lm-panel-' + this.panelType} key={state.currentEntity.id}>
+            //                 {this.renderControl()}
+            //             </Controls.Panel>;                
+            //         } 
+            //         return <div className='lm-empty-control' />;
+            //     }
+            //     protected abstract renderControl(): React.ReactElement<any>;
+            // }
         })(Views = Plugin.Views || (Plugin.Views = {}));
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
@@ -75129,7 +76107,7 @@ var LiteMol;
             var Layout = (function (_super) {
                 __extends(Layout, _super);
                 function Layout() {
-                    _super.apply(this, arguments);
+                    return _super.apply(this, arguments) || this;
                 }
                 Layout.prototype.renderTarget = function (target) {
                     var statics = [];
@@ -75137,49 +76115,68 @@ var LiteMol;
                     for (var _i = 0, _a = target.components; _i < _a.length; _i++) {
                         var c = _a[_i];
                         if (c.isStatic)
-                            statics.push(Plugin.React.createElement(c.view, {controller: c.controller}));
+                            statics.push(Plugin.React.createElement(c.view, { controller: c.controller }));
                         else
-                            scrollable.push(Plugin.React.createElement(c.view, {controller: c.controller}));
+                            scrollable.push(Plugin.React.createElement(c.view, { controller: c.controller }));
                     }
-                    return Plugin.React.createElement("div", {className: 'lm-layout-region lm-layout-' + target.cssClass}, 
-                        statics.length ? Plugin.React.createElement("div", {className: 'lm-layout-static'}, statics) : void 0, 
-                        scrollable.length ? Plugin.React.createElement("div", {className: 'lm-layout-scrollable'}, scrollable) : void 0);
+                    return Plugin.React.createElement("div", { className: 'lm-layout-region lm-layout-' + target.cssClass },
+                        statics.length ? Plugin.React.createElement("div", { className: 'lm-layout-static' }, statics) : void 0,
+                        scrollable.length ? Plugin.React.createElement("div", { className: 'lm-layout-scrollable' }, scrollable) : void 0);
                 };
                 Layout.prototype.render = function () {
                     var layoutClass = '';
                     var state = this.controller.latestState;
-                    var layoutType = state.isExpanded ? 'lm-layout-expanded' : 'lm-layout-standard';
+                    var layoutType;
+                    if (state.isExpanded) {
+                        layoutType = 'lm-layout-expanded';
+                    }
+                    else {
+                        layoutType = 'lm-layout-standard ';
+                        switch (state.collapsedControlsLayout) {
+                            case LiteMol.Bootstrap.Components.CollapsedControlsLayout.Outside:
+                                layoutType += 'lm-layout-standard-outside';
+                                break;
+                            case LiteMol.Bootstrap.Components.CollapsedControlsLayout.Landscape:
+                                layoutType += 'lm-layout-standard-landscape';
+                                break;
+                            case LiteMol.Bootstrap.Components.CollapsedControlsLayout.Portrait:
+                                layoutType += 'lm-layout-standard-portrait';
+                                break;
+                            default:
+                                layoutType += 'lm-layout-standard-outside';
+                                break;
+                        }
+                    }
                     var targets = this.controller.targets;
                     var regions = [this.renderTarget(targets[LayoutRegion.Main])];
+                    var hiddenRegions = state.hiddenRegions || [];
                     var region = targets[LayoutRegion.Top];
-                    if (state.hideControls || !region.components.length)
+                    if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Top) >= 0)
                         layoutClass += ' lm-layout-hide-top';
                     else
                         regions.push(this.renderTarget(region));
                     region = targets[LayoutRegion.Right];
-                    if (state.hideControls || !region.components.length)
+                    if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Right) >= 0)
                         layoutClass += ' lm-layout-hide-right';
                     else
                         regions.push(this.renderTarget(region));
                     region = targets[LayoutRegion.Bottom];
-                    if (state.hideControls || !region.components.length)
+                    if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Bottom) >= 0)
                         layoutClass += ' lm-layout-hide-bottom';
                     else
                         regions.push(this.renderTarget(region));
                     region = targets[LayoutRegion.Left];
-                    if (state.hideControls || !region.components.length)
+                    if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Left) >= 0)
                         layoutClass += ' lm-layout-hide-left';
                     else
                         regions.push(this.renderTarget(region));
                     var root = targets[LayoutRegion.Root]
-                        .components.map(function (c) { return Plugin.React.createElement(c.view, {controller: c.controller}); });
-                    return Plugin.React.createElement("div", {className: 'lm-plugin'}, 
-                        Plugin.React.createElement("div", {className: 'lm-plugin-content ' + layoutType}, 
-                            Plugin.React.createElement("div", {className: layoutClass}, 
-                                regions, 
-                                root)
-                        )
-                    );
+                        .components.map(function (c) { return Plugin.React.createElement(c.view, { controller: c.controller }); });
+                    return Plugin.React.createElement("div", { className: 'lm-plugin' },
+                        Plugin.React.createElement("div", { className: 'lm-plugin-content ' + layoutType },
+                            Plugin.React.createElement("div", { className: layoutClass },
+                                regions,
+                                root)));
                 };
                 return Layout;
             }(Views.View));
@@ -75202,7 +76199,7 @@ var LiteMol;
                 var ControllerBase = (function (_super) {
                     __extends(ControllerBase, _super);
                     function ControllerBase() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Object.defineProperty(ControllerBase.prototype, "params", {
                         get: function () {
@@ -75217,10 +76214,15 @@ var LiteMol;
                     ControllerBase.prototype.autoUpdateParams = function (p) {
                         this.controller.autoUpdateParams(p);
                     };
+                    ControllerBase.prototype.getPersistentState = function (prop, defaultValue) {
+                        return this.controller.context.transforms.getPersistentState(this.controller.transformer, prop, defaultValue);
+                    };
+                    ControllerBase.prototype.setPersistentState = function (prop, value) {
+                        if (this.controller.context.transforms.setPersistentState(this.controller.transformer, prop, value)) {
+                            this.forceUpdate();
+                        }
+                    };
                     Object.defineProperty(ControllerBase.prototype, "transformSourceEntity", {
-                        //  get entity() {
-                        //      return this.controller.entity;
-                        //  }
                         get: function () {
                             return this.isUpdate ? this.controller.entity.parent : this.controller.entity;
                         },
@@ -75261,17 +76263,16 @@ var LiteMol;
                         var isBusy = state.isBusy;
                         var offMsg = isBusy ? 'Working...' : isUpdate && !hasError ? 'Nothing to update' : (issues ? issues[0] : void 0);
                         var t = this.controller.transformer.info;
-                        var commit = Plugin.React.createElement(Plugin.Controls.CommitButton, {action: function () { return _this.controller.apply(); }, isOn: this.canApply, title: issues && issues.length ? issues[0] : this.canApply ? isUpdate ? 'An update will remove all child nodes.' : void 0 : void 0, on: isUpdate ? 'Update' : this.props.isAction ? 'Apply' : 'Add', off: offMsg});
+                        var commit = Plugin.React.createElement(Plugin.Controls.CommitButton, { action: function () { return _this.controller.apply(); }, isOn: this.canApply, title: issues && issues.length ? issues[0] : this.canApply ? isUpdate ? 'An update will remove all child nodes.' : void 0 : void 0, on: isUpdate ? 'Update' : this.props.isAction ? 'Apply' : 'Add', off: offMsg });
                         var showCommit = this.canApply || hasError;
                         var header = this.props.customHeader
                             ? this.props.customHeader
                             : (isUpdate ? 'Update ' : '') + t.name;
-                        return Plugin.React.createElement("div", {className: 'lm-transformer-wrapper'}, 
-                            Plugin.React.createElement(Plugin.Controls.Panel, {header: header, badge: this.props.hideBadge ? void 0 : Plugin.React.createElement(Views.Entity.Badge, {type: t.to[0].info}), className: 'lm-control lm-transformer lm-panel-' + t.to[0].info.typeClass, key: t.id, title: t.description, isExpanded: state.isExpanded, onExpand: function (e) { _this.controller.setState({ isExpanded: e }); }, description: this.controller.transformer.info.description}, 
-                                this.renderControls(), 
-                                showCommit ? commit : void 0, 
-                                this.props.showVisibilityIcon ? Plugin.React.createElement(Views.Entity.VisibilityControl, {entity: this.controller.entity}) : void 0)
-                        );
+                        var isExpanded = this.getPersistentState('isExpanded', true);
+                        return Plugin.React.createElement("div", { className: 'lm-transformer-wrapper' },
+                            Plugin.React.createElement(Plugin.Controls.Panel, { header: header, badge: this.props.hideBadge ? void 0 : Plugin.React.createElement(Views.Entity.Badge, { type: t.to[0].info }), className: 'lm-control lm-transformer lm-panel-' + t.to[0].info.typeClass, key: t.id, title: t.description, isExpanded: isExpanded, onExpand: function (e) { _this.setPersistentState('isExpanded', e); }, description: this.controller.transformer.info.description, topRightAction: this.props.showVisibilityIcon ? Plugin.React.createElement(Views.Entity.VisibilityControl, { entity: this.controller.entity }) : void 0 },
+                                this.renderControls(),
+                                showCommit ? commit : void 0));
                     };
                     return ControllerBase;
                 }(Views.View));
@@ -75279,7 +76280,7 @@ var LiteMol;
                 var Empty = (function (_super) {
                     __extends(Empty, _super);
                     function Empty() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Empty.prototype.renderControls = function () {
                         return Plugin.React.createElement("div", null);
@@ -75290,7 +76291,7 @@ var LiteMol;
                 var View = (function (_super) {
                     __extends(View, _super);
                     function View() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     View.prototype.render = function () {
                         var ctx = this.controller.context;
@@ -75305,19 +76306,19 @@ var LiteMol;
                             var v = plugin.getTransformerInfo(state.update.transformer).view;
                             views.push(Plugin.React.createElement(v, { controller: state.update, key: state.update.transformer.info.id + '-' + state.update.entity.id }));
                         }
-                        return Plugin.React.createElement("div", {className: 'lm-transform-view'}, views);
+                        return Plugin.React.createElement("div", { className: 'lm-transform-view' }, views);
                     };
                     return View;
                 }(Views.View));
                 Transform.View = View;
                 Transform.TransparencyControl = function (props) {
                     var d = props.definition.alpha;
-                    return Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Opacity', onChange: function (v) { return props.onChange({ alpha: v, writeDepth: props.definition.writeDepth }); }, min: 0, max: 1, step: 0.01, value: d});
+                    return Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Opacity', onChange: function (v) { return props.onChange({ alpha: v, writeDepth: props.definition.writeDepth }); }, min: 0, max: 1, step: 0.01, value: d });
                 };
                 var Updater = (function (_super) {
                     __extends(Updater, _super);
                     function Updater() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Updater.prototype.componentWillMount = function () {
                         var _this = this;
@@ -75332,13 +76333,13 @@ var LiteMol;
                     Updater.prototype.render = function () {
                         var c = this.controller.latestState.controller;
                         if (!c)
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         var ctx = this.controller.context;
                         var plugin = ctx.plugin;
                         var v = plugin.getTransformerInfo(c.transformer).view;
                         if (!v) {
                             console.warn("Count not find view for updater (" + c.transformer.info.id + "), please register it.");
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         }
                         return Plugin.React.createElement(v, { controller: c, key: c.transformer.info.id + '-' + c.entity.id, customHeader: this.controller.header, hideBadge: true, showVisibilityIcon: true });
                     };
@@ -75348,18 +76349,18 @@ var LiteMol;
                 var Action = (function (_super) {
                     __extends(Action, _super);
                     function Action() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Action.prototype.render = function () {
                         var c = this.controller.latestState.controller;
                         if (!c)
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         var ctx = this.controller.context;
                         var plugin = ctx.plugin;
                         var v = plugin.getTransformerInfo(c.transformer).view;
                         if (!v) {
                             console.warn("Count not find view for updater (" + c.transformer.info.id + "), please register it.");
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         }
                         return Plugin.React.createElement(v, { controller: c, key: c.transformer.info.id + '-' + c.entity.id, customHeader: this.controller.header, hideBadge: true, isAction: true });
                     };
@@ -75387,14 +76388,18 @@ var LiteMol;
                     var Download = (function (_super) {
                         __extends(Download, _super);
                         function Download() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         Download.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Entity.Data.Types, caption: function (s) { return s; }, current: params.type, onChange: function (o) { return _this.updateParams({ type: o }); }, label: 'Type'}), 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.url, onChange: function (v) { return _this.updateParams({ url: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter URL...'}));
+                            var compression;
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Entity.Data.Types, caption: function (s) { return s; }, current: params.type, onChange: function (o) { return _this.updateParams({ type: o, responseCompression: LiteMol.Bootstrap.Utils.DataCompressionMethod.None }); }, label: 'Type' }),
+                                params.type === 'Binary'
+                                    ? Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: ['None', 'Gzip'], caption: function (s) { return s; }, current: params.responseCompression === LiteMol.Bootstrap.Utils.DataCompressionMethod.Gzip ? 'Gzip' : 'None', onChange: function (o) { return _this.updateParams({ responseCompression: o === 'None' ? LiteMol.Bootstrap.Utils.DataCompressionMethod.None : LiteMol.Bootstrap.Utils.DataCompressionMethod.Gzip }); }, label: 'Compression', title: 'Specify the compression of the data. Usually only appliable if you downloading "raw" files.' })
+                                    : void 0,
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.url, onChange: function (v) { return _this.updateParams({ url: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter URL...' }));
                         };
                         return Download;
                     }(Transform.ControllerBase));
@@ -75402,18 +76407,18 @@ var LiteMol;
                     var OpenFile = (function (_super) {
                         __extends(OpenFile, _super);
                         function OpenFile() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         OpenFile.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
                             var state = this.controller.latestState;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Entity.Data.Types, caption: function (s) { return s; }, current: params.type, onChange: function (o) { return _this.updateParams({ type: o }); }, label: 'Type'}), 
-                                Plugin.React.createElement("div", {className: 'btn btn-block btn-action lm-loader-btn-file', style: { marginTop: '1px' }}, 
-                                    params.file ? params.file.name : 'Select a file...', 
-                                    " ", 
-                                    Plugin.React.createElement("input", {disabled: state.isBusy, type: 'file', onChange: function (evt) { return _this.updateParams({ file: evt.target.files[0] }); }, multiple: false})));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Entity.Data.Types, caption: function (s) { return s; }, current: params.type, onChange: function (o) { return _this.updateParams({ type: o }); }, label: 'Type' }),
+                                Plugin.React.createElement("div", { className: 'lm-btn lm-btn-block lm-btn-action lm-loader-lm-btn-file', style: { marginTop: '1px' } },
+                                    params.file ? params.file.name : 'Select a file...',
+                                    " ",
+                                    Plugin.React.createElement("input", { disabled: state.isBusy, type: 'file', onChange: function (evt) { return _this.updateParams({ file: evt.target.files[0] }); }, multiple: false })));
                         };
                         return OpenFile;
                     }(Transform.ControllerBase));
@@ -75421,14 +76426,13 @@ var LiteMol;
                     var WithIdField = (function (_super) {
                         __extends(WithIdField, _super);
                         function WithIdField() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         WithIdField.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'Id', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter PDB id...'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'Id', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter PDB id...' }));
                         };
                         return WithIdField;
                     }(Transform.ControllerBase));
@@ -75436,14 +76440,13 @@ var LiteMol;
                     var WithUrlIdField = (function (_super) {
                         __extends(WithUrlIdField, _super);
                         function WithUrlIdField() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         WithUrlIdField.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter URL...'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter URL...' }));
                         };
                         return WithUrlIdField;
                     }(Transform.ControllerBase));
@@ -75470,14 +76473,13 @@ var LiteMol;
                     var CreateFromData = (function (_super) {
                         __extends(CreateFromData, _super);
                         function CreateFromData() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateFromData.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Core.Formats.Molecule.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Core.Formats.Molecule.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format' }));
                         };
                         return CreateFromData;
                     }(Transform.ControllerBase));
@@ -75485,14 +76487,14 @@ var LiteMol;
                     var DownloadFromUrl = (function (_super) {
                         __extends(DownloadFromUrl, _super);
                         function DownloadFromUrl() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         DownloadFromUrl.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Core.Formats.Molecule.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format'}), 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter url...'}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Core.Formats.Molecule.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format' }),
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'URL', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter url...' }));
                         };
                         return DownloadFromUrl;
                     }(Transform.ControllerBase));
@@ -75500,19 +76502,18 @@ var LiteMol;
                     var OpenFile = (function (_super) {
                         __extends(OpenFile, _super);
                         function OpenFile() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         OpenFile.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
                             var state = this.controller.latestState;
                             var extensions = LiteMol.Core.Formats.FormatInfo.formatFileFilters(LiteMol.Core.Formats.Molecule.SupportedFormats.All);
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement("div", {className: 'btn btn-block btn-action lm-loader-btn-file', style: { marginTop: '1px' }}, 
-                                    params.file ? params.file.name : 'Select a file...', 
-                                    " ", 
-                                    Plugin.React.createElement("input", {disabled: state.isBusy, type: 'file', accept: extensions, onChange: function (evt) { return _this.updateParams({ file: evt.target.files[0] }); }, multiple: false}))
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement("div", { className: 'lm-btn lm-btn-block lm-btn-action lm-loader-lm-btn-file', style: { marginTop: '1px' } },
+                                    params.file ? params.file.name : 'Select a file...',
+                                    " ",
+                                    Plugin.React.createElement("input", { disabled: state.isBusy, type: 'file', accept: extensions, onChange: function (evt) { return _this.updateParams({ file: evt.target.files[0] }); }, multiple: false })));
                         };
                         return OpenFile;
                     }(Transform.ControllerBase));
@@ -75520,14 +76521,14 @@ var LiteMol;
                     var InitCoordinateStreaming = (function (_super) {
                         __extends(InitCoordinateStreaming, _super);
                         function InitCoordinateStreaming() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         InitCoordinateStreaming.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'Id', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter pdb id...'}), 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.server, onChange: function (v) { return _this.updateParams({ server: v }); }, label: 'Server', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Server url...'}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.id, onChange: function (v) { return _this.updateParams({ id: v }); }, label: 'Id', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Enter pdb id...' }),
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.server, onChange: function (v) { return _this.updateParams({ server: v }); }, label: 'Server', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Server url...' }));
                         };
                         return InitCoordinateStreaming;
                     }(Transform.ControllerBase));
@@ -75535,16 +76536,15 @@ var LiteMol;
                     var CreateFromMmCif = (function (_super) {
                         __extends(CreateFromMmCif, _super);
                         function CreateFromMmCif() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateFromMmCif.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
                             var cif = this.transformSourceEntity;
                             var options = cif.props.dictionary.dataBlocks.map(function (b, i) { return ({ b: b.header, i: i }); });
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: options, caption: function (s) { return s.b; }, current: options[this.params.blockIndex], onChange: function (o) { return _this.updateParams({ blockIndex: o.i }); }, label: 'Source'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: options, caption: function (s) { return s.b; }, current: options[this.params.blockIndex], onChange: function (o) { return _this.updateParams({ blockIndex: o.i }); }, label: 'Source' }));
                         };
                         return CreateFromMmCif;
                     }(Transform.ControllerBase));
@@ -75552,14 +76552,13 @@ var LiteMol;
                     var CreateModel = (function (_super) {
                         __extends(CreateModel, _super);
                         function CreateModel() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateModel.prototype.renderControls = function () {
                             var _this = this;
                             var modelCount = this.transformSourceEntity.props.molecule.models.length;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Index', onChange: function (v) { return _this.updateParams({ modelIndex: v - 1 }); }, min: 1, max: modelCount, step: 1, value: (this.params.modelIndex | 0) + 1, title: 'Index of the model.'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Index', onChange: function (v) { return _this.updateParams({ modelIndex: v - 1 }); }, min: 1, max: modelCount, step: 1, value: (this.params.modelIndex | 0) + 1, title: 'Index of the model.' }));
                         };
                         return CreateModel;
                     }(Transform.ControllerBase));
@@ -75567,7 +76566,7 @@ var LiteMol;
                     var CreateAssembly = (function (_super) {
                         __extends(CreateAssembly, _super);
                         function CreateAssembly() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateAssembly.prototype.renderControls = function () {
                             var _this = this;
@@ -75578,9 +76577,8 @@ var LiteMol;
                             if (!asm)
                                 return void 0;
                             var names = asm.assemblies.map(function (a) { return a.name; });
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: names, current: params.name, onChange: function (o) { return _this.updateParams({ name: o }); }, label: 'Name'})
-                            );
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: names, current: params.name, onChange: function (o) { return _this.updateParams({ name: o }); }, label: 'Name' }));
                         };
                         return CreateAssembly;
                     }(Transform.ControllerBase));
@@ -75588,15 +76586,15 @@ var LiteMol;
                     var CreateSymmetryMates = (function (_super) {
                         __extends(CreateSymmetryMates, _super);
                         function CreateSymmetryMates() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateSymmetryMates.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
                             var options = ['Mates', 'Interaction'];
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: options, current: params.type, onChange: function (o) { return _this.updateParams({ type: o }); }, label: 'Type', title: 'Mates: copies whole asymetric unit. Interaction: Includes only residues that are no more than `radius` from the asymetric unit.'}), 
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Radius', onChange: function (v) { return _this.updateParams({ radius: v }); }, min: 0, max: 25, step: 0.1, value: params.radius, title: 'Interaction radius.'}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: options, current: params.type, onChange: function (o) { return _this.updateParams({ type: o }); }, label: 'Type', title: 'Mates: copies whole asymetric unit. Interaction: Includes only residues that are no more than `radius` from the asymetric unit.' }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Radius', onChange: function (v) { return _this.updateParams({ radius: v }); }, min: 0, max: 25, step: 0.1, value: params.radius, title: 'Interaction radius.' }));
                         };
                         return CreateSymmetryMates;
                     }(Transform.ControllerBase));
@@ -75604,14 +76602,14 @@ var LiteMol;
                     var CreateSelection = (function (_super) {
                         __extends(CreateSelection, _super);
                         function CreateSelection() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateSelection.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, {value: params.name, onChange: function (v) { return _this.updateParams({ name: v }); }, label: 'Name', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Optional name...'}), 
-                                Plugin.React.createElement(Plugin.Controls.QueryEditor, {value: params.queryString, onChange: function (v) { return _this.updateParams({ queryString: v }); }, onEnter: function (e) { return _this.applyEnter(e); }}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.TextBoxGroup, { value: params.name, onChange: function (v) { return _this.updateParams({ name: v }); }, label: 'Name', onEnter: function (e) { return _this.applyEnter(e); }, placeholder: 'Optional name...' }),
+                                Plugin.React.createElement(Plugin.Controls.QueryEditor, { value: params.queryString, onChange: function (v) { return _this.updateParams({ queryString: v }); }, onEnter: function (e) { return _this.applyEnter(e); } }));
                             //<Controls.TextBoxGroup value={params.queryString} onChange={(v) => this.updateParams({ queryString: v })} onEnter={e => this.applyEnter(e) } label='Query' placeholder='Enter a query...' />
                         };
                         return CreateSelection;
@@ -75620,15 +76618,15 @@ var LiteMol;
                     var CreateMacromoleculeVisual = (function (_super) {
                         __extends(CreateMacromoleculeVisual, _super);
                         function CreateMacromoleculeVisual() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateMacromoleculeVisual.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.updateParams({ polymer: v }); }, value: params.polymer, label: 'Polymer'}), 
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.updateParams({ het: v }); }, value: params.het, label: 'HET'}), 
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.updateParams({ water: v }); }, value: params.water, label: 'Water'}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.updateParams({ polymer: v }); }, value: params.polymer, label: 'Polymer' }),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.updateParams({ het: v }); }, value: params.het, label: 'HET' }),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.updateParams({ water: v }); }, value: params.water, label: 'Water' }));
                         };
                         return CreateMacromoleculeVisual;
                     }(Transform.ControllerBase));
@@ -75636,36 +76634,36 @@ var LiteMol;
                     var CreateVisual = (function (_super) {
                         __extends(CreateVisual, _super);
                         function CreateVisual() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateVisual.prototype.detail = function () {
                             var _this = this;
                             var p = this.params.style.params;
-                            return [Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail'})];
+                            return [Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' })];
                         };
                         CreateVisual.prototype.ballsAndSticks = function () {
                             var _this = this;
                             var p = this.params.style.params;
                             var controls = [];
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, {title: 'Scale atoms using their VDW radius.', onChange: function (v) { return _this.controller.updateStyleParams({ useVDW: v }); }, value: p.useVDW, label: 'VDW'}));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, { title: 'Scale atoms using their VDW radius.', onChange: function (v) { return _this.controller.updateStyleParams({ useVDW: v }); }, value: p.useVDW, label: 'VDW' }));
                             if (p.useVDW) {
-                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Scale', onChange: function (v) { return _this.controller.updateStyleParams({ vdwScaling: v }); }, min: 0.1, max: 1, step: 0.01, value: p.vdwScaling, title: 'VDW scale factor.'}));
+                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Scale', onChange: function (v) { return _this.controller.updateStyleParams({ vdwScaling: v }); }, min: 0.1, max: 1, step: 0.01, value: p.vdwScaling, title: 'VDW scale factor.' }));
                             }
                             else {
-                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Atom Rds', onChange: function (v) { return _this.controller.updateStyleParams({ atomRadius: v }); }, min: 0.05, max: 2, step: 0.01, value: p.atomRadius, title: 'Atom Radius'}));
+                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Atom Rds', onChange: function (v) { return _this.controller.updateStyleParams({ atomRadius: v }); }, min: 0.05, max: 2, step: 0.01, value: p.atomRadius, title: 'Atom Radius' }));
                             }
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Bond Rds', onChange: function (v) { return _this.controller.updateStyleParams({ bondRadius: v }); }, min: 0.05, max: 1, step: 0.01, value: p.bondRadius, title: 'Bond Radius'}));
-                            controls.push(Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail'}));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Bond Rds', onChange: function (v) { return _this.controller.updateStyleParams({ bondRadius: v }); }, min: 0.05, max: 1, step: 0.01, value: p.bondRadius, title: 'Bond Radius' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' }));
                             return controls;
                         };
                         CreateVisual.prototype.surface = function () {
                             var _this = this;
                             var params = this.params.style.params;
                             return [
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Probe Radius', onChange: function (v) { return _this.controller.updateStyleParams({ probeRadius: v }); }, min: 0, max: 6, step: 0.1, value: params.probeRadius}),
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: params.smoothing, title: 'Number of laplacian smoothing itrations.'}),
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Detail', onChange: function (v) { return _this.controller.updateStyleParams({ density: v }); }, min: 0.3, max: 3, step: 0.1, value: params.density, title: 'Determines the size of a grid cell.'}),
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe'})
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Probe Radius', onChange: function (v) { return _this.controller.updateStyleParams({ probeRadius: v }); }, min: 0, max: 6, step: 0.1, value: params.probeRadius }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: params.smoothing, title: 'Number of laplacian smoothing itrations.' }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Detail', onChange: function (v) { return _this.controller.updateStyleParams({ density: v }); }, min: 0.3, max: 3, step: 0.1, value: params.density, title: 'Determines the size of a grid cell.' }),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe' })
                             ];
                         };
                         CreateVisual.prototype.createColors = function () {
@@ -75675,8 +76673,8 @@ var LiteMol;
                             var colorControls;
                             var controls = theme.colors
                                 .filter(function (c, n) { return !isBallsAndSticks ? n !== 'Bond' : true; })
-                                .map(function (c, n) { return Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {key: n, label: n, color: c, onChange: function (c) { return _this.controller.updateThemeColor(n, c); }}); }).toArray();
-                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, {definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); }}));
+                                .map(function (c, n) { return Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { key: n, label: n, color: c, onChange: function (c) { return _this.controller.updateThemeColor(n, c); } }); }).toArray();
+                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, { definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); } }));
                             // controls.push(<Controls.Toggle 
                             //         onChange={v => this.controller.updateStyleTheme({ wireframe: v }) } value={theme.wireframe} label='Wireframe' />);
                             return controls;
@@ -75697,11 +76695,11 @@ var LiteMol;
                                     break;
                             }
                             var desc = function (key) { return LiteMol.Bootstrap.Visualization.Molecule.TypeDescriptions[key]; };
-                            var showTypeOptions = this.controller.latestState.showTypeOptions;
-                            var showThemeOptions = this.controller.latestState.showThemeOptions;
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.ExpandableGroup, {select: Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Visualization.Molecule.Types, caption: function (k) { return desc(k).label; }, current: params.style.type, onChange: function (o) { return _this.controller.updateTemplate(o, LiteMol.Bootstrap.Visualization.Molecule.Default.ForType); }, label: 'Type'}), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, {isExpanded: showTypeOptions, onChange: function (e) { return _this.controller.setState({ showTypeOptions: e }); }}), options: controls, isExpanded: showTypeOptions}), 
-                                Plugin.React.createElement(Plugin.Controls.ExpandableGroup, {select: Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Bootstrap.Visualization.Molecule.Default.Themes, caption: function (k) { return k.name; }, current: params.style.theme.template, onChange: function (o) { return _this.controller.updateThemeDefinition(o); }, label: 'Coloring'}), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, {isExpanded: showThemeOptions, onChange: function (e) { return _this.controller.setState({ showThemeOptions: e }); }}), options: this.createColors(), isExpanded: showThemeOptions}));
+                            var showTypeOptions = this.getPersistentState('showTypeOptions', false);
+                            var showThemeOptions = this.getPersistentState('showThemeOptions', false);
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.Types, caption: function (k) { return desc(k).label; }, current: params.style.type, onChange: function (o) { return _this.controller.updateTemplate(o, LiteMol.Bootstrap.Visualization.Molecule.Default.ForType); }, label: 'Type' }), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: showTypeOptions, onChange: function (e) { return _this.setPersistentState('showTypeOptions', e); } }), options: controls, isExpanded: showTypeOptions }),
+                                Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.Default.Themes, caption: function (k) { return k.name; }, current: params.style.theme.template, onChange: function (o) { return _this.controller.updateThemeDefinition(o); }, label: 'Coloring' }), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: showThemeOptions, onChange: function (e) { return _this.setPersistentState('showThemeOptions', e); } }), options: this.createColors(), isExpanded: showThemeOptions }));
                         };
                         return CreateVisual;
                     }(Transform.ControllerBase));
@@ -75725,11 +76723,29 @@ var LiteMol;
                 var Density;
                 (function (Density) {
                     "use strict";
-                    var IsoValue = function (props) { return Plugin.React.createElement(Plugin.Controls.Slider, __assign({label: 'Iso Value (\u03C3)'}, props, {step: 0.001})); };
+                    var IsoValue = function (props) {
+                        return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: Plugin.React.createElement(Plugin.Controls.Slider, { label: props.isSigma ? 'Iso Value (\u03C3)' : 'Iso Value', onChange: props.onChangeValue, min: props.min, max: props.max, value: props.value, step: 0.001 }), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: props.view.getPersistentState('showIsoValueType', false), onChange: function (e) { return props.view.setPersistentState('showIsoValueType', e); } }), options: [Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return props.onChangeType(v ? LiteMol.Bootstrap.Visualization.Density.IsoValueType.Sigma : LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute); }, value: props.isSigma, label: 'Relative (\u03C3)' })], isExpanded: props.view.getPersistentState('showIsoValueType', false) });
+                    };
+                    function isoValueAbsoluteToSigma(data, value, min, max) {
+                        var ret = (value - data.valuesInfo.mean) / data.valuesInfo.sigma;
+                        if (ret > max)
+                            return max;
+                        if (ret < min)
+                            return min;
+                        return ret;
+                    }
+                    function isoValueSigmaToAbsolute(data, value) {
+                        var ret = data.valuesInfo.mean + value * data.valuesInfo.sigma;
+                        if (ret > data.valuesInfo.max)
+                            return data.valuesInfo.max;
+                        if (ret < data.valuesInfo.min)
+                            return data.valuesInfo.min;
+                        return ret;
+                    }
                     var ParseData = (function (_super) {
                         __extends(ParseData, _super);
                         function ParseData() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         ParseData.prototype.renderControls = function () {
                             var _this = this;
@@ -75739,16 +76755,16 @@ var LiteMol;
                             var round = LiteMol.Bootstrap.Utils.round;
                             if (this.isUpdate) {
                                 var data = this.controller.entity.props.data;
-                                return Plugin.React.createElement("div", null, 
-                                    Plugin.React.createElement(Plugin.Controls.RowText, {label: 'Format', value: params.format.name}), 
-                                    Plugin.React.createElement(Plugin.Controls.RowText, {label: 'Sigma', value: round(data.valuesInfo.sigma, 3)}), 
-                                    Plugin.React.createElement(Plugin.Controls.RowText, {label: 'Mean', value: round(data.valuesInfo.mean, 3)}), 
-                                    Plugin.React.createElement(Plugin.Controls.RowText, {label: 'Value Range', value: "[" + round(data.valuesInfo.min, 3) + ", " + round(data.valuesInfo.max, 3) + "]"}), 
-                                    Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.updateParams({ normalize: v }); }, value: normalize, label: 'Normalized'}));
+                                return Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement(Plugin.Controls.RowText, { label: 'Format', value: params.format.name }),
+                                    Plugin.React.createElement(Plugin.Controls.RowText, { label: 'Sigma', value: round(data.valuesInfo.sigma, 3) }),
+                                    Plugin.React.createElement(Plugin.Controls.RowText, { label: 'Mean', value: round(data.valuesInfo.mean, 3) }),
+                                    Plugin.React.createElement(Plugin.Controls.RowText, { label: 'Value Range', value: "[" + round(data.valuesInfo.min, 3) + ", " + round(data.valuesInfo.max, 3) + "]" }),
+                                    Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateParams({ normalize: v }); }, value: normalize, label: 'Normalized' }));
                             }
-                            return Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, {options: LiteMol.Core.Formats.Density.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format'}), 
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.updateParams({ normalize: v }); }, value: normalize, label: 'Normalized'}));
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Core.Formats.Density.SupportedFormats.All, caption: function (s) { return s.name; }, current: params.format, onChange: function (o) { return _this.updateParams({ format: o }); }, label: 'Format' }),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateParams({ normalize: v }); }, value: normalize, label: 'Normalized' }));
                         };
                         return ParseData;
                     }(Transform.ControllerBase));
@@ -75756,23 +76772,23 @@ var LiteMol;
                     var CreateVisual = (function (_super) {
                         __extends(CreateVisual, _super);
                         function CreateVisual() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateVisual.prototype.surface = function () {
                             var _this = this;
                             var data = LiteMol.Bootstrap.Tree.Node.findClosestNodeOfType(this.transformSourceEntity, [LiteMol.Bootstrap.Entity.Density.Data]);
                             var params = this.params.style.params;
-                            return Plugin.React.createElement(IsoValue, {onChange: function (v) { return _this.controller.updateStyleParams({ isoSigma: v }); }, min: -5, max: 5, value: params.isoSigma});
-                            // let options = [
-                            //     <Controls.Slider label='Smoothing' onChange={v => this.controller.updateStyleParams({ smoothing: v  })} 
-                            //         min={0} max={10} step={1} value={params.smoothing} title='Number of laplacian smoothing itrations.' />
-                            // ];
-                            // let showTypeOptions =  (this.controller.latestState as any).showTypeOptions;
-                            // return <Controls.ExpandableGroup
-                            //         select={iso}
-                            //         expander={<Controls.ControlGroupExpander isExpanded={showTypeOptions} onChange={e => this.controller.setState({ showTypeOptions: e } as any)}  />}
-                            //         options={options}
-                            //         isExpanded={showTypeOptions} />;
+                            var isSigma = params.isoValueType !== LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute;
+                            return Plugin.React.createElement(IsoValue, { view: this, onChangeValue: function (v) { return _this.controller.updateStyleParams({ isoValue: v }); }, onChangeType: function (v) {
+                                    if (v === params.isoValueType)
+                                        return;
+                                    if (v === LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute) {
+                                        _this.controller.updateStyleParams({ isoValue: isoValueSigmaToAbsolute(data.props.data, params.isoValue), isoValueType: v });
+                                    }
+                                    else {
+                                        _this.controller.updateStyleParams({ isoValue: isoValueAbsoluteToSigma(data.props.data, params.isoValue, -5, 5), isoValueType: v });
+                                    }
+                                }, min: isSigma ? -5 : data.props.data.valuesInfo.min, max: isSigma ? 5 : data.props.data.valuesInfo.max, isSigma: params.isoValueType !== LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute, value: params.isoValue });
                         };
                         CreateVisual.prototype.colors = function () {
                             var _this = this;
@@ -75780,21 +76796,22 @@ var LiteMol;
                             var theme = this.params.style.theme;
                             var colorControls;
                             var uc = theme.colors.get('Uniform');
-                            var uniform = Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {key: 'Uniform', label: 'Color', color: uc, onChange: function (c) { return _this.controller.updateThemeColor('Uniform', c); }});
-                            var controls = theme.colors
-                                .filter(function (c, n) { return n !== 'Uniform'; })
-                                .map(function (c, n) { return Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {key: n, label: n, color: c, onChange: function (c) { return _this.controller.updateThemeColor(n, c); }}); }).toArray();
-                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, {definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); }}));
+                            var uniform = Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { key: 'Uniform', label: 'Color', color: uc, onChange: function (c) { return _this.controller.updateThemeColor('Uniform', c); } });
+                            var controls = [];
+                            // theme.colors!
+                            //     .filter((c, n) => n !== 'Uniform')
+                            //     .map((c, n) => <Controls.ToggleColorPicker  key={n} label={n!} color={c!} onChange={c => this.controller.updateThemeColor(n!, c) } />).toArray();
+                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, { definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); } }));
                             var visualParams = this.params.style.params;
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: visualParams.smoothing, title: 'Number of laplacian smoothing itrations.'}));
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe'}));
-                            var showThemeOptions = this.controller.latestState.showThemeOptions;
-                            return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, {select: uniform, expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, {isExpanded: showThemeOptions, onChange: function (e) { return _this.controller.setState({ showThemeOptions: e }); }}), options: controls, isExpanded: showThemeOptions});
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: visualParams.smoothing, title: 'Number of laplacian smoothing itrations.' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe' }));
+                            var showThemeOptions = this.getPersistentState('showThemeOptions', false);
+                            return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: uniform, expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: showThemeOptions, onChange: function (e) { return _this.setPersistentState('showThemeOptions', e); } }), options: controls, isExpanded: showThemeOptions });
                         };
                         CreateVisual.prototype.renderControls = function () {
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                this.surface(), 
+                            return Plugin.React.createElement("div", null,
+                                this.surface(),
                                 this.colors());
                         };
                         return CreateVisual;
@@ -75803,23 +76820,24 @@ var LiteMol;
                     var CreateVisualBehaviour = (function (_super) {
                         __extends(CreateVisualBehaviour, _super);
                         function CreateVisualBehaviour() {
-                            _super.apply(this, arguments);
+                            return _super.apply(this, arguments) || this;
                         }
                         CreateVisualBehaviour.prototype.surface = function () {
                             var _this = this;
                             var data = LiteMol.Bootstrap.Tree.Node.findClosestNodeOfType(this.transformSourceEntity, [LiteMol.Bootstrap.Entity.Density.Data]);
-                            var visualParams = this.params.style.params;
-                            return Plugin.React.createElement(IsoValue, {onChange: function (v) { return _this.controller.updateStyleParams({ isoSigma: v }); }, min: this.params.isoSigmaMin, max: this.params.isoSigmaMax, value: visualParams.isoSigma});
-                            // let options = [
-                            //     <Controls.Slider label='Smoothing' onChange={v => this.controller.updateStyleParams({ smoothing: v  })} 
-                            //         min={0} max={10} step={1} value={visualParams.smoothing} title='Number of laplacian smoothing itrations.' />
-                            // ];
-                            // let showTypeOptions =  (this.controller.latestState as any).showTypeOptions;
-                            // return <Controls.ExpandableGroup
-                            //         select={iso}
-                            //         expander={<Controls.ControlGroupExpander isExpanded={showTypeOptions} onChange={e => this.controller.setState({ showTypeOptions: e } as any)}  />}
-                            //         options={options}
-                            //         isExpanded={showTypeOptions} />;
+                            var params = this.params;
+                            var visualParams = params.style.params;
+                            var isSigma = visualParams.isoValueType !== LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute;
+                            return Plugin.React.createElement(IsoValue, { view: this, onChangeValue: function (v) { return _this.controller.updateStyleParams({ isoValue: v }); }, onChangeType: function (v) {
+                                    if (v === visualParams.isoValueType)
+                                        return;
+                                    if (v === LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute) {
+                                        _this.controller.updateStyleParams({ isoValue: isoValueSigmaToAbsolute(data.props.data, visualParams.isoValue), isoValueType: v });
+                                    }
+                                    else {
+                                        _this.controller.updateStyleParams({ isoValue: isoValueAbsoluteToSigma(data.props.data, visualParams.isoValue, _this.params.isoSigmaMin, params.isoSigmaMax), isoValueType: v });
+                                    }
+                                }, min: isSigma ? params.isoSigmaMin : data.props.data.valuesInfo.min, max: isSigma ? params.isoSigmaMax : data.props.data.valuesInfo.max, isSigma: visualParams.isoValueType !== LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute, value: visualParams.isoValue });
                         };
                         CreateVisualBehaviour.prototype.colors = function () {
                             var _this = this;
@@ -75827,26 +76845,34 @@ var LiteMol;
                             var theme = this.params.style.theme;
                             var colorControls;
                             var uc = theme.colors.get('Uniform');
-                            var uniform = Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {key: 'Uniform', label: 'Color', color: uc, onChange: function (c) { return _this.controller.updateThemeColor('Uniform', c); }});
-                            var controls = theme.colors
-                                .filter(function (c, n) { return n !== 'Uniform'; })
-                                .map(function (c, n) { return Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {key: n, label: n, color: c, onChange: function (c) { return _this.controller.updateThemeColor(n, c); }}); }).toArray();
-                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, {definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); }}));
+                            var uniform = Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { key: 'Uniform', label: 'Color', color: uc, onChange: function (c) { return _this.controller.updateThemeColor('Uniform', c); } });
+                            var controls = [];
+                            // theme.colors!
+                            //     .filter((c, n) => n !== 'Uniform')
+                            //     .map((c, n) => <Controls.ToggleColorPicker  key={n} label={n!} color={c!} onChange={c => this.controller.updateThemeColor(n!, c) } />).toArray();
+                            controls.push(Plugin.React.createElement(Transform.TransparencyControl, { definition: theme.transparency, onChange: function (d) { return _this.controller.updateThemeTransparency(d); } }));
                             var visualParams = this.params.style.params;
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: visualParams.smoothing, title: 'Number of laplacian smoothing itrations.'}));
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe'}));
-                            // controls.push(<Controls.Toggle 
-                            //         onChange={v => this.controller.updateStyleTheme({ wireframe: v }) } value={theme.wireframe} label='Wireframe' />);
-                            var showThemeOptions = this.controller.latestState.showThemeOptions;
-                            return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, {select: uniform, expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, {isExpanded: showThemeOptions, onChange: function (e) { return _this.controller.setState({ showThemeOptions: e }); }}), options: controls, isExpanded: showThemeOptions});
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 10, step: 1, value: visualParams.smoothing, title: 'Number of laplacian smoothing itrations.' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe' }));
+                            var showThemeOptions = this.getPersistentState('showThemeOptions', false);
+                            return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: uniform, expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: showThemeOptions, onChange: function (e) { return _this.setPersistentState('showThemeOptions', e); } }), options: controls, isExpanded: showThemeOptions });
+                        };
+                        CreateVisualBehaviour.prototype.show = function () {
+                            var _this = this;
+                            var selLabel = 'Around Selection';
+                            var allLabel = 'Everything';
+                            return Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: [selLabel, allLabel], caption: function (s) { return s; }, current: this.params.showFull ? allLabel : selLabel, onChange: function (o) { return _this.autoUpdateParams({ showFull: o === allLabel }); }, label: 'Show' });
                         };
                         CreateVisualBehaviour.prototype.renderControls = function () {
                             var _this = this;
                             var params = this.params;
-                            return Plugin.React.createElement("div", null, 
-                                this.surface(), 
-                                this.colors(), 
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'Radius', onChange: function (v) { return _this.controller.updateRadius(v); }, min: 0, max: 10, step: 0.005, value: params.radius}));
+                            return Plugin.React.createElement("div", null,
+                                this.surface(),
+                                this.colors(),
+                                this.show(),
+                                !params.showFull
+                                    ? Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Radius', onChange: function (v) { return _this.controller.updateRadius(v); }, min: params.minRadius !== void 0 ? params.minRadius : 0, max: params.maxRadius !== void 0 ? params.maxRadius : 10, step: 0.005, value: params.radius })
+                                    : void 0);
                         };
                         return CreateVisualBehaviour;
                     }(Transform.ControllerBase));
@@ -75872,7 +76898,7 @@ var LiteMol;
                 var Log = (function (_super) {
                     __extends(Log, _super);
                     function Log() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Log.prototype.componentWillMount = function () {
                         var _this = this;
@@ -75890,42 +76916,40 @@ var LiteMol;
                     Log.prototype.render = function () {
                         var entries = this.controller.latestState.entries;
                         var count = entries.count();
-                        return Plugin.React.createElement("div", {className: 'lm-log-wrap'}, 
-                            Plugin.React.createElement("div", {className: 'lm-log', ref: 'log'}, 
-                                Plugin.React.createElement("ul", {className: 'list-unstyled'}, entries.map(function (entry, i, arr) {
+                        return Plugin.React.createElement("div", { className: 'lm-log-wrap' },
+                            Plugin.React.createElement("div", { className: 'lm-log', ref: 'log' },
+                                Plugin.React.createElement("ul", { className: 'lm-list-unstyled' }, entries.map(function (entry, i, arr) {
                                     var msg;
                                     var e = entry;
                                     switch (e.type) {
                                         case EntryType.Message:
-                                            msg = Plugin.React.createElement("div", {className: 'lm-log-entry'}, e.message);
+                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' }, e.message);
                                             break;
                                         case EntryType.Error:
-                                            msg = Plugin.React.createElement("div", {className: 'lm-log-entry'}, 
-                                                Plugin.React.createElement("span", {className: 'label label-danger'}, "Error"), 
-                                                " ", 
+                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
+                                                Plugin.React.createElement("span", { className: 'label label-danger' }, "Error"),
+                                                " ",
                                                 e.message);
                                             break;
                                         case EntryType.Warning:
-                                            msg = Plugin.React.createElement("div", {className: 'lm-log-entry'}, 
-                                                Plugin.React.createElement("span", {className: 'label label-warning'}, "Warning"), 
-                                                " ", 
+                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
+                                                Plugin.React.createElement("span", { className: 'label label-warning' }, "Warning"),
+                                                " ",
                                                 e.message);
                                             break;
                                         case EntryType.Info:
-                                            msg = Plugin.React.createElement("div", {className: 'lm-log-entry'}, 
-                                                Plugin.React.createElement("span", {className: 'label label-info'}, "Info"), 
-                                                " ", 
+                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
+                                                Plugin.React.createElement("span", { className: 'label label-info' }, "Info"),
+                                                " ",
                                                 e.message);
                                             break;
                                     }
                                     var t = LiteMol.Bootstrap.Utils.formatTime(e.timestamp);
-                                    return Plugin.React.createElement("li", {key: i}, 
-                                        Plugin.React.createElement("div", {className: 'lm-log-entry-badge lm-log-entry-' + EntryType[e.type].toLowerCase()}), 
-                                        Plugin.React.createElement("div", {className: 'lm-log-timestamp'}, t), 
-                                        Plugin.React.createElement("div", {className: 'lm-log-entry'}, e.message));
-                                }))
-                            )
-                        );
+                                    return Plugin.React.createElement("li", { key: i },
+                                        Plugin.React.createElement("div", { className: 'lm-log-entry-badge lm-log-entry-' + EntryType[e.type].toLowerCase() }),
+                                        Plugin.React.createElement("div", { className: 'lm-log-timestamp' }, t),
+                                        Plugin.React.createElement("div", { className: 'lm-log-entry' }, e.message));
+                                }))));
                     };
                     return Log;
                 }(Views.View));
@@ -75949,43 +76973,40 @@ var LiteMol;
                 var TaskState = (function (_super) {
                     __extends(TaskState, _super);
                     function TaskState() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     TaskState.prototype.render = function () {
                         var info = this.props.info;
-                        return Plugin.React.createElement("div", {className: 'lm-task-state'}, 
-                            Plugin.React.createElement("div", null, 
-                                info.abort ? Plugin.React.createElement(Plugin.Controls.Button, {onClick: function () { return info.abort.call(null); }, style: 'remove', icon: 'abort', title: 'Abort', customClass: 'btn-icon'}) : void 0, 
-                                Plugin.React.createElement("div", null, 
-                                    info.name, 
-                                    ": ", 
-                                    info.message))
-                        );
+                        return Plugin.React.createElement("div", { className: 'lm-task-state' },
+                            Plugin.React.createElement("div", null,
+                                info.abort ? Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { return info.abort.call(null); }, style: 'remove', icon: 'abort', title: 'Abort', customClass: 'lm-btn-icon' }) : void 0,
+                                Plugin.React.createElement("div", null,
+                                    info.name,
+                                    ": ",
+                                    info.message)));
                     };
                     return TaskState;
                 }(Plugin.React.Component));
                 var Overlay = (function (_super) {
                     __extends(Overlay, _super);
                     function Overlay() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Overlay.prototype.render = function () {
                         var state = this.controller.latestState;
                         if (!state.tasks.count())
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         var tasks = [];
-                        state.tasks.forEach(function (t, k) { return tasks.push(Plugin.React.createElement(TaskState, {key: k, info: t})); });
+                        state.tasks.forEach(function (t, k) { return tasks.push(Plugin.React.createElement(TaskState, { key: k, info: t })); });
                         //    tasks.push(<span><TaskState key={-1} info={{ message: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut te', name: 'occaecat ', abort: () => {} }} /><br/></span>)
                         //    tasks.push(<br/>)
                         //    tasks.push(<TaskState key={-2} info={{ message: 'uam metus. Duis risus. F', name: 'dsads' }} />)
                         //   tasks.push(<TaskState key={-3} info={{ message: 'm dapibus fermentum ipsum. Lorem ipsum dolor', name: 'bibendum ', abort: () => {} }} />)          
-                        return Plugin.React.createElement("div", {className: 'lm-overlay'}, 
-                            Plugin.React.createElement("div", {className: 'lm-overlay-background'}), 
-                            Plugin.React.createElement("div", {className: 'lm-overlay-content-wrap'}, 
-                                Plugin.React.createElement("div", {className: 'lm-overlay-content'}, 
-                                    Plugin.React.createElement("div", null, tasks)
-                                )
-                            ));
+                        return Plugin.React.createElement("div", { className: 'lm-overlay' },
+                            Plugin.React.createElement("div", { className: 'lm-overlay-background' }),
+                            Plugin.React.createElement("div", { className: 'lm-overlay-content-wrap' },
+                                Plugin.React.createElement("div", { className: 'lm-overlay-content' },
+                                    Plugin.React.createElement("div", null, tasks))));
                     };
                     return Overlay;
                 }(Views.View));
@@ -75993,22 +77014,75 @@ var LiteMol;
                 var BackgroundTasks = (function (_super) {
                     __extends(BackgroundTasks, _super);
                     function BackgroundTasks() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     BackgroundTasks.prototype.render = function () {
                         var state = this.controller.latestState;
                         if (!state.tasks.count())
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         var tasks = [];
-                        state.tasks.forEach(function (t, k) { return tasks.push(Plugin.React.createElement(TaskState, {key: k, info: t, isSmall: true})); });
+                        state.tasks.forEach(function (t, k) { return tasks.push(Plugin.React.createElement(TaskState, { key: k, info: t, isSmall: true })); });
                         //    tasks.push(<TaskState key={-1} isSmall={true} info={{ message: 's diam. Vivamus luctus egestas l', name: 'bibendum ', abort: () => {} }} />)
                         //    tasks.push(<TaskState key={-3} isSmall={true} info={{ message: 'ccaecat cupidatat non proid', name: 'dsadsad', abort: () => {} }} />)
                         //    tasks.push(<TaskState key={-2} isSmall={true} info={{ message: 'modo dui eget wisi. Nullam sap', name: 'dsads' }} />)
-                        return Plugin.React.createElement("div", {className: 'lm-background-tasks'}, tasks);
+                        return Plugin.React.createElement("div", { className: 'lm-background-tasks' }, tasks);
                     };
                     return BackgroundTasks;
                 }(Views.View));
                 Context.BackgroundTasks = BackgroundTasks;
+            })(Context = Views.Context || (Views.Context = {}));
+        })(Views = Plugin.Views || (Plugin.Views = {}));
+    })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Plugin;
+    (function (Plugin) {
+        var Views;
+        (function (Views) {
+            var Context;
+            (function (Context) {
+                "use strict";
+                var ToastEntry = (function (_super) {
+                    __extends(ToastEntry, _super);
+                    function ToastEntry() {
+                        return _super.apply(this, arguments) || this;
+                    }
+                    ToastEntry.prototype.render = function () {
+                        var entry = this.props.entry;
+                        return Plugin.React.createElement("div", { className: 'lm-toast-entry' },
+                            Plugin.React.createElement("div", { className: 'lm-toast-title' }, entry.title),
+                            Plugin.React.createElement("div", { className: 'lm-toast-message' }, entry.message),
+                            Plugin.React.createElement("div", { className: 'lm-toast-clear' }),
+                            Plugin.React.createElement("div", { className: 'lm-toast-hide' },
+                                Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { return (entry.hide || function () { }).call(null); }, style: 'link', icon: 'abort', title: 'Hide', customClass: 'lm-btn-icon' })));
+                    };
+                    return ToastEntry;
+                }(Plugin.React.Component));
+                var Toast = (function (_super) {
+                    __extends(Toast, _super);
+                    function Toast() {
+                        return _super.apply(this, arguments) || this;
+                    }
+                    Toast.prototype.render = function () {
+                        var state = this.controller.latestState;
+                        if (!state.entries.count())
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
+                        var entries = [];
+                        state.entries.forEach(function (t, k) { return entries.push(t); });
+                        entries.sort(function (x, y) { return x.serialNumber - y.serialNumber; });
+                        var toasts = entries.map(function (e) { return Plugin.React.createElement(ToastEntry, { key: e.serialNumber, entry: e }); });
+                        // toasts.push(<ToastEntry key={0} entry={{ message: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut te.', title: 'Test Title' } as any} />);
+                        // toasts.push(<ToastEntry key={1} entry={{ message: 'Lorem ipsum, consectetuer adipiscin te.', title: 'Title' } as any} />);
+                        return Plugin.React.createElement("div", { className: 'lm-toast-container' },
+                            Plugin.React.createElement("div", null, toasts));
+                    };
+                    return Toast;
+                }(Views.View));
+                Context.Toast = Toast;
             })(Context = Views.Context || (Views.Context = {}));
         })(Views = Plugin.Views || (Plugin.Views = {}));
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
@@ -76045,13 +77119,14 @@ var LiteMol;
                         cls = 'partial';
                         title = 'Show';
                     }
-                    return Plugin.React.createElement(Plugin.Controls.Button, {title: title, onClick: command, icon: 'visual-visibility', style: 'link', customClass: 'lm-entity-tree-entry-toggle-visible lm-entity-tree-entry-toggle-visible-' + cls});
+                    return Plugin.React.createElement(Plugin.Controls.Button, { title: title, onClick: command, icon: 'visual-visibility', style: 'link', customClass: "lm-entity-tree-entry-toggle-visible lm-entity-tree-entry-toggle-visible-" + cls });
                 };
                 var Entity = (function (_super) {
                     __extends(Entity, _super);
                     function Entity() {
-                        _super.apply(this, arguments);
-                        this.renderedVersion = -1;
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.renderedVersion = -1;
+                        return _this;
                     }
                     Entity.prototype.ensureVisible = function () {
                         if (this.ctx.currentEntity === this.props.node) {
@@ -76103,19 +77178,17 @@ var LiteMol;
                         var title = props.label;
                         if (props.description)
                             title += ' (' + props.description + ')';
-                        return Plugin.React.createElement("div", {className: 'lm-entity-tree-entry-body' + (this.ctx.currentEntity === entity ? ' lm-entity-tree-entry-current' : '') + (this.isOnCurrentPath() ? ' lm-entity-tree-entry-current-path' : ''), ref: 'root'}, 
-                            Plugin.React.createElement(Entity_1.Badge, {type: entity.type.info}), 
-                            Plugin.React.createElement("div", {className: 'lm-entity-tree-entry-label-wrap'}, 
-                                Plugin.React.createElement(Plugin.Controls.Button, {onClick: function () { return LiteMol.Bootstrap.Command.Entity.SetCurrent.dispatch(_this.ctx, entity); }, customClass: 'lm-entity-tree-entry-label', style: 'link', title: title}, 
-                                    Plugin.React.createElement("span", null, 
-                                        props.label, 
-                                        Plugin.React.createElement("span", {className: 'lm-entity-tree-entry-label-tag'}, props.description ? ' ' + props.description : void 0))
-                                )
-                            ), 
+                        return Plugin.React.createElement("div", { className: 'lm-entity-tree-entry-body' + (this.ctx.currentEntity === entity ? ' lm-entity-tree-entry-current' : '') + (this.isOnCurrentPath() ? ' lm-entity-tree-entry-current-path' : ''), ref: 'root' },
+                            Plugin.React.createElement(Entity_1.Badge, { type: entity.type.info }),
+                            Plugin.React.createElement("div", { className: 'lm-entity-tree-entry-label-wrap' },
+                                Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { return LiteMol.Bootstrap.Command.Entity.SetCurrent.dispatch(_this.ctx, entity); }, customClass: 'lm-entity-tree-entry-label', style: 'link', title: title },
+                                    Plugin.React.createElement("span", null,
+                                        props.label,
+                                        Plugin.React.createElement("span", { className: 'lm-entity-tree-entry-label-tag' }, props.description ? ' ' + props.description : void 0)))),
                             !isRoot || childCount
-                                ? Plugin.React.createElement(Plugin.Controls.Button, {title: 'Remove', onClick: function () { return LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(entity.tree.context, entity); }, icon: 'remove', style: 'link', customClass: 'lm-entity-tree-entry-remove'})
-                                : void 0, 
-                            isRoot && !childCount ? void 0 : Plugin.React.createElement(Entity_1.VisibilityControl, {entity: entity}));
+                                ? Plugin.React.createElement(Plugin.Controls.Button, { title: 'Remove', onClick: function () { return LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(entity.tree.context, entity); }, icon: 'remove', style: 'link', customClass: 'lm-entity-tree-entry-remove' })
+                                : void 0,
+                            isRoot && !childCount ? void 0 : Plugin.React.createElement(Entity_1.VisibilityControl, { entity: entity }));
                         //<RemoveEntityControl entity={entity} />
                     };
                     Entity.prototype.renderFlat = function () {
@@ -76123,9 +77196,9 @@ var LiteMol;
                         var children = [];
                         for (var _i = 0, _a = node.children; _i < _a.length; _i++) {
                             var c = _a[_i];
-                            children.push(Plugin.React.createElement(Entity, {key: c.id, node: c, tree: this.props.tree}));
+                            children.push(Plugin.React.createElement(Entity, { key: c.id, node: c, tree: this.props.tree }));
                         }
-                        return Plugin.React.createElement("div", {key: node.id}, children);
+                        return Plugin.React.createElement("div", { key: node.id }, children);
                     };
                     Entity.prototype.isFullyBound = function () {
                         var isFullyBound = true;
@@ -76169,35 +77242,36 @@ var LiteMol;
                             if (c.isHidden)
                                 continue;
                             if (!isRoot)
-                                children.push(Plugin.React.createElement(Entity, {key: c.id, node: c, tree: this.props.tree}));
+                                children.push(Plugin.React.createElement(Entity, { key: c.id, node: c, tree: this.props.tree }));
                             childCount++;
                         }
                         var expander;
                         if (children.length) {
                             expander = state.isCollapsed
-                                ? Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', title: 'Expand', onClick: function () { return LiteMol.Bootstrap.Command.Entity.ToggleExpanded.dispatch(_this.ctx, node); }, icon: 'expand', customClass: 'lm-entity-tree-entry-toggle-group'})
-                                : Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', title: 'Collapse', onClick: function () { return LiteMol.Bootstrap.Command.Entity.ToggleExpanded.dispatch(_this.ctx, node); }, icon: 'collapse', customClass: 'lm-entity-tree-entry-toggle-group'});
+                                ? Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', title: 'Expand', onClick: function () { return LiteMol.Bootstrap.Command.Entity.ToggleExpanded.dispatch(_this.ctx, node); }, icon: 'expand', customClass: 'lm-entity-tree-entry-toggle-group' })
+                                : Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', title: 'Collapse', onClick: function () { return LiteMol.Bootstrap.Command.Entity.ToggleExpanded.dispatch(_this.ctx, node); }, icon: 'collapse', customClass: 'lm-entity-tree-entry-toggle-group' });
                         }
                         else {
                             if (node.state.visibility === 0 /* Full */ && node.type.traits.isFocusable) {
-                                expander = Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', icon: 'focus-on-visual', title: 'Focus', onClick: function () { return LiteMol.Bootstrap.Command.Entity.Focus.dispatch(_this.ctx, _this.ctx.select(node)); }, customClass: 'lm-entity-tree-entry-toggle-group'});
+                                expander = Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'focus-on-visual', title: 'Focus', onClick: function () { return LiteMol.Bootstrap.Command.Entity.Focus.dispatch(_this.ctx, _this.ctx.select(node)); }, customClass: 'lm-entity-tree-entry-toggle-group' });
                             }
                         }
-                        var main = Plugin.React.createElement("div", {className: 'lm-entity-tree-entry', onMouseEnter: function () { return _this.highlight(true); }, onMouseLeave: function () { return _this.highlight(false); }, onTouchStart: function () { return setTimeout(function () { return _this.highlight(true); }, 1000 / 30); }, onTouchCancel: function () { return setTimeout(function () { return _this.highlight(false); }, 1000 / 30); }, onTouchEnd: function () { return setTimeout(function () { return _this.highlight(false); }, 1000 / 30); }}, 
-                            expander, 
+                        var main = Plugin.React.createElement("div", { className: 'lm-entity-tree-entry', onMouseEnter: function () { return _this.highlight(true); }, onMouseLeave: function () { return _this.highlight(false); }, onTouchStart: function () { return setTimeout(function () { return _this.highlight(true); }, 1000 / 30); }, onTouchCancel: function () { return setTimeout(function () { return _this.highlight(false); }, 1000 / 30); }, onTouchEnd: function () { return setTimeout(function () { return _this.highlight(false); }, 1000 / 30); } },
+                            expander,
                             this.row(childCount));
-                        return Plugin.React.createElement("div", {key: node.id, className: (isRoot ? 'lm-entity-tree-root' : '')}, 
-                            main, 
-                            Plugin.React.createElement("div", {className: 'lm-entity-tree-children-wrap', style: { display: state.isCollapsed ? 'none' : 'block' }}, children));
+                        return Plugin.React.createElement("div", { key: node.id, className: (isRoot ? 'lm-entity-tree-root' : '') },
+                            main,
+                            Plugin.React.createElement("div", { className: 'lm-entity-tree-children-wrap', style: { display: state.isCollapsed ? 'none' : 'block' } }, children));
                     };
                     return Entity;
                 }(Views.ObserverView));
                 var Tree = (function (_super) {
                     __extends(Tree, _super);
                     function Tree() {
-                        _super.apply(this, arguments);
-                        this.renderedVersion = -1;
-                        this.splash = Entity_1.SplashInfo.Info();
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.renderedVersion = -1;
+                        _this.splash = Entity_1.SplashInfo.Info();
+                        return _this;
                     }
                     Tree.prototype.scrollIntoView = function (element) {
                         var node = this.refs['chilren'];
@@ -76239,11 +77313,11 @@ var LiteMol;
                             var c = _a[_i];
                             if (c.isHidden)
                                 continue;
-                            children.push(Plugin.React.createElement(Entity, {key: c.id, node: c, tree: this}));
+                            children.push(Plugin.React.createElement(Entity, { key: c.id, node: c, tree: this }));
                         }
-                        return Plugin.React.createElement("div", {className: 'lm-entity-tree', ref: 'root'}, 
-                            Plugin.React.createElement(Entity, {key: root.id, node: root, tree: this}), 
-                            Plugin.React.createElement("div", {className: 'lm-entity-tree-children'}, children.length ? children : this.splash));
+                        return Plugin.React.createElement("div", { className: 'lm-entity-tree', ref: 'root' },
+                            Plugin.React.createElement(Entity, { key: root.id, node: root, tree: this }),
+                            Plugin.React.createElement("div", { className: 'lm-entity-tree-children' }, children.length ? children : this.splash));
                     };
                     return Tree;
                 }(Views.View));
@@ -76264,11 +77338,11 @@ var LiteMol;
             var Entity;
             (function (Entity) {
                 "use strict";
-                Entity.Remove = function (props) { return Plugin.React.createElement(Plugin.Controls.Button, {onClick: function () { LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(props.entity.tree.context, props.entity); props.onRemove.call(null); }, style: 'link', icon: 'remove', customClass: 'lm-remove-entity btn-icon'}); };
+                Entity.Remove = function (props) { return Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(props.entity.tree.context, props.entity); props.onRemove.call(null); }, style: 'link', icon: 'remove', customClass: 'lm-remove-entity lm-btn-icon' }); };
                 var Badge = (function (_super) {
                     __extends(Badge, _super);
                     function Badge() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     Badge.prototype.shouldComponentUpdate = function (nextProps, nextState, nextContext) {
                         return this.props.type !== nextProps.type;
@@ -76308,9 +77382,8 @@ var LiteMol;
                     };
                     Badge.prototype.render = function () {
                         var type = this.props.type;
-                        return Plugin.React.createElement("div", {className: 'lm-entity-badge lm-entity-badge-' + this.props.type.typeClass, title: type.name}, 
-                            Plugin.React.createElement("div", null, type === LiteMol.Bootstrap.Entity.Root.info ? void 0 : this.createBadge(type.shortName))
-                        );
+                        return Plugin.React.createElement("div", { className: 'lm-entity-badge lm-entity-badge-' + this.props.type.typeClass, title: type.name },
+                            Plugin.React.createElement("div", null, type === LiteMol.Bootstrap.Entity.Root.info ? void 0 : this.createBadge(type.shortName)));
                     };
                     return Badge;
                 }(Plugin.React.Component));
@@ -76318,8 +77391,9 @@ var LiteMol;
                 var CurrentEntityControl = (function (_super) {
                     __extends(CurrentEntityControl, _super);
                     function CurrentEntityControl() {
-                        _super.apply(this, arguments);
-                        this.state = { current: void 0 };
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.state = { current: void 0 };
+                        return _this;
                     }
                     CurrentEntityControl.prototype.componentWillMount = function () {
                         var _this = this;
@@ -76332,22 +77406,19 @@ var LiteMol;
                     CurrentEntityControl.prototype.render = function () {
                         var _this = this;
                         if (!this.state.current) {
-                            return Plugin.React.createElement("div", {className: 'lm-entity-info'}, 
-                                Plugin.React.createElement("div", null, 
-                                    Plugin.React.createElement("span", null, this.controller.appName)
-                                )
-                            );
+                            return Plugin.React.createElement("div", { className: 'lm-entity-info' },
+                                Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("span", null, this.controller.appName)));
                         }
                         //<div>{this.controller.appVersion}</div> 
                         var entity = this.state.current;
-                        return Plugin.React.createElement("div", {className: 'lm-entity-info', title: entity.props.label + " " + (entity.props.description ? entity.props.description : '')}, 
-                            Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement(Badge, {type: entity.type.info}), 
-                                Plugin.React.createElement("span", null, 
-                                    entity.props.label, 
-                                    Plugin.React.createElement("span", null, entity.props.description)), 
-                                entity.parent === entity && !entity.children.length ? void 0 : Plugin.React.createElement(Entity.Remove, {entity: entity, onRemove: function () { return _this.forceUpdate(); }}))
-                        );
+                        return Plugin.React.createElement("div", { className: 'lm-entity-info', title: entity.props.label + " " + (entity.props.description ? entity.props.description : '') },
+                            Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Badge, { type: entity.type.info }),
+                                Plugin.React.createElement("span", null,
+                                    entity.props.label,
+                                    Plugin.React.createElement("span", null, entity.props.description)),
+                                entity.parent === entity && !entity.children.length ? void 0 : Plugin.React.createElement(Entity.Remove, { entity: entity, onRemove: function () { return _this.forceUpdate(); } })));
                         //<div>{entity.props.label}<span>{entity.props.description}</span></div>             
                     };
                     return CurrentEntityControl;
@@ -76356,42 +77427,43 @@ var LiteMol;
                 var SplashInfo;
                 (function (SplashInfo) {
                     SplashInfo.General = function () {
-                        return Plugin.React.createElement("div", {className: 'lm-entity-splash-general'}, 
-                            Plugin.React.createElement("div", null), 
-                            Plugin.React.createElement("span", {className: 'icon icon-info'}), 
+                        return Plugin.React.createElement("div", { className: 'lm-entity-splash-general' },
+                            Plugin.React.createElement("div", null),
+                            Plugin.React.createElement("span", { className: 'lm-icon lm-icon-info' }),
                             "The application operates on an entity tree structure that can be manipulated using the controls on the panel to the right.");
                     };
                     var ClassInfo = (function (_super) {
                         __extends(ClassInfo, _super);
                         function ClassInfo() {
-                            _super.apply(this, arguments);
-                            this.state = { isExpanded: false };
+                            var _this = _super.apply(this, arguments) || this;
+                            _this.state = { isExpanded: false };
+                            return _this;
                         }
                         //onClick={() => this.setState({isExpanded: !this.state.isExpanded} )}
                         //onMouseEnter={() => this.setState({isExpanded: true} )} onMouseLeave={() => this.setState({isExpanded: false} )}
                         ClassInfo.prototype.render = function () {
                             var _this = this;
-                            return Plugin.React.createElement("div", {className: 'lm-entity-splash-class lm-entity-splash-class-' + (this.state.isExpanded ? 'expanded' : 'collapsed')}, 
-                                Plugin.React.createElement("div", {onClick: function () { return _this.setState({ isExpanded: !_this.state.isExpanded }); }}, 
-                                    Plugin.React.createElement("div", null), 
-                                    Plugin.React.createElement("div", {className: 'lm-entity-badge-' + this.props.cls}), 
-                                    " ", 
-                                    Plugin.React.createElement("span", null, this.props.cls)), 
+                            return Plugin.React.createElement("div", { className: 'lm-entity-splash-class lm-entity-splash-class-' + (this.state.isExpanded ? 'expanded' : 'collapsed') },
+                                Plugin.React.createElement("div", { onClick: function () { return _this.setState({ isExpanded: !_this.state.isExpanded }); } },
+                                    Plugin.React.createElement("div", null),
+                                    Plugin.React.createElement("div", { className: 'lm-entity-badge-' + this.props.cls }),
+                                    " ",
+                                    Plugin.React.createElement("span", null, this.props.cls)),
                                 Plugin.React.createElement("div", null, this.props.desc));
                         };
                         return ClassInfo;
                     }(Plugin.React.Component));
                     SplashInfo.Info = function () {
-                        return Plugin.React.createElement("div", {className: 'lm-entity-splash'}, 
-                            Plugin.React.createElement(SplashInfo.General, null), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Root', desc: 'The root entity represents the starting point of all actions.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Action', desc: 'Represents a composition of one of more changes to the entity tree.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Data', desc: 'Low level data, for example a string or a CIF dictionary.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Object', desc: 'A more complex structure obtained from low level data. For example a molecule.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Visual', desc: 'A visual representation of an object.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Selection', desc: 'A description of a substructure of an object or a visual.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Behaviour', desc: 'Represents a dynamic behavior of the program. For example creating electron density surface when the selection changes.'}), 
-                            Plugin.React.createElement(ClassInfo, {cls: 'Group', desc: 'A collection of related entities.'}));
+                        return Plugin.React.createElement("div", { className: 'lm-entity-splash' },
+                            Plugin.React.createElement(SplashInfo.General, null),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Root', desc: 'The root entity represents the starting point of all actions.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Action', desc: 'Represents a composition of one of more changes to the entity tree.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Data', desc: 'Low level data, for example a string or a CIF dictionary.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Object', desc: 'A more complex structure obtained from low level data. For example a molecule.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Visual', desc: 'A visual representation of an object.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Selection', desc: 'A description of a substructure of an object or a visual.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Behaviour', desc: 'Represents a dynamic behavior of the program. For example creating electron density surface when the selection changes.' }),
+                            Plugin.React.createElement(ClassInfo, { cls: 'Group', desc: 'A collection of related entities.' }));
                     };
                 })(SplashInfo = Entity.SplashInfo || (Entity.SplashInfo = {}));
             })(Entity = Views.Entity || (Views.Entity = {}));
@@ -76413,9 +77485,25 @@ var LiteMol;
                 var ViewportControls = (function (_super) {
                     __extends(ViewportControls, _super);
                     function ViewportControls() {
-                        _super.apply(this, arguments);
-                        this.state = { showSceneOptions: false };
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.state = { showSceneOptions: false, showHelp: false };
+                        return _this;
                     }
+                    ViewportControls.prototype.help = function () {
+                        return Plugin.React.createElement("div", { className: 'lm-viewport-controls-scene-options lm-control' },
+                            Plugin.React.createElement(Plugin.Controls.HelpBox, { title: 'Rotate', content: Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("div", null, "Left button"),
+                                    Plugin.React.createElement("div", null, "One finger touch")) }),
+                            Plugin.React.createElement(Plugin.Controls.HelpBox, { title: 'Zoom', content: Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("div", null, "Right button"),
+                                    Plugin.React.createElement("div", null, "Pinch")) }),
+                            Plugin.React.createElement(Plugin.Controls.HelpBox, { title: 'Move', content: Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("div", null, "Middle button"),
+                                    Plugin.React.createElement("div", null, "Two finger touch")) }),
+                            Plugin.React.createElement(Plugin.Controls.HelpBox, { title: 'Slab', content: Plugin.React.createElement("div", null,
+                                    Plugin.React.createElement("div", null, "Mouse wheel"),
+                                    Plugin.React.createElement("div", null, "Three finger touch")) }));
+                    };
                     ViewportControls.prototype.render = function () {
                         var _this = this;
                         var state = this.controller.latestState;
@@ -76423,19 +77511,23 @@ var LiteMol;
                         var layoutController = this.controller.context.layout;
                         var layoutState = layoutController.latestState;
                         if (this.state.showSceneOptions) {
-                            options = Plugin.React.createElement("div", {className: 'lm-viewport-controls-scene-options lm-control'}, 
-                                Plugin.React.createElement(Plugin.Controls.Toggle, {onChange: function (v) { return _this.controller.setState({ enableFog: v }); }, value: state.enableFog, label: 'Fog'}), 
-                                Plugin.React.createElement(Plugin.Controls.Slider, {label: 'FOV', min: 30, max: 90, onChange: function (v) { return _this.controller.setState({ cameraFOV: v }); }, value: state.cameraFOV}), 
-                                Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, {color: state.clearColor, label: 'Background', position: 'below', onChange: function (c) { return _this.controller.setState({ clearColor: c }); }}));
+                            options = Plugin.React.createElement("div", { className: 'lm-viewport-controls-scene-options lm-control' },
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.setState({ enableFog: v }); }, value: state.enableFog, label: 'Fog' }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'FOV', min: 30, max: 90, onChange: function (v) { return _this.controller.setState({ cameraFOV: v }); }, value: state.cameraFOV }),
+                                Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { color: state.clearColor, label: 'Background', position: 'below', onChange: function (c) { return _this.controller.setState({ clearColor: c }); } }));
+                        }
+                        else if (this.state.showHelp) {
+                            options = this.help();
                         }
                         var controlsShown = !layoutState.hideControls;
-                        return Plugin.React.createElement("div", {className: 'lm-viewport-controls', onMouseLeave: function () { return _this.setState({ showSceneOptions: false }); }}, 
-                            Plugin.React.createElement("div", {className: 'lm-viewport-controls-buttons'}, 
-                                Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', active: this.state.showSceneOptions, customClass: 'btn-link-toggle-' + (this.state.showSceneOptions ? 'on' : 'off'), icon: 'settings', onClick: function (e) { return _this.setState({ showSceneOptions: !_this.state.showSceneOptions }); }, title: 'Scene Options'}), 
-                                Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', icon: 'screenshot', onClick: function (e) { window.open(_this.controller.scene.scene.screenshotAsDataURL(), '_blank'); }, title: 'Screenshot'}), 
-                                Plugin.React.createElement(Plugin.Controls.Button, {onClick: function () { layoutController.update({ hideControls: controlsShown }); _this.forceUpdate(); }, icon: 'tools', title: controlsShown ? 'Hide Controls' : 'Show Controls', active: controlsShown, customClass: 'btn-link-toggle-' + (controlsShown ? 'on' : 'off'), style: 'link'}), 
-                                Plugin.React.createElement(Plugin.Controls.Button, {onClick: function () { return layoutController.update({ isExpanded: !layoutState.isExpanded }); }, icon: 'expand-layout', title: layoutState.isExpanded ? 'Collapse' : 'Expand', active: layoutState.isExpanded, customClass: 'btn-link-toggle-' + (layoutState.isExpanded ? 'on' : 'off'), style: 'link'}), 
-                                Plugin.React.createElement(Plugin.Controls.Button, {style: 'link', icon: 'reset-scene', onClick: function (e) { return LiteMol.Bootstrap.Command.Visual.ResetScene.dispatch(_this.controller.context, void 0); }, title: 'Reset scene'})), 
+                        return Plugin.React.createElement("div", { className: 'lm-viewport-controls', onMouseLeave: function () { return _this.setState({ showSceneOptions: false, showHelp: false }); } },
+                            Plugin.React.createElement("div", { className: 'lm-viewport-controls-buttons' },
+                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', active: this.state.showHelp, customClass: 'lm-btn-link-toggle-' + (this.state.showHelp ? 'on' : 'off'), icon: 'help-circle', onClick: function (e) { return _this.setState({ showHelp: !_this.state.showHelp, showSceneOptions: false }); }, title: 'Controls Help' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', active: this.state.showSceneOptions, customClass: 'lm-btn-link-toggle-' + (this.state.showSceneOptions ? 'on' : 'off'), icon: 'settings', onClick: function (e) { return _this.setState({ showSceneOptions: !_this.state.showSceneOptions, showHelp: false }); }, title: 'Scene Options' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'screenshot', onClick: function (e) { window.open(_this.controller.scene.scene.screenshotAsDataURL(), '_blank'); }, title: 'Screenshot' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { layoutController.update({ hideControls: controlsShown }); _this.forceUpdate(); }, icon: 'tools', title: controlsShown ? 'Hide Controls' : 'Show Controls', active: controlsShown, customClass: 'lm-btn-link-toggle-' + (controlsShown ? 'on' : 'off'), style: 'link' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { return layoutController.update({ isExpanded: !layoutState.isExpanded }); }, icon: 'expand-layout', title: layoutState.isExpanded ? 'Collapse' : 'Expand', active: layoutState.isExpanded, customClass: 'lm-btn-link-toggle-' + (layoutState.isExpanded ? 'on' : 'off'), style: 'link' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'reset-scene', onClick: function (e) { return LiteMol.Bootstrap.Command.Visual.ResetScene.dispatch(_this.controller.context, void 0); }, title: 'Reset scene' })),
                             options);
                     };
                     return ViewportControls;
@@ -76444,36 +77536,34 @@ var LiteMol;
                 var HighlightInfo = (function (_super) {
                     __extends(HighlightInfo, _super);
                     function HighlightInfo() {
-                        _super.apply(this, arguments);
+                        return _super.apply(this, arguments) || this;
                     }
                     HighlightInfo.prototype.render = function () {
                         var state = this.controller.latestState;
                         var info = state.info;
                         if (!info.length) {
-                            return Plugin.React.createElement("div", {className: 'lm-empty-control'});
+                            return Plugin.React.createElement("div", { className: 'lm-empty-control' });
                         }
                         var html = { __html: info.join(', ') };
-                        return Plugin.React.createElement("div", {className: 'lm-highlight-info'}, 
-                            Plugin.React.createElement("div", {dangerouslySetInnerHTML: html})
-                        );
+                        return Plugin.React.createElement("div", { className: 'lm-highlight-info' },
+                            Plugin.React.createElement("div", { dangerouslySetInnerHTML: html }));
                     };
                     return HighlightInfo;
                 }(Views.View));
                 Visualization.HighlightInfo = HighlightInfo;
                 Visualization.Logo = function () {
-                    return Plugin.React.createElement("div", {className: 'lm-logo'}, 
-                        Plugin.React.createElement("div", null, 
-                            Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement("div", null), 
-                                Plugin.React.createElement("div", {className: 'lm-logo-image'}))
-                        )
-                    );
+                    return Plugin.React.createElement("div", { className: 'lm-logo' },
+                        Plugin.React.createElement("div", null,
+                            Plugin.React.createElement("div", null,
+                                Plugin.React.createElement("div", null),
+                                Plugin.React.createElement("div", { className: 'lm-logo-image' }))));
                 };
                 var Viewport = (function (_super) {
                     __extends(Viewport, _super);
                     function Viewport() {
-                        _super.apply(this, arguments);
-                        this.state = { noWebGl: false, showLogo: true };
+                        var _this = _super.apply(this, arguments) || this;
+                        _this.state = { noWebGl: false, showLogo: true };
+                        return _this;
                     }
                     Viewport.prototype.componentDidMount = function () {
                         if (!this.controller.init(this.refs['host-3d'])) {
@@ -76486,41 +77576,45 @@ var LiteMol;
                         this.controller.destroy();
                     };
                     Viewport.prototype.renderMissing = function () {
-                        return Plugin.React.createElement("div", {className: 'lm-no-webgl'}, 
-                            Plugin.React.createElement("div", null, 
-                                Plugin.React.createElement("p", null, 
-                                    Plugin.React.createElement("b", null, "WebGL does not seem to be available.")
-                                ), 
-                                Plugin.React.createElement("p", null, "This can be caused by an outdated browser, graphics card driver issue, or bad weather. Sometimes, just restarting the browser helps."), 
-                                Plugin.React.createElement("p", null, 
-                                    "For a list of supported browsers, refer to ", 
-                                    Plugin.React.createElement("a", {href: 'http://caniuse.com/#feat=webgl', target: '_blank'}, "http://caniuse.com/#feat=webgl"), 
-                                    "."))
-                        );
+                        return Plugin.React.createElement("div", { className: 'lm-no-webgl' },
+                            Plugin.React.createElement("div", null,
+                                Plugin.React.createElement("p", null,
+                                    Plugin.React.createElement("b", null, "WebGL does not seem to be available.")),
+                                Plugin.React.createElement("p", null, "This can be caused by an outdated browser, graphics card driver issue, or bad weather. Sometimes, just restarting the browser helps."),
+                                Plugin.React.createElement("p", null,
+                                    "For a list of supported browsers, refer to ",
+                                    Plugin.React.createElement("a", { href: 'http://caniuse.com/#feat=webgl', target: '_blank' }, "http://caniuse.com/#feat=webgl"),
+                                    ".")));
                     };
                     Viewport.prototype.handleLogo = function () {
                         var _this = this;
                         var visualCount = 0;
                         this.subscribe(LiteMol.Bootstrap.Event.Tree.NodeAdded.getStream(this.controller.context), function (e) {
                             if (LiteMol.Bootstrap.Entity.isClass(e.data, LiteMol.Bootstrap.Entity.VisualClass)) {
-                                visualCount++;
-                                _this.setState({ showLogo: !visualCount });
+                                setTimeout(function () { return _this.setState({ showLogo: _this.getShowLogo() }); }, 0);
                             }
                         });
                         this.subscribe(LiteMol.Bootstrap.Event.Tree.NodeRemoved.getStream(this.controller.context), function (e) {
                             if (LiteMol.Bootstrap.Entity.isClass(e.data, LiteMol.Bootstrap.Entity.VisualClass)) {
-                                visualCount--;
-                                _this.setState({ showLogo: !visualCount });
+                                setTimeout(function () { return _this.setState({ showLogo: _this.getShowLogo() }); }, 0);
                             }
                         });
+                    };
+                    Viewport.prototype.getShowLogo = function () {
+                        try {
+                            return this.controller.context.viewport.scene.models.isEmpty();
+                        }
+                        catch (e) {
+                            return true;
+                        }
                     };
                     Viewport.prototype.render = function () {
                         if (this.state.noWebGl)
                             return this.renderMissing();
-                        return Plugin.React.createElement("div", {className: 'lm-viewport'}, 
-                            Plugin.React.createElement("div", {ref: 'host-3d', className: 'lm-viewport-host3d'}), 
-                            this.state.showLogo ? Plugin.React.createElement(Visualization.Logo, null) : void 0, 
-                            Plugin.React.createElement(ViewportControls, {controller: this.controller}));
+                        return Plugin.React.createElement("div", { className: 'lm-viewport' },
+                            Plugin.React.createElement("div", { ref: 'host-3d', className: 'lm-viewport-host3d' }),
+                            this.state.showLogo ? Plugin.React.createElement(Visualization.Logo, null) : void 0,
+                            Plugin.React.createElement(ViewportControls, { controller: this.controller }));
                     };
                     return Viewport;
                 }(Views.View));
@@ -76552,9 +77646,10 @@ var LiteMol;
             var AppInfo = (function (_super) {
                 __extends(AppInfo, _super);
                 function AppInfo(ctx, appName, appVersion) {
-                    _super.call(this, ctx, {});
-                    this.appName = appName;
-                    this.appVersion = appVersion;
+                    var _this = _super.call(this, ctx, {}) || this;
+                    _this.appName = appName;
+                    _this.appVersion = appVersion;
+                    return _this;
                 }
                 return AppInfo;
             }(LiteMol.Bootstrap.Components.Component));
@@ -76562,6 +77657,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 Context.Log = create('Context.Log', function (s) { return new LiteMol.Bootstrap.Components.Context.Log(s); }, Plugin.Views.Context.Log);
+                Context.Toast = create('Context.Toast', function (s) { return new LiteMol.Bootstrap.Components.Context.Toast(s); }, Plugin.Views.Context.Toast);
                 Context.Overlay = create('Context.Overlay', function (s) { return new LiteMol.Bootstrap.Components.Context.TaskWatcher(s, 'Normal'); }, Plugin.Views.Context.Overlay);
                 Context.BackgroundTasks = create('Context.BackgroundTasks', function (s) { return new LiteMol.Bootstrap.Components.Context.TaskWatcher(s, 'Background'); }, Plugin.Views.Context.BackgroundTasks);
             })(Context = Components.Context || (Components.Context = {}));
@@ -76687,8 +77783,8 @@ var LiteMol;
             });
         })(DataSources = Plugin.DataSources || (Plugin.DataSources = {}));
         var LayoutRegion = LiteMol.Bootstrap.Components.LayoutRegion;
-        function createDefault(target) {
-            var spec = {
+        function getDefaultSpecification() {
+            return {
                 settings: {
                     'molecule.model.defaultQuery': "residues({ name: 'ALA' })",
                     'molecule.model.defaultAssemblyName': '1',
@@ -76725,13 +77821,12 @@ var LiteMol;
                 behaviours: [
                     LiteMol.Bootstrap.Behaviour.SetEntityToCurrentWhenAdded,
                     LiteMol.Bootstrap.Behaviour.FocusCameraOnSelect,
-                    LiteMol.Bootstrap.Behaviour.CreateVisualWhenModelIsAdded,
                     LiteMol.Bootstrap.Behaviour.ApplySelectionToVisual,
                     LiteMol.Bootstrap.Behaviour.ApplyInteractivitySelection,
+                    LiteMol.Bootstrap.Behaviour.UnselectElementOnRepeatedClick,
                     LiteMol.Bootstrap.Behaviour.Molecule.HighlightElementInfo,
                     LiteMol.Bootstrap.Behaviour.Molecule.DistanceToLastClickedElement,
-                    LiteMol.Bootstrap.Behaviour.Molecule.ShowInteractionOnSelect(5),
-                    LiteMol.Bootstrap.Behaviour.GoogleAnalytics('UA-77062725-1')
+                    LiteMol.Bootstrap.Behaviour.Molecule.ShowInteractionOnSelect(5)
                 ],
                 components: [
                     Plugin.Components.Visualization.HighlightInfo(LayoutRegion.Main, true),
@@ -76739,6 +77834,7 @@ var LiteMol;
                     Plugin.Components.Transform.View(LayoutRegion.Right),
                     Plugin.Components.Context.Log(LayoutRegion.Bottom, true),
                     Plugin.Components.Context.Overlay(LayoutRegion.Root),
+                    Plugin.Components.Context.Toast(LayoutRegion.Main, true),
                     Plugin.Components.Context.BackgroundTasks(LayoutRegion.Main, true)
                 ],
                 viewport: {
@@ -76751,11 +77847,166 @@ var LiteMol;
                     view: Plugin.Views.Entity.Tree
                 }
             };
-            var plugin = new Plugin.Instance(spec, target);
-            plugin.context.logger.message("LiteMol Viewer " + Plugin.VERSION.number);
-            return plugin;
         }
-        Plugin.createDefault = createDefault;
+        Plugin.getDefaultSpecification = getDefaultSpecification;
+    })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Plugin;
+    (function (Plugin) {
+        "use strict";
+        var Entity = LiteMol.Bootstrap.Entity;
+        var Transformer = Entity.Transformer;
+        var Controller = (function () {
+            function Controller(options) {
+                var spec = options.customSpecification ? options.customSpecification : Plugin.getDefaultSpecification();
+                if (!options.customSpecification) {
+                    spec.behaviours.push(LiteMol.Bootstrap.Behaviour.GoogleAnalytics(options.analyticsId ? options.analyticsId : 'UA-77062725-1'));
+                }
+                var target;
+                if (options.target instanceof HTMLElement) {
+                    target = options.target;
+                }
+                else {
+                    target = document.querySelector(options.target);
+                }
+                if (!target) {
+                    throw new Error("options.target cannot be undefined.");
+                }
+                this._instance = new Plugin.Instance(spec, target);
+                if (options.viewportBackground) {
+                    this.setViewportBackground(options.viewportBackground);
+                }
+                if (options.layoutState) {
+                    this.setLayoutState(options.layoutState);
+                }
+            }
+            Object.defineProperty(Controller.prototype, "instance", {
+                get: function () { return this._instance; },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Controller.prototype, "context", {
+                get: function () { return this._instance.context; },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Controller.prototype, "root", {
+                get: function () { return this._instance.context.tree.root; },
+                enumerable: true,
+                configurable: true
+            });
+            /**
+             * execute a command with the specified params.
+             */
+            Controller.prototype.command = function (cmd, params) {
+                cmd.dispatch(this.context, params);
+            };
+            /**
+             * Subscribes the specified event and returns
+             * a disposable for the event.
+             *
+             * let sub = litemol.subscribe(...)
+             * ...
+             * sub.dispose(); // to stop listening
+             */
+            Controller.prototype.subscribe = function (event, onEvent) {
+                return event.getStream(this.context).subscribe(onEvent);
+            };
+            /**
+             * Create a transform builder.
+             */
+            Controller.prototype.createTransform = function () {
+                return LiteMol.Bootstrap.Tree.Transform.build();
+            };
+            /**
+             * Applies a state trasnform.
+             */
+            Controller.prototype.applyTransform = function (transform) {
+                var ctx = this.context;
+                return LiteMol.Bootstrap.Tree.Transform.apply(ctx, transform).run(ctx);
+            };
+            /**
+             * Remove all entities.
+             */
+            Controller.prototype.clear = function () {
+                this.command(LiteMol.Bootstrap.Command.Tree.RemoveNode, this.root);
+            };
+            /**
+             * Set the background of the viewport from:
+             *
+             * HEX color in format '#rgb' or '#rrggbb'
+             * or Visualization.Color instance.
+             */
+            Controller.prototype.setViewportBackground = function (color) {
+                if (LiteMol.Visualization.Color.isColor(color)) {
+                    this.command(LiteMol.Bootstrap.Command.Layout.SetViewportOptions, { clearColor: color });
+                }
+                else {
+                    this.command(LiteMol.Bootstrap.Command.Layout.SetViewportOptions, { clearColor: LiteMol.Visualization.Color.fromHexString(color) });
+                }
+            };
+            /**
+             * Sets the state of the plugin layout.
+             *
+             * Expanded, show/hide controls, etc..
+             */
+            Controller.prototype.setLayoutState = function (state) {
+                this.command(LiteMol.Bootstrap.Command.Layout.SetState, state);
+            };
+            /**
+             * Load molecule from url or string/binary data.
+             *
+             * Default format is mmCIF.
+             */
+            Controller.prototype.loadMolecule = function (source) {
+                var action = this.createTransform();
+                if (!source.url && !source.data) {
+                    throw new Error('Please specify either url or data');
+                }
+                var format = LiteMol.Core.Formats.Molecule.SupportedFormats.mmCIF;
+                if (source.format) {
+                    if (LiteMol.Core.Formats.FormatInfo.is(source.format)) {
+                        format = source.format;
+                    }
+                    else {
+                        var f = LiteMol.Core.Formats.FormatInfo.fromShortcut(LiteMol.Core.Formats.Molecule.SupportedFormats.All, source.format);
+                        if (!f) {
+                            throw new Error("'" + source.format + "' is not a supported format.");
+                        }
+                        format = f;
+                    }
+                }
+                var data = source.data
+                    ? action.add(this.root, Entity.Transformer.Data.FromData, { data: source.data, id: source.id })
+                    : action.add(this.root, Transformer.Data.Download, { url: source.url, type: format.isBinary ? 'Binary' : 'String', id: source.id });
+                data
+                    .then(Transformer.Molecule.CreateFromData, { format: format, customId: source.id }, { isBinding: true, ref: source.moleculeRef })
+                    .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false, ref: source.modelRef })
+                    .then(Transformer.Molecule.CreateMacromoleculeVisual, { polymer: true, het: true, water: true });
+                return this.applyTransform(data);
+            };
+            /**
+             * Destroys the the plugin instance.
+             * The controller becomes unusable as a result.
+             */
+            Controller.prototype.destroy = function () {
+                if (!this._instance)
+                    return;
+                this._instance.destroy();
+                this._instance = void 0;
+            };
+            return Controller;
+        }());
+        Plugin.Controller = Controller;
+        function create(options) {
+            return new Controller(options);
+        }
+        Plugin.create = create;
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
   return LiteMol;
