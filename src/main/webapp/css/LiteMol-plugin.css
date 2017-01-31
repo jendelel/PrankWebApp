@@ -1614,6 +1614,10 @@
     content: '\e875'; }
   .lm-plugin .lm-icon-screenshot:before {
     content: "\e80f"; }
+  .lm-plugin .lm-icon-help:before {
+    content: "\e81c"; }
+  .lm-plugin .lm-icon-help-circle:before {
+    content: "\e81d"; }
   .lm-plugin .lm-layout-expanded, .lm-plugin .lm-layout-standard {
     left: 0;
     right: 0;
@@ -1648,31 +1652,31 @@
     right: 0;
     bottom: 0;
     top: 0; }
-  .lm-plugin .lm-layout-standard {
+  .lm-plugin .lm-layout-standard-outside {
     position: absolute; }
-    .lm-plugin .lm-layout-standard .lm-layout-main {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-main {
       position: absolute;
       left: 0;
       right: 0;
       bottom: 0;
       top: 0; }
-    .lm-plugin .lm-layout-standard .lm-layout-top {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-top {
       position: absolute;
       right: 0;
-      height: 65px;
-      top: -65px;
+      height: 161px;
+      top: -161px;
       width: 50%;
       border-left: 1px solid #313645;
       border-bottom: 1px solid #313645; }
-    .lm-plugin .lm-layout-standard .lm-layout-bottom {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-bottom {
       position: absolute;
       left: 0;
       right: 0;
-      height: 65px;
-      top: -65px;
+      height: 161px;
+      top: -161px;
       width: 50%;
       border-bottom: 1px solid #313645; }
-    .lm-plugin .lm-layout-standard .lm-layout-right {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-right {
       position: absolute;
       width: 50%;
       right: 0;
@@ -1680,7 +1684,7 @@
       height: 295px;
       border-left: 1px solid #313645;
       border-top: 1px solid #313645; }
-    .lm-plugin .lm-layout-standard .lm-layout-left {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-left {
       position: absolute;
       width: 50%;
       left: 0;
@@ -1688,25 +1692,138 @@
       bottom: -295px;
       height: 295px;
       border-top: 1px solid #313645; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-right .lm-layout-right {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-right .lm-layout-right {
       display: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-right .lm-layout-left {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-right .lm-layout-left {
       width: 100%; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-left .lm-layout-left {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-left .lm-layout-left {
       display: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-left .lm-layout-right {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-left .lm-layout-right {
       width: 100%;
       border-left: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-top .lm-layout-top {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-top .lm-layout-top {
       display: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-top .lm-layout-bottom {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-top .lm-layout-bottom {
       width: 100%;
       border-left: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-bottom .lm-layout-bottom {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-bottom .lm-layout-bottom {
       display: none; }
-    .lm-plugin .lm-layout-standard .lm-layout-hide-bottom .lm-layout-top {
+    .lm-plugin .lm-layout-standard-outside .lm-layout-hide-bottom .lm-layout-top {
       width: 100%;
       border-left: none; }
+  .lm-plugin .lm-layout-standard-landscape {
+    position: absolute; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-main {
+      position: absolute;
+      left: 290px;
+      right: 290px;
+      bottom: 98px;
+      top: 170px; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-top {
+      position: absolute;
+      left: 290px;
+      right: 290px;
+      height: 170px;
+      top: 0;
+      border-bottom: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-bottom {
+      position: absolute;
+      left: 290px;
+      right: 290px;
+      height: 98px;
+      bottom: 0;
+      border-top: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-right {
+      position: absolute;
+      width: 290px;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      border-left: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-left {
+      position: absolute;
+      width: 290px;
+      left: 0;
+      bottom: 0;
+      top: 0;
+      border-right: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-right .lm-layout-right {
+      display: none; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-right .lm-layout-main, .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-right .lm-layout-top, .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-right .lm-layout-bottom {
+      right: 0; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-left .lm-layout-left {
+      display: none; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-left .lm-layout-main, .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-left .lm-layout-top, .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-left .lm-layout-bottom {
+      left: 0; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-bottom .lm-layout-bottom {
+      display: none; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-bottom .lm-layout-main {
+      bottom: 0; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-top .lm-layout-top {
+      display: none; }
+    .lm-plugin .lm-layout-standard-landscape .lm-layout-hide-top .lm-layout-main {
+      top: 0; }
+  .lm-plugin .lm-layout-standard-portrait {
+    position: absolute; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-main {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 361px;
+      top: 161px; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-top {
+      position: absolute;
+      right: 0;
+      height: 161px;
+      top: 0;
+      width: 50%;
+      border-left: 1px solid #313645;
+      border-bottom: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 161px;
+      width: 50%;
+      border-bottom: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-right {
+      position: absolute;
+      width: 50%;
+      right: 0;
+      bottom: 0;
+      height: 361px;
+      border-left: 1px solid #313645;
+      border-top: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-left {
+      position: absolute;
+      width: 50%;
+      left: 0;
+      bottom: 0;
+      height: 361px;
+      border-top: 1px solid #313645; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-right .lm-layout-right {
+      display: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-right .lm-layout-left {
+      width: 100%; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-left .lm-layout-left {
+      display: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-left .lm-layout-right {
+      width: 100%;
+      border-left: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-right.lm-layout-hide-left .lm-layout-main {
+      bottom: 0; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-top .lm-layout-top {
+      display: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-top .lm-layout-bottom {
+      width: 100%;
+      border-left: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-bottom .lm-layout-bottom {
+      display: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-bottom .lm-layout-top {
+      width: 100%;
+      border-left: none; }
+    .lm-plugin .lm-layout-standard-portrait .lm-layout-hide-top.lm-layout-hide-bottom .lm-layout-main {
+      top: 0; }
   .lm-plugin .lm-layout-expanded {
     position: fixed; }
     @media (orientation: landscape) {
@@ -1715,12 +1832,12 @@
         left: 290px;
         right: 290px;
         bottom: 98px;
-        top: 100px; }
+        top: 170px; }
       .lm-plugin .lm-layout-expanded .lm-layout-top {
         position: absolute;
         left: 290px;
         right: 290px;
-        height: 100px;
+        height: 170px;
         top: 0;
         border-bottom: 1px solid #313645; }
       .lm-plugin .lm-layout-expanded .lm-layout-bottom {
@@ -1766,11 +1883,11 @@
         left: 0;
         right: 0;
         bottom: 361px;
-        top: 65px; }
+        top: 161px; }
       .lm-plugin .lm-layout-expanded .lm-layout-top {
         position: absolute;
         right: 0;
-        height: 65px;
+        height: 161px;
         top: 0;
         width: 50%;
         border-left: 1px solid #313645;
@@ -1779,7 +1896,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        height: 65px;
+        height: 161px;
         width: 50%;
         border-bottom: 1px solid #313645; }
       .lm-plugin .lm-layout-expanded .lm-layout-right {
@@ -2105,10 +2222,16 @@
           text-align: center; }
         .lm-plugin .lm-panel-header .lm-panel-expander-wrapper button:hover {
           background: #090a0c; }
+    .lm-plugin .lm-panel-header .lm-panel-description-standalone {
+      width: 64px; }
+      .lm-plugin .lm-panel-header .lm-panel-description-standalone > .lm-icon {
+        margin-left: 32px; }
+    .lm-plugin .lm-panel-header .lm-panel-description-with-action {
+      width: 32px;
+      margin-right: 32px; }
     .lm-plugin .lm-panel-header .lm-panel-description {
       color: #ccd4e0;
       float: right;
-      width: 64px;
       background: #090a0c; }
       .lm-plugin .lm-panel-header .lm-panel-description > .lm-icon {
         display: block;
@@ -2119,8 +2242,7 @@
         font-size: 70%;
         cursor: default;
         background: #090a0c;
-        color: #232b39;
-        margin-left: 32px; }
+        color: #232b39; }
       .lm-plugin .lm-panel-header .lm-panel-description .lm-panel-description-content {
         -webkit-user-select: none;
         /* Chrome/Safari */
@@ -2140,7 +2262,7 @@
         background: #363c4c;
         min-height: 32px;
         z-index: 1000000;
-        padding: 5px 10px 5px 42px;
+        padding: 6px 10px 6px 42px;
         text-align: left; }
         .lm-plugin .lm-panel-header .lm-panel-description .lm-panel-description-content > .lm-icon {
           position: absolute;
@@ -2162,10 +2284,6 @@
     background: #1f222b; }
   .lm-plugin .lm-panel {
     margin-bottom: 10px; }
-    .lm-plugin .lm-panel .lm-entity-tree-entry-toggle-visible {
-      position: absolute;
-      top: 0;
-      right: 32px; }
   .lm-plugin .lm-transform-view {
     padding-top: 10px; }
   .lm-plugin .lm-description {
@@ -2373,6 +2491,13 @@
   .lm-plugin .lm-entity-tree-root > .lm-entity-tree-children-wrap {
     margin-top: 10px;
     padding-left: 0 !important; }
+  .lm-plugin .lm-panel .lm-entity-tree-entry-toggle-visible {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 32px;
+    font-size: 100%;
+    background: #111318; }
   .lm-plugin .lm-layout-hide-right .lm-entity-info {
     display: none; }
   .lm-plugin .lm-entity-info {
@@ -2452,7 +2577,7 @@
     background-position: center;
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAACKUExURQAAAM4+K84/LM4+K5BhopJboCue1XmKi5RbpSud1R2tcolpRx2scys8Sis8Sn6SlOCFOiqYzhUYMDRPYSue1n6SlMiDTR6ncbVfNd+EOeCEOeCEOeCEORYZMMk/LH6RkxUcMhUYMSs8S32Rkyye1BUZL9+FOVpORWRSRCw8SxYYMB6tcxYZMSw9S+ECnyoAAAArdFJOUwB5/uoyc/FX9DjdS5SzyPT+acsS/fwdWEmk1NidrGb6bq+HgJY7eFVH955mjSdVAAAAn0lEQVQ4y93TyxaCIBCA4alQpFQsSs1Ku997/9drRtoxwV5Ww/m/BXAOAENc8hTonRb+3sn86OkrLfNPVgd6Ox55ezWb8KLUtr+mvLg2kjpAyguxLprbI6ORFVESobjbDSdE0ouSZrPvRQuO2BYbFGbxJmGcQ/wE9sP8nFbuNayoqS9jxT0ECey7f51E5O24Qh0uT3/HO8b+DqDUIH/SF4XSDWWIL+vnAAAAAElFTkSuQmCC); }
   .lm-plugin .lm-entity-splash .lm-entity-splash-general {
-    padding: 5px 10px 5px 66px;
+    padding: 6px 10px 6px 66px;
     position: relative;
     background: #090a0c;
     margin-bottom: 10px; }
@@ -2510,7 +2635,7 @@
       left: 24px;
       top: 0; }
   .lm-plugin .lm-entity-splash .lm-entity-splash-class > div:nth-child(2) {
-    padding: 5px 10px 5px 66px;
+    padding: 6px 10px 6px 66px;
     margin-top: 1px;
     background: #111318; }
   .lm-plugin .lm-entity-splash .lm-entity-splash-class-expanded > div:nth-child(2) {
@@ -2660,7 +2785,7 @@
     background: #1f222b; }
   .lm-plugin .lm-highlight-info {
     color: #51A2FB;
-    padding: 5px 10px;
+    padding: 6px 10px;
     background: #111318;
     position: absolute;
     top: 10px;
@@ -2715,9 +2840,9 @@
     .lm-plugin .lm-log .lm-log-entry {
       margin-left: 110px;
       background: #14171c;
-      padding: 5px 25px 5px 10px; }
+      padding: 6px 25px 6px 10px; }
     .lm-plugin .lm-log .lm-log-timestamp {
-      padding: 6px 10px 4px 10px;
+      padding: 7px 10px 5px 10px;
       float: left;
       text-align: right;
       width: 110px;
@@ -2760,6 +2885,75 @@
     top: 33px; }
   .lm-plugin .lm-transformer-wrapper:not(:first-child) .lm-panel-description-content {
     bottom: 33px; }
+  .lm-plugin .lm-toast-container {
+    position: absolute;
+    max-width: 100%;
+    bottom: 10px;
+    right: 10px;
+    margin-left: 10px;
+    z-index: 1001; }
+    .lm-plugin .lm-toast-container .lm-toast-entry {
+      color: #ccd4e0;
+      background: #1f222b;
+      position: relative;
+      min-height: 32px;
+      margin-top: 10px;
+      border: 1px solid #313645;
+      display: table; }
+      .lm-plugin .lm-toast-container .lm-toast-entry .lm-toast-title {
+        height: 100%;
+        line-height: 32px;
+        padding: 0 10px;
+        background: #111318;
+        font-weight: bold;
+        display: table-cell; }
+      .lm-plugin .lm-toast-container .lm-toast-entry .lm-toast-message {
+        padding: 6px 42px 6px 10px;
+        display: table-cell; }
+      .lm-plugin .lm-toast-container .lm-toast-entry .lm-toast-hide {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0; }
+        .lm-plugin .lm-toast-container .lm-toast-entry .lm-toast-hide .lm-btn-icon {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          bottom: 0;
+          width: 100%;
+          text-align: right;
+          padding-right: 5px; }
+  .lm-plugin .lm-help-row {
+    position: relative;
+    height: 32px;
+    background: #111318;
+    margin-top: 1px;
+    display: table;
+    width: 100%; }
+    .lm-plugin .lm-help-row > span {
+      width: 120px;
+      text-align: right;
+      padding: 6px 10px;
+      color: #9cacc3;
+      display: table-cell;
+      font-weight: bold;
+      -webkit-user-select: none;
+      /* Chrome/Safari */
+      -moz-user-select: none;
+      /* Firefox */
+      -ms-user-select: none;
+      /* IE10+ */
+      /* Rules below not implemented in browsers yet */
+      -o-user-select: none;
+      user-select: none;
+      cursor: default; }
+    .lm-plugin .lm-help-row > div {
+      background: #0c0d11;
+      position: relative;
+      padding: 6px 10px;
+      display: table-cell; }
   .lm-plugin .lm-logo {
     position: absolute;
     top: 0;

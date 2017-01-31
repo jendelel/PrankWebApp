@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,54 +17,48 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import cz.siret.prank.webapp.utils.Utils;
+import cz.siret.prank.program.api.PrankFacade;
+import cz.siret.prank.program.api.PrankPredictor;
+import cz.siret.prank.webapp.utils.AppSettings;
 
 @WebServlet(
-  name = "AnalyzeFileServlet",
-  urlPatterns = "/analyze/file_upload",
-  asyncSupported = true
+        name = "AnalyzeFileServlet",
+        urlPatterns = "/analyze/file_upload",
+        asyncSupported = true
 )
 @MultipartConfig
 public class AnalyzeFileServlet extends HttpServlet {
 
-  private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    Part filePart = request.getPart("pdbFile"); // Retrieves <input
-    // type="file" name="pdbFile">
-    InputStream fileContent = filePart.getInputStream();
-    // Store the content in a temp file
-    // TODO: Use TEMP folder from AppSettings
-    File tempFile = null;
-    try {
-      File tempFolder = new File(Utils.getUploadsDir());
-      tempFile =
-          File.createTempFile(
-              String.format("upload_%s_", dateTimeFormatter.format(LocalDateTime.now())),
-              ".pdb",
-              tempFolder);
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
+        InputStream fileContent = filePart.getInputStream(); // Store the content in a temp file
+        File tempFile = null;
+        try {
+            File tempFolder = new File(AppSettings.INSTANCE.getUploadsDir());
+            tempFile =
+                    File.createTempFile(
+                            String.format(
+                                    "upload_%s_", dateTimeFormatter.format(LocalDateTime.now())),
+                            ".pdb",
+                            tempFolder);
 
-      Files.copy(fileContent, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-      fileContent.close();
-    } catch (Exception e) {
-      e.printStackTrace(response.getWriter());
+            Files.copy(fileContent, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            fileContent.close();
+        } catch (Exception e) {
+            e.printStackTrace(response.getWriter());
+        }
+
+        System.out.println(tempFile.toPath().toAbsolutePath().toString());
+        PrankPredictor prankPredictor = PrankFacade.createPredictor(
+                Paths.get(AppSettings.INSTANCE.getPrankPath()));
+        prankPredictor.predict(tempFile.toPath());
+//        prankPredictor.runPrediction(tempFile.toPath(), Paths.get(Utils.getPredictionDir()));
     }
 
-    System.out.println(tempFile.toPath().toAbsolutePath().toString());
-    // Run Prank on file
-    String cmd =
-        String.format(
-            "%s predict -f %s", Utils.getPrankPath(), tempFile.getAbsolutePath().toString());
-    Process p = Runtime.getRuntime().exec(cmd);
-    try {
-      int result = p.waitFor();
-      response.getWriter().println(result);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
     }
-  }
-
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {}
 }

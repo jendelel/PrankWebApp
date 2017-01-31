@@ -488,11 +488,16 @@ var LiteMol;
                             console.log(r * 255, g * 255, b * 255);
                             return LiteMol.Visualization.Color.fromRgb(r * 255, g * 255, b * 255);
                         };
+                        var colors = Array(6);
+                        colors[0] = LiteMol.Visualization.Color.fromHexString("#e74c3c");
+                        colors[1] = LiteMol.Visualization.Color.fromHexString("#00ffff");
+                        colors[2] = LiteMol.Visualization.Color.fromHexString("#2ecc71");
+                        colors[3] = LiteMol.Visualization.Color.fromHexString("#9b59b6");
+                        colors[4] = LiteMol.Visualization.Color.fromHexString("#00007f");
+                        colors[5] = LiteMol.Visualization.Color.fromHexString("#e67e22");
                         var _loop_1 = function (i) {
-                            h = h + (1 / 6);
-                            if (h >= 1) {
-                                h = h - 1;
-                            }
+                            // h = h + (1/6)
+                            // if (h >= 1) { h = h-1 }
                             var fields = lines[i].split(',');
                             if (fields.length < 10)
                                 return "continue";
@@ -511,7 +516,7 @@ var LiteMol;
                                 centerZ: parseFloat(fields[7]),
                                 residueIds: resIds,
                                 surfAtomIds: surfAtoms,
-                                color: HSVtoRGB(h, 1, 1)
+                                color: colors[(i - 1) % 6]
                             });
                         };
                         for (var i = 1; i < lines.length; i++) {
@@ -566,6 +571,16 @@ var LiteMol;
             }
             return CacheItem;
         }());
+        var Feature = (function () {
+            function Feature(cat, typ, start, end, text) {
+                this.category = cat;
+                this.type = typ;
+                this.start = start;
+                this.end = end;
+                this.text = text;
+            }
+            return Feature;
+        }());
         var SequenceView = (function (_super) {
             __extends(SequenceView, _super);
             function SequenceView() {
@@ -592,45 +607,33 @@ var LiteMol;
             };
             SequenceView.prototype.componentDidUpdate = function () {
                 //this.scrollToBottom();
-            };
-            SequenceView.prototype.onLetterMouseEnter = function (seqNumber, letter, isOn) {
-                var ctx = this.controller.context;
-                var model = ctx.select('model')[0];
-                if (!model)
-                    return;
-                // Get the sequence selection
-                var seqSel = this.getResidue(seqNumber, model);
-                // Highlight in the 3D Visualization
-                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: isOn });
-                if (isOn) {
-                    // Show tooltip
-                    var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
-                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
-                }
-                else {
-                    // Hide tooltip
-                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
-                }
-            };
-            SequenceView.prototype.onLetterClick = function (seqNumber, letter) {
-                var ctx = this.controller.context;
-                var model = ctx.select('model')[0];
-                if (!model)
-                    return;
-                var query = this.getResidue(seqNumber, model).query;
-                Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
-            };
-            SequenceView.prototype.render = function () {
-                var _this = this;
-                var seq = this.controller.latestState.seq.split('');
                 var pockets = this.controller.latestState.pockets;
-                var ctx = this.controller.context;
-                var seqToPrint = [];
-                seq.forEach(function (letter, i) {
-                    seqToPrint.push(letter);
-                    if ((i + 1) % 10 == 0) {
-                        seqToPrint.push(' ');
+                var pviz = getPviz();
+                var seqEntry = new pviz.SeqEntry({ sequence: this.controller.latestState.seq });
+                new pviz.SeqEntryAnnotInteractiveView({
+                    model: seqEntry, el: '#seqView',
+                    xChangeCallback: function (pStart, pEnd) {
+                        // this.onLetterMouseEnter(Math.round(pStart));
                     }
+                }).render();
+                var features = [];
+                pockets.forEach(function (pocket, i) {
+                    pocket.residueIds.sort(function (a, b) { return a - b; });
+                    var lastStart = -1;
+                    var lastResNum = -1;
+                    pocket.residueIds.forEach(function (resNum, y) {
+                        if (y == 0) {
+                            lastStart = resNum;
+                        }
+                        else {
+                            if (lastResNum + 1 < resNum) {
+                                features.push(new Feature("Pockets", "col" + i % 6, lastStart, lastResNum, pocket.rank.toString()));
+                                lastStart = resNum;
+                            }
+                        }
+                        lastResNum = resNum;
+                    });
+                    features.push(new Feature("Pockets", "col" + i % 6, lastStart, lastResNum, pocket.rank.toString()));
                 });
                 var getColor = function (seqId) {
                     var color = LiteMol.Visualization.Color.fromRgb(255, 255, 255);
@@ -648,19 +651,71 @@ var LiteMol;
                     });
                     return color;
                 };
+                seqEntry.addFeatures(features);
+            };
+            SequenceView.prototype.onLetterMouseEnter = function (seqNumber) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                // Get the sequence selection
+                var seqSel = this.getResidue(seqNumber, model);
+                // Highlight in the 3D Visualization
+                if (this.lastSelectedSeq) {
+                    Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: this.lastSelectedSeq.query, isOn: false });
+                }
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: true });
+                this.lastSelectedSeq = seqSel;
+                // if (isOn) {
+                // Show tooltip
+                var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
+                Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
+                // } else {
+                // Hide tooltip
+                // Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [])
+                // }
+            };
+            SequenceView.prototype.onLetterClick = function (seqNumber, letter) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                var query = this.getResidue(seqNumber, model).query;
+                Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
+            };
+            SequenceView.prototype.render = function () {
+                var seq = this.controller.latestState.seq.split('');
+                var pockets = this.controller.latestState.pockets;
+                var ctx = this.controller.context;
+                var seqToPrint = [];
+                seq.forEach(function (letter, i) {
+                    seqToPrint.push(letter);
+                    if ((i + 1) % 10 == 0) {
+                        seqToPrint.push(' ');
+                    }
+                });
                 var colorToString = function (color) {
                     return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
                 };
                 var seqId = -1;
-                return (React.createElement("div", { className: 'protein-seq', style: { fontFamily: 'Consolas, "Courier New", monospace', fontSize: 'large' } }, seqToPrint.map(function (letter, i) {
-                    if (letter === ' ') {
-                        return React.createElement("span", { className: "space" }, " ");
-                    }
-                    else {
-                        seqId++;
-                        return React.createElement("span", { id: 'res' + seqId.toString(), onMouseEnter: _this.onLetterMouseEnter.bind(_this, seqId, letter, true), onMouseLeave: _this.onLetterMouseEnter.bind(_this, seqId, letter, false), onClick: _this.onLetterClick.bind(_this, seqId, letter), style: { color: colorToString(getColor(seqId)) } }, letter);
-                    }
-                })));
+                return React.createElement("div", { id: "seqView" });
+                // return (<div className='protein-seq' style={{ fontFamily: 'Consolas, "Courier New", monospace', fontSize: 'large' }}>
+                //     {seqToPrint.map((letter, i) => {
+                //         if (letter === ' ') {
+                //             return <span className="space"> </span>
+                //         } else {
+                //             seqId++
+                //             return <span
+                //                 id={'res' + seqId.toString()}
+                //                 onMouseEnter={this.onLetterMouseEnter.bind(this, seqId, letter, true)}
+                //                 onMouseLeave={this.onLetterMouseEnter.bind(this, seqId, letter, false)}
+                //                 onClick={this.onLetterClick.bind(this, seqId, letter)}
+                //                 style={{ color: colorToString(getColor(seqId)) }}
+                //                 >{letter}</span>
+                //         }
+                //     })
+                //     }
+                // </div>);
             };
             return SequenceView;
         }(Views.View));
