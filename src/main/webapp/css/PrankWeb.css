@@ -170,7 +170,8 @@ footer p {
     }
 
     .nav>li>a {
-        padding: 35px;
+        padding-left: 35px;
+        padding-right: 35px;
     }
 
     .navbar-nav>li>a {

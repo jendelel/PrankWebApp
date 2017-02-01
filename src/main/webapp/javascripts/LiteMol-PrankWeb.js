@@ -1,10 +1,5 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 /*
- * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
 (function (LiteMol) {
@@ -26,7 +21,7 @@ var LiteMol;
     })(Viewer = LiteMol.Viewer || (LiteMol.Viewer = {}));
 })(LiteMol || (LiteMol = {}));
 /*
- * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
 (function (LiteMol) {
@@ -36,10 +31,10 @@ var LiteMol;
         (function (PDBe) {
             var Data;
             (function (Data) {
+                "use strict";
                 var Bootstrap = LiteMol.Bootstrap;
                 var Entity = Bootstrap.Entity;
                 var Transformer = Bootstrap.Entity.Transformer;
-                var Visualization = Bootstrap.Visualization;
                 // straigtforward
                 Data.DownloadMolecule = Transformer.Molecule.downloadMoleculeSource({
                     sourceId: 'pdbe-molecule',
@@ -62,26 +57,82 @@ var LiteMol;
                     var id = t.params.id.toLowerCase().trim();
                     var url = "" + t.params.serverUrl + (t.params.serverUrl[t.params.serverUrl.length - 1] === '/' ? '' : '/') + id + "/" + query + "?encoding=bcif&lowPrecisionCoords=" + (t.params.lowPrecisionCoords ? '1' : '2');
                     return Bootstrap.Tree.Transform.build()
-                        .add(a, Entity.Transformer.Data.Download, { url: url, type: 'Binary', id: id })
+                        .add(a, Entity.Transformer.Data.Download, { url: url, type: 'Binary', id: id, title: 'Molecule' })
                         .then(Entity.Transformer.Molecule.CreateFromData, { format: LiteMol.Core.Formats.Molecule.SupportedFormats.mmBCIF }, { isBinding: true })
                         .then(Entity.Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false });
                 });
-                // this creates the electron density based on the spec you sent me
-                Data.DownloadDensity = Bootstrap.Tree.Transformer.action({
-                    id: 'pdbe-density-download-data',
-                    name: 'Density Data from PDBe',
-                    description: 'Download density data from PDBe.',
-                    from: [Entity.Root],
-                    to: [Entity.Action],
-                    defaultParams: function () { return ({ id: '1cbs' }); },
-                    validateParams: function (p) { return (!p.id || !p.id.trim().length) ? ['Enter Id'] : void 0; },
-                }, function (context, a, t) {
+            })(Data = PDBe.Data || (PDBe.Data = {}));
+        })(PDBe = Viewer.PDBe || (Viewer.PDBe = {}));
+    })(Viewer = LiteMol.Viewer || (LiteMol.Viewer = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var LiteMol;
+(function (LiteMol) {
+    var Viewer;
+    (function (Viewer) {
+        var PDBe;
+        (function (PDBe) {
+            var Data;
+            (function (Data) {
+                "use strict";
+                var Bootstrap = LiteMol.Bootstrap;
+                var Entity = Bootstrap.Entity;
+                var Transformer = Bootstrap.Entity.Transformer;
+                var Tree = Bootstrap.Tree;
+                var Visualization = Bootstrap.Visualization;
+                Data.DensitySourceLabels = {
+                    'electron-density': 'Electron Density',
+                    'emdb-pdbid': 'EMDB (from PDB ID)',
+                    'emdb-id': 'EMDB'
+                };
+                Data.DensitySources = ['electron-density', 'emdb-pdbid', 'emdb-id'];
+                function doElectron(a, t, id) {
                     var action = Bootstrap.Tree.Transform.build();
-                    var id = t.params.id.trim().toLocaleLowerCase();
-                    var group = action.add(a, Transformer.Basic.CreateGroup, { label: id, description: 'Density' }, { ref: t.props.ref });
+                    id = id.trim().toLowerCase();
+                    var groupRef = t.props.ref ? t.props.ref : Bootstrap.Utils.generateUUID();
+                    var group = action.add(a, Transformer.Basic.CreateGroup, { label: id, description: 'Density' }, { ref: groupRef });
+                    var diffRef = Bootstrap.Utils.generateUUID();
+                    var mainRef = Bootstrap.Utils.generateUUID();
                     var diff = group
-                        .then(Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/coordinates/files/" + id + "_diff.ccp4", type: 'Binary', id: t.params.id, description: 'Fo-Fc' })
-                        .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: 'Fo-Fc', normalize: false }, { isBinding: true });
+                        .then(Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/coordinates/files/" + id + "_diff.ccp4", type: 'Binary', id: id, description: 'Fo-Fc', title: 'Density' })
+                        .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: 'Fo-Fc', normalize: false }, { isBinding: true, ref: diffRef });
                     diff
                         .then(Transformer.Density.CreateVisualBehaviour, {
                         id: 'Fo-Fc(-ve)',
@@ -116,9 +167,9 @@ var LiteMol;
                             transparency: { alpha: 1.0 }
                         })
                     });
-                    var base = group
-                        .then(Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/coordinates/files/" + id + ".ccp4", type: 'Binary', id: t.params.id, description: '2Fo-Fc' })
-                        .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: '2Fo-Fc', normalize: false }, { isBinding: true })
+                    group
+                        .then(Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/coordinates/files/" + id + ".ccp4", type: 'Binary', id: id, description: '2Fo-Fc', title: 'Density' })
+                        .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: '2Fo-Fc', normalize: false }, { isBinding: true, ref: mainRef })
                         .then(Transformer.Density.CreateVisualBehaviour, {
                         id: '2Fo-Fc',
                         isoSigmaMin: 0,
@@ -132,17 +183,176 @@ var LiteMol;
                             isoValueType: Bootstrap.Visualization.Density.IsoValueType.Sigma,
                             color: LiteMol.Visualization.Color.fromHex(0x3362B2),
                             isWireframe: false,
-                            transparency: { alpha: 0.45 }
+                            transparency: { alpha: 0.4 }
                         })
                     });
-                    return action;
-                }, "Electron density loaded, click on a residue or an atom to view the data.");
+                    return {
+                        action: action,
+                        context: { id: id, refs: [mainRef, diffRef], groupRef: groupRef }
+                    };
+                }
+                function doEmdb(a, t, id, contourLevel) {
+                    var action = Bootstrap.Tree.Transform.build();
+                    var mainRef = Bootstrap.Utils.generateUUID();
+                    var labelId = 'EMD-' + id;
+                    action
+                        .add(a, Transformer.Data.Download, {
+                        url: "https://www.ebi.ac.uk/pdbe/static/files/em/maps/emd_" + id + ".map.gz",
+                        type: 'Binary',
+                        id: labelId,
+                        description: 'EMDB Density',
+                        responseCompression: Bootstrap.Utils.DataCompressionMethod.Gzip,
+                        title: 'Density'
+                    })
+                        .then(Transformer.Density.ParseData, { format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, id: labelId, normalize: false }, { isBinding: true, ref: mainRef })
+                        .then(Transformer.Density.CreateVisualBehaviour, {
+                        id: 'Density',
+                        isoSigmaMin: -5,
+                        isoSigmaMax: 5,
+                        minRadius: 0,
+                        maxRadius: 50,
+                        radius: 5,
+                        showFull: false,
+                        style: Visualization.Density.Style.create({
+                            isoValue: contourLevel !== void 0 ? contourLevel : 1.5,
+                            isoValueType: contourLevel !== void 0 ? Bootstrap.Visualization.Density.IsoValueType.Absolute : Bootstrap.Visualization.Density.IsoValueType.Sigma,
+                            color: LiteMol.Visualization.Color.fromHex(0x638F8F),
+                            isWireframe: false,
+                            transparency: { alpha: 0.3 }
+                        })
+                    });
+                    return {
+                        action: action,
+                        context: { id: id, refs: [mainRef] }
+                    };
+                }
+                function fail(a, message) {
+                    return {
+                        action: Bootstrap.Tree.Transform.build()
+                            .add(a, Transformer.Basic.Fail, { title: 'Density', message: message }),
+                        context: void 0
+                    };
+                }
+                function doEmdbPdbId(ctx, a, t, id) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var s, json, emdbId, e, emdb;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    id = id.trim().toLowerCase();
+                                    return [4 /*yield*/, Bootstrap.Utils.ajaxGetString("https://www.ebi.ac.uk/pdbe/api/pdb/entry/summary/" + id, 'PDB API').run(ctx)];
+                                case 1:
+                                    s = _a.sent();
+                                    try {
+                                        json = JSON.parse(s);
+                                        emdbId = void 0;
+                                        e = json[id];
+                                        if (e && e[0] && e[0].related_structures) {
+                                            emdb = e[0].related_structures.filter(function (s) { return s.resource === 'EMDB'; });
+                                            if (!emdb.length) {
+                                                return [2 /*return*/, fail(a, "No related EMDB entry found for '" + id + "'.")];
+                                            }
+                                            emdbId = emdb[0].accession.split('-')[1];
+                                        }
+                                        else {
+                                            return [2 /*return*/, fail(a, "No related EMDB entry found for '" + id + "'.")];
+                                        }
+                                        return [2 /*return*/, doEmdbId(ctx, a, t, emdbId)];
+                                    }
+                                    catch (e) {
+                                        return [2 /*return*/, fail(a, 'PDBe API call failed.')];
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                }
+                function doEmdbId(ctx, a, t, id) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var s, json, contour, e;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    id = id.trim();
+                                    return [4 /*yield*/, Bootstrap.Utils.ajaxGetString("https://www.ebi.ac.uk/pdbe/api/emdb/entry/map/EMD-" + id, 'EMDB API').run(ctx)];
+                                case 1:
+                                    s = _a.sent();
+                                    try {
+                                        json = JSON.parse(s);
+                                        contour = void 0;
+                                        e = json['EMD-' + id];
+                                        if (e && e[0] && e[0].map && e[0].map.contour_level && e[0].map.contour_level.value !== void 0) {
+                                            contour = +e[0].map.contour_level.value;
+                                        }
+                                        return [2 /*return*/, doEmdb(a, t, id, contour)];
+                                    }
+                                    catch (e) {
+                                        return [2 /*return*/, fail(a, 'EMDB API call failed.')];
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                }
+                // this creates the electron density based on the spec you sent me
+                Data.DownloadDensity = Bootstrap.Tree.Transformer.actionWithContext({
+                    id: 'pdbe-density-download-data',
+                    name: 'Density Data from PDBe',
+                    description: 'Download density data from PDBe.',
+                    from: [Entity.Root],
+                    to: [Entity.Action],
+                    defaultParams: function () { return ({
+                        sourceId: 'electron-density',
+                        id: {
+                            'electron-density': '1cbs',
+                            'emdb-id': '3121',
+                            'emdb-pdbid': '5aco'
+                        }
+                    }); },
+                    validateParams: function (p) {
+                        var source = p.sourceId ? p.sourceId : 'electron-density';
+                        if (!p.id)
+                            return ['Enter Id'];
+                        var id = typeof p.id === 'string' ? p.id : p.id[source];
+                        return !id.trim().length ? ['Enter Id'] : void 0;
+                    }
+                }, function (context, a, t) {
+                    var id;
+                    if (typeof t.params.id === 'string')
+                        id = t.params.id;
+                    else
+                        id = t.params.id[t.params.sourceId];
+                    switch (t.params.sourceId || 'electron-density') {
+                        case 'electron-density': return doElectron(a, t, id);
+                        case 'emdb-id': return doEmdbId(context, a, t, id);
+                        case 'emdb-pdbid': return doEmdbPdbId(context, a, t, id);
+                        default: return fail(a, 'Unknown source.');
+                    }
+                }, function (ctx, actionCtx) {
+                    if (!actionCtx)
+                        return;
+                    var _a = actionCtx, id = _a.id, refs = _a.refs, groupRef = _a.groupRef;
+                    var sel = ctx.select((_b = Tree.Selection).byRef.apply(_b, refs));
+                    if (sel.length === refs.length) {
+                        ctx.logger.message('Density loaded, click on a residue or an atom to view the data.');
+                    }
+                    else if (sel.length > 0) {
+                        ctx.logger.message('Density partially loaded, click on a residue or an atom to view the data.');
+                    }
+                    else {
+                        ctx.logger.error("Density for ID '" + id + "' failed to load.");
+                        if (groupRef) {
+                            Bootstrap.Command.Tree.RemoveNode.dispatch(ctx, groupRef);
+                        }
+                    }
+                    var _b;
+                });
             })(Data = PDBe.Data || (PDBe.Data = {}));
         })(PDBe = Viewer.PDBe || (Viewer.PDBe = {}));
     })(Viewer = LiteMol.Viewer || (LiteMol.Viewer = {}));
 })(LiteMol || (LiteMol = {}));
 /*
- * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
 (function (LiteMol) {
@@ -152,6 +362,7 @@ var LiteMol;
         (function (PDBe) {
             var Validation;
             (function (Validation) {
+                var _this = this;
                 var Entity = LiteMol.Bootstrap.Entity;
                 var Transformer = LiteMol.Bootstrap.Entity.Transformer;
                 Validation.Report = Entity.create({ name: 'PDBe Molecule Validation Report', typeClass: 'Behaviour', shortName: 'VR', description: 'Represents PDBe validation report.' });
@@ -275,7 +486,7 @@ var LiteMol;
                 var Theme;
                 (function (Theme) {
                     var colorMap = (function () {
-                        var colors = new Map();
+                        var colors = LiteMol.Core.Utils.FastMap.create();
                         colors.set(0, { r: 0, g: 1, b: 0 });
                         colors.set(1, { r: 1, g: 1, b: 0 });
                         colors.set(2, { r: 1, g: 0.5, b: 0 });
@@ -286,10 +497,10 @@ var LiteMol;
                     var selectionColor = { r: 0, g: 0, b: 1 };
                     var highlightColor = { r: 1, g: 0, b: 1 };
                     function createResidueMapNormal(model, report) {
-                        var map = new Uint8Array(model.residues.count);
+                        var map = new Uint8Array(model.data.residues.count);
                         var mId = model.modelId;
-                        var _a = model.residues, asymId = _a.asymId, entityId = _a.entityId, seqNumber = _a.seqNumber, insCode = _a.insCode;
-                        for (var i = 0, _b = model.residues.count; i < _b; i++) {
+                        var _a = model.data.residues, asymId = _a.asymId, entityId = _a.entityId, seqNumber = _a.seqNumber, insCode = _a.insCode;
+                        for (var i = 0, _b = model.data.residues.count; i < _b; i++) {
                             var e = Api.getEntry(report, mId, entityId[i], asymId[i], Api.getResidueId(seqNumber[i], insCode[i]));
                             if (e) {
                                 map[i] = Math.min(e.numIssues, 3);
@@ -298,13 +509,13 @@ var LiteMol;
                         return map;
                     }
                     function createResidueMapComputed(model, report) {
-                        var map = new Uint8Array(model.residues.count);
+                        var map = new Uint8Array(model.data.residues.count);
                         var mId = model.modelId;
                         var parent = model.parent;
-                        var _a = model.residues, entityId = _a.entityId, seqNumber = _a.seqNumber, insCode = _a.insCode, chainIndex = _a.chainIndex;
-                        var sourceChainIndex = model.chains.sourceChainIndex;
-                        var asymId = parent.chains.asymId;
-                        for (var i = 0, _b = model.residues.count; i < _b; i++) {
+                        var _a = model.data.residues, entityId = _a.entityId, seqNumber = _a.seqNumber, insCode = _a.insCode, chainIndex = _a.chainIndex;
+                        var sourceChainIndex = model.data.chains.sourceChainIndex;
+                        var asymId = parent.data.chains.asymId;
+                        for (var i = 0, _b = model.data.residues.count; i < _b; i++) {
                             var aId = asymId[sourceChainIndex[chainIndex[i]]];
                             var e = Api.getEntry(report, mId, entityId[i], aId, Api.getResidueId(seqNumber[i], insCode[i]));
                             if (e) {
@@ -315,14 +526,14 @@ var LiteMol;
                     }
                     function create(entity, report) {
                         var model = entity.props.model;
-                        var map = model.source === LiteMol.Core.Structure.MoleculeModelSource.File
+                        var map = model.source === LiteMol.Core.Structure.Molecule.Model.Source.File
                             ? createResidueMapNormal(model, report)
                             : createResidueMapComputed(model, report);
-                        var colors = new Map();
+                        var colors = LiteMol.Core.Utils.FastMap.create();
                         colors.set('Uniform', defaultColor);
                         colors.set('Selection', selectionColor);
                         colors.set('Highlight', highlightColor);
-                        var residueIndex = model.atoms.residueIndex;
+                        var residueIndex = model.data.atoms.residueIndex;
                         var mapping = LiteMol.Visualization.Theme.createColorMapMapping(function (i) { return map[residueIndex[i]]; }, colorMap, defaultColor);
                         return LiteMol.Visualization.Theme.createMapping(mapping, { colors: colors, interactive: true, transparency: { alpha: 1.0 } });
                     }
@@ -336,15 +547,20 @@ var LiteMol;
                     to: [Validation.Report],
                     defaultParams: function () { return ({}); }
                 }, function (context, a, t) {
-                    return LiteMol.Bootstrap.Task.create("Validation Report (" + t.params.id + ")", 'Normal', function (ctx) {
-                        ctx.update('Parsing...');
-                        ctx.schedule(function () {
-                            var data = JSON.parse(a.props.data);
-                            var model = data[t.params.id];
-                            var report = Api.createReport(model || {});
-                            ctx.resolve(Validation.Report.create(t, { label: 'Validation Report', behaviour: new Interactivity.Behaviour(context, report) }));
+                    return LiteMol.Bootstrap.Task.create("Validation Report (" + t.params.id + ")", 'Normal', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        var data, model, report;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, ctx.updateProgress('Parsing...')];
+                                case 1:
+                                    _a.sent();
+                                    data = JSON.parse(a.props.data);
+                                    model = data[t.params.id];
+                                    report = Api.createReport(model || {});
+                                    return [2 /*return*/, Validation.Report.create(t, { label: 'Validation Report', behaviour: new Interactivity.Behaviour(context, report) })];
+                            }
                         });
-                    }).setReportTime(true);
+                    }); }).setReportTime(true);
                 });
                 Validation.DownloadAndCreate = LiteMol.Bootstrap.Tree.Transformer.action({
                     id: 'pdbe-validation-download-and-create',
@@ -356,7 +572,7 @@ var LiteMol;
                 }, function (context, a, t) {
                     var id = a.props.molecule.id.trim().toLocaleLowerCase();
                     var action = LiteMol.Bootstrap.Tree.Transform.build()
-                        .add(a, Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/api/validation/residuewise_outlier_summary/entry/" + id, type: 'String', id: id, description: 'Validation Data' })
+                        .add(a, Transformer.Data.Download, { url: "https://www.ebi.ac.uk/pdbe/api/validation/residuewise_outlier_summary/entry/" + id, type: 'String', id: id, description: 'Validation Data', title: 'Validation' })
                         .then(Create, { id: id }, { isBinding: true });
                     return action;
                 }, "Validation report loaded. Hovering over residue will now contain validation info. To apply validation coloring, select the entity in the tree and apply it the right panel.");
@@ -368,29 +584,31 @@ var LiteMol;
                     to: [Entity.Action],
                     defaultParams: function () { return ({}); }
                 }, function (context, a, t) {
-                    return LiteMol.Bootstrap.Task.create('Validation Coloring', 'Background', function (ctx) {
-                        var molecule = LiteMol.Bootstrap.Tree.Node.findAncestor(a, LiteMol.Bootstrap.Entity.Molecule.Molecule);
-                        if (!molecule) {
-                            ctx.reject('No suitable parent found.');
-                            return;
-                        }
-                        var themes = new Map();
-                        var visuals = context.select(LiteMol.Bootstrap.Tree.Selection.byValue(molecule).subtree().ofType(LiteMol.Bootstrap.Entity.Molecule.Visual));
-                        for (var _i = 0, visuals_1 = visuals; _i < visuals_1.length; _i++) {
-                            var v = visuals_1[_i];
-                            var model = LiteMol.Bootstrap.Utils.Molecule.findModel(v);
-                            if (!model)
-                                continue;
-                            var theme = themes.get(model.id);
-                            if (!theme) {
-                                theme = Theme.create(model, a.props.behaviour.report);
-                                themes.set(model.id, theme);
+                    return LiteMol.Bootstrap.Task.create('Validation Coloring', 'Background', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        var molecule, themes, visuals, _i, visuals_1, v, model, theme;
+                        return __generator(this, function (_a) {
+                            molecule = LiteMol.Bootstrap.Tree.Node.findAncestor(a, LiteMol.Bootstrap.Entity.Molecule.Molecule);
+                            if (!molecule) {
+                                throw 'No suitable parent found.';
                             }
-                            LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme.dispatch(context, { visual: v, theme: theme });
-                        }
-                        context.logger.message('Validation coloring applied.');
-                        ctx.resolve(LiteMol.Bootstrap.Tree.Node.Null);
-                    });
+                            themes = LiteMol.Core.Utils.FastMap.create();
+                            visuals = context.select(LiteMol.Bootstrap.Tree.Selection.byValue(molecule).subtree().ofType(LiteMol.Bootstrap.Entity.Molecule.Visual));
+                            for (_i = 0, visuals_1 = visuals; _i < visuals_1.length; _i++) {
+                                v = visuals_1[_i];
+                                model = LiteMol.Bootstrap.Utils.Molecule.findModel(v);
+                                if (!model)
+                                    continue;
+                                theme = themes.get(model.id);
+                                if (!theme) {
+                                    theme = Theme.create(model, a.props.behaviour.report);
+                                    themes.set(model.id, theme);
+                                }
+                                LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme.dispatch(context, { visual: v, theme: theme });
+                            }
+                            context.logger.message('Validation coloring applied.');
+                            return [2 /*return*/, LiteMol.Bootstrap.Tree.Node.Null];
+                        });
+                    }); });
                 });
             })(Validation = PDBe.Validation || (PDBe.Validation = {}));
         })(PDBe = Viewer.PDBe || (Viewer.PDBe = {}));
@@ -400,6 +618,7 @@ var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
     (function (PrankWeb) {
+        var _this = this;
         var Bootstrap = LiteMol.Bootstrap;
         var Entity = Bootstrap.Entity;
         PrankWeb.Sequence = Entity.create({
@@ -416,14 +635,19 @@ var LiteMol;
             to: [PrankWeb.Sequence],
             defaultParams: function () { return ({}); }
         }, function (context, a, t) {
-            return Bootstrap.Task.create("Create sequence entity", 'Normal', function (ctx) {
-                ctx.update('Creating sequence entity...');
-                ctx.schedule(function () {
-                    var seq = a.props.data;
-                    console.log("Sekvence: " + seq);
-                    ctx.resolve(PrankWeb.Sequence.create(t, { label: 'Sequence', seq: seq }));
+            return Bootstrap.Task.create("Create sequence entity", 'Normal', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                var seq;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, ctx.updateProgress('Creating sequence entity...')];
+                        case 1:
+                            _a.sent();
+                            seq = a.props.data;
+                            console.log("Sekvence: " + seq);
+                            return [2 /*return*/, PrankWeb.Sequence.create(t, { label: 'Sequence', seq: seq })];
+                    }
                 });
-            }).setReportTime(true);
+            }); }).setReportTime(true);
         });
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
@@ -431,6 +655,7 @@ var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
     (function (PrankWeb) {
+        var _this = this;
         var Bootstrap = LiteMol.Bootstrap;
         var Entity = Bootstrap.Entity;
         PrankWeb.Prediction = Entity.create({
@@ -447,91 +672,107 @@ var LiteMol;
             to: [PrankWeb.Prediction],
             defaultParams: function () { return ({}); }
         }, function (context, a, t) {
-            return Bootstrap.Task.create("Parse protein prediction entity.", 'Normal', function (ctx) {
-                ctx.update('Parsing prediction data...');
-                ctx.schedule(function () {
-                    var csvData = a.props.data;
-                    var result = [];
-                    try {
-                        var lines = csvData.split('\n');
-                        var h = 0;
-                        var HSVtoRGB = function (h, s, v) {
-                            var r, g, b, i, f, p, q, t;
-                            // if (arguments.length === 1) {
-                            //     s = h.s, v = h.v, h = h.h;
-                            // }
-                            i = Math.floor(h * 6);
-                            f = h * 6 - i;
-                            p = v * (1 - s);
-                            q = v * (1 - f * s);
-                            t = v * (1 - (1 - f) * s);
-                            switch (i % 6) {
-                                case 0:
-                                    r = v, g = t, b = p;
-                                    break;
-                                case 1:
-                                    r = q, g = v, b = p;
-                                    break;
-                                case 2:
-                                    r = p, g = v, b = t;
-                                    break;
-                                case 3:
-                                    r = p, g = q, b = v;
-                                    break;
-                                case 4:
-                                    r = t, g = p, b = v;
-                                    break;
-                                case 5:
-                                    r = v, g = p, b = q;
-                                    break;
+            return Bootstrap.Task.create("Parse protein prediction entity.", 'Normal', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                var csvData, result, lines, h, HSVtoRGB, colors, _loop_1, i;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, ctx.updateProgress('Parsing prediction data...')];
+                        case 1:
+                            _a.sent();
+                            csvData = a.props.data;
+                            result = [];
+                            try {
+                                lines = csvData.split('\n');
+                                h = 0;
+                                HSVtoRGB = function (h, s, v) {
+                                    var r, g, b, i, f, p, q, t;
+                                    r = g = b = 0;
+                                    // if (arguments.length === 1) {
+                                    //     s = h.s, v = h.v, h = h.h;
+                                    // }
+                                    i = Math.floor(h * 6);
+                                    f = h * 6 - i;
+                                    p = v * (1 - s);
+                                    q = v * (1 - f * s);
+                                    t = v * (1 - (1 - f) * s);
+                                    switch (i % 6) {
+                                        case 0:
+                                            r = v, g = t, b = p;
+                                            break;
+                                        case 1:
+                                            r = q, g = v, b = p;
+                                            break;
+                                        case 2:
+                                            r = p, g = v, b = t;
+                                            break;
+                                        case 3:
+                                            r = p, g = q, b = v;
+                                            break;
+                                        case 4:
+                                            r = t, g = p, b = v;
+                                            break;
+                                        case 5:
+                                            r = v, g = p, b = q;
+                                            break;
+                                    }
+                                    console.log(r * 255, g * 255, b * 255);
+                                    return LiteMol.Visualization.Color.fromRgb(r * 255, g * 255, b * 255);
+                                };
+                                colors = Array(6);
+                                colors[0] = LiteMol.Visualization.Color.fromHexString("#e74c3c");
+                                colors[1] = LiteMol.Visualization.Color.fromHexString("#00ffff");
+                                colors[2] = LiteMol.Visualization.Color.fromHexString("#2ecc71");
+                                colors[3] = LiteMol.Visualization.Color.fromHexString("#9b59b6");
+                                colors[4] = LiteMol.Visualization.Color.fromHexString("#00007f");
+                                colors[5] = LiteMol.Visualization.Color.fromHexString("#e67e22");
+                                _loop_1 = function (i) {
+                                    // h = h + (1/6)
+                                    // if (h >= 1) { h = h-1 }
+                                    var fields = lines[i].split(',');
+                                    if (fields.length < 10)
+                                        return "continue";
+                                    var resIds = [];
+                                    fields[8].split(' ').forEach(function (value) { resIds.push(parseInt(value)); });
+                                    var surfAtoms = [];
+                                    fields[9].split(' ').forEach(function (value) { surfAtoms.push(parseInt(value)); });
+                                    result.push({
+                                        name: fields[0],
+                                        rank: parseFloat(fields[1]),
+                                        score: parseFloat(fields[2]),
+                                        conollyPoints: parseFloat(fields[3]),
+                                        surfAtoms: parseFloat(fields[4]),
+                                        centerX: parseFloat(fields[5]),
+                                        centerY: parseFloat(fields[6]),
+                                        centerZ: parseFloat(fields[7]),
+                                        residueIds: resIds,
+                                        surfAtomIds: surfAtoms,
+                                        color: colors[(i - 1) % 6]
+                                    });
+                                };
+                                for (i = 1; i < lines.length; i++) {
+                                    _loop_1(i);
+                                }
                             }
-                            console.log(r * 255, g * 255, b * 255);
-                            return LiteMol.Visualization.Color.fromRgb(r * 255, g * 255, b * 255);
-                        };
-                        var colors = Array(6);
-                        colors[0] = LiteMol.Visualization.Color.fromHexString("#e74c3c");
-                        colors[1] = LiteMol.Visualization.Color.fromHexString("#00ffff");
-                        colors[2] = LiteMol.Visualization.Color.fromHexString("#2ecc71");
-                        colors[3] = LiteMol.Visualization.Color.fromHexString("#9b59b6");
-                        colors[4] = LiteMol.Visualization.Color.fromHexString("#00007f");
-                        colors[5] = LiteMol.Visualization.Color.fromHexString("#e67e22");
-                        var _loop_1 = function (i) {
-                            // h = h + (1/6)
-                            // if (h >= 1) { h = h-1 }
-                            var fields = lines[i].split(',');
-                            if (fields.length < 10)
-                                return "continue";
-                            var resIds = [];
-                            fields[8].split(' ').forEach(function (value) { resIds.push(parseInt(value)); });
-                            var surfAtoms = [];
-                            fields[9].split(' ').forEach(function (value) { surfAtoms.push(parseInt(value)); });
-                            result.push({
-                                name: fields[0],
-                                rank: parseFloat(fields[1]),
-                                score: parseFloat(fields[2]),
-                                conollyPoints: parseFloat(fields[3]),
-                                surfAtoms: parseFloat(fields[4]),
-                                centerX: parseFloat(fields[5]),
-                                centerY: parseFloat(fields[6]),
-                                centerZ: parseFloat(fields[7]),
-                                residueIds: resIds,
-                                surfAtomIds: surfAtoms,
-                                color: colors[(i - 1) % 6]
-                            });
-                        };
-                        for (var i = 1; i < lines.length; i++) {
-                            _loop_1(i);
-                        }
+                            catch (e) {
+                                console.log("Exception catched during parsing.");
+                            }
+                            return [2 /*return*/, PrankWeb.Prediction.create(t, { label: 'Sequence', pockets: result })];
                     }
-                    catch (e) {
-                        console.log("Exception catched during parsing.");
-                    }
-                    ctx.resolve(PrankWeb.Prediction.create(t, { label: 'Sequence', pockets: result }));
                 });
-            }).setReportTime(true);
+            }); }).setReportTime(true);
         });
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
@@ -584,7 +825,7 @@ var LiteMol;
         var SequenceView = (function (_super) {
             __extends(SequenceView, _super);
             function SequenceView() {
-                return _super.apply(this, arguments) || this;
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             SequenceView.prototype.getResidue = function (seqNumber, model) {
                 var ctx = this.controller.context;
@@ -593,7 +834,7 @@ var LiteMol;
                 var item = cache.get(model, cacheId);
                 if (!item) {
                     var selectionQ = LiteMol.Core.Structure.Query.residuesById(seqNumber); //Core.Structure.Query.chains({ authAsymId: 'A' })
-                    var elements = model.props.model.query(selectionQ).unionAtomIndices();
+                    var elements = LiteMol.Core.Structure.Query.apply(selectionQ, model.props.model).unionAtomIndices();
                     var selection = Bootstrap.Interactivity.Info.selection(model, elements);
                     var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
                     item = new CacheItem(selectionQ, selectionInfo);
@@ -754,7 +995,7 @@ var LiteMol;
         var PocketList = (function (_super) {
             __extends(PocketList, _super);
             function PocketList() {
-                return _super.apply(this, arguments) || this;
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             PocketList.prototype.getPocket = function (pocket, model) {
                 var ctx = this.controller.context;
@@ -763,7 +1004,7 @@ var LiteMol;
                 var item = cache.get(model, cacheId);
                 if (!item) {
                     var selectionQ = LiteMol.Core.Structure.Query.atomsById.apply(null, pocket.surfAtomIds); //Core.Structure.Query.chains({ authAsymId: 'A' })
-                    var elements = model.props.model.query(selectionQ).unionAtomIndices();
+                    var elements = LiteMol.Core.Structure.Query.apply(selectionQ, model.props.model).unionAtomIndices();
                     var selection = Bootstrap.Interactivity.Info.selection(model, elements);
                     var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
                     item = new CacheItem(selectionQ, selectionInfo);
@@ -828,9 +1069,6 @@ var LiteMol;
         PrankWeb.PocketList = PocketList;
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
-/*
- * Copyright (c) 2016 David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
- */
 var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
@@ -949,9 +1187,8 @@ var LiteMol;
                 sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: true });
                 sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: true });
             });
-            var loadTask = Bootstrap.Tree.Transform.apply(plugin.context, action).run(plugin.context);
             // to access the model after it was loaded...
-            loadTask.then(function () {
+            plugin.applyTransform(action).then(function () {
                 var model = plugin.context.select('model')[0];
                 if (!model)
                     return;
