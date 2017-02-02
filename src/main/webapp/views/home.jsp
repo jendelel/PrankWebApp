@@ -2,39 +2,12 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:layout>
-    <jsp:attribute name="header">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js"></script>
+    <jsp:attribute name="header_after">
         <script src="htps://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
         <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"/>
     </jsp:attribute>
     <jsp:body>
         <div class="container">
-           <div class="row">
-             <div class="box">
-               <div class="col-lg-12 text-center">
-                 <div id="carousel-example-generic" class="carousel slide">
-                   <!-- Indicators-->
-                   <ol class="carousel-indicators hidden-xs">
-                     <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
-                     <li data-target="#carousel-example-generic" data-slide-to="1"></li>
-                     <li data-target="#carousel-example-generic" data-slide-to="2"></li>
-                   </ol>
-                   <!-- Wrapper for slides-->
-                   <div class="carousel-inner">
-                     <div class="item active"><img src="/images/slide-1.png" alt="" class="img-responsive img-full"/></div>
-                     <div class="item"><img src="/images/slide-2.png" alt="" class="img-responsive img-full"/></div>
-                     <div class="item"><img src="/images/slide-3.png" alt="" class="img-responsive img-full"/></div>
-                   </div>
-                   <!-- Controls--><a href="#carousel-example-generic" data-slide="prev" class="left carousel-control"><span class="icon-prev"></span></a><a href="#carousel-example-generic" data-slide="next" class="right carousel-control"><span class="icon-next"></span></a>
-                 </div>
-                 <h2 class="brand-before"><small>Welcome to</small></h2>
-                 <h1 class="brand-name">Prank WebApp</h1>
-                 <hr class="tagline-divider"/>
-                 <h2><small>By <strong>SIRET Research Group At Charles University</strong></small></h2>
-               </div>
-             </div>
-           </div>
            <div class="row">
              <div class="box">
                <div class="col-lg-12">
@@ -69,6 +42,6 @@
              </div>
            </div>
         </div>
-        <script src="/javascripts/upload.js"></script>
+        <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:body>
 </t:layout>

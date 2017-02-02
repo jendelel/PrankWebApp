@@ -939,7 +939,7 @@ var LiteMol;
                     return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
                 };
                 var seqId = -1;
-                return React.createElement("div", { id: "seqView" });
+                return React.createElement("div", { id: "seqView", className: "noselect" });
                 // return (<div className='protein-seq' style={{ fontFamily: 'Consolas, "Courier New", monospace', fontSize: 'large' }}>
                 //     {seqToPrint.map((letter, i) => {
                 //         if (letter === ' ') {
@@ -1166,7 +1166,7 @@ var LiteMol;
             };
             // Represent an action to perform on the app state.
             var action = Bootstrap.Tree.Transform.build();
-            // This loads the model from PDBe
+            // This loads the model from REST api
             var modelAction = action.add(plugin.context.tree.root, Transformer.Data.Download, { url: "/api/mmcif/" + pdbId, type: 'String', description: pdbId })
                 .then(Transformer.Data.ParseCif, { id: pdbId, description: pdbId }, { isBinding: true })
                 .then(Transformer.Molecule.CreateFromMmCif, { blockIndex: 0 }, { isBinding: true })

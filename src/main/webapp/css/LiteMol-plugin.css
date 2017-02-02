@@ -1627,7 +1627,7 @@
     overflow: hidden;
     background: #111318; }
   .lm-plugin .lm-layout-static, .lm-plugin .lm-layout-scrollable {
-    position: absolute; }
+    /*position: absolute;*/ }
   .lm-plugin .lm-layout-scrollable {
     overflow-y: auto; }
   .lm-plugin .lm-layout-static {
@@ -3137,7 +3137,7 @@
   .lm-plugin .lm-plugin-content {
     color: #ccd4e0; }
 
-  // Added based on a request by DSehnal
+  /* Added based on a request by DSehnal */
   .lm-plugin .lm-layout-top .lm-layout-static {
     width: 100%;
     height: 100%;  }

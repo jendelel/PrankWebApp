@@ -72,13 +72,15 @@ public class RestAPI  extends Application {
     @javax.ws.rs.Path("/mmcif/{pdbid}")
     public String streamMMCIFile(@PathParam("pdbid") String pdbId) throws IOException {
         PDBFileReader pdbReader = new PDBFileReader();
-        Structure structure = null;
+        Structure structure;
         Path path = Paths.get(AppSettings.INSTANCE.getPdbDataPath(), String.format("pdb%s.ent.gz",
                 pdbId));
         GZIPInputStream fis = new GZIPInputStream(new FileInputStream(path.toString()));
         try {
             structure = pdbReader.getStructure(fis);
-            return structure.toMMCIF();
+            String header = "data_" + structure.getPDBHeader().getIdCode();
+            String mmcif = structure.toMMCIF();
+            return header + mmcif.substring(mmcif.indexOf('\n'));
         } catch (IOException e) {
             e.printStackTrace();
         }
