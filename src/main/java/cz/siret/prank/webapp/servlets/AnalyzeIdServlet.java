@@ -14,12 +14,11 @@ public class AnalyzeIdServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        rdk.pockets.program.Main.main();
-
         String urlSuffix = req.getPathInfo();
         if (urlSuffix != null && urlSuffix.length() == 5 && urlSuffix.charAt(0) == '/' ) {
             String pdbId = urlSuffix.substring(1);
-            req.setAttribute("pdbId", pdbId);
+            req.setAttribute("inputType", "pdb");
+            req.setAttribute("inputId", pdbId);
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/visualize.jsp");
             rd.forward(req, resp);
         } else {

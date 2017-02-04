@@ -1082,7 +1082,15 @@ var LiteMol;
         function create(target) {
             var spec = {
                 settings: {},
-                transforms: [],
+                transforms: [
+                    // Molecule(model) transforms
+                    { transformer: Transformer.Molecule.CreateModel, view: Views.Transform.Molecule.CreateModel, initiallyCollapsed: true },
+                    { transformer: Transformer.Molecule.CreateSelection, view: Views.Transform.Molecule.CreateSelection, initiallyCollapsed: true },
+                    { transformer: Transformer.Molecule.CreateAssembly, view: Views.Transform.Molecule.CreateAssembly, initiallyCollapsed: true },
+                    { transformer: Transformer.Molecule.CreateSymmetryMates, view: Views.Transform.Molecule.CreateSymmetryMates, initiallyCollapsed: true },
+                    { transformer: Transformer.Molecule.CreateMacromoleculeVisual, view: Views.Transform.Empty },
+                    { transformer: Transformer.Molecule.CreateVisual, view: Views.Transform.Molecule.CreateVisual }
+                ],
                 behaviours: [
                     // you will find the source of all behaviours in the Bootstrap/Behaviour directory
                     Bootstrap.Behaviour.SetEntityToCurrentWhenAdded,
@@ -1106,9 +1114,12 @@ var LiteMol;
                 ],
                 components: [
                     Plugin.Components.Visualization.HighlightInfo(LayoutRegion.Main, true),
+                    Plugin.Components.Entity.Current('LiteMol', Plugin.VERSION.number)(LayoutRegion.Right, true),
+                    Plugin.Components.Transform.View(LayoutRegion.Right),
                     //Plugin.Components.Context.Log(LayoutRegion.Bottom, true),
                     Plugin.Components.create('PrankWeb.SequenceView', function (s) { return new PrankWeb.SequenceController(s); }, PrankWeb.SequenceView)(LayoutRegion.Top, true),
                     Plugin.Components.Context.Overlay(LayoutRegion.Root),
+                    Plugin.Components.Context.Toast(LayoutRegion.Main, true),
                     Plugin.Components.Context.BackgroundTasks(LayoutRegion.Main, true)
                 ],
                 viewport: {
@@ -1125,13 +1136,27 @@ var LiteMol;
         PrankWeb.create = create;
         var appNode = document.getElementById('app');
         var pocketNode = document.getElementById('pockets');
-        var pdbId = appNode.getAttribute("data-pdbid");
+        var inputType = appNode.getAttribute("data-input-type");
+        var inputId = appNode.getAttribute("data-input-id");
+        var mmcifUrl;
+        var seqUrl;
+        var csvUrl;
+        if (inputType == "pdb") {
+            mmcifUrl = "/api/id/mmcif/" + inputId;
+            csvUrl = "/api/id/csv/" + inputId;
+            seqUrl = "/api/id/seq/" + inputId;
+        }
+        else {
+            mmcifUrl = "/api/upload/mmcif/" + inputId;
+            csvUrl = "/api/upload/csv/" + inputId;
+            seqUrl = "/api/upload/seq/" + inputId;
+        }
         var plugin = create(appNode);
         LiteMol.Plugin.ReactDOM.render(LiteMol.Plugin.React.createElement(PrankWeb.PocketList, { controller: new PrankWeb.PocketController(plugin.context) }), pocketNode);
         var downloadAction = Bootstrap.Tree.Transform.build()
-            .add(plugin.root, Transformer.Data.Download, { url: "/api/csv/" + pdbId, type: 'String' }, { isHidden: true })
+            .add(plugin.root, Transformer.Data.Download, { url: csvUrl, type: 'String' }, { isHidden: true })
             .then(PrankWeb.ParseAndCreatePrediction, {}, { ref: 'pockets', isHidden: true })
-            .add(plugin.root, Transformer.Data.Download, { url: "/api/seq/" + pdbId, type: 'String' }, { isHidden: true })
+            .add(plugin.root, Transformer.Data.Download, { url: seqUrl, type: 'String' }, { isHidden: true })
             .then(PrankWeb.CreateSequence, {}, { ref: 'sequence', isHidden: true });
         plugin.applyTransform(downloadAction).then(function () {
             var pockets = plugin.context.select('pockets')[0].props.pockets;
@@ -1167,25 +1192,25 @@ var LiteMol;
             // Represent an action to perform on the app state.
             var action = Bootstrap.Tree.Transform.build();
             // This loads the model from REST api
-            var modelAction = action.add(plugin.context.tree.root, Transformer.Data.Download, { url: "/api/mmcif/" + pdbId, type: 'String', description: pdbId })
-                .then(Transformer.Data.ParseCif, { id: pdbId, description: pdbId }, { isBinding: true })
+            var modelAction = action.add(plugin.context.tree.root, Transformer.Data.Download, { url: mmcifUrl, type: 'String', description: inputType })
+                .then(Transformer.Data.ParseCif, { id: inputId, description: inputType }, { isBinding: true })
                 .then(Transformer.Molecule.CreateFromMmCif, { blockIndex: 0 }, { isBinding: true })
                 .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false, ref: 'model' });
             // Create a selection on the model and then create a visual for it...
             modelAction
                 .then(Transformer.Molecule.CreateSelectionFromQuery, { query: complementQ, name: 'Protein', silent: true }, {})
-                .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: true });
+                .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: false });
             selectionQueries.forEach(function (selectionQuery, i) {
                 var selectionColor = selectionColors.set('Uniform', pockets[i].color);
                 var selectionStyle = {
                     type: 'Surface',
                     params: { probeRadius: 0.5, density: 1.25, smoothing: 3, isWireframe: false },
-                    theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: selectionColor, transparency: { alpha: 0.5 } }
+                    theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: selectionColor, transparency: { alpha: 0.8 } }
                 };
                 var sel = modelAction
                     .then(Transformer.Molecule.CreateSelectionFromQuery, { query: selectionQuery, name: pockets[i].name, silent: true }, {});
-                sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: true });
-                sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: true });
+                sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
+                sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
             });
             // to access the model after it was loaded...
             plugin.applyTransform(action).then(function () {

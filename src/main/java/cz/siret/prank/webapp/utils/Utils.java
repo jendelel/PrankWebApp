@@ -5,12 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 
-// http://stackoverflow.com/questions/70689/what-is-an-efficient-way-to-implement-a-singleton
-// -pattern-in-java
-public enum Utils {
-    INSTANCE;
-
-
+public class Utils {
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int len = in.read(buffer);

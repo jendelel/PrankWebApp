@@ -19,9 +19,8 @@ $('#upload-pdb').on('change', function(){
             data: formData,
             processData: false,
             success: function (data) {
-                console.log('upload successful!\n' + data);
-                document.write(data)
-                document.close()
+                console.log('Upload successful!\n' + data);
+                window.location.assign(data);
             },
             xhr: function () {
                 // create an XMLHttpRequest

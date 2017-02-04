@@ -10,6 +10,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+// http://stackoverflow.com/questions/70689/what-is-an-efficient-way-to-implement-a-singleton-pattern-in-java
 public enum AppSettings {
    INSTANCE;
 

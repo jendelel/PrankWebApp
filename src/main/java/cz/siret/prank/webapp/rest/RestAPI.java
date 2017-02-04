@@ -25,18 +25,28 @@ import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.Utils;
 
 @ApplicationPath("/api")
-@javax.ws.rs.Path("/")
-public class RestAPI  extends Application {
+@javax.ws.rs.Path("/{type}/")
+public class RestAPI extends Application {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
+    private Path getPdbFilePath(String inputType, String id) {
+        if (inputType.equals("id")) {
+            return Paths.get(AppSettings.INSTANCE.getPdbDataPath(),
+                    String.format("pdb%s.ent.gz", id));
+        } else {
+            return Paths.get(AppSettings.INSTANCE.getUploadsDir(), id);
+        }
+    }
+
+
     @GET
-    @javax.ws.rs.Path("pdb/{pdbid}")
+    @javax.ws.rs.Path("pdb/{id}")
     @Produces(MediaType.TEXT_PLAIN)
-    public StreamingOutput streamPdbFile(@PathParam("pdbid") String pdbId) {
+    public StreamingOutput streamPdbFile(@PathParam("type") String inputType,
+                                         @PathParam("id") String id) {
         return outputStream -> {
-            Path path = Paths.get(AppSettings.INSTANCE.getPdbDataPath(), String.format("pdb%s.ent.gz",
-                    pdbId));
+            Path path = getPdbFilePath(inputType, id);
             InputStream in = new GZIPInputStream(new FileInputStream(path.toString()));
             Utils.copyStream(in, outputStream);
             outputStream.close();
@@ -46,12 +56,12 @@ public class RestAPI  extends Application {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @javax.ws.rs.Path("/seq/{pdbid}")
-    public String streamSequence(@PathParam("pdbid") String pdbId) throws IOException {
+    @javax.ws.rs.Path("/seq/{id}")
+    public String streamSequence(@PathParam("type") String inputType,
+                                 @PathParam("id") String id) throws IOException {
         PDBFileReader pdbReader = new PDBFileReader();
-        Structure structure = null;
-        Path path = Paths.get(AppSettings.INSTANCE.getPdbDataPath(), String.format("pdb%s.ent.gz",
-                pdbId));
+        Structure structure;
+        Path path = getPdbFilePath(inputType, id);
         GZIPInputStream fis = new GZIPInputStream(new FileInputStream(path.toString()));
         StringBuilder res = new StringBuilder();
         try {
@@ -69,12 +79,12 @@ public class RestAPI  extends Application {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @javax.ws.rs.Path("/mmcif/{pdbid}")
-    public String streamMMCIFile(@PathParam("pdbid") String pdbId) throws IOException {
+    @javax.ws.rs.Path("/mmcif/{id}")
+    public String streamMMCIFile(@PathParam("type") String inputType,
+                                 @PathParam("id") String id) throws IOException {
         PDBFileReader pdbReader = new PDBFileReader();
         Structure structure;
-        Path path = Paths.get(AppSettings.INSTANCE.getPdbDataPath(), String.format("pdb%s.ent.gz",
-                pdbId));
+        Path path = getPdbFilePath(inputType, id);
         GZIPInputStream fis = new GZIPInputStream(new FileInputStream(path.toString()));
         try {
             structure = pdbReader.getStructure(fis);
@@ -89,13 +99,19 @@ public class RestAPI  extends Application {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @javax.ws.rs.Path("/csv/{pdbid}")
-    public StreamingOutput streamCsvFile(@PathParam("pdbid") String pdbId) {
+    @javax.ws.rs.Path("/csv/{id}")
+    public StreamingOutput streamCsvFile(@PathParam("type") String inputType,
+                                         @PathParam("id") String id) {
         return outputStream -> {
-            Path path = Paths.get(AppSettings.INSTANCE.getCsvDataPath(), String.format("pdb%s" +
-                    ".ent" +
-                    ".gz_predictions" +
-                    ".csv", pdbId));
+            Path path;
+            if (inputType.equals("id")) {
+                path = Paths.get(AppSettings.INSTANCE.getCsvDataPath(),
+                        String.format("pdb%s.ent.gz_predictions.csv", id));
+            } else {
+                path = Paths.get(AppSettings.INSTANCE.getPredictionDir(),
+                        String.format("%s_predictions.csv", id));
+            }
+
             InputStream in = new FileInputStream(path.toString());
             Utils.copyStream(in, outputStream);
             outputStream.close();
