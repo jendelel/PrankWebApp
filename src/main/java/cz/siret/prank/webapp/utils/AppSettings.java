@@ -31,6 +31,7 @@ public enum AppSettings {
         }
     }
 
+    // Paths for data
     public String getPrankPath() {
         String value = config.getString("prank.installdir");
         Path path = dataDir.resolve(value);
@@ -59,5 +60,16 @@ public enum AppSettings {
         String value = config.getString("uploads.csv");
         Path path = dataDir.resolve(value);
         return path.toAbsolutePath().toString();
+    }
+
+    // Settings of ThreadPoolExecutor
+    public int getCorePoolSize() {
+        return config.getInt("pool.coresize", 3);
+    }
+    public int getMaxPoolSize() {
+        return config.getInt("pool.maxsize", 5);
+    }
+    public int getQueueSize() {
+        return config.getInt("queue.size", 100);
     }
 }

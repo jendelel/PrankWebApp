@@ -15,9 +15,11 @@ public enum JobRunner {
     private ThreadPoolExecutor workQueue;
     private PrankPredictor prankPredictor;
     JobRunner() {
-        // TODO: Load the parameters from AppSettings
-        workQueue = new ThreadPoolExecutor(3, 5, 10,
-                TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(50));
+        int corePoolSize = AppSettings.INSTANCE.getCorePoolSize();
+        int maxPoolSize = AppSettings.INSTANCE.getMaxPoolSize();
+        int queueSize = AppSettings.INSTANCE.getQueueSize();
+        workQueue = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 10,
+                TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueSize));
         prankPredictor = PrankFacade.createPredictor(
                 Paths.get(AppSettings.INSTANCE.getPrankPath()));
     }

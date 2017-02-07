@@ -8,6 +8,7 @@
             <link rel="stylesheet"
                   href="${pageContext.request.contextPath}/css/LiteMol-plugin.css"/>
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pviz-core.css"/>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pviz-custom.css"/>
             <link rel="stylesheet"
                   href="${pageContext.request.contextPath}/css/visualizations.css"/>
     </jsp:attribute>

@@ -6,9 +6,11 @@ import org.biojava.nbio.structure.io.PDBFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
@@ -57,23 +59,48 @@ public class RestAPI extends Application {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @javax.ws.rs.Path("/seq/{id}")
-    public String streamSequence(@PathParam("type") String inputType,
-                                 @PathParam("id") String id) throws IOException {
-        PDBFileReader pdbReader = new PDBFileReader();
-        Structure structure;
-        Path path = getPdbFilePath(inputType, id);
-        GZIPInputStream fis = new GZIPInputStream(new FileInputStream(path.toString()));
-        StringBuilder res = new StringBuilder();
-        try {
-            structure = pdbReader.getStructure(fis);
-            for (Chain chain : structure.getChains()) {
-                res.append(chain.getAtomSequence() + "\n");
-            }
-            return res.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public StreamingOutput streamSequence(@PathParam("type") String inputType,
+                                          @PathParam("id") String id) throws IOException {
+        Path conservPath;
+        if (inputType.equals("id")) {
+            conservPath = Paths.get(AppSettings.INSTANCE.getCsvDataPath(),
+                    String.format("pdb%s.ent.gz.hom.gz", id));
+        } else {
+            conservPath = Paths.get(AppSettings.INSTANCE.getPredictionDir(),
+                    String.format("%s.hom.gz", id));
         }
-        return "Error occurred";
+        File conservationFile = new File(conservPath.toAbsolutePath().toString());
+        if (conservationFile.exists()) {
+            InputStream inputStream = new GZIPInputStream(new FileInputStream(conservationFile));
+            return outputStream -> {
+                Utils.copyStream(inputStream, outputStream);
+                inputStream.close();
+                outputStream.close();
+            };
+        }
+        // else (i.e. if conservation score isn't available
+        return outputStream -> {
+            PDBFileReader pdbReader = new PDBFileReader();
+            Structure structure;
+            Path path = getPdbFilePath(inputType, id);
+            GZIPInputStream fis = new GZIPInputStream(new FileInputStream(path.toString()));
+            try {
+                structure = pdbReader.getStructure(fis);
+                PrintStream output = new PrintStream(outputStream);
+                output.println("N/A");
+                for (Chain chain : structure.getChains()) {
+                    output.printf("Chain %s:", chain.getChainID());
+                    String seq = chain.getAtomSequence();
+                    for (int i = 0; i < seq.length(); i++) {
+                        output.printf(",%s", seq.charAt(i));
+                    }
+                    output.println();
+                }
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
     }
 
 
