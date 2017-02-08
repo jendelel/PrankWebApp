@@ -42,6 +42,7 @@ public class UploadFileServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
 
         // Store file into a temp file
         Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
@@ -62,7 +63,7 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         try {
-            JobRunner.INSTANCE.runPrediction(tempFile);
+            JobRunner.INSTANCE.runPrediction(tempFile, doConservation);
             request.setAttribute("upload", tempFile.getName());
             response.getWriter().write("/analyze/upload/" + removeExtension(tempFile.getName()));
             response.getWriter().close();

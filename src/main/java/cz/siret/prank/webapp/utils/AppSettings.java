@@ -62,6 +62,13 @@ public enum AppSettings {
         return path.toAbsolutePath().toString();
     }
 
+    public String getConservationScriptPath() {
+        String value = config.getString("conservation.script", null);
+        if (value == null) return null;
+        Path path = dataDir.resolve(value);
+        return path.toAbsolutePath().toString();
+    }
+
     // Settings of ThreadPoolExecutor
     public int getCorePoolSize() {
         return config.getInt("pool.coresize", 3);

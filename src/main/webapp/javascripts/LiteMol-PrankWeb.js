@@ -264,11 +264,13 @@ var LiteMol;
                 }
                 return item;
             };
-            SequenceView.prototype.componentWillMount = function () {
-                _super.prototype.componentWillMount.call(this);
+            SequenceView.prototype.componentDidMount = function () {
+                this.componentDidUpdate();
                 //this.subscribe(Bootstrap.Event.Common.LayoutChanged.getStream(this.controller.context), () => this.scrollToBottom());
             };
             SequenceView.prototype.componentDidUpdate = function () {
+                if (this.controller.latestState.seqs.length <= 0)
+                    return;
                 //this.scrollToBottom();
                 var pockets = this.controller.latestState.pockets;
                 var pviz = getPviz();
@@ -577,7 +579,7 @@ var LiteMol;
                 target: target,
                 //viewportBackground: '#333',
                 layoutState: {
-                    hideControls: true,
+                    hideControls: false,
                     isExpanded: false,
                 },
                 customSpecification: PrankWeb.PrankWebSpec

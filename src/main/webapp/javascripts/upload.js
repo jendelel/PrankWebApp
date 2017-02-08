@@ -1,5 +1,5 @@
-$('#upload-pdb').on('change', function(){
-    var files = $(this).get(0).files;
+function uploadPdbFile() {
+    var files = $('#upload-pdb').get(0).files;
 
     if (files.length > 0) {
         $('.progress-bar').text('0%');
@@ -11,6 +11,9 @@ $('#upload-pdb').on('change', function(){
             var file = files[i];
             formData.append('pdbFile', file, file.name);
         }
+
+        var doConservation = $('#conservation-checkbox').prop('checked');
+        formData.append('conservation', doConservation);
 
         $.ajax({
             url: '/analyze/file_upload',
@@ -51,10 +54,10 @@ $('#upload-pdb').on('change', function(){
             }
         });
     }
-});
+}
 
-$('#pdbIdSumbit').on('click', function() {
-    var pdbId = document.getElementById('pdbId').value;
+function submitPdbId() {
+    var pdbId = $('#pdbId').val();
     //TODO: Improve validation
     if (pdbId === "") {
         window.location.href = '/analyze/id/4x09';
@@ -62,5 +65,5 @@ $('#pdbIdSumbit').on('click', function() {
         var hostName = window.location.hostname;
         window.location.href = '/analyze/id/' + pdbId;
     }
-});
+}
 
