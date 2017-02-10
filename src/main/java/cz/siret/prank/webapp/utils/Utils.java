@@ -3,11 +3,13 @@ package cz.siret.prank.webapp.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 
 public class Utils {
@@ -24,10 +26,15 @@ public class Utils {
 
     // http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
     // The stream is not closed.
-    static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    public static String convertStreamToString(InputStream is) {
+        Scanner s = new Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 
+    public static void stringToFile(String content, File destination) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(destination);
+        writer.print(content);
+        writer.close();
+    }
 
 }

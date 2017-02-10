@@ -43,23 +43,27 @@ public class UploadFileServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
+        String chain = request.getParameter("chain");
 
         // Store file into a temp file
         Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
-        InputStream fileContent = filePart.getInputStream();
-        File tempFile = null;
-        try {
-            File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
-            tempFile = File.createTempFile(String.format("upload_%s_",
-                    dateTimeFormatter.format(LocalDateTime.now())), ".pdb.gz", uploadsFolder);
-            GZIPOutputStream outputStream = new GZIPOutputStream(
-                    new FileOutputStream(tempFile, false));
-            Utils.copyStream(fileContent, outputStream);
-            fileContent.close();
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace(response.getWriter());
-            return;
+        File tempFile;
+        try (InputStream fileContent = filePart.getInputStream()) {
+            tempFile = null;
+            try {
+                File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
+                tempFile = File.createTempFile(String.format("upload_%s_",
+                        dateTimeFormatter.format(LocalDateTime.now())), ".pdb.gz", uploadsFolder);
+                try (GZIPOutputStream outputStream = new GZIPOutputStream(
+                        new FileOutputStream(tempFile, false))) {
+                    Utils.copyStream(fileContent, outputStream);
+                    fileContent.close();
+                    outputStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(response.getWriter());
+                return;
+            }
         }
 
         try {

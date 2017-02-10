@@ -1,13 +1,11 @@
 package cz.siret.prank.webapp.utils;
 
+import org.biojava.nbio.structure.StructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -36,7 +34,7 @@ public enum JobRunner {
     }
 
 
-    private void scoreConservation(File fileToAnalyze) throws IOException, InterruptedException {
+    private void scoreConservation(File fileToAnalyze) throws IOException, InterruptedException, StructureException {
         // Check if the script even exists
         String script = AppSettings.INSTANCE.getConservationScriptPath();
         if (script != null) {
@@ -44,9 +42,7 @@ public enum JobRunner {
             if (scriptFile.exists()) {
                 // Create a FASTA file
                 File tempFile = File.createTempFile("conservation", ".fasta");
-                PrintWriter writer = new PrintWriter(tempFile);
-                writer.println(BioUtils.pdbToFasta(fileToAnalyze));
-                writer.close();
+                Utils.stringToFile(BioUtils.pdbToFasta(fileToAnalyze), tempFile);
 
                 ProcessBuilder processBuilder = new ProcessBuilder(script,
                         tempFile.getAbsolutePath());
@@ -55,14 +51,6 @@ public enum JobRunner {
                         fileToAnalyze.getName() + ".hom.gz");
                 processBuilder.redirectOutput(resultFile.toFile());
                 Process process = processBuilder.start();
-
-//                BufferedReader err = new BufferedReader(
-//                        new InputStreamReader( process.getErrorStream()));
-//                String line;
-//                while ((line = err.readLine()) != null) {
-//                   logger.info(line);
-//                }
-//                err.close();
 
                 int result = process.waitFor();
                 tempFile.delete();
@@ -78,6 +66,8 @@ public enum JobRunner {
                 } catch (IOException e) {
                     logger.error("Failed to run conservation script.", e);
                 } catch (InterruptedException e) {
+                    logger.error("Failed to run conservation script.", e);
+                } catch (StructureException e) {
                     logger.error("Failed to run conservation script.", e);
                 }
             }
