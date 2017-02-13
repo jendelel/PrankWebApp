@@ -1,0 +1,3 @@
+[submodule "LiteMol"]
+	path = LiteMol
+	url = https://github.com/jendelel/LiteMol.git
