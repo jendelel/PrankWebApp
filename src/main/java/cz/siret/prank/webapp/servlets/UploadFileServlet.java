@@ -20,9 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import cz.siret.prank.lib.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.JobRunner;
-import cz.siret.prank.webapp.utils.Utils;
 
 @WebServlet(
         name = "UploadFileServlet",

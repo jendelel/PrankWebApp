@@ -25,12 +25,17 @@ repositories {
 }
 
 dependencies {
+    compile 'cz.siret.prank:pranklib:1.0.0' // locally imported pranlib module
+
     compile group: 'org.biojava', name: 'biojava-core', version: '4.2.4'
     compile group: 'org.biojava', name: 'biojava-structure', version: '4.2.4'
     compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.1'
     compile 'commons-beanutils:commons-beanutils:1.9.3'
     compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
     compile group: 'javax', name: 'javaee-api', version: '7.0'
+
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+
     //Prank dependencies begin
     compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile 'org.codehaus.gpars:gpars:1.2.1'
@@ -47,8 +52,9 @@ dependencies {
     compile 'nz.ac.waikato.cms.weka:weka-dev:3.9.0'
     // compile files('lib/biojava-structure-4.2.4-rdk1.jar')     // customized fork for pocket-rank
     // local jars imported to local maven repository
-    compile 'hr.irb:fastrandomforest:0.9'
+//    compile 'hr.irb:fastrandomforest:0.9'
     // compile 'org.biojava:biojava-structure:4.2.4-rdk1'
-    compile 'cz.siret.prank:program:2.0-rc.3_JAVAAPI.1'
+//    compile 'cz.siret.prank:program:2.0-rc.3_JAVAAPI.1'
     // Prank dependencies end
+    compile fileTree(dir: 'libs', include: '*.jar')
 }

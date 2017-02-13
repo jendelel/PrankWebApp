@@ -212,7 +212,6 @@ var LiteMol;
             };
             SequenceView.prototype.componentDidMount = function () {
                 this.componentDidUpdate();
-                //this.subscribe(Bootstrap.Event.Common.LayoutChanged.getStream(this.controller.context), () => this.scrollToBottom());
             };
             SequenceView.prototype.componentDidUpdate = function () {
                 var seq = this.controller.latestState.seq;
@@ -283,8 +282,6 @@ var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
     (function (PrankWeb) {
-        var Plugin = LiteMol.Plugin;
-        var Views = Plugin.Views;
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
         var PocketController = (function (_super) {
@@ -314,7 +311,7 @@ var LiteMol;
                 return _super !== null && _super.apply(this, arguments) || this;
             }
             PocketList.prototype.getPocket = function (pocket, model) {
-                var ctx = this.controller.context;
+                var ctx = this.props.plugin.context;
                 var cache = ctx.entityCache;
                 var cacheId = "__pocketSelectionInfo-" + pocket.name;
                 var item = cache.get(model, cacheId);
@@ -328,15 +325,11 @@ var LiteMol;
                 }
                 return item;
             };
-            PocketList.prototype.componentWillMount = function () {
-                _super.prototype.componentWillMount.call(this);
-                //this.subscribe(Bootstrap.Event.Common.LayoutChanged.getStream(this.controller.context), () => this.scrollToBottom());
-            };
             PocketList.prototype.componentDidUpdate = function () {
                 //this.scrollToBottom();
             };
             PocketList.prototype.onLetterMouseEnter = function (pocket, isOn) {
-                var ctx = this.controller.context;
+                var ctx = this.props.plugin.context;
                 var model = ctx.select('model')[0];
                 if (!model)
                     return;
@@ -355,7 +348,7 @@ var LiteMol;
                 }
             };
             PocketList.prototype.onLetterClick = function (pocket) {
-                var ctx = this.controller.context;
+                var ctx = this.props.plugin.context;
                 var model = ctx.select('model')[0];
                 if (!model)
                     return;
@@ -364,8 +357,8 @@ var LiteMol;
             };
             PocketList.prototype.render = function () {
                 var _this = this;
-                var pockets = this.controller.latestState.pockets;
-                var ctx = this.controller.context;
+                var pockets = this.props.data.prediction.props.pockets;
+                var ctx = this.props.plugin.context;
                 var colorToString = function (color) {
                     return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
                 };
@@ -381,8 +374,177 @@ var LiteMol;
                 })));
             };
             return PocketList;
-        }(Views.View));
+        }(React.Component));
         PrankWeb.PocketList = PocketList;
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var DataLoader;
+        (function (DataLoader) {
+            var Bootstrap = LiteMol.Bootstrap;
+            var Transformer = Bootstrap.Entity.Transformer;
+            var Query = LiteMol.Core.Structure.Query;
+            function loadData(plugin, inputType, inputId) {
+                return new LiteMol.Promise(function (res, rej) {
+                    plugin.clear();
+                    var pdbUrl;
+                    var seqUrl;
+                    var csvUrl;
+                    if (inputType == "pdb") {
+                        pdbUrl = "/api/id/pdb/" + inputId;
+                        csvUrl = "/api/id/csv/" + inputId;
+                        seqUrl = "/api/id/seq/" + inputId;
+                    }
+                    else {
+                        pdbUrl = "/api/upload/pdb/" + inputId;
+                        csvUrl = "/api/upload/csv/" + inputId;
+                        seqUrl = "/api/upload/seq/" + inputId;
+                    }
+                    // Download mmcif and create model
+                    var model = plugin.createTransform()
+                        .add(plugin.root, Transformer.Data.Download, { url: pdbUrl, type: 'String', id: inputType })
+                        .then(Transformer.Molecule.CreateFromData, { format: LiteMol.Core.Formats.Molecule.SupportedFormats.PDB }, { isBinding: true })
+                        .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { ref: 'model' });
+                    // Download and parse predictions
+                    model.add(plugin.root, Transformer.Data.Download, { url: csvUrl, type: 'String', id: 'predictions' }, { isHidden: true })
+                        .then(Transformer.Data.ParseJson, { id: 'P2RANK Data' })
+                        .then(PrankWeb.ParseAndCreatePrediction, {}, { ref: 'pockets', isHidden: true });
+                    // Download and store sequence
+                    model.add(plugin.root, Transformer.Data.Download, { url: seqUrl, type: 'String', id: 'sequence' }, { isHidden: true })
+                        .then(Transformer.Data.ParseJson, { id: 'Sequence Data' })
+                        .then(PrankWeb.CreateSequence, {}, { ref: 'sequence', isHidden: true });
+                    plugin.applyTransform(model)
+                        .then(function () {
+                        var model = plugin.context.select('model')[0];
+                        var prediction = plugin.context.select('pockets')[0];
+                        var sequence = plugin.context.select('sequence')[0];
+                        if (!prediction)
+                            rej("Unable to load predictions.");
+                        else if (!sequence)
+                            rej("Unable to load protein sequence.");
+                        else {
+                            res({ plugin: plugin, data: { model: model, prediction: prediction, sequence: sequence } });
+                        }
+                    }).catch(function (e) { return rej(e); });
+                });
+            }
+            DataLoader.loadData = loadData;
+            function visualizeData(plugin, data) {
+                return new LiteMol.Promise(function (res, rej) {
+                    var pockets = data.prediction.props.pockets;
+                    /**
+                     * Selection of a specific set of atoms...
+                     */
+                    var selectionQueries = [];
+                    var allPocketIds = [];
+                    pockets.forEach(function (pocket) {
+                        selectionQueries.push(Query.atomsById.apply(null, pocket.surfAtomIds));
+                        pocket.surfAtomIds.forEach(function (id) { allPocketIds.push(id); });
+                        // __LiteMolReact.__DOM.render(__LiteMolReact.createElement('p', {}, 'Ahoj'), pocketNode)   
+                    });
+                    var selectionColors = Bootstrap.Immutable.Map()
+                        .set('Uniform', LiteMol.Visualization.Color.fromHex(0xff0000))
+                        .set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor)
+                        .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
+                    /**
+                     * Selection of the complement of the previous set.
+                     */
+                    var complementQ = Query.atomsById.apply(null, allPocketIds).complement();
+                    var complementColors = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(0x666666));
+                    var complementStyle = {
+                        type: 'Surface',
+                        params: { probeRadius: 0.5, density: 1.4, smoothing: 4, isWireframe: false },
+                        theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: complementColors, transparency: { alpha: 1.0 } }
+                    };
+                    // Represent an action to perform on the app state.
+                    var action = plugin.createTransform();
+                    // Create a selection on the model and then create a visual for it...
+                    action
+                        .add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: complementQ, name: 'Protein complement', silent: true }, {})
+                        .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: false });
+                    // For each pocket:
+                    selectionQueries.forEach(function (selectionQuery, i) {
+                        // Set selection style (i.e. color, probe, density etc.)
+                        var selectionColor = selectionColors.set('Uniform', PrankWeb.Colors.get(i % 6));
+                        var selectionStyle = {
+                            type: 'Surface',
+                            params: { probeRadius: 0.5, density: 1.25, smoothing: 3, isWireframe: false },
+                            theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: selectionColor, transparency: { alpha: 0.8 } }
+                        };
+                        // Create selection and create visual (surface and ball and sticks)
+                        var sel = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: selectionQuery, name: pockets[i].name, silent: true }, { ref: pockets[i].name });
+                        sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
+                        sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
+                    });
+                    plugin.applyTransform(action);
+                    res(data);
+                });
+            }
+            DataLoader.visualizeData = visualizeData;
+        })(DataLoader = PrankWeb.DataLoader || (PrankWeb.DataLoader = {}));
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var App;
+        (function (App_1) {
+            var React = LiteMol.Plugin.React;
+            function render(plugin, inputType, inputId, target) {
+                LiteMol.Plugin.ReactDOM.render(React.createElement(App, { plugin: plugin, inputType: inputType, inputId: inputId }), target);
+            }
+            App_1.render = render;
+            var App = (function (_super) {
+                __extends(App, _super);
+                function App() {
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    _this.state = { isLoading: false, data: void 0, error: void 0 };
+                    return _this;
+                }
+                App.prototype.componentDidMount = function () {
+                    this.load();
+                };
+                App.prototype.load = function () {
+                    var _this = this;
+                    this.setState({ isLoading: true, error: void 0 });
+                    // Try to load data
+                    PrankWeb.DataLoader.loadData(this.props.plugin, this.props.inputType, this.props.inputId)
+                        .then(function (val) { return PrankWeb.DataLoader.visualizeData(val.plugin, val.data); })
+                        .then(function (data) { return _this.setState({ isLoading: false, data: data }); })
+                        .catch(function (e) { return _this.setState({ isLoading: false, error: '' + e }); });
+                };
+                App.prototype.render = function () {
+                    var _this = this;
+                    if (this.state.data) {
+                        // Display pocket list
+                        return React.createElement(PrankWeb.PocketList, { data: this.state.data, plugin: this.props.plugin });
+                    }
+                    else {
+                        var controls = [];
+                        if (this.state.isLoading) {
+                            controls.push(React.createElement("h1", null, "Loading..."));
+                        }
+                        else {
+                            // Offer a button to load data.
+                            controls.push(React.createElement("button", { onClick: function () { return _this.load(); } }, "Load data"));
+                            if (this.state.error) {
+                                // Display error message.
+                                controls.push(React.createElement("div", { style: { color: 'red', fontSize: '18px' } },
+                                    "Error: ",
+                                    this.state.error));
+                            }
+                        }
+                        return React.createElement("div", null, controls);
+                    }
+                };
+                return App;
+            }(React.Component));
+            App_1.App = App;
+        })(App = PrankWeb.App || (PrankWeb.App = {}));
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -450,12 +612,8 @@ var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
     (function (PrankWeb) {
-        var Plugin = LiteMol.Plugin;
-        var Query = LiteMol.Core.Structure.Query;
-        var Bootstrap = LiteMol.Bootstrap;
-        var Transformer = Bootstrap.Entity.Transformer;
         function create(target) {
-            var plugin = Plugin.create({
+            var plugin = LiteMol.Plugin.create({
                 target: target,
                 //viewportBackground: '#333',
                 layoutState: {
@@ -464,110 +622,16 @@ var LiteMol;
                 },
                 customSpecification: PrankWeb.PrankWebSpec
             });
-            plugin.context.logger.message("LiteMol " + Plugin.VERSION.number);
+            plugin.context.logger.message("LiteMol " + LiteMol.Plugin.VERSION.number);
             return plugin;
         }
         PrankWeb.create = create;
         var appNode = document.getElementById('app');
-        var pocketNode = document.getElementById('pockets');
         var inputType = appNode.getAttribute("data-input-type");
         var inputId = appNode.getAttribute("data-input-id");
-        var plugin = create(appNode);
-        LiteMol.Plugin.ReactDOM.render(LiteMol.Plugin.React.createElement(PrankWeb.PocketList, { controller: new PrankWeb.PocketController(plugin.context) }), pocketNode);
-        function loadData(plugin, input_type, input_id) {
-            return new LiteMol.Promise(function (res, rej) {
-                plugin.clear();
-                var pdbUrl;
-                var seqUrl;
-                var csvUrl;
-                if (inputType == "pdb") {
-                    pdbUrl = "/api/id/pdb/" + inputId;
-                    csvUrl = "/api/id/csv/" + inputId;
-                    seqUrl = "/api/id/seq/" + inputId;
-                }
-                else {
-                    pdbUrl = "/api/upload/pdb/" + inputId;
-                    csvUrl = "/api/upload/csv/" + inputId;
-                    seqUrl = "/api/upload/seq/" + inputId;
-                }
-                // Download mmcif and create model
-                var model = plugin.createTransform()
-                    .add(plugin.root, Transformer.Data.Download, { url: pdbUrl, type: 'String', id: input_type })
-                    .then(Transformer.Molecule.CreateFromData, { format: LiteMol.Core.Formats.Molecule.SupportedFormats.PDB }, { isBinding: true })
-                    .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { ref: 'model' });
-                // Download and parse predictions
-                model.add(plugin.root, Transformer.Data.Download, { url: csvUrl, type: 'String', id: 'predictions' }, { isHidden: true })
-                    .then(Transformer.Data.ParseJson, { id: 'P2RANK Data' })
-                    .then(PrankWeb.ParseAndCreatePrediction, {}, { ref: 'pockets', isHidden: true });
-                // Download and store sequence
-                model.add(plugin.root, Transformer.Data.Download, { url: seqUrl, type: 'String', id: 'sequence' }, { isHidden: true })
-                    .then(Transformer.Data.ParseJson, { id: 'Sequence Data' })
-                    .then(PrankWeb.CreateSequence, {}, { ref: 'sequence', isHidden: true });
-                plugin.applyTransform(model)
-                    .then(function () {
-                    var model = plugin.context.select('model')[0];
-                    var prediction = plugin.context.select('pockets')[0];
-                    var sequence = plugin.context.select('sequence')[0];
-                    if (!prediction)
-                        rej("Unable to load predictions.");
-                    else if (!sequence)
-                        rej("Unable to load protein sequence.");
-                    else {
-                        res({ model: model, prediction: prediction, sequence: sequence });
-                    }
-                }).catch(function (e) { return rej(e); });
-            });
-        }
-        PrankWeb.loadData = loadData;
-        function visualizeData(data) {
-            var pockets = data.prediction.props.pockets;
-            /**
-             * Selection of a specific set of atoms...
-             */
-            var selectionQueries = [];
-            var allPocketIds = [];
-            pockets.forEach(function (pocket) {
-                selectionQueries.push(Query.atomsById.apply(null, pocket.surfAtomIds));
-                pocket.surfAtomIds.forEach(function (id) { allPocketIds.push(id); });
-                // __LiteMolReact.__DOM.render(__LiteMolReact.createElement('p', {}, 'Ahoj'), pocketNode)   
-            });
-            var selectionColors = Bootstrap.Immutable.Map()
-                .set('Uniform', LiteMol.Visualization.Color.fromHex(0xff0000))
-                .set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor)
-                .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
-            /**
-             * Selection of the complement of the previous set.
-             */
-            var complementQ = Query.atomsById.apply(null, allPocketIds).complement();
-            var complementColors = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(0x666666));
-            var complementStyle = {
-                type: 'Surface',
-                params: { probeRadius: 0.5, density: 1.4, smoothing: 4, isWireframe: false },
-                theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: complementColors, transparency: { alpha: 1.0 } }
-            };
-            // Represent an action to perform on the app state.
-            var action = plugin.createTransform();
-            // Create a selection on the model and then create a visual for it...
-            action
-                .add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: complementQ, name: 'Protein complement', silent: true }, {})
-                .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: false });
-            // For each pocket:
-            selectionQueries.forEach(function (selectionQuery, i) {
-                // Set selection style (i.e. color, probe, density etc.)
-                var selectionColor = selectionColors.set('Uniform', PrankWeb.Colors.get(i % 6));
-                var selectionStyle = {
-                    type: 'Surface',
-                    params: { probeRadius: 0.5, density: 1.25, smoothing: 3, isWireframe: false },
-                    theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: selectionColor, transparency: { alpha: 0.8 } }
-                };
-                // Create selection and create visual (surface and ball and sticks)
-                var sel = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: selectionQuery, name: pockets[i].name, silent: true }, { ref: pockets[i].name });
-                sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
-                sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
-            });
-            plugin.applyTransform(action);
-        }
-        PrankWeb.visualizeData = visualizeData;
-        loadData(plugin, inputType, inputId).then(visualizeData);
+        PrankWeb.App.render(create(appNode), inputType, inputId, document.getElementById('pockets'));
+        /* let command = () => {
+               Bootstrap.Command.Entity.SetVisibility.dispatch(e.tree!.context, { entity: e, visible: e.state.visibility === BEntity.Visibility.Full ? false : true });
+         }*/
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
