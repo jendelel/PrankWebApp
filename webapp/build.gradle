@@ -1,31 +1,49 @@
 apply plugin: 'java'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-apply plugin: 'application'
 apply plugin: 'war'
 
 war {
-	archiveName 'ROOT.war'
+    archiveName 'ROOT.war'
 }
 
-//mainClassName = 'org.siret.prank.webapp.rest.Main'
+task('copy_LiteMol_js', type:Copy) {
+    // Copy LiteMol plugin (the core).
+    from('../LiteMol/build/web/assets/js/') {
+        include 'LiteMol-plugin.js'
+    }
+    // Copy PrankWeb app.
+    from ('../LiteMol/build/examples/PrankWeb') {
+        include 'LiteMol-example.js'
+        rename 'LiteMol-example.js', 'LiteMol-PrankWeb.js'
+    }
+    into 'src/main/webapp/javascripts'
+}
+tasks['copy_LiteMol_js'].dependsOn ':LiteMol:gulp_Example-PrankWeb'
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url 'https://maven.repository.redhat.com/nexus/content/repositories/releases/'
+task('copy_LiteMol_css', type:Copy) {
+    // Copy LiteMol CSS stylesheets.
+    from('../LiteMol/build/web/assets/css/') {
+        include 'LiteMol-plugin-light.css'
+        rename 'LiteMol-plugin-light.css', 'LiteMol-plugin.css'
     }
-    maven {
-        url 'https://maven.repository.redhat.com/nexus/content/repositories/thirdparty-releases/'
-    }
-    flatDir {
-        dirs 'libs'
+    into 'src/main/webapp/css'
+}
+tasks['copy_LiteMol_css'].dependsOn ':LiteMol:gulp_Example-PrankWeb'
+
+processResources.dependsOn 'copy_LiteMol_css'
+processResources.dependsOn 'copy_LiteMol_js'
+
+task('deploy', type:Exec) {
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', "call ${System.env.JBOSS_HOME}\\bin\\jboss-cli.bat --connect controller=localhost \"deploy --force build\\libs\\ROOT.war\""
+    } else {
+        commandLine "${System.env.JBOSS_HOME}/bin/jboss-cli.sh --connect controller=localhost \"deploy --force build/libs/ROOT.war\""
     }
 }
 
 dependencies {
-    compile 'cz.siret.prank:pranklib:1.0.0' // locally imported pranlib module
+    compile project(':pranklib')
 
     compile group: 'org.biojava', name: 'biojava-core', version: '4.2.4'
     compile group: 'org.biojava', name: 'biojava-structure', version: '4.2.4'
@@ -50,11 +68,7 @@ dependencies {
     compile 'org.openscience.cdk:cdk-qsarmolecular:1.5.13'    // for NumericalSurface class
     compile 'org.openscience.cdk:cdk-data:1.5.13'             // for Atom class
     compile 'nz.ac.waikato.cms.weka:weka-dev:3.9.0'
-    // compile files('lib/biojava-structure-4.2.4-rdk1.jar')     // customized fork for pocket-rank
-    // local jars imported to local maven repository
-//    compile 'hr.irb:fastrandomforest:0.9'
-    // compile 'org.biojava:biojava-structure:4.2.4-rdk1'
-//    compile 'cz.siret.prank:program:2.0-rc.3_JAVAAPI.1'
-    // Prank dependencies end
     compile fileTree(dir: 'libs', include: '*.jar')
+    // Prank dependencies end
+    
 }
