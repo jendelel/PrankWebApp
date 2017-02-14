@@ -1,0 +1,6 @@
+[submodule "LiteMol"]
+	path = LiteMol
+	url = https://github.com/jendelel/LiteMol.git
+[submodule "pranklib"]
+	path = pranklib
+	url = https://github.com/jendelel/pranklib.git

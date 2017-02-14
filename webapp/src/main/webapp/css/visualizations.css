@@ -1,0 +1,93 @@
+#app {
+    position: relative;
+    margin: 190px auto 330px auto;
+    height: 480px;
+}
+
+section {
+    padding: 100px 0
+}
+
+section h2.section-heading {
+    font-size: 40px;
+    margin-top: 0;
+    margin-bottom: 15px
+}
+
+section h3.section-subheading {
+    font-size: 16px;
+    text-transform: none;
+    font-weight: 400;
+    margin-bottom: 75px
+}
+
+#portfolio .portfolio-item .portfolio-caption p, section h3.section-subheading {
+    font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-style: italic
+}
+
+#portfolio .portfolio-item {
+    margin: 0 auto 15px;
+    right: 0;
+    border: 1px solid;
+    background-color: white;
+    border-radius: 16px;
+}
+
+#portfolio .portfolio-item:hover {
+    background-color: orange;
+}
+
+#portfolio .portfolio-item:active {
+    background-color: lightblue;
+}
+
+#portfolio * {
+    z-index: 2
+}
+
+@media (min-width: 767px) {
+    #portfolio .portfolio-item {
+        margin: 0 auto 30px;
+    }
+}
+
+dl {
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+    margin: 0
+}
+
+dt {
+    float: left;
+    width: 50%;
+    /* adjust the width; make sure the total of both is 100% */
+    padding: 0;
+    margin: 0
+}
+
+dd {
+    float: left;
+    width: 50%;
+    /* adjust the width; make sure the total of both is 100% */
+    padding: 0;
+    margin: 0
+}
+
+.lm-plugin .lm-layout-top {
+    overflow: auto;
+}
+
+.pocket {
+    margin: 0 auto 30px;
+    border: 1px solid;
+}
+
+.pocket:hover {
+    border: 1px dotted;
+}
+
+.pocket:active {
+    border: 1px dashed;
+}

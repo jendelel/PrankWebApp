@@ -1,54 +1,13 @@
-apply plugin: 'java'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-apply plugin: 'application'
-apply plugin: 'war'
+subprojects {
 
-war {
-	archiveName 'ROOT.war'
-}
-
-//mainClassName = 'org.siret.prank.webapp.rest.Main'
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url 'https://maven.repository.redhat.com/nexus/content/repositories/releases/'
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://maven.repository.redhat.com/nexus/content/repositories/releases/'
+        }
+        maven {
+            url 'https://maven.repository.redhat.com/nexus/content/repositories/thirdparty-releases/'
+        }
     }
-    maven {
-        url 'https://maven.repository.redhat.com/nexus/content/repositories/thirdparty-releases/'
-    }
-    flatDir {
-        dirs 'libs'
-    }
-}
-
-dependencies {
-    compile group: 'org.biojava', name: 'biojava-core', version: '4.2.4'
-    compile group: 'org.biojava', name: 'biojava-structure', version: '4.2.4'
-    compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.1'
-    compile 'commons-beanutils:commons-beanutils:1.9.3'
-    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
-    compile group: 'javax', name: 'javaee-api', version: '7.0'
-    //Prank dependencies begin
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-    compile 'org.codehaus.gpars:gpars:1.2.1'
-    compile "org.apache.commons:commons-lang3:3.4"
-    compile "com.google.guava:guava:19.0"
-
-    compile 'org.slf4j:slf4j-api:1.7.21'
-    compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
-
-    compile 'org.biojava:biojava-alignment:4.2.4'
-
-    compile 'org.openscience.cdk:cdk-qsarmolecular:1.5.13'    // for NumericalSurface class
-    compile 'org.openscience.cdk:cdk-data:1.5.13'             // for Atom class
-    compile 'nz.ac.waikato.cms.weka:weka-dev:3.9.0'
-    // compile files('lib/biojava-structure-4.2.4-rdk1.jar')     // customized fork for pocket-rank
-    // local jars imported to local maven repository
-    compile 'hr.irb:fastrandomforest:0.9'
-    // compile 'org.biojava:biojava-structure:4.2.4-rdk1'
-    compile 'cz.siret.prank:program:2.0-rc.3_JAVAAPI.1'
-    // Prank dependencies end
 }
