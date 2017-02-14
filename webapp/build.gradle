@@ -34,12 +34,14 @@ tasks['copy_LiteMol_css'].dependsOn ':LiteMol:gulp_Example-PrankWeb'
 processResources.dependsOn 'copy_LiteMol_css'
 processResources.dependsOn 'copy_LiteMol_js'
 
-task('deploy', type:Exec) {
+task('deploy', dependsOn: 'war', type:Exec) {
     if (System.getProperty('os.name').toLowerCase().contains('windows')) {
         commandLine 'cmd', '/c', "call ${System.env.JBOSS_HOME}\\bin\\jboss-cli.bat --connect controller=localhost \"deploy --force build\\libs\\ROOT.war\""
     } else {
-        commandLine "${System.env.JBOSS_HOME}/bin/jboss-cli.sh --connect controller=localhost \"deploy --force build/libs/ROOT.war\""
+        commandLine "./deploy.sh"
     }
+    inputs.file "build/libs/ROOT.war"
+    outputs.upToDateWhen {true} // Since there is no output.
 }
 
 dependencies {
