@@ -55,12 +55,20 @@ var LiteMol;
             defaultParams: function () { return ({}); }
         }, function (context, a, t) {
             return Bootstrap.Task.create("Create sequence entity", 'Normal', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                var seq;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, ctx.updateProgress('Creating sequence entity...')];
                         case 1:
                             _a.sent();
-                            return [2 /*return*/, PrankWeb.SequenceEntity.create(t, { label: 'Sequence', seq: a.props.data })];
+                            seq = a.props.data;
+                            // Get rid of the negative scores.
+                            if (seq.scores) {
+                                seq.scores.forEach(function (score, i) {
+                                    seq.scores[i] = score < 0 ? 0 : score;
+                                });
+                            }
+                            return [2 /*return*/, PrankWeb.SequenceEntity.create(t, { label: 'Sequence', seq: seq })];
                     }
                 });
             }); }).setReportTime(true);
@@ -74,7 +82,14 @@ var LiteMol;
         var _this = this;
         var Bootstrap = LiteMol.Bootstrap;
         var Entity = Bootstrap.Entity;
-        PrankWeb.Colors = Bootstrap.Immutable.List.of(LiteMol.Visualization.Color.fromHexString("#e74c3c"), LiteMol.Visualization.Color.fromHexString("#00ffff"), LiteMol.Visualization.Color.fromHexString("#2ecc71"), LiteMol.Visualization.Color.fromHexString("#9b59b6"), LiteMol.Visualization.Color.fromHexString("#00007f"), LiteMol.Visualization.Color.fromHexString("#e67e22"));
+        PrankWeb.Colors = Bootstrap.Immutable.List.of(LiteMol.Visualization.Color.fromRgb(0, 0, 255), //Blue
+        LiteMol.Visualization.Color.fromRgb(255, 0, 0), //Red
+        LiteMol.Visualization.Color.fromRgb(0, 255, 0), //Green
+        LiteMol.Visualization.Color.fromRgb(255, 0, 255), //Magenta
+        LiteMol.Visualization.Color.fromRgb(255, 128, 128), //Pink
+        LiteMol.Visualization.Color.fromRgb(128, 128, 128), //Gray
+        LiteMol.Visualization.Color.fromRgb(128, 0, 0), //Brown
+        LiteMol.Visualization.Color.fromRgb(255, 128, 0)); //Orange
         PrankWeb.Prediction = Entity.create({
             name: 'Pocket prediction',
             typeClass: 'Data',
@@ -298,9 +313,58 @@ var LiteMol;
             function PocketList() {
                 return _super !== null && _super.apply(this, arguments) || this;
             }
-            PocketList.prototype.getPocket = function (pocket, model) {
+            PocketList.prototype.calcConservationAvg = function () {
+                var seq = this.props.data.sequence.props.seq;
+                var pockets = this.props.data.prediction.props.pockets;
+                if (!seq.scores || seq.scores.length <= 0)
+                    return pockets.map(function () { return "N/A"; });
+                var indexMap = LiteMol.Core.Utils.FastMap.create();
+                seq.indices.forEach(function (element, i) { indexMap.set(element, i); });
+                return pockets.map(function (pocket, i) {
+                    var scoreSum = pocket.residueIds.map(function (i) { return seq.scores[indexMap.get(i)]; }).reduce(function (acc, val) { return acc + val; }, 0);
+                    // Round the score to 3 digit average.
+                    return (Math.round((scoreSum / pocket.residueIds.length) * 1000) / 1000).toString();
+                });
+            };
+            PocketList.prototype.render = function () {
+                var _this = this;
+                var pockets = this.props.data.prediction.props.pockets;
+                var ctx = this.props.plugin.context;
+                var controls = [];
+                var conservationAvg = this.calcConservationAvg();
+                if (pockets.length > 0) {
+                    controls.push(React.createElement("h2", null, "Pockets:"));
+                }
+                pockets.forEach(function (pocket, i) {
+                    controls.push(React.createElement(Pocket, { plugin: _this.props.plugin, model: _this.props.data.model, pocket: pocket, index: i, conservationAvg: conservationAvg[i] }));
+                });
+                return (React.createElement("div", { className: "pockets" }, controls));
+            };
+            return PocketList;
+        }(React.Component));
+        PrankWeb.PocketList = PocketList;
+        var Pocket = (function (_super) {
+            __extends(Pocket, _super);
+            function Pocket() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.state = { isVisible: true };
+                return _this;
+            }
+            Pocket.prototype.componentWillMount = function () {
+                var _this = this;
+                var ctx = this.props.plugin.context;
+                Bootstrap.Command.Entity.SetVisibility.getStream(this.props.plugin.context).subscribe(function (e) {
+                    var pocketEntity = ctx.select(_this.props.pocket.name)[0];
+                    if (pocketEntity && e.data.entity.id === pocketEntity.id) {
+                        _this.setState({ isVisible: e.data.visible });
+                    }
+                });
+            };
+            Pocket.prototype.getPocket = function () {
                 var ctx = this.props.plugin.context;
                 var cache = ctx.entityCache;
+                var pocket = this.props.pocket;
+                var model = this.props.model;
                 var cacheId = "__pocketSelectionInfo-" + pocket.name;
                 var item = cache.get(model, cacheId);
                 if (!item) {
@@ -313,56 +377,72 @@ var LiteMol;
                 }
                 return item;
             };
-            PocketList.prototype.componentDidUpdate = function () {
-            };
-            PocketList.prototype.onLetterMouseEnter = function (pocket, isOn) {
-                var ctx = this.props.plugin.context;
-                var model = ctx.select('model')[0];
-                if (!model)
+            Pocket.prototype.onPocketMouse = function (enter) {
+                // Cannot focus on hidden pocket.
+                if (!this.state.isVisible)
                     return;
+                var ctx = this.props.plugin.context;
+                var model = this.props.model;
                 // Get the sequence selection
-                var pocketSel = this.getPocket(pocket, model);
+                var pocketSel = this.getPocket();
                 // Highlight in the 3D Visualization
-                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: pocketSel.query, isOn: isOn });
-                if (isOn) {
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: pocketSel.query, isOn: enter });
+                if (enter) {
                     // Show tooltip
                     var label = Bootstrap.Interactivity.Molecule.formatInfo(pocketSel.selectionInfo);
-                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label, "" + pocket.name]);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label, "Pocket score: " + this.props.pocket.score]);
                 }
                 else {
                     // Hide tooltip
                     Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
                 }
             };
-            PocketList.prototype.onLetterClick = function (pocket) {
-                var ctx = this.props.plugin.context;
-                var model = ctx.select('model')[0];
-                if (!model)
+            Pocket.prototype.onPocketClick = function () {
+                // Cannot focus on hidden pocket.
+                if (!this.state.isVisible)
                     return;
-                var query = this.getPocket(pocket, model).query;
+                var ctx = this.props.plugin.context;
+                var model = this.props.model;
+                var query = this.getPocket().query;
                 Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
             };
-            PocketList.prototype.render = function () {
-                var _this = this;
-                var pockets = this.props.data.prediction.props.pockets;
+            Pocket.prototype.toggleVisibility = function () {
                 var ctx = this.props.plugin.context;
-                var colorToString = function (color) {
-                    return 'rgb(' + (color.r * 255) + ',' + (color.g * 255) + ',' + (color.b * 255) + ')';
-                };
-                return (React.createElement("div", { className: "pocket-list" }, pockets.map(function (pocket, i) {
-                    return React.createElement("div", { className: "pocket col-sm-6 col-xs-12", style: { borderColor: colorToString(PrankWeb.Colors.get(i % 6)) }, onMouseEnter: _this.onLetterMouseEnter.bind(_this, pocket, true), onMouseLeave: _this.onLetterMouseEnter.bind(_this, pocket, false), onClick: _this.onLetterClick.bind(_this, pocket) },
-                        React.createElement("dl", null,
-                            React.createElement("dt", null, "Pocket name"),
-                            React.createElement("dd", null, pocket.name),
-                            React.createElement("dt", null, "Pocket rank"),
-                            React.createElement("dd", null, pocket.rank),
-                            React.createElement("dt", null, "Pocket score"),
-                            React.createElement("dd", null, pocket.score)));
-                })));
+                var pocketEntity = ctx.select(this.props.pocket.name)[0];
+                if (pocketEntity) {
+                    Bootstrap.Command.Entity.SetVisibility.dispatch(this.props.plugin.context, { entity: pocketEntity, visible: !this.state.isVisible });
+                }
+                this.setState({ isVisible: !this.state.isVisible });
             };
-            return PocketList;
+            // https://css-tricks.com/left-align-and-right-align-text-on-the-same-line/
+            Pocket.prototype.render = function () {
+                var _this = this;
+                var pocketClass = "pocket pocket" + this.props.index % PrankWeb.Colors.count();
+                var pocket = this.props.pocket;
+                var focusIconDisplay = this.state.isVisible ? "inherit" : "none";
+                var hideIconOpacity = this.state.isVisible ? 1 : 0.3;
+                return React.createElement("div", { className: pocketClass },
+                    React.createElement("button", { style: { float: 'left', display: focusIconDisplay }, title: "Focus", className: "pocket-btn", onClick: function () { _this.onPocketClick(); }, onMouseEnter: function () { _this.onPocketMouse(true); }, onMouseOut: function () { _this.onPocketMouse(false); } },
+                        React.createElement("span", { className: "pocket-icon focus-icon" })),
+                    React.createElement("button", { style: { float: 'right', opacity: hideIconOpacity }, title: "Hide", className: "pocket-btn", onClick: function () { _this.toggleVisibility(); } },
+                        React.createElement("span", { className: "pocket-icon hide-icon" })),
+                    React.createElement("div", { style: { clear: 'both' } }),
+                    React.createElement("p", { style: { float: 'left' } }, "Pocket rank:"),
+                    React.createElement("p", { style: { float: 'right' } }, pocket.rank),
+                    React.createElement("div", { style: { clear: 'both' } }),
+                    React.createElement("p", { style: { float: 'left' } }, "Pocket score:"),
+                    React.createElement("p", { style: { float: 'right' } }, pocket.score),
+                    React.createElement("div", { style: { clear: 'both' } }),
+                    React.createElement("p", { style: { float: 'left' } }, "AA count:"),
+                    React.createElement("p", { style: { float: 'right' } }, pocket.residueIds.length),
+                    React.createElement("div", { style: { clear: 'both' } }),
+                    React.createElement("p", { style: { float: 'left', textDecoration: 'overline' } }, "Conservation:"),
+                    React.createElement("p", { style: { float: 'right' } }, this.props.conservationAvg),
+                    React.createElement("div", { style: { clear: 'both' } }));
+            };
+            return Pocket;
         }(React.Component));
-        PrankWeb.PocketList = PocketList;
+        PrankWeb.Pocket = Pocket;
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -435,7 +515,7 @@ var LiteMol;
                         .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
                     // Selection of complement of the previous set.
                     var complement = Query.atomsById.apply(null, allPocketIds).complement();
-                    var complementColors = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(0x666666));
+                    var complementColors = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(0xffffff));
                     var complementStyle = {
                         type: 'Surface',
                         params: { probeRadius: 0.5, density: 1.4, smoothing: 4, isWireframe: false },
@@ -501,6 +581,7 @@ var LiteMol;
                 App.prototype.render = function () {
                     var _this = this;
                     if (this.state.data) {
+                        // LiteMol.Plugin.ReactDOM.render(LiteMol.Plugin.React.createElement(SequenceView, {plugin, data}), document.getElementById('sequence-view')!);
                         // Data available, display pocket list.
                         return React.createElement(PrankWeb.PocketList, { data: this.state.data, plugin: this.props.plugin });
                     }
@@ -593,13 +674,15 @@ var LiteMol;
     var PrankWeb;
     (function (PrankWeb) {
         var Plugin = LiteMol.Plugin;
+        var Bootstrap = LiteMol.Bootstrap;
         function create(target) {
             var plugin = Plugin.create({
                 target: target,
-                // viewportBackground: '#333',
+                viewportBackground: '#e7e7e7',
                 layoutState: {
-                    hideControls: false,
+                    hideControls: true,
                     isExpanded: false,
+                    collapsedControlsLayout: Bootstrap.Components.CollapsedControlsLayout.Landscape,
                 },
                 customSpecification: PrankWeb.PrankWebSpec
             });
@@ -608,7 +691,7 @@ var LiteMol;
         }
         PrankWeb.create = create;
         var appNode = document.getElementById('app');
-        var pocketNode = document.getElementById('pockets');
+        var pocketNode = document.getElementById('pocket-list');
         var inputType = appNode.getAttribute("data-input-type");
         var inputId = appNode.getAttribute("data-input-id");
         PrankWeb.App.render(create(appNode), inputType, inputId, pocketNode);

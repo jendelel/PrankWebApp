@@ -77133,10 +77133,8 @@ var LiteMol;
                     var regions = [this.renderTarget(targets[LayoutRegion.Main])];
                     var hiddenRegions = state.hiddenRegions || [];
                     var region = targets[LayoutRegion.Top];
-                    if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Top) >= 0)
-                        layoutClass += ' lm-layout-hide-top';
-                    else
-                        regions.push(this.renderTarget(region));
+                    /*if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Top) >= 0) layoutClass += ' lm-layout-hide-top';
+                    else*/ regions.push(this.renderTarget(region));
                     region = targets[LayoutRegion.Right];
                     if (state.hideControls || !region.components.length || hiddenRegions.indexOf(LayoutRegion.Right) >= 0)
                         layoutClass += ' lm-layout-hide-right';

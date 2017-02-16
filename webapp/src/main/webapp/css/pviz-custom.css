@@ -1,31 +1,41 @@
 /* Pocket colors */
 g.feature.Pockets.col0 rect.feature {
-    fill: #e74c3c;
+    fill: rgb(0, 0, 255); /*Blue*/
     fill-opacity: 0.8;
 }
 
 g.feature.Pockets.col1 rect.feature {
-    fill: #00ffff;
+    fill: rgb(255, 0, 0); /*Red*/  
     fill-opacity: 0.8;
 }
 
 g.feature.Pockets.col2 rect.feature {
-    fill: #2ecc71;
+    fill: rgb(0, 255, 0); /*Green*/
     fill-opacity: 0.8;
 }
 
 g.feature.Pockets.col3 rect.feature {
-    fill: #9b59b6;
+    fill: rgb(255, 0, 255); /*Magenta*/
     fill-opacity: 0.8;
 }
 
 g.feature.Pockets.col4 rect.feature {
-    fill: #00007f;
+    fill: rgb(255, 128, 128); /*Pink*/
     fill-opacity: 0.8;
 }
 
 g.feature.Pockets.col5 rect.feature {
-    fill: #e67e22;
+    fill: rgb(128, 128, 128); /*Gray*/
+    fill-opacity: 0.8;
+}
+
+g.feature.Pockets.col6 rect.feature {
+    fill: rgb(128, 0, 0); /*Brown*/
+    fill-opacity: 0.8;
+}
+
+g.feature.Pockets.col7 rect.feature {
+    fill: rgb(255, 128, 0); /*Orange*/
     fill-opacity: 0.8;
 }
 

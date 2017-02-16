@@ -42,7 +42,8 @@
                     class="icon-bar"></span><span class="icon-bar"></span><span
                     class="icon-bar"></span></button>
             <!-- navbar-brand is hidden on larger screens, but visible when the menu is collapsed-->
-            <a href="${pageContext.request.contextPath}/" class="navbar-brand text-capitalize">Prank</a>
+            <a href="${pageContext.request.contextPath}/"
+               class="navbar-brand text-capitalize">Prank</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling-->
         <div id="bs-example-navbar-collapse-1" class="collapse navbar-collapse">
@@ -64,11 +65,7 @@
 <jsp:doBody/>
 
 <footer>
-    <div class="row">
-        <div class="col-lg-12 text-center">
-            <p>Copyright &copy; Lukas Jendele, Siret group, Charles University 2016</p>
-        </div>
-    </div>
+    <p class="text-center">Copyright &copy; Lukas Jendele, Siret group, Charles University 2016</p>
 </footer>
 </body>
 </html>
