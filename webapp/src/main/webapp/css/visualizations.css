@@ -6,7 +6,7 @@
     position: fixed;
     top: 52px; /* (navbar) */
     bottom: 28px;
-    right: 200px;
+    right: 300px;
     left: 0px;
 }
 
@@ -15,8 +15,8 @@
     top: 52px; /* (navbar) */
     bottom: 28px;
     right: 0;
-    width: 200px;
-    padding: 5px;
+    width: 300px;
+    padding: 15px;
     overflow-y: scroll;
     background: white;
 }
@@ -26,15 +26,16 @@
 }
 
 .lm-plugin .lm-layout-top {
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 .pocket {
-    margin: 0 auto 3px;
+    margin: 15px;
     border: 1px solid;
     border-color: black;
     padding-left: 10px;
     padding-right: 10px;
+    border-radius: 10px;
 }
 
 .pocket .pocket-btn {
@@ -43,7 +44,7 @@
     border: 1px solid;
     background-color: transparent;
     font-weight: normal;
-    border-radius: 0;
+    border-radius: 10px;
     padding: 0px;
     cursor: pointer;
     line-height: 32px !important;
@@ -73,36 +74,37 @@
 
 /* Colors of pockets */
 .pocket0 {
-    background-color: rgb(0, 0, 255); /*Blue*/
+    background-color: rgba(0, 0, 255, 0.5); /*Blue*/
     color: white;
+
 }
 
 .pocket1 {
-    background-color: rgb(255, 0, 0); /*Red*/
+    background-color: rgba(255, 0, 0, 0.5); /*Red*/
 }
 
 .pocket2 {
-    background-color: rgb(0, 255, 0); /*Green*/
+    background-color: rgba(0, 255, 0, 0.5); /*Green*/
 }
 
 .pocket3 {
-    background-color: rgb(255, 0, 255); /*Magenta*/
+    background-color: rgba(255, 0, 255, 0.5); /*Magenta*/
 }
 
 .pocket4 {
-    background-color: rgb(255, 128, 128); /*Pink*/
+    background-color: rgba(255, 128, 128, 0.5); /*Pink*/
 }
 
 .pocket5 {
-    background-color: rgb(128, 128, 128); /*Gray*/
+    background-color: rgba(128, 128, 128, 0.5); /*Gray*/
     color: white;
 }
 
 .pocket6 {
-    background-color: rgb(128, 0, 0); /*Brown*/
+    background-color: rgba(128, 0, 0, 0.5); /*Brown*/
     color: white;
 }
 
 .pocket7 {
-    background-color: rgb(255, 128, 0); /*Orange*/
+    background-color: rgba(255, 128, 0, 0.5); /*Orange*/
 }

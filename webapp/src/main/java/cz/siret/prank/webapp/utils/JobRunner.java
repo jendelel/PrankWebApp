@@ -12,8 +12,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import cz.siret.prank.lib.BioUtils;
-import cz.siret.prank.lib.Utils;
+import cz.siret.prank.lib.utils.BioUtils;
+import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.program.api.PrankFacade;
 import cz.siret.prank.program.api.PrankPredictor;
 

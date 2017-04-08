@@ -155,33 +155,54 @@ var LiteMol;
         var SequenceView = (function (_super) {
             __extends(SequenceView, _super);
             function SequenceView() {
-                return _super !== null && _super.apply(this, arguments) || this;
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.pVizSeqView = void 0;
+                return _this;
             }
-            SequenceView.prototype.getResidue = function (seqNumber, model) {
-                var ctx = this.controller.context;
-                var cache = ctx.entityCache;
-                var cacheId = "__resSelectionInfo-" + seqNumber;
+            SequenceView.prototype.getResidue = function (seqIndex, model) {
+                var cacheId = "__resSelectionInfo-" + seqIndex;
+                var result = this.getCacheItem(cacheId, model);
+                if (!result)
+                    result = this.setCacheItem(cacheId, LiteMol.Core.Structure.Query.residuesById(seqIndex), model);
+                return result;
+            };
+            SequenceView.prototype.getPocket = function (pocket, model) {
+                var cacheId = "__resSelectionInfo-" + pocket.name + "-" + pocket.rank;
+                var result = this.getCacheItem(cacheId, model);
+                if (!result)
+                    result = this.setCacheItem(cacheId, LiteMol.Core.Structure.Query.atomsById.apply(null, pocket.surfAtomIds), model);
+                return result;
+            };
+            SequenceView.prototype.setCacheItem = function (cacheId, query, model) {
+                var cache = this.controller.context.entityCache;
+                var elements = LiteMol.Core.Structure.Query.apply(query, model.props.model).unionAtomIndices();
+                var selection = Bootstrap.Interactivity.Info.selection(model, elements);
+                var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
+                var item = new CacheItem(query, selectionInfo);
+                cache.set(model, cacheId, item);
+                return item;
+            };
+            SequenceView.prototype.getCacheItem = function (cacheId, model) {
+                var cache = this.controller.context.entityCache;
                 var item = cache.get(model, cacheId);
-                if (!item) {
-                    var selectionQ = LiteMol.Core.Structure.Query.residuesById(seqNumber); //Core.Structure.Query.chains({ authAsymId: 'A' })
-                    var elements = LiteMol.Core.Structure.Query.apply(selectionQ, model.props.model).unionAtomIndices();
-                    var selection = Bootstrap.Interactivity.Info.selection(model, elements);
-                    var selectionInfo = Bootstrap.Interactivity.Molecule.transformInteraction(selection);
-                    item = new CacheItem(selectionQ, selectionInfo);
-                    cache.set(model, cacheId, item);
-                }
+                if (!item)
+                    return void 0;
                 return item;
             };
             SequenceView.prototype.addPocketFeatures = function (features) {
-                var map = LiteMol.Core.Utils.FastMap.create();
+                var _this = this;
+                this.indexMap = LiteMol.Core.Utils.FastMap.create();
                 // Build hashmap index->sequential index zero-based.
                 this.controller.latestState.seq.indices.forEach(function (index, seqIndex) {
-                    map.set(index, seqIndex);
+                    _this.indexMap.set(index, seqIndex);
                 });
                 var pockets = this.controller.latestState.pockets;
+                var pocketVisibility = this.controller.latestState.pocketVisibility;
                 pockets.forEach(function (pocket, i) {
+                    if (!pocketVisibility[i])
+                        return; // Skip over invisible pockets.
                     // Transform indices to sequential indices and then sort them
-                    var sortedIndices = pocket.residueIds.map(function (index) { return map.get(index); })
+                    var sortedIndices = pocket.residueIds.map(function (index) { return _this.indexMap.get(index); })
                         .sort(function (a, b) { return (a - b); });
                     var lastStart = -1;
                     var lastResNum = -1;
@@ -191,65 +212,151 @@ var LiteMol;
                         }
                         else {
                             if (lastResNum + 1 < resNum) {
-                                features.push(new Feature("Pockets", "pocket" + i + " col" + i % 6, lastStart, lastResNum, pocket.rank.toString()));
+                                features.push(new Feature("Pockets", pocket.name + " col" + i % 8, lastStart, lastResNum, pocket.rank.toString()));
                                 lastStart = resNum;
                             }
                         }
                         lastResNum = resNum;
                     });
-                    features.push(new Feature("Pockets", "pocket" + (pockets.length - 1) + " col" + i % 6, lastStart, lastResNum, pocket.rank.toString()));
+                    features.push(new Feature("Pockets", pocket.name + " col" + i % 8, lastStart, lastResNum, pocket.rank.toString()));
                 });
             };
             SequenceView.prototype.componentDidMount = function () {
-                this.componentDidUpdate();
+                var _this = this;
+                this.subscribe(this.controller.state, function (state) {
+                    _this.updatePViz();
+                });
+                this.initPViz();
             };
             SequenceView.prototype.componentDidUpdate = function () {
+                this.updatePViz();
+            };
+            SequenceView.prototype.initPViz = function () {
+                var _this = this;
                 var seq = this.controller.latestState.seq;
+                console.log(seq);
                 if (seq.seq.length <= 0)
                     return; // Sequence isn't loaded yet.
                 var pviz = getPviz();
                 var pockets = this.controller.latestState.pockets;
-                var seqEntry = new pviz.SeqEntry({ sequence: seq.seq.join("") });
+                this.pVizSeqView = new pviz.SeqEntry({ sequence: seq.seq.join("") });
                 new pviz.SeqEntryAnnotInteractiveView({
-                    model: seqEntry, el: '#seqView',
+                    model: this.pVizSeqView, el: '#seqView',
                     xChangeCallback: function (pStart, pEnd) {
-                        // this.onLetterMouseEnter(Math.round(pStart));
+                        _this.onLetterMouseEnter(Math.round(pStart) + 1);
                     }
                 }).render();
+                this.updatePViz();
+            };
+            SequenceView.prototype.updatePViz = function () {
+                var _this = this;
+                if (!this.pVizSeqView)
+                    this.initPViz();
+                if (!this.pVizSeqView)
+                    return; // If something went wrong! 
+                // Clear pViz features and callbacks.
+                this.pVizSeqView.clear();
+                var pViz = getPviz();
+                pViz.FeatureDisplayer.mouseoverCallBacks = {};
+                pViz.FeatureDisplayer.mouseoutCallBacks = {};
+                var seq = this.controller.latestState.seq;
+                if (seq.seq.length <= 0)
+                    return; // Sequence isn't loaded yet.
                 var features = [];
-                this.addPocketFeatures(features);
+                this.addPocketFeatures(features); // Add pocket features.
+                var pocketFeatureTypes = features.map(function (feature) { return feature.type; });
+                // Add mouse callbacks.
+                pViz.FeatureDisplayer.addMouseoverCallback(pocketFeatureTypes, function (feature) {
+                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, false);
+                    _this.lastMouseOverFeature = _this.parsePocketName(feature.type);
+                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, true);
+                }).addMouseoutCallback(pocketFeatureTypes, function (feature) {
+                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, false);
+                    _this.lastMouseOverFeature = void 0;
+                });
                 var scores = seq.scores;
                 // Add conservation features.
                 if (scores != null && scores.length >= 0) {
                     scores.forEach(function (score, i) {
                         var s = score >= 0 ? score : 0;
-                        var s2 = Math.round(s * 10); // There are 11 shades of gray with selector score0, score1, ..., score10.
-                        features.push(new Feature("Conservation", "score" + s2, i, i, (Math.round(s * 100) / 100).toString()));
+                        var s2 = (s * 10).toFixed(0); // There are 11 shades with selector score0, score1, ..., score10.
+                        features.push(new Feature("Conservation", "score" + s2, i, i, s.toFixed(2)));
                     });
                 }
-                seqEntry.addFeatures(features);
+                this.pVizSeqView.addFeatures(features);
             };
             SequenceView.prototype.onLetterMouseEnter = function (seqNumber) {
+                if (this.lastNumber) {
+                    if (this.lastNumber != seqNumber) {
+                        this.selectAndDisplayToastLetter(this.lastNumber, false);
+                        this.selectAndDisplayToastLetter(seqNumber, true);
+                    }
+                }
+                else {
+                    this.selectAndDisplayToastLetter(seqNumber, true);
+                }
+                this.lastNumber = seqNumber;
+            };
+            SequenceView.prototype.selectAndDisplayToastLetter = function (seqNumber, isOn) {
+                if (!seqNumber)
+                    return;
                 var ctx = this.controller.context;
                 var model = ctx.select('model')[0];
                 if (!model)
                     return;
+                var map = this.indexMap;
+                if (!map)
+                    return;
+                var seqIndex = map.get(seqNumber);
+                if (!seqIndex)
+                    return;
                 // Get the sequence selection
-                var seqSel = this.getResidue(seqNumber, model);
+                var seqSel = this.getResidue(seqIndex, model);
                 // Highlight in the 3D Visualization
-                if (this.lastSelectedSeq) {
-                    Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: this.lastSelectedSeq.query, isOn: false });
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: isOn });
+                if (isOn) {
+                    // Show tooltip
+                    var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
                 }
-                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: true });
-                this.lastSelectedSeq = seqSel;
-                // if (isOn) {
-                // Show tooltip
-                var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
-                Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
-                // } else {
-                // Hide tooltip
-                // Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [])
-                // }
+                else {
+                    // Hide tooltip
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
+                }
+            };
+            SequenceView.prototype.parsePocketName = function (pocketFeatureType) {
+                // Using the fact that * is greedy, so it will match everything up to and including the last space.
+                var res = pocketFeatureType.match(".* ");
+                if (!res)
+                    return void 0;
+                var pocketName = res[0].trim();
+                var pocketRes = void 0;
+                this.controller.latestState.pockets.forEach(function (pocket) {
+                    if (pocket.name == pocketName)
+                        pocketRes = pocket;
+                });
+                return pocketRes;
+            };
+            SequenceView.prototype.selectAndDisplayToastPocket = function (pocket, isOn) {
+                if (!pocket)
+                    return;
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                // Get the pocket selection
+                var seqSel = this.getPocket(pocket, model);
+                // Highlight in the 3D Visualization
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: isOn });
+                if (isOn) {
+                    // Show tooltip
+                    var label = Bootstrap.Interactivity.Molecule.formatInfo(seqSel.selectionInfo);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
+                }
+                else {
+                    // Hide tooltip
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
+                }
             };
             SequenceView.prototype.onLetterClick = function (seqNumber, letter) {
                 var ctx = this.controller.context;
@@ -260,8 +367,9 @@ var LiteMol;
                 Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
             };
             SequenceView.prototype.render = function () {
+                var _this = this;
                 var seqId = -1;
-                return React.createElement("div", { id: "seqView", className: "noselect" });
+                return React.createElement("div", { id: "seqView", className: "noselect", onMouseLeave: function () { _this.onLetterMouseEnter(void 0); } });
             };
             return SequenceView;
         }(Views.View));
@@ -269,13 +377,40 @@ var LiteMol;
         var SequenceController = (function (_super) {
             __extends(SequenceController, _super);
             function SequenceController(context) {
-                var _this = _super.call(this, context, { seq: { indices: [], seq: [], scores: [] }, pockets: [] }) || this;
+                var _this = _super.call(this, context, { seq: { indices: [], seq: [], scores: [] }, pockets: [], pocketVisibility: [], version: 0 }) || this;
                 Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(function (e) {
                     if (e.data.type === PrankWeb.SequenceEntity) {
-                        _this.setState({ seq: e.data.props.seq, pockets: _this.latestState.pockets });
+                        _this.setState({ seq: e.data.props.seq });
                     }
                     else if (e.data.type === PrankWeb.Prediction) {
-                        _this.setState({ seq: _this.latestState.seq, pockets: e.data.props.pockets });
+                        var pockets = e.data.props.pockets;
+                        _this.setState({ pockets: pockets, pocketVisibility: pockets.map(function () { return true; }) });
+                    }
+                });
+                // Subscribe to get updates about visibility of pockets.
+                Bootstrap.Event.Tree.NodeUpdated.getStream(context).subscribe(function (e) {
+                    var entityRef = e.data.ref; // Pocket name whose visibility just changed.
+                    var pockets = _this.latestState.pockets;
+                    var changed = false;
+                    var pocketVisibility = _this.latestState.pocketVisibility;
+                    var i = 0;
+                    for (var _i = 0, pockets_1 = pockets; _i < pockets_1.length; _i++) {
+                        var pocket = pockets_1[_i];
+                        if (pocket.name !== entityRef) {
+                            i++;
+                            continue;
+                        }
+                        // It should still be visible even if some children are invisible.
+                        var visible = (e.data.state.visibility === 0 /* Full */ || e.data.state.visibility === 1 /* Partial */);
+                        if (pocketVisibility[i] !== visible) {
+                            pocketVisibility[i] = visible;
+                            changed = true;
+                        }
+                        break;
+                    }
+                    if (changed) {
+                        // Keeping version field in the state, so that event about state update is fired. 
+                        _this.setState({ pockets: pockets, pocketVisibility: pocketVisibility, version: _this.latestState.version + 1 });
                     }
                 });
                 return _this;
@@ -291,16 +426,6 @@ var LiteMol;
     (function (PrankWeb) {
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
-        // export class PocketController extends Bootstrap.Components.Component<{ pockets: PrankPocket[] }> {
-        //     constructor(context: Bootstrap.Context) {
-        //         super(context, { pockets: [] });
-        //         Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(e => {
-        //             if (e.data.type === Prediction) {
-        //                 this.setState({ pockets: e.data.props.pockets });
-        //             }
-        //         })
-        //     }
-        // }
         var CacheItem = (function () {
             function CacheItem(query, selectionInfo) {
                 this.query = query;
@@ -308,6 +433,9 @@ var LiteMol;
             }
             return CacheItem;
         }());
+        function tooglePocketVisibility(data) {
+        }
+        PrankWeb.tooglePocketVisibility = tooglePocketVisibility;
         var PocketList = (function (_super) {
             __extends(PocketList, _super);
             function PocketList() {
@@ -323,7 +451,7 @@ var LiteMol;
                 return pockets.map(function (pocket, i) {
                     var scoreSum = pocket.residueIds.map(function (i) { return seq.scores[indexMap.get(i)]; }).reduce(function (acc, val) { return acc + val; }, 0);
                     // Round the score to 3 digit average.
-                    return (Math.round((scoreSum / pocket.residueIds.length) * 1000) / 1000).toString();
+                    return (scoreSum / pocket.residueIds.length).toFixed(3);
                 });
             };
             PocketList.prototype.render = function () {
@@ -333,7 +461,7 @@ var LiteMol;
                 var controls = [];
                 var conservationAvg = this.calcConservationAvg();
                 if (pockets.length > 0) {
-                    controls.push(React.createElement("h2", null, "Pockets:"));
+                    controls.push(React.createElement("h2", { className: "text-center" }, "Pockets"));
                 }
                 pockets.forEach(function (pocket, i) {
                     controls.push(React.createElement(Pocket, { plugin: _this.props.plugin, model: _this.props.data.model, pocket: pocket, index: i, conservationAvg: conservationAvg[i] }));
@@ -353,12 +481,40 @@ var LiteMol;
             Pocket.prototype.componentWillMount = function () {
                 var _this = this;
                 var ctx = this.props.plugin.context;
-                Bootstrap.Command.Entity.SetVisibility.getStream(this.props.plugin.context).subscribe(function (e) {
-                    var pocketEntity = ctx.select(_this.props.pocket.name)[0];
-                    if (pocketEntity && e.data.entity.id === pocketEntity.id) {
-                        _this.setState({ isVisible: e.data.visible });
+                Bootstrap.Event.Tree.NodeUpdated.getStream(ctx).subscribe(function (e) {
+                    var entityRef = e.data.ref; // Pocket name whose visibility just changed.
+                    var pocket = _this.props.pocket;
+                    if (entityRef === pocket.name) {
+                        // It should still be visible even if some children are invisible.
+                        var visible = (e.data.state.visibility === 0 /* Full */ || e.data.state.visibility === 1 /* Partial */);
+                        if (_this.state.isVisible !== visible) {
+                            _this.setState({ isVisible: visible });
+                            _this.toogleColoring(visible);
+                        }
                     }
                 });
+            };
+            Pocket.prototype.toogleColoring = function (isVisible) {
+                var mapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, false);
+                if (!mapping)
+                    return;
+                if (isVisible) {
+                    for (var _i = 0, _a = this.props.pocket.surfAtomIds; _i < _a.length; _i++) {
+                        var atom = _a[_i];
+                        mapping[atom - 1] = (this.props.index % 8) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%8)
+                    }
+                }
+                else {
+                    var originalMapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, true);
+                    if (!originalMapping)
+                        return;
+                    for (var _b = 0, _c = this.props.pocket.surfAtomIds; _b < _c.length; _b++) {
+                        var atom = _c[_b];
+                        mapping[atom - 1] = originalMapping[atom - 1];
+                    }
+                }
+                PrankWeb.DataLoader.setAtomColorMapping(this.props.plugin, this.props.model, mapping, false);
+                PrankWeb.DataLoader.colorProtein(this.props.plugin);
             };
             Pocket.prototype.getPocket = function () {
                 var ctx = this.props.plugin.context;
@@ -454,6 +610,32 @@ var LiteMol;
             var Bootstrap = LiteMol.Bootstrap;
             var Transformer = Bootstrap.Entity.Transformer;
             var Query = LiteMol.Core.Structure.Query;
+            function initColorMapping(model, prediction, sequence) {
+                var atomColorMapConservation = new Uint8Array(model.props.model.data.atoms.count);
+                var atomColorMap = new Uint8Array(model.props.model.data.atoms.count);
+                var seq = sequence.props.seq;
+                var seqIndices = seq.indices;
+                var seqScores = seq.scores;
+                if (seqScores != null) {
+                    seqIndices.forEach(function (seqIndex, i) {
+                        var shade = Math.round((seqScores[i]) * 10); // Shade within [0,10]
+                        var query = Query.residuesById(seqIndex).compile();
+                        for (var _i = 0, _a = query(model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
+                            var atom = _a[_i];
+                            atomColorMap[atom] = shade + PrankWeb.Colors.size + 1; // First there is fallbackColor(0), then pocketColors(1-9) and lastly conservation colors.
+                            atomColorMapConservation[atom] = shade + PrankWeb.Colors.size + 1; // First there is fallbackColor(0), then pocketColors(1-9) and lastly conservation colors.
+                        }
+                    });
+                }
+                var pockets = prediction.props.pockets;
+                pockets.forEach(function (pocket, i) {
+                    for (var _i = 0, _a = pocket.surfAtomIds; _i < _a.length; _i++) {
+                        var atom = _a[_i];
+                        atomColorMap[atom - 1] = (i % 8) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%8)
+                    }
+                });
+                return { atomColorMap: atomColorMap, atomColorMapConservation: atomColorMapConservation };
+            }
             function loadData(plugin, inputType, inputId) {
                 return new LiteMol.Promise(function (res, rej) {
                     plugin.clear();
@@ -488,12 +670,15 @@ var LiteMol;
                         var model = plugin.context.select('model')[0];
                         var prediction = plugin.context.select('pockets')[0];
                         var sequence = plugin.context.select('sequence')[0];
+                        var mappings = initColorMapping(model, prediction, sequence);
+                        DataLoader.setAtomColorMapping(plugin, model, mappings.atomColorMap);
+                        DataLoader.setAtomColorMapping(plugin, model, mappings.atomColorMapConservation, true);
                         if (!prediction)
                             rej("Unable to load predictions.");
                         else if (!sequence)
                             rej("Unable to load protein sequence.");
                         else {
-                            res({ plugin: plugin, data: { model: model, prediction: prediction, sequence: sequence } });
+                            res({ model: model, prediction: prediction, sequence: sequence });
                         }
                     }).catch(function (e) { return rej(e); });
                 });
@@ -502,50 +687,117 @@ var LiteMol;
             function visualizeData(plugin, data) {
                 return new LiteMol.Promise(function (res, rej) {
                     var pockets = data.prediction.props.pockets;
-                    // Select specific sets of atoms and create visuals.
-                    var selectionQueries = [];
-                    var allPocketIds = [];
-                    pockets.forEach(function (pocket) {
-                        selectionQueries.push(Query.atomsById.apply(null, pocket.surfAtomIds));
-                        pocket.surfAtomIds.forEach(function (id) { allPocketIds.push(id); });
-                    });
-                    var selectionColors = Bootstrap.Immutable.Map()
-                        .set('Uniform', LiteMol.Visualization.Color.fromHex(0xff0000))
+                    // Specify styles for visual.
+                    var cartoonsColors = Bootstrap.Visualization.Molecule.UniformBaseColors;
+                    var cartoonStyle = {
+                        type: 'Cartoons', params: { detail: 'Automatic' },
+                        theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: cartoonsColors }
+                    };
+                    // Create color theme for pockets.
+                    var surfaceColors = Bootstrap.Immutable.Map()
+                        .set('Uniform', LiteMol.Visualization.Color.fromHex(0xffffff))
                         .set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor)
                         .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
-                    // Selection of complement of the previous set.
-                    var complement = Query.atomsById.apply(null, allPocketIds).complement();
-                    var complementColors = selectionColors.set('Uniform', LiteMol.Visualization.Color.fromHex(0xffffff));
-                    var complementStyle = {
+                    // Style for protein surface.
+                    var surfaceStyle = {
                         type: 'Surface',
-                        params: { probeRadius: 0.5, density: 1.4, smoothing: 4, isWireframe: false },
-                        theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: complementColors, transparency: { alpha: 1.0 } }
+                        params: { probeRadius: 0.55, density: 1.4, smoothing: 4, isWireframe: false },
+                        theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: surfaceColors, transparency: { alpha: 0.6 } }
+                    };
+                    // Style for water.
+                    var ballsAndSticksStyle = {
+                        type: 'BallsAndSticks',
+                        params: { useVDW: false, atomRadius: 0.23, bondRadius: 0.09, detail: 'Automatic' },
+                        theme: { template: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate, colors: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate.colors, transparency: { alpha: 0.25 } }
                     };
                     var action = plugin.createTransform();
-                    // Create a selection on the model and create a visual for it...
-                    action
-                        .add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: complement, name: 'Protein complement', silent: true }, {})
-                        .then(Transformer.Molecule.CreateVisual, { style: complementStyle }, { isHidden: false });
-                    // For each pocket: 
-                    selectionQueries.forEach(function (selectionQuery, i) {
-                        // Set selection style (i.e. color, probe, density etc.)
-                        var selectionColor = selectionColors.set('Uniform', PrankWeb.Colors.get(i % 6));
-                        var selectionStyle = {
-                            type: 'Surface',
-                            params: { probeRadius: 0.5, density: 1.25, smoothing: 3, isWireframe: false },
-                            theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: selectionColor, transparency: { alpha: 0.8 } }
-                        };
-                        // Create selection and create visual (surface and ball and sticks)
-                        var sel = action
-                            .add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: selectionQuery, name: pockets[i].name, silent: true }, { ref: pockets[i].name });
-                        sel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
-                        sel.then(Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
+                    // Create visuals for protein, ligand and water.
+                    // Protein.
+                    var polymer = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.nonHetPolymer(), name: 'Polymer', silent: true }, { isBinding: true, ref: 'polymer' });
+                    polymer.then(Transformer.Molecule.CreateVisual, { style: cartoonStyle }, { ref: 'polymer-cartoon' });
+                    polymer.then(Transformer.Molecule.CreateVisual, { style: surfaceStyle }, { ref: 'polymer-surface' });
+                    // Ligand.
+                    var het = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true });
+                    het.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') });
+                    // Water.
+                    var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true });
+                    water.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyle });
+                    // Create a group for all pockets.
+                    var pocketGroup = action.add(data.model, Transformer.Basic.CreateGroup, { label: 'Group', description: 'Pockets' });
+                    // For each pocket create selections, but don't create any visuals for them. 
+                    pockets.forEach(function (pocket, i) {
+                        var query = Query.atomsById.apply(null, pocket.surfAtomIds);
+                        // Create selection.
+                        var sel = pocketGroup.then(Transformer.Molecule.CreateSelectionFromQuery, { query: query, name: pockets[i].name, silent: true }, { ref: pockets[i].name });
+                        //sel.then(<any>Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
+                        //sel.then(<any>Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
                     });
-                    plugin.applyTransform(action);
-                    res(data);
+                    plugin.applyTransform(action)
+                        .then(function () { return res(data); })
+                        .catch(function (e) { return rej(e); });
                 });
             }
             DataLoader.visualizeData = visualizeData;
+            function setAtomColorMapping(plugin, model, mapping, conservation) {
+                if (conservation === void 0) { conservation = false; }
+                var ctx = plugin.context;
+                var cache = ctx.entityCache;
+                var cacheId = conservation ? '__PrankWeb__atomColorMapping__conservation__' : '__PrankWeb__atomColorMapping__';
+                cache.set(model, cacheId, mapping);
+            }
+            DataLoader.setAtomColorMapping = setAtomColorMapping;
+            function getAtomColorMapping(plugin, model, conservation) {
+                if (conservation === void 0) { conservation = false; }
+                var ctx = plugin.context;
+                var cache = ctx.entityCache;
+                var cacheId = conservation ? '__PrankWeb__atomColorMapping__conservation__' : '__PrankWeb__atomColorMapping__';
+                return cache.get(model, cacheId);
+            }
+            DataLoader.getAtomColorMapping = getAtomColorMapping;
+            function colorProteinFuture(plugin, data) {
+                return new LiteMol.Promise(function (res, rej) {
+                    if (colorProtein(plugin)) {
+                        res(data);
+                    }
+                    else {
+                        rej("Mapping or model not found!");
+                    }
+                });
+            }
+            DataLoader.colorProteinFuture = colorProteinFuture;
+            function colorProtein(plugin) {
+                var model = plugin.context.select('model')[0];
+                if (!model)
+                    return false;
+                var atomColorMapping = getAtomColorMapping(plugin, model);
+                if (!atomColorMapping)
+                    return false;
+                var colorMap = LiteMol.Core.Utils.FastMap.create();
+                var fallbackColor = LiteMol.Visualization.Color.fromHex(0xffffff); // white
+                colorMap.set(0, fallbackColor);
+                // Fill the color map with colors.
+                PrankWeb.Colors.forEach(function (color, i) { return colorMap.set(i + 1, color); });
+                for (var _i = 0, _a = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]; _i < _a.length; _i++) {
+                    var shade = _a[_i];
+                    var c = shade * 255;
+                    colorMap.set(colorMap.size, LiteMol.Visualization.Color.fromRgb(c, c, c));
+                }
+                var colors = LiteMol.Core.Utils.FastMap.create();
+                colors.set('Uniform', fallbackColor);
+                colors.set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor);
+                colors.set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
+                // Create mapping, theme and apply to all protein visuals.
+                var mapping = LiteMol.Visualization.Theme.createColorMapMapping(function (i) { return atomColorMapping[i]; }, colorMap, fallbackColor);
+                // make the theme "sticky" so that it persist "ResetScene" command.
+                var themeTransparent = LiteMol.Visualization.Theme.createMapping(mapping, { colors: colors, isSticky: true, transparency: { alpha: 1 } });
+                //const theme = Visualization.Theme.createMapping(mapping, { colors, isSticky: true });
+                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-surface').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                //const cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-cartoon').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: surface, theme: themeTransparent });
+                //plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: cartoon as any, theme });
+                return true;
+            }
+            DataLoader.colorProtein = colorProtein;
         })(DataLoader = PrankWeb.DataLoader || (PrankWeb.DataLoader = {}));
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
@@ -573,15 +825,16 @@ var LiteMol;
                 App.prototype.load = function () {
                     var _this = this;
                     this.setState({ isLoading: true, error: void 0 });
+                    // Load data.
                     PrankWeb.DataLoader.loadData(this.props.plugin, this.props.inputType, this.props.inputId)
-                        .then(function (val) { return PrankWeb.DataLoader.visualizeData(val.plugin, val.data); })
+                        .then(function (data) { return PrankWeb.DataLoader.visualizeData(_this.props.plugin, data); })
+                        .then(function (data) { return PrankWeb.DataLoader.colorProteinFuture(_this.props.plugin, data); })
                         .then(function (data) { return _this.setState({ isLoading: false, data: data }); })
                         .catch(function (e) { return _this.setState({ isLoading: false, error: '' + e }); });
                 };
                 App.prototype.render = function () {
                     var _this = this;
                     if (this.state.data) {
-                        // LiteMol.Plugin.ReactDOM.render(LiteMol.Plugin.React.createElement(SequenceView, {plugin, data}), document.getElementById('sequence-view')!);
                         // Data available, display pocket list.
                         return React.createElement(PrankWeb.PocketList, { data: this.state.data, plugin: this.props.plugin });
                     }
@@ -662,7 +915,7 @@ var LiteMol;
             ],
             viewport: {
                 view: Views.Visualization.Viewport,
-                controlsView: Views.Visualization.ViewportControls
+                controlsView: Views.Visualization.ViewportControls,
             },
             layoutView: Views.Layout,
             tree: { region: LayoutRegion.Left, view: Views.Entity.Tree }
@@ -687,11 +940,18 @@ var LiteMol;
                 customSpecification: PrankWeb.PrankWebSpec
             });
             plugin.context.logger.message("LiteMol " + Plugin.VERSION.number);
+            plugin.command(Bootstrap.Command.Layout.SetState, {
+                regionStates: (_a = {}, _a[Bootstrap.Components.LayoutRegion.Top] = 'Sticky', _a)
+            });
             return plugin;
+            var _a;
         }
         PrankWeb.create = create;
+        // Div that LiteMol mounts into.
         var appNode = document.getElementById('app');
+        // Div that control panel mounts into.
         var pocketNode = document.getElementById('pocket-list');
+        // Specify what data to display.
         var inputType = appNode.getAttribute("data-input-type");
         var inputId = appNode.getAttribute("data-input-id");
         PrankWeb.App.render(create(appNode), inputType, inputId, pocketNode);

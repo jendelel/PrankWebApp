@@ -27,7 +27,7 @@ import javax.ws.rs.core.StreamingOutput;
 import cz.siret.prank.lib.Pocket;
 import cz.siret.prank.lib.PrankUtils;
 import cz.siret.prank.lib.Sequence;
-import cz.siret.prank.lib.Utils;
+import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
 
 @ApplicationPath("/api")
