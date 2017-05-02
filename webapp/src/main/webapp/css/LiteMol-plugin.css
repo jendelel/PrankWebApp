@@ -1663,8 +1663,8 @@
     .lm-plugin .lm-layout-standard-outside .lm-layout-top {
       position: absolute;
       right: 0;
-      height: 161px;
-      top: -161px;
+      height: 257px;
+      top: -257px;
       width: 50%;
       border-left: 1px solid #cec9ba;
       border-bottom: 1px solid #cec9ba; }
@@ -1672,8 +1672,8 @@
       position: absolute;
       left: 0;
       right: 0;
-      height: 161px;
-      top: -161px;
+      height: 257px;
+      top: -257px;
       width: 50%;
       border-bottom: 1px solid #cec9ba; }
     .lm-plugin .lm-layout-standard-outside .lm-layout-right {
@@ -1718,12 +1718,12 @@
       left: 290px;
       right: 290px;
       bottom: 98px;
-      top: 170px; }
+      top: 240px; }
     .lm-plugin .lm-layout-standard-landscape .lm-layout-top {
       position: absolute;
       left: 290px;
       right: 290px;
-      height: 170px;
+      height: 240px;
       top: 0;
       border-bottom: 1px solid #cec9ba; }
     .lm-plugin .lm-layout-standard-landscape .lm-layout-bottom {
@@ -1770,11 +1770,11 @@
       left: 0;
       right: 0;
       bottom: 361px;
-      top: 161px; }
+      top: 257px; }
     .lm-plugin .lm-layout-standard-portrait .lm-layout-top {
       position: absolute;
       right: 0;
-      height: 161px;
+      height: 257px;
       top: 0;
       width: 50%;
       border-left: 1px solid #cec9ba;
@@ -1783,7 +1783,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      height: 161px;
+      height: 257px;
       width: 50%;
       border-bottom: 1px solid #cec9ba; }
     .lm-plugin .lm-layout-standard-portrait .lm-layout-right {
@@ -1832,12 +1832,12 @@
         left: 290px;
         right: 290px;
         bottom: 98px;
-        top: 170px; }
+        top: 240px; }
       .lm-plugin .lm-layout-expanded .lm-layout-top {
         position: absolute;
         left: 290px;
         right: 290px;
-        height: 170px;
+        height: 240px;
         top: 0;
         border-bottom: 1px solid #cec9ba; }
       .lm-plugin .lm-layout-expanded .lm-layout-bottom {
@@ -1883,11 +1883,11 @@
         left: 0;
         right: 0;
         bottom: 361px;
-        top: 161px; }
+        top: 257px; }
       .lm-plugin .lm-layout-expanded .lm-layout-top {
         position: absolute;
         right: 0;
-        height: 161px;
+        height: 257px;
         top: 0;
         width: 50%;
         border-left: 1px solid #cec9ba;
@@ -1896,7 +1896,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        height: 161px;
+        height: 257px;
         width: 50%;
         border-bottom: 1px solid #cec9ba; }
       .lm-plugin .lm-layout-expanded .lm-layout-right {

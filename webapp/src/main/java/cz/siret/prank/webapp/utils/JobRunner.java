@@ -44,7 +44,7 @@ public enum JobRunner {
             if (scriptFile.exists()) {
                 // Create a FASTA file
                 File tempFile = File.createTempFile("conservation", ".fasta");
-                Utils.stringToFile(BioUtils.pdbToFasta(fileToAnalyze), tempFile);
+                //Utils.stringToFile(BioUtils.pdbToFasta(fileToAnalyze), tempFile);
 
                 ProcessBuilder processBuilder = new ProcessBuilder(script,
                         tempFile.getAbsolutePath());

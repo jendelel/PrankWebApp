@@ -31,11 +31,25 @@
 
 .pocket {
     margin: 15px;
-    border: 1px solid;
+    border: 3px solid;
     border-color: black;
     padding-left: 10px;
     padding-right: 10px;
     border-radius: 10px;
+    background-color: #f2f1ed;;
+}
+
+.pocket:hover {
+    background-color: #f6f5f3;
+}
+
+.pocket .pocket-feature {
+    color: #63533c;
+    font-size: 12px;
+}
+
+.pocket p {
+    margin-bottom: 5px;
 }
 
 .pocket .pocket-btn {
@@ -43,6 +57,7 @@
     height: 32px;
     border: 1px solid;
     background-color: transparent;
+    color: #9c835f;
     font-weight: normal;
     border-radius: 10px;
     padding: 0px;
@@ -55,7 +70,6 @@
 .pocket .pocket-btn:hover {
     color: #ae5d04;
     text-decoration: none;
-    border: 1px dotted;
 }
 
 .pocket .icon-hidden {
@@ -70,41 +84,4 @@
 }
 .pocket .pocket-icon {
    font-size: 100%;
-}
-
-/* Colors of pockets */
-.pocket0 {
-    background-color: rgba(0, 0, 255, 0.5); /*Blue*/
-    color: white;
-
-}
-
-.pocket1 {
-    background-color: rgba(255, 0, 0, 0.5); /*Red*/
-}
-
-.pocket2 {
-    background-color: rgba(0, 255, 0, 0.5); /*Green*/
-}
-
-.pocket3 {
-    background-color: rgba(255, 0, 255, 0.5); /*Magenta*/
-}
-
-.pocket4 {
-    background-color: rgba(255, 128, 128, 0.5); /*Pink*/
-}
-
-.pocket5 {
-    background-color: rgba(128, 128, 128, 0.5); /*Gray*/
-    color: white;
-}
-
-.pocket6 {
-    background-color: rgba(128, 0, 0, 0.5); /*Brown*/
-    color: white;
-}
-
-.pocket7 {
-    background-color: rgba(255, 128, 0, 0.5); /*Orange*/
 }

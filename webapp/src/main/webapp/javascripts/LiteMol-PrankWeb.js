@@ -87,7 +87,6 @@ var LiteMol;
         LiteMol.Visualization.Color.fromRgb(0, 255, 0), //Green
         LiteMol.Visualization.Color.fromRgb(255, 0, 255), //Magenta
         LiteMol.Visualization.Color.fromRgb(255, 128, 128), //Pink
-        LiteMol.Visualization.Color.fromRgb(128, 128, 128), //Gray
         LiteMol.Visualization.Color.fromRgb(128, 0, 0), //Brown
         LiteMol.Visualization.Color.fromRgb(255, 128, 0)); //Orange
         PrankWeb.Prediction = Entity.create({
@@ -143,27 +142,41 @@ var LiteMol;
             return CacheItem;
         }());
         var Feature = (function () {
-            function Feature(cat, typ, start, end, text) {
-                this.category = cat;
-                this.type = typ;
+            function Feature(regionType, color, start, end, label, properties) {
+                this.regionType = regionType;
+                this.color = color;
                 this.start = start;
                 this.end = end;
-                this.text = text;
+                this.label = label;
+                this.properties = properties;
             }
             return Feature;
+        }());
+        var ProtaelContent = (function () {
+            function ProtaelContent(seq, pocketFeatures, conservationScores) {
+                this.qtracks = [];
+                this.sequence = seq;
+                this.ftracks = [{ label: "Pockets", color: "blue", showLine: false, allowOverlap: false, features: pocketFeatures }];
+                if (conservationScores != null && conservationScores.length >= 0) {
+                    this.qtracks = [{ label: "Evolutionary conservation", color: "gray", type: "column", values: conservationScores }];
+                }
+            }
+            return ProtaelContent;
         }());
         var SequenceView = (function (_super) {
             __extends(SequenceView, _super);
             function SequenceView() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.pVizSeqView = void 0;
+                _this.protaelView = void 0;
                 return _this;
             }
             SequenceView.prototype.getResidue = function (seqIndex, model) {
                 var cacheId = "__resSelectionInfo-" + seqIndex;
                 var result = this.getCacheItem(cacheId, model);
-                if (!result)
-                    result = this.setCacheItem(cacheId, LiteMol.Core.Structure.Query.residuesById(seqIndex), model);
+                if (!result) {
+                    var pdbResIndex = this.controller.latestState.seq.indices[seqIndex];
+                    result = this.setCacheItem(cacheId, LiteMol.Core.Structure.Query.residuesById(pdbResIndex), model);
+                }
                 return result;
             };
             SequenceView.prototype.getPocket = function (pocket, model) {
@@ -192,9 +205,9 @@ var LiteMol;
             SequenceView.prototype.addPocketFeatures = function (features) {
                 var _this = this;
                 this.indexMap = LiteMol.Core.Utils.FastMap.create();
-                // Build hashmap index->sequential index zero-based.
+                // Build hashmap index->sequential index one-based.
                 this.controller.latestState.seq.indices.forEach(function (index, seqIndex) {
-                    _this.indexMap.set(index, seqIndex);
+                    _this.indexMap.set(index, seqIndex + 1);
                 });
                 var pockets = this.controller.latestState.pockets;
                 var pocketVisibility = this.controller.latestState.pocketVisibility;
@@ -212,80 +225,79 @@ var LiteMol;
                         }
                         else {
                             if (lastResNum + 1 < resNum) {
-                                features.push(new Feature("Pockets", pocket.name + " col" + i % 8, lastStart, lastResNum, pocket.rank.toString()));
+                                var c_1 = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
+                                features.push(new Feature("Pockets", "rgb(" + c_1.r * 255 + ", " + c_1.g * 255 + ", " + c_1.b * 255 + ")", lastStart, lastResNum, pocket.rank.toString(), { "Pocket name": pocket.name }));
                                 lastStart = resNum;
                             }
                         }
                         lastResNum = resNum;
                     });
-                    features.push(new Feature("Pockets", pocket.name + " col" + i % 8, lastStart, lastResNum, pocket.rank.toString()));
+                    var c = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
+                    features.push(new Feature("Pockets", "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")", lastStart, lastResNum, pocket.rank.toString(), { "Pocket name": pocket.name }));
                 });
             };
             SequenceView.prototype.componentDidMount = function () {
                 var _this = this;
                 this.subscribe(this.controller.state, function (state) {
-                    _this.updatePViz();
+                    _this.updateProtael();
                 });
-                this.initPViz();
+                this.updateProtael();
             };
             SequenceView.prototype.componentDidUpdate = function () {
-                this.updatePViz();
+                this.updateProtael();
             };
-            SequenceView.prototype.initPViz = function () {
-                var _this = this;
+            SequenceView.prototype.createProtelContent = function () {
                 var seq = this.controller.latestState.seq;
                 console.log(seq);
                 if (seq.seq.length <= 0)
-                    return; // Sequence isn't loaded yet.
-                var pviz = getPviz();
-                var pockets = this.controller.latestState.pockets;
-                this.pVizSeqView = new pviz.SeqEntry({ sequence: seq.seq.join("") });
-                new pviz.SeqEntryAnnotInteractiveView({
-                    model: this.pVizSeqView, el: '#seqView',
-                    xChangeCallback: function (pStart, pEnd) {
-                        _this.onLetterMouseEnter(Math.round(pStart) + 1);
-                    }
-                }).render();
-                this.updatePViz();
-            };
-            SequenceView.prototype.updatePViz = function () {
-                var _this = this;
-                if (!this.pVizSeqView)
-                    this.initPViz();
-                if (!this.pVizSeqView)
-                    return; // If something went wrong! 
-                // Clear pViz features and callbacks.
-                this.pVizSeqView.clear();
-                var pViz = getPviz();
-                pViz.FeatureDisplayer.mouseoverCallBacks = {};
-                pViz.FeatureDisplayer.mouseoutCallBacks = {};
-                var seq = this.controller.latestState.seq;
-                if (seq.seq.length <= 0)
-                    return; // Sequence isn't loaded yet.
+                    return void 0; // Sequence isn't loaded yet.
                 var features = [];
                 this.addPocketFeatures(features); // Add pocket features.
-                var pocketFeatureTypes = features.map(function (feature) { return feature.type; });
-                // Add mouse callbacks.
-                pViz.FeatureDisplayer.addMouseoverCallback(pocketFeatureTypes, function (feature) {
-                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, false);
-                    _this.lastMouseOverFeature = _this.parsePocketName(feature.type);
-                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, true);
-                }).addMouseoutCallback(pocketFeatureTypes, function (feature) {
-                    _this.selectAndDisplayToastPocket(_this.lastMouseOverFeature, false);
-                    _this.lastMouseOverFeature = void 0;
-                });
-                var scores = seq.scores;
-                // Add conservation features.
-                if (scores != null && scores.length >= 0) {
-                    scores.forEach(function (score, i) {
-                        var s = score >= 0 ? score : 0;
-                        var s2 = (s * 10).toFixed(0); // There are 11 shades with selector score0, score1, ..., score10.
-                        features.push(new Feature("Conservation", "score" + s2, i, i, s.toFixed(2)));
-                    });
+                return new ProtaelContent(seq.seq.join(""), features, seq.scores);
+            };
+            SequenceView.prototype.updateProtael = function () {
+                var _this = this;
+                var protaelContent = this.createProtelContent();
+                if (!protaelContent)
+                    return;
+                if (this.protaelView) {
+                    try {
+                        var el = document.getElementsByClassName("protael_resizable").item(0);
+                        el.parentNode.removeChild(el);
+                    }
+                    catch (err) {
+                        console.log("Unable to remove Protael, " + err);
+                    }
                 }
-                this.pVizSeqView.addFeatures(features);
+                var seqViewEl = document.getElementById("seqView");
+                if (!seqViewEl) {
+                    console.log("No seqView element!");
+                }
+                this.protaelView = createProtael(protaelContent, "seqView", true);
+                this.protaelView.draw();
+                this.protaelView.onMouseOver(function (e) {
+                    if (e.offsetX == 0)
+                        return;
+                    var seqNum = _this.protaelView.toOriginalX(e.offsetX);
+                    _this.onLetterMouseEnter(seqNum);
+                });
+                // pViz.FeatureDisplayer.mouseoverCallBacks = {};
+                // pViz.FeatureDisplayer.mouseoutCallBacks = {};
+                // Add mouse callbacks.
+                /*
+                pViz.FeatureDisplayer.addMouseoverCallback(pocketFeatureLabels, (feature: any) => {
+                    this.selectAndDisplayToastPocket(this.lastMouseOverFeature, false);
+                    this.lastMouseOverFeature = this.parsePocketName(feature.type);
+                    this.selectAndDisplayToastPocket(this.lastMouseOverFeature, true);
+                }).addMouseoutCallback(pocketFeatureLabels, (feature: any) => {
+                    this.selectAndDisplayToastPocket(this.lastMouseOverFeature, false);
+                    this.lastMouseOverFeature = void 0;
+                });
+                */
             };
             SequenceView.prototype.onLetterMouseEnter = function (seqNumber) {
+                if (!seqNumber && seqNumber != 0)
+                    return;
                 if (this.lastNumber) {
                     if (this.lastNumber != seqNumber) {
                         this.selectAndDisplayToastLetter(this.lastNumber, false);
@@ -297,21 +309,16 @@ var LiteMol;
                 }
                 this.lastNumber = seqNumber;
             };
+            // Displays/Hides toast for given residue. SeqNumber is ***zero-based index*** of the residue.
             SequenceView.prototype.selectAndDisplayToastLetter = function (seqNumber, isOn) {
-                if (!seqNumber)
+                if ((!seqNumber && seqNumber != 0) || seqNumber < 0)
                     return;
                 var ctx = this.controller.context;
                 var model = ctx.select('model')[0];
                 if (!model)
                     return;
-                var map = this.indexMap;
-                if (!map)
-                    return;
-                var seqIndex = map.get(seqNumber);
-                if (!seqIndex)
-                    return;
                 // Get the sequence selection
-                var seqSel = this.getResidue(seqIndex, model);
+                var seqSel = this.getResidue(seqNumber, model);
                 // Highlight in the 3D Visualization
                 Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: seqSel.query, isOn: isOn });
                 if (isOn) {
@@ -367,9 +374,8 @@ var LiteMol;
                 Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
             };
             SequenceView.prototype.render = function () {
-                var _this = this;
                 var seqId = -1;
-                return React.createElement("div", { id: "seqView", className: "noselect", onMouseLeave: function () { _this.onLetterMouseEnter(void 0); } });
+                return React.createElement("div", { id: "seqView", className: "noselect" /*onMouseLeave={() => { this.onLetterMouseEnter(void 0); }}*/ });
             };
             return SequenceView;
         }(Views.View));
@@ -424,6 +430,7 @@ var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
     (function (PrankWeb) {
+        var Query = LiteMol.Core.Structure.Query;
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
         var CacheItem = (function () {
@@ -433,9 +440,6 @@ var LiteMol;
             }
             return CacheItem;
         }());
-        function tooglePocketVisibility(data) {
-        }
-        PrankWeb.tooglePocketVisibility = tooglePocketVisibility;
         var PocketList = (function (_super) {
             __extends(PocketList, _super);
             function PocketList() {
@@ -489,28 +493,30 @@ var LiteMol;
                         var visible = (e.data.state.visibility === 0 /* Full */ || e.data.state.visibility === 1 /* Partial */);
                         if (_this.state.isVisible !== visible) {
                             _this.setState({ isVisible: visible });
-                            _this.toogleColoring(visible);
+                            _this.toggleColoring(visible);
                         }
                     }
                 });
             };
-            Pocket.prototype.toogleColoring = function (isVisible) {
+            Pocket.prototype.toggleColoring = function (isVisible) {
                 var mapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, false);
+                var pocketQuery = Query.atomsById.apply(null, this.props.pocket.surfAtomIds).compile();
                 if (!mapping)
                     return;
                 if (isVisible) {
-                    for (var _i = 0, _a = this.props.pocket.surfAtomIds; _i < _a.length; _i++) {
+                    var colorIndex = (this.props.index % PrankWeb.Colors.size) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%Colors.size);
+                    for (var _i = 0, _a = pocketQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                         var atom = _a[_i];
-                        mapping[atom - 1] = (this.props.index % 8) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%8)
+                        mapping[atom] = colorIndex;
                     }
                 }
                 else {
                     var originalMapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, true);
                     if (!originalMapping)
                         return;
-                    for (var _b = 0, _c = this.props.pocket.surfAtomIds; _b < _c.length; _b++) {
+                    for (var _b = 0, _c = pocketQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _b < _c.length; _b++) {
                         var atom = _c[_b];
-                        mapping[atom - 1] = originalMapping[atom - 1];
+                        mapping[atom] = originalMapping[atom];
                     }
                 }
                 PrankWeb.DataLoader.setAtomColorMapping(this.props.plugin, this.props.model, mapping, false);
@@ -573,26 +579,26 @@ var LiteMol;
             // https://css-tricks.com/left-align-and-right-align-text-on-the-same-line/
             Pocket.prototype.render = function () {
                 var _this = this;
-                var pocketClass = "pocket pocket" + this.props.index % PrankWeb.Colors.count();
                 var pocket = this.props.pocket;
                 var focusIconDisplay = this.state.isVisible ? "inherit" : "none";
                 var hideIconOpacity = this.state.isVisible ? 1 : 0.3;
-                return React.createElement("div", { className: pocketClass },
+                var c = PrankWeb.Colors.get(this.props.index % PrankWeb.Colors.size);
+                return React.createElement("div", { className: "pocket", style: { borderColor: "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")" } },
                     React.createElement("button", { style: { float: 'left', display: focusIconDisplay }, title: "Focus", className: "pocket-btn", onClick: function () { _this.onPocketClick(); }, onMouseEnter: function () { _this.onPocketMouse(true); }, onMouseOut: function () { _this.onPocketMouse(false); } },
                         React.createElement("span", { className: "pocket-icon focus-icon" })),
                     React.createElement("button", { style: { float: 'right', opacity: hideIconOpacity }, title: "Hide", className: "pocket-btn", onClick: function () { _this.toggleVisibility(); } },
                         React.createElement("span", { className: "pocket-icon hide-icon" })),
                     React.createElement("div", { style: { clear: 'both' } }),
-                    React.createElement("p", { style: { float: 'left' } }, "Pocket rank:"),
+                    React.createElement("p", { style: { float: 'left' }, className: "pocket-feature" }, "Pocket rank:"),
                     React.createElement("p", { style: { float: 'right' } }, pocket.rank),
                     React.createElement("div", { style: { clear: 'both' } }),
-                    React.createElement("p", { style: { float: 'left' } }, "Pocket score:"),
+                    React.createElement("p", { style: { float: 'left' }, className: "pocket-feature" }, "Pocket score:"),
                     React.createElement("p", { style: { float: 'right' } }, pocket.score),
                     React.createElement("div", { style: { clear: 'both' } }),
-                    React.createElement("p", { style: { float: 'left' } }, "AA count:"),
+                    React.createElement("p", { style: { float: 'left' }, className: "pocket-feature" }, "AA count:"),
                     React.createElement("p", { style: { float: 'right' } }, pocket.residueIds.length),
                     React.createElement("div", { style: { clear: 'both' } }),
-                    React.createElement("p", { style: { float: 'left', textDecoration: 'overline' } }, "Conservation:"),
+                    React.createElement("p", { style: { float: 'left', textDecoration: 'overline' }, className: "pocket-feature" }, "Conservation:"),
                     React.createElement("p", { style: { float: 'right' } }, this.props.conservationAvg),
                     React.createElement("div", { style: { clear: 'both' } }));
             };
@@ -618,7 +624,7 @@ var LiteMol;
                 var seqScores = seq.scores;
                 if (seqScores != null) {
                     seqIndices.forEach(function (seqIndex, i) {
-                        var shade = Math.round((seqScores[i]) * 10); // Shade within [0,10]
+                        var shade = Math.round((1 - seqScores[i]) * 10); // Shade within [0,10]
                         var query = Query.residuesById(seqIndex).compile();
                         for (var _i = 0, _a = query(model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                             var atom = _a[_i];
@@ -629,9 +635,11 @@ var LiteMol;
                 }
                 var pockets = prediction.props.pockets;
                 pockets.forEach(function (pocket, i) {
-                    for (var _i = 0, _a = pocket.surfAtomIds; _i < _a.length; _i++) {
+                    var pocketQuery = Query.atomsById.apply(null, pocket.surfAtomIds).compile();
+                    var colorIndex = (i % PrankWeb.Colors.size) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%Colors.size);
+                    for (var _i = 0, _a = pocketQuery(model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                         var atom = _a[_i];
-                        atomColorMap[atom - 1] = (i % 8) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%8)
+                        atomColorMap[atom] = colorIndex;
                     }
                 });
                 return { atomColorMap: atomColorMap, atomColorMapConservation: atomColorMapConservation };

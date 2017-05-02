@@ -1,0 +1,192 @@
+text
+{
+    pointer-events: none !important; 
+}
+.protael_toolbar {
+    font-size: 75%;
+    vertical-align: middle;
+    margin-bottom: 10px;
+}
+.protael_toolbar div {
+    margin: 4px;
+    margin-top: 10px;
+}
+.protael_resizable {
+    padding: .1em;
+    padding-bottom: .7em;
+    /*overflow: hidden        ;*/
+    margin-bottom: 30px;
+    width:100%;
+    height:100%;
+}
+.protael_zoomslider{
+    width: 200px;  
+    display:inline-block; 
+    clear:none; 
+}
+.protael_svg {
+    padding: 0em;
+    padding-top: 10px;
+    margin: 0em;
+    overflow: scroll;
+    width: 100%;
+    height: 100%
+}
+.protael_selection_inp{}
+.pl-zoomer {
+    position: absolute;
+    background: aquamarine;
+    float: left;
+    left: 5px;
+    top: 115px;
+    display: block;
+    border: green 5px;
+    width: 15px;
+}
+#xdialog {
+    font-size: 80%;
+}
+#xdialog textArea { 
+    font-family: monospace; 
+    width:100%;
+}
+.ui-tooltip {
+    border: 1px solid white;
+    background: rgba(20, 20, 20, 1);
+    color: white;
+    max-width: 400px;
+    font-size: smaller !important; 
+}
+.ui-slider .ui-slider-handle {
+    width: .6em;
+    height: 1.1em;
+    cursor: -webkit-grab;
+    border-radius: 0px 0px 20px 20px;
+}
+.ui-slider-horizontal .ui-slider-handle {
+    margin-left: -.85em;
+}
+.ui-slider-horizontal .ui-slider-range {
+    margin-left: -.85em;
+}
+.ui-widget {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 1em;
+}
+.ui-slider-horizontal {
+    height: .3em;
+}
+.protael_slider {
+    border-bottom: 0px;
+    border-left: 0px;
+    border-right: 0px;
+}
+/*Protael link*/
+#prref{
+    fill: #18bc9c;
+    text-anchor:end;
+    font-size: 8px;
+}
+#prref:hover {
+    cursor: pointer;
+}
+/* GRAPH ELEMENTS*/
+svg{
+    background: #FFF;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+}
+/* Features*/
+.pl-ftrack{
+    text-anchor: left;
+    /*    font-style: normal; 
+        font-variant: normal; 
+        font-weight: normal; 
+        font-size: 7px; 
+        line-height: normal; */
+    font-family: Arial;
+}
+.pl-ftrack-label{ 
+    font-size: 14px;
+    text-anchor: start;
+}
+.pl-feature {
+    fill: blue;
+    stroke: #bbb
+}
+.pl-feature:hover {
+    stroke-width: 3px
+}
+.pl-feature-label {
+    stroke:none !important;
+    stroke-width:0px;
+    fill: #000;
+}
+.pl-highlight{
+    fill:#FF0 !important;
+}
+
+/* Main sequence and alignments*/
+.pl-seqline{
+    stroke: #BBB;
+    fill: #BBB;
+    stroke-width:2px
+}
+.pl-seqline:hover{
+    stroke-width:4px
+}
+
+/* Grid lines */
+#gridlines{
+    stroke-width: 1px;
+    fill: none
+}
+.pl-grid-label{
+    /*alignment-baseline:bottom;*/
+    text-anchor: middle;
+    font: 10px Arial;
+    fill: #000
+}
+.pl-grid-minor {
+    stroke: #eee
+}
+.pl-grid-major {
+    stroke: #ccc
+}
+
+.pl-chart{/*this class for marking qtrack group only, will not affect appearance*/}
+.pl-chart-top, .pl-chart-bottom{
+    stroke:none;
+    stroke-width: 1px;
+    stroke-dasharray: "5,5";
+}
+.pl-chart-scalelbl{
+    font-size: 9px;
+    text-shadow: white 0.1em 0.1em 0.5em
+}
+.pl-chart-label{ 
+    font-size: 14px;
+    text-anchor: start;
+    fill:#000;
+}
+.pl-chart-area{
+    stroke-width: 0.1;
+    stroke-linejoin: round;
+    stroke-linecap: butt;
+    opacity: 0.7;
+}
+.pl-chart-center{
+    stroke:#BBB;
+    stroke-width: 1px;
+    stroke-dasharray: "5,5";
+}
+.pl-bridge {
+    font-size: 10px;
+    font-family: Arial;
+    text-anchor: middle;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+.pl-marker{/*this class for marking group only, do not use to change appearance*/}

@@ -49,47 +49,47 @@ g.feature.Conservation rect.feature-block-end {
     display: none;
 }
 
-g.feature.Conservation.score10 rect.feature {
-    fill: #e61717;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score9 rect.feature {
-    fill: #e64917;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score8 rect.feature {
-    fill: #e67a17;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score7 rect.feature {
-    fill: #e6ac17;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score6 rect.feature {
-    fill: #e6dd17;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score5 rect.feature {
-    fill: #bce617;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score4 rect.feature {
-    fill: #8be617;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score3 rect.feature {
-    fill: #59e617;
-    fill-opacity: 1.0;
-}
-g.feature.Conservation.score2 rect.feature {
-    fill: #27e617;
-    fill-opacity: 1.0;
+g.feature.Conservation.score0 rect.feature {
+    fill: #fff;
+    fill-opacity: 0.8;
 }
 g.feature.Conservation.score1 rect.feature {
-    fill: #17e638;
-    fill-opacity: 1.0;
+    fill: #e5e5e5;
+    fill-opacity: 0.8;
 }
-g.feature.Conservation.score0 rect.feature {
-    fill: #17e66a;
-    fill-opacity: 1.0;
+g.feature.Conservation.score2 rect.feature {
+    fill: #cccccc;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score3 rect.feature {
+    fill: #b2b2b2;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score4 rect.feature {
+    fill: #999999;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score5 rect.feature {
+    fill: #7f7f7f;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score6 rect.feature {
+    fill: #666666;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score7 rect.feature {
+    fill: #4c4c4c;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score8 rect.feature {
+    fill: #333333;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score9 rect.feature {
+    fill: #1a1a1a;
+    fill-opacity: 0.8;
+}
+g.feature.Conservation.score10 rect.feature {
+    fill: #000;
+    fill-opacity: 0.8;
 }

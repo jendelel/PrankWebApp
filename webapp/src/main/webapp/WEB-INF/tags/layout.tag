@@ -24,8 +24,10 @@
           rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
     <jsp:invoke fragment="header_after"/>
@@ -33,7 +35,7 @@
 </head>
 <body>
 <!-- Navigation-->
-<nav role="navigation" class="navbar navbar-default">
+<nav role="navigation" class="navbar navbar-default" id="main-navbar">
     <div class="container">
         <!-- Brand and toggle get grouped for better mobile display-->
         <div class="navbar-header">

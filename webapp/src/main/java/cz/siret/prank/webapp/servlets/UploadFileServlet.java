@@ -29,7 +29,7 @@ import cz.siret.prank.webapp.utils.JobRunner;
         urlPatterns = "/analyze/file_upload",
         asyncSupported = true
 )
-@MultipartConfig
+@MultipartConfig(maxFileSize = 1024 * 1024 * 10, maxRequestSize = 1024*1024*10)
 public class UploadFileServlet extends HttpServlet {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
