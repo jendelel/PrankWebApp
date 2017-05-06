@@ -8069,7 +8069,7 @@ var __LiteMolRx = __LiteMolRxTemp.Rx;
  */
 var CIFTools;
 (function (CIFTools) {
-    CIFTools.VERSION = { number: "1.1.4", date: "Jan 18 2017" };
+    CIFTools.VERSION = { number: "1.1.5", date: "April 20 2017" };
 })(CIFTools || (CIFTools = {}));
 /*
  * Copyright (c) 2016 - now David Sehnal, licensed under MIT License, See LICENSE file for more info.
@@ -9160,9 +9160,11 @@ var CIFTools;
                     // escaped is always Value
                     if (state.isEscaped) {
                         state.currentTokenType = 3 /* Value */;
+                        // _ always means column name
                     }
                     else if (state.data.charCodeAt(state.currentTokenStart) === 95) {
                         state.currentTokenType = 4 /* ColumnName */;
+                        // 5th char needs to be _ for data_ or loop_
                     }
                     else if (state.currentTokenEnd - state.currentTokenStart >= 5 && state.data.charCodeAt(state.currentTokenStart + 4) === 95) {
                         if (isData(state))
@@ -9173,6 +9175,7 @@ var CIFTools;
                             state.currentTokenType = 2 /* Loop */;
                         else
                             state.currentTokenType = 3 /* Value */;
+                        // all other tests failed, we are at Value token.
                     }
                     else {
                         state.currentTokenType = 3 /* Value */;
@@ -9293,6 +9296,7 @@ var CIFTools;
                     }
                     block = new Text.DataBlock(data, data.substring(tokenizer.currentTokenStart + 5, tokenizer.currentTokenEnd));
                     moveNext(tokenizer);
+                    // Save frame
                 }
                 else if (token === 1 /* Save */) {
                     id = data.substring(tokenizer.currentTokenStart + 5, tokenizer.currentTokenEnd);
@@ -9315,18 +9319,21 @@ var CIFTools;
                         saveFrame = new Text.DataBlock(data, id);
                     }
                     moveNext(tokenizer);
+                    // Loop
                 }
                 else if (token === 2 /* Loop */) {
                     cat = handleLoop(tokenizer, inSaveFrame ? saveFrame : block);
                     if (cat.hasError) {
                         return error(cat.errorLine, cat.errorMessage);
                     }
+                    // Single row
                 }
                 else if (token === 4 /* ColumnName */) {
                     cat = handleSingle(tokenizer, inSaveFrame ? saveFrame : block);
                     if (cat.hasError) {
                         return error(cat.errorLine, cat.errorMessage);
                     }
+                    // Out of options
                 }
                 else {
                     return error(tokenizer.currentLineNumber, "Unexpected token. Expected data_, loop_, or data name.");
@@ -9407,8 +9414,8 @@ var CIFTools;
                 var f = fields_1[_i];
                 StringWriter.writePadRight(writer, category.desc.name + "." + f.name, width);
                 var presence = f.presence;
-                var p = void 0;
-                if (presence && (p = presence(data, 0)) !== 0 /* Present */) {
+                var p = presence ? presence(data, 0) : 0 /* Present */;
+                if (p !== 0 /* Present */) {
                     if (p === 1 /* NotSpecified */)
                         writeNotSpecified(writer);
                     else
@@ -9444,8 +9451,8 @@ var CIFTools;
                     for (var _b = 0, fields_3 = fields; _b < fields_3.length; _b++) {
                         var f = fields_3[_b];
                         var presence = f.presence;
-                        var p = void 0;
-                        if (presence && (p = presence(data, i)) !== 0 /* Present */) {
+                        var p = presence ? presence(data, i) : 0 /* Present */;
+                        if (p !== 0 /* Present */) {
                             if (p === 1 /* NotSpecified */)
                                 writeNotSpecified(writer);
                             else
@@ -9602,6 +9609,10 @@ var CIFTools;
     (function (Binary) {
         var MessagePack;
         (function (MessagePack) {
+            /*
+             * Adapted from https://github.com/rcsb/mmtf-javascript
+             * by Alexander Rose <alexander.rose@weirdbyte.de>, MIT License, Copyright (c) 2016
+             */
             /**
              * decode all key-value pairs of a map into an object
              * @param  {Integer} length - number of key-value pairs
@@ -10643,7 +10654,6 @@ var CIFTools;
             return Encoder;
         }());
         Binary.Encoder = Encoder;
-        var Encoder;
         (function (Encoder) {
             function by(f) {
                 return new Encoder([f]);
@@ -10668,8 +10678,7 @@ var CIFTools;
                 _a[6 /* Uint32 */] = function (v, i, a) { v.setUint32(4 * i, a, true); },
                 _a[32 /* Float32 */] = function (v, i, a) { v.setFloat32(4 * i, a, true); },
                 _a[33 /* Float64 */] = function (v, i, a) { v.setFloat64(8 * i, a, true); },
-                _a
-            );
+                _a);
             var byteSizes = (_b = {},
                 _b[2 /* Int16 */] = 2,
                 _b[5 /* Uint16 */] = 2,
@@ -10677,8 +10686,7 @@ var CIFTools;
                 _b[6 /* Uint32 */] = 4,
                 _b[32 /* Float32 */] = 4,
                 _b[33 /* Float64 */] = 8,
-                _b
-            );
+                _b);
             function byteArray(data) {
                 var type = Binary.Encoding.getDataType(data);
                 if (type === 1 /* Int8 */)
@@ -11067,8 +11075,8 @@ var CIFTools;
                 var _d = data_2[_i];
                 var d = _d.data;
                 for (var i = 0, _b = _d.count; i < _b; i++) {
-                    var p = void 0;
-                    if (presence && (p = presence(d, i)) !== 0 /* Present */) {
+                    var p = presence ? presence(d, i) : 0 /* Present */;
+                    if (p !== 0 /* Present */) {
                         mask[offset] = p;
                         if (isNative)
                             array[offset] = null;
@@ -56180,7 +56188,7 @@ var LiteMol;
 (function (LiteMol) {
     var Core;
     (function (Core) {
-        Core.VERSION = { number: "3.1.1", date: "March 20 2017" };
+        Core.VERSION = { number: "3.1.2", date: "April 12 2017" };
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -56195,8 +56203,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -63261,10 +63269,10 @@ var LiteMol;
                         createOperators(operators, list, i - 1, current);
                     }
                 }
-                function getAssemblyTransforms(model, operators) {
+                function getAssemblyTransforms(model, operators, offset) {
                     var info = model.data.assemblyInfo;
                     var transforms = [];
-                    var index = 0;
+                    var index = offset;
                     for (var _i = 0, operators_1 = operators; _i < operators_1.length; _i++) {
                         var op = operators_1[_i];
                         var m = Mat4.identity();
@@ -63276,12 +63284,12 @@ var LiteMol;
                     }
                     return transforms;
                 }
-                function getAssemblyParts(model, residueMask, currentTransforms, state) {
+                function getAssemblyParts(model, residueMask, currentTransforms, state, transformOffset) {
                     var _a = model.data, chains = _a.chains, entities = _a.entities, residues = _a.residues;
                     var residueIndices = state.residueIndices, operatorIndices = state.operatorIndices;
                     var atomCount = 0, chainCount = 0, entityCount = 0;
                     for (var eI = 0, _eC = entities.count; eI < _eC; eI++) {
-                        var opIndex = state.transformsOffset; //0;
+                        var opIndex = transformOffset;
                         var chainAdded = false;
                         for (var _i = 0, currentTransforms_1 = currentTransforms; _i < currentTransforms_1.length; _i++) {
                             var _ = currentTransforms_1[_i];
@@ -63309,21 +63317,14 @@ var LiteMol;
                     state.atomCount += atomCount;
                     state.chainCount += chainCount;
                     state.entityCount += entityCount;
-                    // return {
-                    //     residues: residueIndices.compact(),
-                    //     operators: operatorIndices.compact(),
-                    //     atomCount,
-                    //     chainCount,
-                    //     entityCount
-                    // };
                 }
                 function buildAssemblyEntry(model, entry, state) {
                     var ops = [], currentOp = [];
                     for (var i_2 = 0; i_2 < entry.operators.length; i_2++)
                         currentOp[i_2] = '';
                     createOperators(entry.operators, ops, entry.operators.length - 1, currentOp);
-                    var transforms = getAssemblyTransforms(model, ops);
-                    state.transformsOffset += state.transforms.length;
+                    var transformOffset = state.transforms.length;
+                    var transforms = getAssemblyTransforms(model, ops, state.transforms.length);
                     (_a = state.transforms).push.apply(_a, transforms);
                     var asymIds = Core.Utils.FastSet.create();
                     entry.asymIds.forEach(function (id) { return asymIds.add(id); });
@@ -63333,7 +63334,7 @@ var LiteMol;
                     for (var i = 0; i < residueCount; i++) {
                         mask[i] = asymIds.has(residueAsymIds[i]);
                     }
-                    getAssemblyParts(model, mask, transforms, state);
+                    getAssemblyParts(model, mask, transforms, state, transformOffset);
                     var _a;
                 }
                 SymmetryHelpers.buildAssemblyEntry = buildAssemblyEntry;
@@ -63343,7 +63344,6 @@ var LiteMol;
                         chainCount: 0,
                         entityCount: 0,
                         transforms: [],
-                        transformsOffset: 0,
                         mask: new Int8Array(model.data.residues.count),
                         residueIndices: Core.Utils.ChunkedArray.create(function (s) { return new Int32Array(s); }, model.data.residues.count, 1),
                         operatorIndices: Core.Utils.ChunkedArray.create(function (s) { return new Int32Array(s); }, model.data.residues.count, 1)
@@ -67493,7 +67493,8 @@ var LiteMol;
                     tessalation: 3,
                     atomRadius: function () { return 0.4; },
                     hideBonds: false,
-                    bondRadius: 0.15
+                    bondRadius: 0.15,
+                    customMaxBondLengths: void 0
                 };
                 var Model = (function (_super) {
                     __extends(Model, _super);
@@ -67620,7 +67621,7 @@ var LiteMol;
                         return stickCount;
                     }
                     BallsAndSticksHelper.addPrecomputedBonds = addPrecomputedBonds;
-                    function analyze(molecule, atomIndices) {
+                    function analyze(molecule, atomIndices, params) {
                         var indices, atomCount = 0;
                         indices = atomIndices;
                         atomCount = indices.length;
@@ -67644,6 +67645,9 @@ var LiteMol;
                             };
                         }
                         var tree = LiteMol.Core.Geometry.SubdivisionTree3D.create(indices, function (i, add) { add(cX[i], cY[i], cZ[i]); }), ctx = LiteMol.Core.Geometry.SubdivisionTree3D.createContextRadius(tree, bondLength + 1, false), pA = new Visualization.THREE.Vector3(), pB = new Visualization.THREE.Vector3(), processed = LiteMol.Core.Utils.FastSet.create(), buffer = ctx.buffer;
+                        var maxHbondLength = params.customMaxBondLengths && params.customMaxBondLengths.has('H')
+                            ? params.customMaxBondLengths.get('H')
+                            : 1.15;
                         while (startAtomIndex < atomCount) {
                             var rIndex = atomResidueIndex[indices[startAtomIndex]];
                             endAtomIndex = startAtomIndex;
@@ -67690,7 +67694,7 @@ var LiteMol;
                                             continue;
                                         var altB = altLoc[idx];
                                         if (isHA || isHB) {
-                                            if (len < 1.1 && (!altA || !altB || altA === altB)) {
+                                            if (len <= maxHbondLength && (!altA || !altB || altA === altB)) {
                                                 ChunkedArray.add3(builder, atom, idx, 1);
                                                 stickCount++;
                                             }
@@ -67858,7 +67862,7 @@ var LiteMol;
                         this.state = state;
                         this.model = this.state.model;
                         this.atomIndices = this.state.atomIndices;
-                        this.info = BallsAndSticksHelper.analyze(this.state.model, this.state.atomIndices);
+                        this.info = BallsAndSticksHelper.analyze(this.state.model, this.state.atomIndices, this.state.params);
                         this.bondMapBuilder = new Visualization.Selection.VertexMapBuilder(this.info.residueCount);
                         this.bondBufferSize = this.state.bondTemplateVertexBufferLength * this.info.stickCount;
                         this.bondVertices = new Float32Array(this.bondBufferSize);
@@ -69728,7 +69732,7 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        Bootstrap.VERSION = { number: "1.3.5", date: "April 7 2017" };
+        Bootstrap.VERSION = { number: "1.3.6", date: "April 13 2017" };
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -72338,31 +72342,45 @@ var LiteMol;
                     'Highlight': Vis.Color.fromHex(0xFFFFFF),
                     'Selection': Vis.Color.fromHex(0x968000),
                 });
-                function makeRainbow(model, groups) {
+                function makeRainbow(model, groupsSource, groupId) {
                     var rC = model.data.residues.count;
                     var _a = { r: new Float32Array(rC), g: new Float32Array(rC), b: new Float32Array(rC) }, r = _a.r, g = _a.g, b = _a.b;
-                    var _b = groups(model), count = _b.count, residueStartIndex = _b.residueStartIndex, residueEndIndex = _b.residueEndIndex;
+                    var groups = groupsSource(model);
+                    var count = groups.count, residueStartIndex = groups.residueStartIndex, residueEndIndex = groups.residueEndIndex;
                     var cC = rainbowPalette.length - 1;
                     var color = Vis.Color.fromHex(0);
+                    var strips = LiteMol.Core.Utils.FastMap.create();
                     for (var cI = 0; cI < count; cI++) {
-                        var s = residueStartIndex[cI], e = residueEndIndex[cI], l = e - s, max = l - 1;
-                        if (max <= 1)
-                            max = 1;
+                        var id = groupId(groups, cI);
+                        var l = residueEndIndex[cI] - residueStartIndex[cI];
+                        if (strips.has(id)) {
+                            strips.get(id).count += l;
+                        }
+                        else {
+                            strips.set(id, { index: 0, count: l });
+                        }
+                    }
+                    strips.forEach(function (s) { return s.count = Math.max(s.count - 1, 1); });
+                    for (var cI = 0; cI < count; cI++) {
+                        var s = residueStartIndex[cI], l = residueEndIndex[cI] - s;
+                        var strip = strips.get(groupId(groups, cI));
+                        var max = strip.count;
                         for (var i = 0; i < l; i++) {
-                            var t = cC * i / max;
+                            var t = cC * strip.index / max;
                             var low = Math.floor(t), high = Math.ceil(t);
                             Vis.Color.interpolate(rainbowPalette[low], rainbowPalette[high], t - low, color);
                             r[s + i] = color.r;
                             g[s + i] = color.g;
                             b[s + i] = color.b;
+                            strip.index++;
                         }
                     }
                     return { r: r, g: g, b: b };
                 }
-                function createRainbowProvider(groups) {
+                function createRainbowProvider(groups, groupId) {
                     return function (e, props) {
                         var model = Bootstrap.Utils.Molecule.findModel(e).props.model;
-                        var colors = makeRainbow(model, groups);
+                        var colors = makeRainbow(model, groups, groupId);
                         var mapping = new RainbowMapping(model, colors);
                         return Vis.Theme.createMapping(mapping, props);
                     };
@@ -72399,12 +72417,12 @@ var LiteMol;
                             name: 'Rainbow (Chain)',
                             description: 'Color each chain using rainbow palette.',
                             colors: RainbowBaseColors,
-                            provider: createRainbowProvider(function (m) { return m.data.chains; })
+                            provider: createRainbowProvider(function (m) { return m.data.chains; }, function (t, i) { return t.asymId[i] + " " + t.entityId[i]; })
                         }, {
                             name: 'Rainbow (Entity)',
                             description: 'Color each entity using rainbow palette.',
                             colors: RainbowBaseColors,
-                            provider: createRainbowProvider(function (m) { return m.data.entities; })
+                            provider: createRainbowProvider(function (m) { return m.data.entities; }, function (t, i) { return t.entityId[i]; })
                         }, {
                             name: 'Uniform Color',
                             description: 'Same color everywhere.',
@@ -72451,6 +72469,7 @@ var LiteMol;
                         vdwScaling: 0.22,
                         atomRadius: 0.35,
                         bondRadius: 0.09,
+                        customMaxBondLengths: void 0,
                         detail: 'Automatic'
                     };
                     Default.SurfaceParams = {
@@ -72549,11 +72568,22 @@ var LiteMol;
                     }(parameters.vdwScaling, vdw);
                 }
                 function createBallsAndSticksParams(tessalation, model, parameters) {
+                    var customMaxBondLengths = void 0;
+                    if (parameters.customMaxBondLengths) {
+                        var keys = Object.getOwnPropertyNames(parameters.customMaxBondLengths);
+                        if (keys.length > 0)
+                            customMaxBondLengths = LiteMol.Core.Utils.FastMap.create();
+                        for (var _i = 0, keys_3 = keys; _i < keys_3.length; _i++) {
+                            var key = keys_3[_i];
+                            customMaxBondLengths.set(key, parameters.customMaxBondLengths[key]);
+                        }
+                    }
                     return {
                         tessalation: tessalation,
                         bondRadius: parameters.bondRadius,
                         hideBonds: false,
-                        atomRadius: makeRadiusFunc(model, parameters)
+                        atomRadius: makeRadiusFunc(model, parameters),
+                        customMaxBondLengths: customMaxBondLengths
                     };
                 }
                 function createVDWBallsParams(tessalation, model) {
@@ -73166,6 +73196,19 @@ var LiteMol;
                         }
                         return Bootstrap.Task.resolve('Group', 'Silent', group);
                     });
+                    Basic.Delay = Transformer.create({
+                        id: 'basic-delay',
+                        name: 'Delay',
+                        description: 'A transformer that delays by the specified timeout and does nothing.',
+                        from: [],
+                        to: [Entity.Action],
+                        validateParams: function () { return void 0; },
+                        defaultParams: function () { return ({ timeoutMs: 1000 }); }
+                    }, function (ctx, a, t) {
+                        return Bootstrap.Task.create('Delay', 'Silent', function (ctx) { return new LiteMol.Promise(function (res) {
+                            setTimeout(function () { return res(Bootstrap.Tree.Node.Null); }, t.params.timeoutMs);
+                        }); });
+                    });
                 })(Basic = Transformer_1.Basic || (Transformer_1.Basic = {}));
             })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
         })(Entity = Bootstrap.Entity || (Bootstrap.Entity = {}));
@@ -73411,7 +73454,14 @@ var LiteMol;
                         to: [Entity.Molecule.Model],
                         defaultParams: function (ctx) { return ({ type: 'Interaction', radius: 5.0 }); },
                         isUpdatable: true,
-                        isApplicable: function (m) { return !!(m && m.props.model.data.symmetryInfo); }
+                        isApplicable: function (m) {
+                            if (!m || !m.props.model.data.symmetryInfo)
+                                return false;
+                            var info = m.props.model.data.symmetryInfo;
+                            if (info.cellSize[0] === 1 && info.cellSize[1] === 1 && info.cellSize[2] === 1)
+                                return false;
+                            return true;
+                        }
                     }, function (ctx, a, t) {
                         return Bootstrap.Task.create("Create Model (" + a.props.label + ")", 'Background', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
                             var i, radius, symm;
@@ -73724,7 +73774,7 @@ var LiteMol;
                         from: [Entity.Data.String, Entity.Data.Binary],
                         to: [Entity.Density.Data],
                         isUpdatable: true,
-                        defaultParams: function () { return ({ format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4, normalize: false }); }
+                        defaultParams: function () { return ({ format: LiteMol.Core.Formats.Density.SupportedFormats.CCP4 }); }
                     }, function (bigCtx, a, t) {
                         return Bootstrap.Task.create("Create Density (" + a.props.label + ")", 'Background', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
                             var data, e;
@@ -77558,6 +77608,8 @@ var LiteMol;
                                 controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Atom Rds', onChange: function (v) { return _this.controller.updateStyleParams({ atomRadius: v }); }, min: 0.05, max: 2, step: 0.01, value: p.atomRadius, title: 'Atom Radius' }));
                             }
                             controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Bond Rds', onChange: function (v) { return _this.controller.updateStyleParams({ bondRadius: v }); }, min: 0.05, max: 1, step: 0.01, value: p.bondRadius, title: 'Bond Radius' }));
+                            var maxHbondLength = p.customMaxBondLengths && p.customMaxBondLengths['H'] ? p.customMaxBondLengths['H'] : 1.15;
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'H Bond Len', onChange: function (v) { return _this.controller.updateStyleParams({ customMaxBondLengths: __assign({}, p.customMaxBondLengths, { 'H': v }) }); }, min: 0.9, max: 1.5, step: 0.01, value: maxHbondLength, title: 'Maximum H bond length' }));
                             controls.push(Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' }));
                             return controls;
                         };
@@ -78692,7 +78744,7 @@ var LiteMol;
                 sourceId: 'url-molecule',
                 name: 'URL',
                 description: 'Download a molecule from the specified URL (if the host server supports cross domain requests).',
-                defaultId: 'https://webchemdev.ncbr.muni.cz/CoordinateServer/1tqn/cartoon',
+                defaultId: 'https://webchem.ncbr.muni.cz/CoordinateServer/1tqn/cartoon',
                 urlTemplate: function (id) { return id; },
                 isFullUrl: true
             });
@@ -78704,7 +78756,7 @@ var LiteMol;
                     'molecule.model.defaultQuery': "residues({ name: 'ALA' })",
                     'molecule.model.defaultAssemblyName': '1',
                     'molecule.coordinateStreaming.defaultId': '1jj2',
-                    'molecule.coordinateStreaming.defaultServer': 'https://webchemdev.ncbr.muni.cz/CoordinateServer',
+                    'molecule.coordinateStreaming.defaultServer': 'https://webchem.ncbr.muni.cz/CoordinateServer',
                     'molecule.coordinateStreaming.defaultRadius': 10,
                     'density.defaultVisualBehaviourRadius': 5
                 },
@@ -78777,27 +78829,12 @@ var LiteMol;
         var Entity = LiteMol.Bootstrap.Entity;
         var Transformer = Entity.Transformer;
         var Controller = (function () {
-            function Controller(options) {
-                var spec = options.customSpecification ? options.customSpecification : Plugin.getDefaultSpecification();
-                if (!options.customSpecification) {
-                    spec.behaviours.push(LiteMol.Bootstrap.Behaviour.GoogleAnalytics(options.analyticsId ? options.analyticsId : 'UA-77062725-1'));
-                }
-                var target;
-                if (options.target instanceof HTMLElement) {
-                    target = options.target;
+            function Controller(optionsOrInstance) {
+                if (optionsOrInstance.getTransformerInfo) {
+                    this.ofInstace(optionsOrInstance);
                 }
                 else {
-                    target = document.querySelector(options.target);
-                }
-                if (!target) {
-                    throw new Error("options.target cannot be undefined.");
-                }
-                this._instance = new Plugin.Instance(spec, target);
-                if (options.viewportBackground) {
-                    this.setViewportBackground(options.viewportBackground);
-                }
-                if (options.layoutState) {
-                    this.setLayoutState(options.layoutState);
+                    this.ofOptions(optionsOrInstance);
                 }
             }
             Object.defineProperty(Controller.prototype, "instance", {
@@ -78928,6 +78965,32 @@ var LiteMol;
                     return;
                 this._instance.destroy();
                 this._instance = void 0;
+            };
+            Controller.prototype.ofOptions = function (options) {
+                var spec = options.customSpecification ? options.customSpecification : Plugin.getDefaultSpecification();
+                if (!options.customSpecification) {
+                    spec.behaviours.push(LiteMol.Bootstrap.Behaviour.GoogleAnalytics(options.analyticsId ? options.analyticsId : 'UA-77062725-1'));
+                }
+                var target;
+                if (options.target instanceof HTMLElement) {
+                    target = options.target;
+                }
+                else {
+                    target = document.querySelector(options.target);
+                }
+                if (!target) {
+                    throw new Error("options.target cannot be undefined.");
+                }
+                this._instance = new Plugin.Instance(spec, target);
+                if (options.viewportBackground) {
+                    this.setViewportBackground(options.viewportBackground);
+                }
+                if (options.layoutState) {
+                    this.setLayoutState(options.layoutState);
+                }
+            };
+            Controller.prototype.ofInstace = function (instance) {
+                this._instance = instance;
             };
             return Controller;
         }());

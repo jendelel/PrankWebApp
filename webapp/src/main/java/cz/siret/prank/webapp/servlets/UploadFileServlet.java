@@ -56,7 +56,7 @@ public class UploadFileServlet extends HttpServlet {
                         dateTimeFormatter.format(LocalDateTime.now())), ".pdb.gz", uploadsFolder);
                 try (GZIPOutputStream outputStream = new GZIPOutputStream(
                         new FileOutputStream(tempFile, false))) {
-                    Utils.copyStream(fileContent, outputStream);
+                    Utils.INSTANCE.copyStream(fileContent, outputStream);
                     fileContent.close();
                     outputStream.close();
                 }
@@ -67,7 +67,7 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         try {
-            JobRunner.INSTANCE.runPrediction(tempFile, doConservation);
+            JobRunner.INSTANCE.runPrediction(tempFile, null, doConservation);
             request.setAttribute("upload", tempFile.getName());
             response.getWriter().write("/analyze/upload/" + removeExtension(tempFile.getName()));
             response.getWriter().close();

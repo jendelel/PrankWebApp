@@ -45,7 +45,7 @@
                     class="icon-bar"></span></button>
             <!-- navbar-brand is hidden on larger screens, but visible when the menu is collapsed-->
             <a href="${pageContext.request.contextPath}/"
-               class="navbar-brand text-capitalize">Prank</a>
+               class="navbar-brand text-capitalize">PrankWeb</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling-->
         <div id="bs-example-navbar-collapse-1" class="collapse navbar-collapse">

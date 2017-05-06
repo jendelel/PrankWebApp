@@ -5,7 +5,7 @@
 .app {
     position: fixed;
     top: 52px; /* (navbar) */
-    bottom: 28px;
+    bottom: 0px;
     right: 300px;
     left: 0px;
 }
@@ -13,7 +13,7 @@
 .pocket-list {
     position: fixed;
     top: 52px; /* (navbar) */
-    bottom: 28px;
+    bottom: 0px;
     right: 0;
     width: 300px;
     padding: 15px;
@@ -27,6 +27,11 @@
 
 .lm-plugin .lm-layout-top {
     overflow-y: hidden;
+}
+
+.control-buttons {
+    margin: 0 auto;
+    text-align: center;
 }
 
 .pocket {
@@ -67,13 +72,34 @@
     margin: 5px 0px 3px 0px;
 }
 
+.control-buttons .control-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid;
+    background-color: transparent;
+    color: #9c835f;
+    font-weight: normal;
+    border-radius: 10px;
+    padding: 0px;
+    cursor: pointer;
+    line-height: 32px !important;
+    font-family: "fontello";
+    margin: 5px 5px 3px 5px;
+}
+
 .pocket .pocket-btn:hover {
     color: #ae5d04;
     text-decoration: none;
 }
 
-.pocket .icon-hidden {
-    color: #dcd4c6
+.control-buttons .control-btn:hover {
+    color: #ae5d04;
+    text-decoration: none;
+}
+
+.control-btn:hover {
+    color: #ae5d04;
+    text-decoration: none;
 }
 
 .pocket .focus-icon:before {
@@ -83,5 +109,22 @@
     content: '\e826'; /*Eye icon*/
 }
 .pocket .pocket-icon {
+   font-size: 100%;
+}
+
+.download-icon:before {
+    content: '\e82d'; /*Download icon*/
+}
+.seq-icon:before {
+    content: '\e86d'; /*Sequence icon*/
+}
+.mail-icon:before {
+    content: '\e805'; /*Mail icon*/
+}
+.clipboard-icon:before {
+    content: '\e8d1'; /*Clipboard icon*/
+}
+
+.pocket .button-icon {
    font-size: 100%;
 }

@@ -1,3 +1,103 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var LiteMol;
+(function (LiteMol) {
+    var PrankWeb;
+    (function (PrankWeb) {
+        var Bootstrap = LiteMol.Bootstrap;
+        var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
+        var ControlButtons = (function (_super) {
+            __extends(ControlButtons, _super);
+            function ControlButtons() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            // http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+            ControlButtons.prototype.copyTextToClipboard = function (text) {
+                var textArea = document.createElement("textarea");
+                //
+                // *** This styling is an extra step which is likely not required. ***
+                //
+                // Why is it here? To ensure:
+                // 1. the element is able to have focus and selection.
+                // 2. if element was to flash render it has minimal visual impact.
+                // 3. less flakyness with selection and copying which **might** occur if
+                //    the textarea element is not visible.
+                //
+                // The likelihood is the element won't even render, not even a flash,
+                // so some of these are just precautions. However in IE the element
+                // is visible whilst the popup box asking the user for permission for
+                // the web page to copy to the clipboard.
+                //
+                // Place in top-left corner of screen regardless of scroll position.
+                textArea.style.position = 'fixed';
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                // Ensure it has a small width and height. Setting to 1px / 1em
+                // doesn't work as this gives a negative w/h on some browsers.
+                textArea.style.width = '2em';
+                textArea.style.height = '2em';
+                // We don't need padding, reducing the size if it does flash render.
+                textArea.style.padding = "0";
+                // Clean up any borders.
+                textArea.style.border = 'none';
+                textArea.style.outline = 'none';
+                textArea.style.boxShadow = 'none';
+                // Avoid flash of white box if rendered for any reason.
+                textArea.style.background = 'transparent';
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    var successful = document.execCommand('copy');
+                    var msg = successful ? 'successful' : 'unsuccessful';
+                    console.log('Copying text command was ' + msg);
+                }
+                catch (err) {
+                    console.log('Oops, unable to copy');
+                }
+                document.body.removeChild(textArea);
+            };
+            ControlButtons.prototype.toggleSequenceView = function () {
+                var regionStates = this.props.plugin.context.layout.latestState.regionStates;
+                if (!regionStates)
+                    return;
+                var regionState = regionStates[Bootstrap.Components.LayoutRegion.Top];
+                this.props.plugin.command(Bootstrap.Command.Layout.SetState, {
+                    regionStates: (_a = {},
+                        _a[Bootstrap.Components.LayoutRegion.Top] = regionState == 'Sticky' ? 'Hidden' : 'Sticky',
+                        _a)
+                });
+                var _a;
+            };
+            ControlButtons.prototype.render = function () {
+                var _this = this;
+                var type = this.props.inputType == "pdb" ? "id" : "upload";
+                var downloadUrl = "/api/" + type + "/all/" + this.props.inputId;
+                var mail = "mailto:?subject=PrankWeb".concat(encodeURIComponent(" - " + window.location.href));
+                return (React.createElement("div", { className: "control-buttons" },
+                    React.createElement("h2", { className: "text-center" }, "Tools"),
+                    React.createElement("button", { className: "control-btn", title: "Download report", onClick: function () { window.location.href = downloadUrl; } },
+                        React.createElement("span", { className: "button-icon download-icon" })),
+                    React.createElement("button", { className: "control-btn", title: "Send via e-mail", onClick: function () { window.open(mail, '_blank'); } },
+                        React.createElement("span", { className: "button-icon mail-icon" })),
+                    React.createElement("button", { className: "control-btn", title: "Copy URL to clipboard", onClick: function () { _this.copyTextToClipboard(window.location.href); } },
+                        React.createElement("span", { className: "button-icon clipboard-icon" })),
+                    React.createElement("button", { className: "control-btn", title: "Toogle sequence view", onClick: function () { _this.toggleSequenceView(); } },
+                        React.createElement("span", { className: "button-icon seq-icon" }))));
+            };
+            return ControlButtons;
+        }(React.Component));
+        PrankWeb.ControlButtons = ControlButtons;
+    })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
+})(LiteMol || (LiteMol = {}));
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,8 +107,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -116,16 +216,6 @@ var LiteMol;
         });
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
@@ -141,8 +231,8 @@ var LiteMol;
             }
             return CacheItem;
         }());
-        var Feature = (function () {
-            function Feature(regionType, color, start, end, label, properties) {
+        var ProtaelFeature = (function () {
+            function ProtaelFeature(regionType, color, start, end, label, properties) {
                 this.regionType = regionType;
                 this.color = color;
                 this.start = start;
@@ -150,15 +240,29 @@ var LiteMol;
                 this.label = label;
                 this.properties = properties;
             }
-            return Feature;
+            return ProtaelFeature;
+        }());
+        var ProtaelRegion = (function () {
+            function ProtaelRegion(label, start, end) {
+                this.color = "#DDD";
+                this.regionType = "Chain";
+                this.label = label;
+                this.start = start;
+                this.end = end;
+            }
+            return ProtaelRegion;
         }());
         var ProtaelContent = (function () {
-            function ProtaelContent(seq, pocketFeatures, conservationScores) {
+            function ProtaelContent(seq, pocketFeatures, chains, conservationScores, bindingSites) {
                 this.qtracks = [];
                 this.sequence = seq;
                 this.ftracks = [{ label: "Pockets", color: "blue", showLine: false, allowOverlap: false, features: pocketFeatures }];
-                if (conservationScores != null && conservationScores.length >= 0) {
+                this.overlayfeatures = { label: "Chains", features: chains };
+                if (conservationScores != null && conservationScores.length > 0) {
                     this.qtracks = [{ label: "Evolutionary conservation", color: "gray", type: "column", values: conservationScores }];
+                }
+                if (bindingSites != null && bindingSites.length > 0) {
+                    this.ftracks.push({ label: "Binding sites", color: "purple", showLine: false, allowOverlap: false, features: bindingSites });
                 }
             }
             return ProtaelContent;
@@ -175,7 +279,7 @@ var LiteMol;
                 var result = this.getCacheItem(cacheId, model);
                 if (!result) {
                     var pdbResIndex = this.controller.latestState.seq.indices[seqIndex];
-                    result = this.setCacheItem(cacheId, LiteMol.Core.Structure.Query.residuesById(pdbResIndex), model);
+                    result = this.setCacheItem(cacheId, PrankWeb.DataLoader.residuesBySeqNums(pdbResIndex), model);
                 }
                 return result;
             };
@@ -202,6 +306,26 @@ var LiteMol;
                     return void 0;
                 return item;
             };
+            SequenceView.prototype.indicesToSequenceSegments = function (sortedIndices) {
+                var result = [];
+                // Transform indices to sequential indices and then sort them
+                var lastStart = -1;
+                var lastResNum = -1;
+                sortedIndices.forEach(function (resNum, y) {
+                    if (y == 0) {
+                        lastStart = resNum;
+                    }
+                    else {
+                        if (lastResNum + 1 < resNum) {
+                            result.push({ start: lastStart, end: lastResNum });
+                            lastStart = resNum;
+                        }
+                    }
+                    lastResNum = resNum;
+                });
+                result.push({ start: lastStart, end: lastResNum });
+                return result;
+            };
             SequenceView.prototype.addPocketFeatures = function (features) {
                 var _this = this;
                 this.indexMap = LiteMol.Core.Utils.FastMap.create();
@@ -214,34 +338,55 @@ var LiteMol;
                 pockets.forEach(function (pocket, i) {
                     if (!pocketVisibility[i])
                         return; // Skip over invisible pockets.
-                    // Transform indices to sequential indices and then sort them
                     var sortedIndices = pocket.residueIds.map(function (index) { return _this.indexMap.get(index); })
                         .sort(function (a, b) { return (a - b); });
-                    var lastStart = -1;
-                    var lastResNum = -1;
-                    sortedIndices.forEach(function (resNum, y) {
-                        if (y == 0) {
-                            lastStart = resNum;
-                        }
-                        else {
-                            if (lastResNum + 1 < resNum) {
-                                var c_1 = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
-                                features.push(new Feature("Pockets", "rgb(" + c_1.r * 255 + ", " + c_1.g * 255 + ", " + c_1.b * 255 + ")", lastStart, lastResNum, pocket.rank.toString(), { "Pocket name": pocket.name }));
-                                lastStart = resNum;
-                            }
-                        }
-                        lastResNum = resNum;
-                    });
-                    var c = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
-                    features.push(new Feature("Pockets", "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")", lastStart, lastResNum, pocket.rank.toString(), { "Pocket name": pocket.name }));
+                    var segments = _this.indicesToSequenceSegments(sortedIndices);
+                    for (var _i = 0, segments_1 = segments; _i < segments_1.length; _i++) {
+                        var s = segments_1[_i];
+                        var c = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
+                        features.push(new ProtaelFeature("Pockets", "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")", s.start, s.end, pocket.rank.toString(), { "Pocket name": pocket.name }));
+                    }
                 });
+            };
+            SequenceView.prototype.getBindingSites = function () {
+                var result = [];
+                var sites = this.controller.latestState.seq.bindingSites;
+                if (sites && sites.length > 0) {
+                    var sortedIndices = sites.sort(function (a, b) { return (a - b); });
+                    var segments = this.indicesToSequenceSegments(sortedIndices);
+                    for (var _i = 0, segments_2 = segments; _i < segments_2.length; _i++) {
+                        var s = segments_2[_i];
+                        result.push(new ProtaelFeature("Binding site", "purple", s.start, s.end, "", void 0));
+                    }
+                }
+                return result;
+            };
+            SequenceView.prototype.getChainRegions = function () {
+                var result = [];
+                this.controller.latestState.seq.regions.forEach(function (region, i) {
+                    result.push(new ProtaelRegion("Chain " + region.regionName, region.start + 1, region.end + 1));
+                });
+                return result;
             };
             SequenceView.prototype.componentDidMount = function () {
                 var _this = this;
-                this.subscribe(this.controller.state, function (state) {
+                this.subscriptionHandle = this.subscribe(this.controller.state, function (state) {
                     _this.updateProtael();
                 });
                 this.updateProtael();
+            };
+            SequenceView.prototype.componentWillUnmount = function () {
+                this.unsubscribe(this.subscriptionHandle);
+                if (this.protaelView) {
+                    try {
+                        var el = document.getElementsByClassName("protael_resizable").item(0);
+                        el.parentNode.removeChild(el);
+                    }
+                    catch (err) {
+                        console.log("Unable to remove Protael, " + err);
+                    }
+                }
+                this.fixProtaelHeight(true);
             };
             SequenceView.prototype.componentDidUpdate = function () {
                 this.updateProtael();
@@ -253,7 +398,9 @@ var LiteMol;
                     return void 0; // Sequence isn't loaded yet.
                 var features = [];
                 this.addPocketFeatures(features); // Add pocket features.
-                return new ProtaelContent(seq.seq.join(""), features, seq.scores);
+                var chainRegions = this.getChainRegions();
+                var bindingSites = this.getBindingSites();
+                return new ProtaelContent(seq.seq.join(""), features, chainRegions, seq.scores, bindingSites);
             };
             SequenceView.prototype.updateProtael = function () {
                 var _this = this;
@@ -281,6 +428,7 @@ var LiteMol;
                     var seqNum = _this.protaelView.toOriginalX(e.offsetX);
                     _this.onLetterMouseEnter(seqNum);
                 });
+                this.fixProtaelHeight();
                 // pViz.FeatureDisplayer.mouseoverCallBacks = {};
                 // pViz.FeatureDisplayer.mouseoutCallBacks = {};
                 // Add mouse callbacks.
@@ -294,6 +442,33 @@ var LiteMol;
                     this.lastMouseOverFeature = void 0;
                 });
                 */
+            };
+            SequenceView.prototype.forEachNodeInSelector = function (elemets, fnc) {
+                for (var i = 0; i < elemets.length; i++) {
+                    var el = elemets.item(i);
+                    if (!el)
+                        continue;
+                    fnc(el, i);
+                }
+            };
+            SequenceView.prototype.fixProtaelHeight = function (clear) {
+                if (clear === void 0) { clear = false; }
+                var protael = document.getElementById('seqView');
+                if (!protael && !clear)
+                    return;
+                var height = !clear ? protael.scrollHeight.toString().concat("px") : null;
+                var minusHeight = !clear ? "-".concat(protael.scrollHeight.toString().concat("px")) : null;
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-outside .lm-layout-top"), function (el) { el.style.height = height; el.style.top = minusHeight; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-outside .lm-layout-bottom"), function (el) { el.style.height = height; el.style.top = minusHeight; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-landscape .lm-layout-main"), function (el) { el.style.top = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-landscape .lm-layout-top"), function (el) { el.style.height = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-portrait .lm-layout-main"), function (el) { el.style.top = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-portrait .lm-layout-top"), function (el) { el.style.height = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-standard-portrait .lm-layout-bottom"), function (el) { el.style.height = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-expanded .lm-layout-main"), function (el) { el.style.top = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-expanded .lm-layout-top"), function (el) { el.style.height = height; });
+                this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-expanded .lm-layout-bottom"), function (el) { el.style.height = height; });
+                this.controller.context.scene.scene.resized();
             };
             SequenceView.prototype.onLetterMouseEnter = function (seqNumber) {
                 if (!seqNumber && seqNumber != 0)
@@ -374,8 +549,9 @@ var LiteMol;
                 Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
             };
             SequenceView.prototype.render = function () {
+                var _this = this;
                 var seqId = -1;
-                return React.createElement("div", { id: "seqView", className: "noselect" /*onMouseLeave={() => { this.onLetterMouseEnter(void 0); }}*/ });
+                return React.createElement("div", { id: "seqView", className: "noselect", onMouseLeave: function () { _this.onLetterMouseEnter(void 0); } });
             };
             return SequenceView;
         }(Views.View));
@@ -383,7 +559,7 @@ var LiteMol;
         var SequenceController = (function (_super) {
             __extends(SequenceController, _super);
             function SequenceController(context) {
-                var _this = _super.call(this, context, { seq: { indices: [], seq: [], scores: [] }, pockets: [], pocketVisibility: [], version: 0 }) || this;
+                var _this = _super.call(this, context, { seq: { indices: [], seq: [], scores: [], bindingSites: [], regions: [] }, pockets: [], pocketVisibility: [], version: 0 }) || this;
                 Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(function (e) {
                     if (e.data.type === PrankWeb.SequenceEntity) {
                         _this.setState({ seq: e.data.props.seq });
@@ -616,6 +792,26 @@ var LiteMol;
             var Bootstrap = LiteMol.Bootstrap;
             var Transformer = Bootstrap.Entity.Transformer;
             var Query = LiteMol.Core.Structure.Query;
+            function residuesBySeqNums() {
+                var seqNums = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    seqNums[_i] = arguments[_i];
+                }
+                return Query.residues.apply(Query, seqNums.map(function (seqNum) {
+                    var num = 0;
+                    var insCode = null;
+                    var parsedNum = seqNum.match(/^[0-9]*/);
+                    var parsedInsCode = seqNum.match(/[A-Z]+$/);
+                    if (parsedNum != null && parsedNum.length > 0) {
+                        num = parseInt(parsedNum[0]);
+                    }
+                    if (parsedInsCode != null && parsedInsCode.length > 0) {
+                        insCode = parsedInsCode[0];
+                    }
+                    return { authSeqNumber: num, insCode: insCode };
+                }));
+            }
+            DataLoader.residuesBySeqNums = residuesBySeqNums;
             function initColorMapping(model, prediction, sequence) {
                 var atomColorMapConservation = new Uint8Array(model.props.model.data.atoms.count);
                 var atomColorMap = new Uint8Array(model.props.model.data.atoms.count);
@@ -625,7 +821,7 @@ var LiteMol;
                 if (seqScores != null) {
                     seqIndices.forEach(function (seqIndex, i) {
                         var shade = Math.round((1 - seqScores[i]) * 10); // Shade within [0,10]
-                        var query = Query.residuesById(seqIndex).compile();
+                        var query = residuesBySeqNums(seqIndex).compile();
                         for (var _i = 0, _a = query(model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                             var atom = _a[_i];
                             atomColorMap[atom] = shade + PrankWeb.Colors.size + 1; // First there is fallbackColor(0), then pocketColors(1-9) and lastly conservation colors.
@@ -843,8 +1039,11 @@ var LiteMol;
                 App.prototype.render = function () {
                     var _this = this;
                     if (this.state.data) {
-                        // Data available, display pocket list.
-                        return React.createElement(PrankWeb.PocketList, { data: this.state.data, plugin: this.props.plugin });
+                        // Data available, display controls and pocket list.
+                        var controls = [];
+                        controls.push(React.createElement(PrankWeb.ControlButtons, { plugin: this.props.plugin, inputId: this.props.inputId, inputType: this.props.inputType }));
+                        controls.push(React.createElement(PrankWeb.PocketList, { data: this.state.data, plugin: this.props.plugin }));
+                        return React.createElement("div", null, controls);
                     }
                     else {
                         var controls = [];

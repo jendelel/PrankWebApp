@@ -47,29 +47,34 @@ task('deploy', dependsOn: 'war', type:Exec) {
 dependencies {
     compile project(':pranklib')
 
-    compile group: 'org.biojava', name: 'biojava-core', version: '4.2.4'
-    compile group: 'org.biojava', name: 'biojava-structure', version: '4.2.4'
+    compile group: 'org.biojava', name: 'biojava-core', version: '4.2.6'
+    // compile 'org.biojava:biojava-structure:4.2.6-rdk1'
     compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.1'
     compile 'commons-beanutils:commons-beanutils:1.9.3'
     compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
     compile group: 'javax', name: 'javaee-api', version: '7.0'
 
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    // Pranklib dependencies
+    compile group: 'com.univocity', name: 'univocity-parsers', version: '2.4.0' // For parsing csv
+    compile group: 'org.apache.commons', name: 'commons-compress', version: '1.13' // bz2 decompress
 
     //Prank dependencies begin
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile 'org.codehaus.groovy:groovy-all:2.4.9'
     compile 'org.codehaus.gpars:gpars:1.2.1'
-    compile "org.apache.commons:commons-lang3:3.4"
-    compile "com.google.guava:guava:19.0"
+    compile "org.apache.commons:commons-lang3:3.5"
+    compile "commons-io:commons-io:2.5"
+    compile "com.google.guava:guava:21.0"
+    compile 'org.zeroturnaround:zt-zip:1.11'
 
     compile 'org.slf4j:slf4j-api:1.7.21'
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
 
-    compile 'org.biojava:biojava-alignment:4.2.4'
+    compile 'org.biojava:biojava-alignment:4.2.6'
 
     compile 'org.openscience.cdk:cdk-qsarmolecular:1.5.13'    // for NumericalSurface class
     compile 'org.openscience.cdk:cdk-data:1.5.13'             // for Atom class
     compile 'nz.ac.waikato.cms.weka:weka-dev:3.9.0'
+    compile files('libs/biojava-structure-4.2.6-rdk1.jar')     // customized fork for pocket-rank
     compile fileTree(dir: 'libs', include: '*.jar')
     // Prank dependencies end
     

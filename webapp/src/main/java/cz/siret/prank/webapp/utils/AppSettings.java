@@ -3,13 +3,10 @@ package cz.siret.prank.webapp.utils;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cz.siret.prank.lib.PrankUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -65,8 +62,28 @@ public enum AppSettings {
         return path.toAbsolutePath().toString();
     }
 
+    public String getHsspDir() {
+        String value = config.getString("database.hssp");
+        Path path = dataDir.resolve(value);
+        return path.toAbsolutePath().toString();
+    }
+
+    public String getMsaToConservationScriptPath() {
+        String value = config.getString("script.msaToConservation", null);
+        if (value == null) return null;
+        Path path = dataDir.resolve(value);
+        return path.toAbsolutePath().toString();
+    }
+
+    public String getHsspToFastaScriptPath() {
+        String value = config.getString("script.hsspToFasta", null);
+        if (value == null) return null;
+        Path path = dataDir.resolve(value);
+        return path.toAbsolutePath().toString();
+    }
+
     public String getConservationScriptPath() {
-        String value = config.getString("conservation.script", null);
+        String value = config.getString("script.conservation", null);
         if (value == null) return null;
         Path path = dataDir.resolve(value);
         return path.toAbsolutePath().toString();

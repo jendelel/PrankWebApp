@@ -1,8 +1,6 @@
 package cz.siret.prank.webapp.rest;
 
-import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.io.PDBFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -25,11 +22,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import cz.siret.prank.lib.ConservationScore;
 import cz.siret.prank.lib.Pocket;
 import cz.siret.prank.lib.Sequence;
+import cz.siret.prank.lib.utils.BioUtils;
 import cz.siret.prank.lib.utils.Utils;
-import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.DataGetter;
+import cz.siret.prank.webapp.utils.PrankUtils;
 
 @ApplicationPath("/api")
 @javax.ws.rs.Path("/{type}/")
@@ -44,8 +43,8 @@ public class RestAPI extends Application {
                                          @PathParam("id") String id) {
         return outputStream -> {
             Path path = (new DataGetter(inputType, id)).pdbFile();
-            try (InputStream in = Utils.readFile(path.toFile())) {
-                Utils.copyStream(in, outputStream);
+            try (InputStream in = Utils.INSTANCE.readFile(path.toFile())) {
+                Utils.INSTANCE.copyStream(in, outputStream);
             }
             outputStream.close();
         };
@@ -57,41 +56,12 @@ public class RestAPI extends Application {
     @javax.ws.rs.Path("/seq/{id}")
     public Sequence streamSequence(@PathParam("type") String inputType,
                                    @PathParam("id") String id) throws IOException {
-        Path conservPath;
-        if (inputType.equals("id")) {
-            conservPath = Paths.get(AppSettings.INSTANCE.getCsvDataPath(),
-                    String.format("pdb%s.ent.gz.hom.gz", id));
-        } else {
-            conservPath = Paths.get(AppSettings.INSTANCE.getPredictionDir(),
-                    String.format("%s.hom.gz", id));
-        }
-
-        PDBFileReader pdbReader = new PDBFileReader();
-        Structure structure;
-        Path path = (new DataGetter(inputType, id)).pdbFile();
-        try (InputStream fis = Utils.readFile(path.toFile())) {
-            try {
-                structure = pdbReader.getStructure(fis);
-                Chain chain = structure.getChains().get(0);
-                Sequence res = Sequence.fromChain(chain);
-
-                File conservationFile = new File(conservPath.toAbsolutePath().toString());
-                if (conservationFile.exists()) {
-                    try (InputStream inputStream = Utils.readFile(conservationFile)) {
-                        String conservation = Utils.convertStreamToString(inputStream);
-                        String[] scores = conservation.split(",");
-                        res.setScores(Arrays.stream(scores)
-                                .mapToDouble((String s) -> Double.parseDouble(s))
-                                .toArray());
-                    }
-                }
-                return res;
-
-            } catch (IOException e) {
-                logger.error("Cannot load pdb file.", e);
-            }
-        }
-        return null;
+        DataGetter data = new DataGetter(inputType, id);
+        Path path = data.pdbFile();
+        Structure structure = BioUtils.INSTANCE.loadPdbFile(path.toFile());
+        Map<String, File> scoresFiles = data.conservationFiles();
+        ConservationScore scores = ConservationScore.fromFiles(structure, scoresFiles::get);
+        return Sequence.fromStructure(structure, scores, PrankUtils.getBindingSites(path.toFile()));
     }
 
     @GET
@@ -101,7 +71,7 @@ public class RestAPI extends Application {
                                       @PathParam("id") String id) {
         Path path = (new DataGetter(inputType, id)).csvFile();
         try {
-            try (InputStream in = Utils.readFile(path.toFile())) {
+            try (InputStream in = Utils.INSTANCE.readFile(path.toFile())) {
                 return Pocket.parseCSVPrediction(in);
             }
         } catch (IOException e) {
@@ -113,8 +83,8 @@ public class RestAPI extends Application {
     private void addFile(ZipOutputStream zipStream, File f, String fileName) throws IOException {
         if (f.exists()) {
             zipStream.putNextEntry(new ZipEntry(fileName));
-            try (InputStream inputStream = Utils.readFile(f)) {
-                Utils.copyStream(inputStream, zipStream);
+            try (InputStream inputStream = Utils.INSTANCE.readFile(f)) {
+                Utils.INSTANCE.copyStream(inputStream, zipStream);
             }
             zipStream.closeEntry();
         }
@@ -139,13 +109,17 @@ public class RestAPI extends Application {
             // P2Rank prediction file.
             addFile(zip, data.csvFile().toFile(), "predictions_" + id + ".csv");
             // Conservation files
-            for (final Path f : data.conservationFiles()) {
-                addFile(zip, f.toFile(), "cs_" + removeGzipExt(f.toString()));
+            for (final Map.Entry<String,File> e  : data.conservationFiles().entrySet()) {
+                addFile(zip, e.getValue(), "cs_".concat(e.getKey()).concat(".hom"));
             }
-            // TODO: MSA file
+            // MSA files
+            for (final Map.Entry<String, File> e : data.msaFiles().entrySet()) {
+                addFile(zip, e.getValue(), "cs_".concat(e.getKey()).concat(".fasta"));
+            }
+            // PyMol visualization
+            Utils.INSTANCE.packZipArchive(zip, data.visualizationZip().toFile(), "visualization");
 
-            // TODO: PyMol visualization
-
+            zip.close();
         }).header("Content-Disposition", "attachment; filename=\"prankweb_" + id + ".zip\"")
                 .build();
     }

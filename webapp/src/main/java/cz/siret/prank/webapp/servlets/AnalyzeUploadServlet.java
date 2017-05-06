@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cz.siret.prank.webapp.utils.AppSettings;
+import cz.siret.prank.webapp.utils.DataGetter;
 
 @WebServlet(name = "AnalyzeUploadServlet", urlPatterns = "/analyze/upload/*")
 public class AnalyzeUploadServlet extends HttpServlet {
@@ -26,24 +27,23 @@ public class AnalyzeUploadServlet extends HttpServlet {
             ServletException, IOException {
         String urlSuffix = req.getPathInfo();
         if (urlSuffix != null && urlSuffix.charAt(0) == '/') {
-            String fileName = urlSuffix.substring(1) + ".pdb.gz";
+            String inputId = urlSuffix.substring(1);
 
-            File pdbFile = new File(Paths.get(AppSettings.INSTANCE.getUploadsDir(), fileName)
-                    .toAbsolutePath().toString());
+            DataGetter data = new DataGetter("upload", inputId);
+            File pdbFile = data.pdbFile().toFile();
             if (!pdbFile.exists()) {
                 // File has been already deleted during clean-up
-                req.setAttribute("inputId", fileName);
+                req.setAttribute("inputId", inputId);
                 RequestDispatcher rd = getServletContext()
                         .getRequestDispatcher("/views/deleted.jsp");
                 rd.forward(req, resp);
                 return;
             }
 
-            File csvFile = new File(Paths.get(AppSettings.INSTANCE.getPredictionDir(),
-                    fileName + "_predictions.csv").toAbsolutePath().toString());
+            File csvFile = data.csvFile().toFile();
             if (!csvFile.exists()) {
                 // The analysis has not completed yet!
-                req.setAttribute("inputId", fileName);
+                req.setAttribute("inputId", inputId);
                 RequestDispatcher rd = getServletContext()
                         .getRequestDispatcher("/views/in_progress.jsp");
                 rd.forward(req, resp);
@@ -51,7 +51,7 @@ public class AnalyzeUploadServlet extends HttpServlet {
             }
 
             req.setAttribute("inputType", "upload");
-            req.setAttribute("inputId", fileName);
+            req.setAttribute("inputId", inputId);
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/visualize.jsp");
             rd.forward(req, resp);
         } else {
