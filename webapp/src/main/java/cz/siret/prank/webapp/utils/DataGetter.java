@@ -63,7 +63,6 @@ public class DataGetter {
                 return Arrays.stream(files).collect(Collectors.toMap((File file) -> {
                     String fileName = file.getName();
                     String baseName = fileName.replaceFirst("(\\.fasta\\.gz|\\.hom\\.gz)$", "");
-                    logger.info(baseName);
                     return baseName.substring(baseName.length() - 1, baseName.length());
                 }, Function.identity()));
             } catch (Exception e) {
@@ -86,9 +85,9 @@ public class DataGetter {
     public Path visualizationZip() {
         Path predictionDir;
         if (inputType.equals("id")) {
-            predictionDir = Paths.get(AppSettings.INSTANCE.getCsvDataPath());
+            predictionDir = Paths.get(AppSettings.INSTANCE.getCsvDataPath(), "visualizations");
         } else {
-            predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
+            predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir(), "visualizations");
         }
         String pdbFileName = pdbFile().getFileName().toString();
         return predictionDir.resolve(pdbFileName.concat("_visualization.zip"));
