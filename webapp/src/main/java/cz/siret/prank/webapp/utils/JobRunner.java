@@ -52,6 +52,7 @@ public enum JobRunner {
             pdbId = protein.getPDBCode();
         }
         if (pdbId != null && !pdbId.trim().isEmpty()) {
+            logger.info("PDB known: {}, trying to get conservation from HSSP.", pdbId);
             result = externalTools.getConsevationAndMSAsFromHSSP(pdbId, protein);
         }
         if (result.size() == 0) {
