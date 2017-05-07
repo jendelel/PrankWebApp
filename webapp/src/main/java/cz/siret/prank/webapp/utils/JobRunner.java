@@ -40,6 +40,7 @@ public enum JobRunner {
                 TimeUnit.SECONDS, new ArrayBlockingQueue<>(queueSize));
         prankPredictor = PrankFacade.createPredictor(
                 Paths.get(AppSettings.INSTANCE.getPrankPath()));
+        prankPredictor.getParams().setZip_visualizations(true);
         externalTools = new ExternalTools(AppSettings.INSTANCE.getHsspToFastaScriptPath(),
                 AppSettings.INSTANCE.getMsaToConservationScriptPath(),
                 AppSettings.INSTANCE.getHsspDir());
