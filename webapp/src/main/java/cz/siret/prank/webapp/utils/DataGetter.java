@@ -90,7 +90,8 @@ public class DataGetter {
         } else {
             predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
         }
-        return predictionDir.resolve(inputId.concat("_visualization.zip"));
+        String pdbFileName = pdbFile().getFileName().toString();
+        return predictionDir.resolve(pdbFileName.concat("_visualization.zip"));
     }
 
 }
