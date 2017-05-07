@@ -76,15 +76,19 @@ public enum JobRunner {
                     File tempMsaFile = File.createTempFile("msa", ".fasta");
                     File tempConservationFile = File.createTempFile("conservation", ".hom");
                     Utils.INSTANCE.stringToFile(chain.getValue(), tempFastaFile);
-                    ProcessBuilder processBuilder = new ProcessBuilder(script,
-                            tempFastaFile.getAbsolutePath(), tempMsaFile.getAbsolutePath());
+                    logger.info("Running pipeline script {} {} {}", scriptFile.getAbsolutePath(), tempFastaFile.getAbsolutePath(), tempMsaFile.getAbsolutePath());
+                    ProcessBuilder processBuilder = new ProcessBuilder(scriptFile.getAbsolutePath(),
+                            tempFastaFile.getAbsolutePath()/*, tempMsaFile.getAbsolutePath()*/);
                     processBuilder.directory(scriptFile.getParentFile());
                     processBuilder.redirectOutput(tempConservationFile);
                     Process process = processBuilder.start();
                     int exitCode = process.waitFor();
                     logger.info("Conservation pipeline finished with exit code: {}", exitCode);
+                    logger.info("Conservation and MSA calculates: {}, {}",
+                            tempMsaFile.getAbsolutePath(),
+                            tempConservationFile.getAbsolutePath());
                     result.put(chain.getKey(), Tuple.create(tempMsaFile, tempConservationFile));
-                    tempFastaFile.delete();
+                    //tempFastaFile.delete();
                 }
             }
         }

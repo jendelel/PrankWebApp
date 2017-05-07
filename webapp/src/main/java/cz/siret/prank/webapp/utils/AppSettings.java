@@ -64,6 +64,7 @@ public enum AppSettings {
 
     public String getHsspDir() {
         String value = config.getString("database.hssp");
+        if (value == null) return null;
         Path path = dataDir.resolve(value);
         return path.toAbsolutePath().toString();
     }
