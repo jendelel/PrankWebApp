@@ -22,22 +22,44 @@
                         style="font-size:48px; color: aqua;"
                         class="fa fa-spinner fa-spin"></i><br/><span>Running analysis...</span>
                 </div>
-                <input id="conservation-checkbox" name="doConservation" type="checkbox"
-                       value="1">Run conservation analysis <br>
-                <label class="btn btn-default btn-file">
-                    <input id="upload-pdb" name="pdbFile" type="file"/>
-                </label> <br>
+
+                <div class="form-group">
+                    <label>PDB file:</label>
+                    <label for="upload-pdb" class="btn btn-default btn-file">
+                        <input id="upload-pdb" name="pdbFile" accept=".pdb" type="file"/>
+                    </label>
+                </div>
+                    <%--<br>--%>
+                <div class="checkbox">
+                    <label> <input id="conservation-checkbox" name="doConservation"
+                                   type="checkbox" onclick="doConservationClicked()"
+                                   value="1" style="margin-right: 4px;">Run conservation
+                        analysis </label>
+                </div>
+                    <%--<br>--%>
+                <div class="form-group">
+                    <label for="pdbId_opt">PDB code (optinal):</label>
+                    <input type="text" id="pdbId_opt"/> <br>
+                    <label>MSA files (optional):</label>
+                    <label for="upload-msas" class="btn btn-default btn-file">
+                        <input id="upload-msas" name="msaFiles" type="file"
+                               accept=".fasta, .aln" multiple/>
+                    </label>
+                </div>
+                    <%--<br>--%>
                 <button id="pdbUploadSumbit" type="submit"
-                        class="btn btn-default" onclick="uploadPdbFile()">Submit</button>
+                        class="btn btn-default" onclick="uploadPdbFile()">Submit
+                </button>
             </div>
 
             <p class="text-center">OR</p>
 
-            <div class="form-group form-inline text-center" style="margin: 0 auto; width: 350px;">
-                <label for="pdbId">PDB code</label>
+            <div class="form-group form-inline" style="margin: 0 auto; width: 350px;">
+                <label for="pdbId">PDB code:</label>
                 <input type="text" id="pdbId" placeholder="4X09" class="form-control"/>
                 <button id="pdbIdSumbit" type="submit" class="btn btn-default"
-                        onclick="submitPdbId()">Submit</button>
+                        onclick="submitPdbId()">Submit
+                </button>
             </div>
         </div>
         <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>

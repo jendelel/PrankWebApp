@@ -7,8 +7,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.zip.GZIPOutputStream;
 
@@ -44,12 +50,27 @@ public class UploadFileServlet extends HttpServlet {
             throws ServletException, IOException {
         boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
         String chain = request.getParameter("chain");
+        String pdbId = request.getParameter("pdbId");
 
-        // Store file into a temp file
         Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
+        Collection<Part> files = request.getParts();
+        Map<String, File> msas = new HashMap<>();
+        Character counter = 'A';
+        for (final Part file : files) {
+            if (file.getName().equals("pdbFile")) continue;
+            if (file.getName().endsWith(".fasta")) {
+                File tmpFile = File.createTempFile("msa", ".fasta");
+                try(InputStream inputStream = file.getInputStream()) {
+                    Files.copy(inputStream, Paths.get(tmpFile.getAbsolutePath()),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    msas.put("X".concat((counter++).toString()), tmpFile);
+                }
+            }
+        }
+
+
         File tempFile;
         try (InputStream fileContent = filePart.getInputStream()) {
-            tempFile = null;
             try {
                 File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
                 tempFile = File.createTempFile(String.format("upload_%s_",
@@ -67,7 +88,11 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         try {
-            JobRunner.INSTANCE.runPrediction(tempFile, null, doConservation);
+            if (msas.size() <= 0) {
+                JobRunner.INSTANCE.runPrediction(tempFile, pdbId, doConservation);
+            } else {
+                JobRunner.INSTANCE.runPrediction(tempFile, msas);
+            }
             request.setAttribute("upload", tempFile.getName());
             response.getWriter().write("/analyze/upload/" + removeExtension(tempFile.getName()));
             response.getWriter().close();
@@ -76,6 +101,8 @@ public class UploadFileServlet extends HttpServlet {
             response.getWriter().write("/views/busy.jsp");
             response.getWriter().close();
             return;
+        } catch (Exception e) {
+            logger.error("Failed to run prediction", e);
         }
     }
 

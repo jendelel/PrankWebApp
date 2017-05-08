@@ -15,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import cz.siret.prank.lib.ConservationScore;
 import cz.siret.prank.lib.ExternalTools;
 import cz.siret.prank.lib.utils.BioUtils;
 import cz.siret.prank.lib.utils.Tuple;
@@ -121,5 +122,28 @@ public enum JobRunner {
             prankPredictor.runPrediction(fileToAnalyze.toPath(), conservationPathForChain,
                     Paths.get(AppSettings.INSTANCE.getPredictionDir()));
         });
+    }
+
+    public void runPrediction(File tempFile, Map<String, File> MSAs) throws IOException,
+            InterruptedException {
+        Map<String, Tuple2<File, File>> msaAndConservationForChain = new HashMap<>();
+        Map<String, File> scores = externalTools.getConservationFromMSAs(MSAs);
+        Map<String, String> chainMatching = ConservationScore.pickScores(BioUtils.INSTANCE
+                        .loadPdbFile(tempFile), scores);
+        for (Map.Entry<String, String> chainMatch : chainMatching.entrySet()) {
+            logger.info("Chains matched. {}->{}", chainMatch.getKey(), chainMatch.getValue());
+            msaAndConservationForChain.put(chainMatch.getKey(), Tuple.create(
+                    MSAs.get(chainMatch.getValue()), scores.get(chainMatch.getValue())));
+        }
+        logger.info(msaAndConservationForChain.toString());
+
+        Function<String, File> conservationPathForChain = null;
+        if (msaAndConservationForChain.size() > 0)  {
+            conservationPathForChain = (chainId) ->
+                    msaAndConservationForChain.getOrDefault(chainId,
+                            Tuple.create(null, null)).getItem2();
+        }
+        prankPredictor.runPrediction(tempFile.toPath(), conservationPathForChain,
+                Paths.get(AppSettings.INSTANCE.getPredictionDir()));
     }
 }

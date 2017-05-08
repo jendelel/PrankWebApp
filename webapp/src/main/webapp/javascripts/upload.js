@@ -1,19 +1,30 @@
 function uploadPdbFile() {
     var files = $('#upload-pdb').get(0).files;
+    var msaFiles = $('#upload-msas').get(0).files;
 
     if (files.length > 0) {
         $('.progress-bar').text('0%');
         $('.progress-bar').width('0%');
 
         var formData = new FormData();
+        var doConservation = $('#conservation-checkbox').prop('checked');
+        formData.append('conservation', doConservation);
 
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
             formData.append('pdbFile', file, file.name);
         }
 
-        var doConservation = $('#conservation-checkbox').prop('checked');
-        formData.append('conservation', doConservation);
+        if (doConservation) {
+            var pdbId = $("#pdbId_opt").val();
+            if (pdbId.length === 4 && /^[a-zA-Z0-9]*/.test(pdbId)) {
+                formData.append('pdbId',pdbId);
+            }
+            for (i = 0; i < msaFiles.length; i++) {
+                file = msaFiles[i];
+                formData.append(file.name, file, file.name);
+            }
+        }
 
         $.ajax({
             url: '/analyze/file_upload',
@@ -56,14 +67,27 @@ function uploadPdbFile() {
     }
 }
 
+function doConservationClicked() {
+    if ($('#conservation-checkbox').prop('checked')) {
+        $('#pdbId_opt').prop('disabled', false);
+        $('#upload-msas').prop('disabled', false);
+    } else {
+        $('#pdbId_opt').prop('disabled', true);
+        $('#upload-msas').prop('disabled', true);
+    }
+}
+
 function submitPdbId() {
     var pdbId = $('#pdbId').val();
     //TODO: Improve validation
     if (pdbId === "") {
         window.location.href = '/analyze/id/4x09';
-    } else if (pdbId.length == 0 && pdbId.search('^[a-zA-Z0-9]$')) {
+    } else if (pdbId.length === 4 && /^[a-zA-Z0-9]*$/.test(pdbId)) {
         var hostName = window.location.hostname;
         window.location.href = '/analyze/id/' + pdbId;
     }
 }
 
+$(document).ready(function () {
+   doConservationClicked();
+});
