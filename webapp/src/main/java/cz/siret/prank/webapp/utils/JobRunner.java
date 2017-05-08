@@ -124,26 +124,31 @@ public enum JobRunner {
         });
     }
 
-    public void runPrediction(File tempFile, Map<String, File> MSAs) throws IOException,
+    public void runPrediction(File fileToAnalyze, Map<String, File> MSAs) throws IOException,
             InterruptedException {
+        String baseName = BioUtils.INSTANCE.removePdbExtension(fileToAnalyze.getName()).getItem1();
         Map<String, Tuple2<File, File>> msaAndConservationForChain = new HashMap<>();
         Map<String, File> scores = externalTools.getConservationFromMSAs(MSAs);
-        Map<String, String> chainMatching = ConservationScore.pickScores(BioUtils.INSTANCE
-                        .loadPdbFile(tempFile), scores);
+        Map<String, String> chainMatching = ConservationScore.pickScores(
+                BioUtils.INSTANCE.loadPdbFile(fileToAnalyze), scores);
         for (Map.Entry<String, String> chainMatch : chainMatching.entrySet()) {
             logger.info("Chains matched. {}->{}", chainMatch.getKey(), chainMatch.getValue());
             msaAndConservationForChain.put(chainMatch.getKey(), Tuple.create(
                     MSAs.get(chainMatch.getValue()), scores.get(chainMatch.getValue())));
         }
         logger.info(msaAndConservationForChain.toString());
+        Map<String, Tuple2<File, File>> conservationAndMsas =
+                BioUtils.INSTANCE.copyAndGzipConservationAndMSAsToDir(
+                        msaAndConservationForChain, baseName,
+                        Paths.get(AppSettings.INSTANCE.getPredictionDir()));
 
         Function<String, File> conservationPathForChain = null;
-        if (msaAndConservationForChain.size() > 0)  {
-            conservationPathForChain = (chainId) ->
-                    msaAndConservationForChain.getOrDefault(chainId,
+        if (conservationAndMsas.size() > 0)  {
+            conservationPathForChain = (String chainId) ->
+                    conservationAndMsas.getOrDefault(chainId,
                             Tuple.create(null, null)).getItem2();
         }
-        prankPredictor.runPrediction(tempFile.toPath(), conservationPathForChain,
+        prankPredictor.runPrediction(fileToAnalyze.toPath(), conservationPathForChain,
                 Paths.get(AppSettings.INSTANCE.getPredictionDir()));
     }
 }
