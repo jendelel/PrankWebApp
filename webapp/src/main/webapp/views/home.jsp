@@ -9,8 +9,8 @@
     </jsp:attribute>
     <jsp:body>
         <div class="jumbotron">
-            <h1 class="text-center">Welcome to PRANK</h1>
-            <p class="text-center">PRANK is a novel machine learning-based method for prediction of
+            <h1 class="text-center">Welcome to PrankWeb</h1>
+            <p class="text-center">Prank is a novel machine learning-based method for prediction of
                 ligand binding sites from protein structure.</p>
             <p class="text-center">Please upload your pdb protein file or enter PBD ID.</p>
 
