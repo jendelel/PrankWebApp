@@ -54,7 +54,7 @@
 
             <p class="text-center">OR</p>
 
-            <div class="form-group form-inline" style="margin: 0 auto; width: 350px;">
+            <div class="form-group form-inline text-center" style="margin: 0 auto; width: 350px;">
                 <label for="pdbId">PDB code:</label>
                 <input type="text" id="pdbId" placeholder="4X09" class="form-control"/>
                 <button id="pdbIdSumbit" type="submit" class="btn btn-default"
