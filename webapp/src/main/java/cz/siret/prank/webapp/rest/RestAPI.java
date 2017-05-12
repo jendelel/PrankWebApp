@@ -98,6 +98,54 @@ public class RestAPI extends Application {
 
     @GET
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @javax.ws.rs.Path("/msa/{id}")
+    public Response downloadMSAs(@PathParam("type") String inputType,
+                                @PathParam("id") String id) {
+        return Response.ok((StreamingOutput) outputStream -> {
+            ZipOutputStream zip = new ZipOutputStream(outputStream);
+            DataGetter data = new DataGetter(inputType, id);
+            // MSA files
+            for (final Map.Entry<String, File> e : data.msaFiles().entrySet()) {
+                addFile(zip, e.getValue(), "cs_".concat(e.getKey()).concat(".fasta"));
+            }
+            zip.close();
+        }).header("Content-Disposition", "attachment; filename=\"prankweb_" + id + "_msa.zip\"")
+                .build();
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @javax.ws.rs.Path("/hom/{id}")
+    public Response downloadConservation(@PathParam("type") String inputType,
+                                 @PathParam("id") String id) {
+        return Response.ok((StreamingOutput) outputStream -> {
+            ZipOutputStream zip = new ZipOutputStream(outputStream);
+            DataGetter data = new DataGetter(inputType, id);
+            // Conservation files
+            for (final Map.Entry<String,File> e  : data.conservationFiles().entrySet()) {
+                addFile(zip, e.getValue(), "cs_".concat(e.getKey()).concat(".hom"));
+            }
+            zip.close();
+        }).header("Content-Disposition", "attachment; filename=\"prankweb_" + id + "_hom.zip\"")
+                .build();
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @javax.ws.rs.Path("/vis/{id}")
+    public Response downloadPyMolVisualization(@PathParam("type") String inputType,
+                                         @PathParam("id") String id) {
+        return Response.ok((StreamingOutput) outputStream -> {
+            ZipOutputStream zip = new ZipOutputStream(outputStream);
+            DataGetter data = new DataGetter(inputType, id);
+            Utils.INSTANCE.packZipArchive(zip, data.visualizationZip().toFile(), "visualization");
+            zip.close();
+        }).header("Content-Disposition", "attachment; filename=\"prankweb_" + id + "_vis.zip\"")
+                .build();
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
     @javax.ws.rs.Path("/all/{id}")
     public Response downloadAll(@PathParam("type") String inputType,
                                 @PathParam("id") String id) {

@@ -331,7 +331,7 @@ var LiteMol;
                 this.indexMap = LiteMol.Core.Utils.FastMap.create();
                 // Build hashmap index->sequential index one-based.
                 this.controller.latestState.seq.indices.forEach(function (index, seqIndex) {
-                    _this.indexMap.set(index, seqIndex + 1);
+                    _this.indexMap.set(index, seqIndex);
                 });
                 var pockets = this.controller.latestState.pockets;
                 var pocketVisibility = this.controller.latestState.pocketVisibility;
@@ -344,7 +344,7 @@ var LiteMol;
                     for (var _i = 0, segments_1 = segments; _i < segments_1.length; _i++) {
                         var s = segments_1[_i];
                         var c = PrankWeb.Colors.get(i % PrankWeb.Colors.size);
-                        features.push(new ProtaelFeature("Pockets", "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")", s.start, s.end, pocket.rank.toString(), { "Pocket name": pocket.name }));
+                        features.push(new ProtaelFeature("Pockets", "rgb(" + c.r * 255 + ", " + c.g * 255 + ", " + c.b * 255 + ")", s.start + 1, s.end + 1, pocket.rank.toString(), { "Pocket name": pocket.name }));
                     }
                 });
             };
@@ -356,7 +356,7 @@ var LiteMol;
                     var segments = this.indicesToSequenceSegments(sortedIndices);
                     for (var _i = 0, segments_2 = segments; _i < segments_2.length; _i++) {
                         var s = segments_2[_i];
-                        result.push(new ProtaelFeature("Binding site", "purple", s.start, s.end, "", void 0));
+                        result.push(new ProtaelFeature("Binding site", "purple", s.start + 1, s.end + 1, "", void 0));
                     }
                 }
                 return result;
@@ -425,10 +425,12 @@ var LiteMol;
                 this.protaelView.onMouseOver(function (e) {
                     if (e.offsetX == 0)
                         return;
-                    var seqNum = _this.protaelView.toOriginalX(e.offsetX);
+                    // We use zero-based indexing for residues.
+                    var seqNum = _this.protaelView.toOriginalX(_this.protaelView.mouseToSvgXY(e).x) - 1;
                     _this.onLetterMouseEnter(seqNum);
                 });
                 this.fixProtaelHeight();
+                this.addMouseEvents();
                 // pViz.FeatureDisplayer.mouseoverCallBacks = {};
                 // pViz.FeatureDisplayer.mouseoutCallBacks = {};
                 // Add mouse callbacks.
@@ -450,6 +452,25 @@ var LiteMol;
                         continue;
                     fnc(el, i);
                 }
+            };
+            SequenceView.prototype.addMouseEvents = function () {
+                var _this = this;
+                var protael = document.getElementById('seqView');
+                if (!protael)
+                    return;
+                var features = document.querySelectorAll(".pl-ftrack .pl-feature");
+                this.forEachNodeInSelector(features, function (el) {
+                    if (el.parentElement.id == "Pockets") {
+                        var pocket_1 = _this.parsePocketName(el.attributes.getNamedItem("data-d").value);
+                        el.onclick = function () { return _this.onPocketClick(pocket_1); };
+                        el.onmouseover = function () { return _this.selectAndDisplayToastPocket(pocket_1, true); };
+                        el.onmouseout = function () { return _this.selectAndDisplayToastPocket(pocket_1, false); };
+                    }
+                    else if (el.parentElement.id == "Binding sites") {
+                        el.onmouseover = function () { return _this.selectAndDisplayToastBindingSites(true); };
+                        el.onmouseout = function () { return _this.selectAndDisplayToastBindingSites(false); };
+                    }
+                });
             };
             SequenceView.prototype.fixProtaelHeight = function (clear) {
                 if (clear === void 0) { clear = false; }
@@ -506,12 +527,42 @@ var LiteMol;
                     Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
                 }
             };
-            SequenceView.prototype.parsePocketName = function (pocketFeatureType) {
+            // Displays/Hides toast for all binding sites.
+            SequenceView.prototype.selectAndDisplayToastBindingSites = function (isOn) {
+                var ctx = this.controller.context;
+                var model = ctx.select('model')[0];
+                if (!model)
+                    return;
+                // Get the sequence selection
+                var cacheId = '__resSelectionInfo-bindingSites__';
+                var sel = this.getCacheItem(cacheId, model);
+                if (!sel) {
+                    var indices_1 = this.controller.latestState.seq.indices;
+                    var bindingSites = this.controller.latestState.seq.bindingSites.map(function (i) { return indices_1[i]; });
+                    sel = this.setCacheItem(cacheId, PrankWeb.DataLoader.residuesBySeqNums.apply(PrankWeb.DataLoader, bindingSites), model);
+                }
+                // Highlight in the 3D Visualization
+                Bootstrap.Command.Molecule.Highlight.dispatch(ctx, { model: model, query: sel.query, isOn: isOn });
+                if (isOn) {
+                    // Show tooltip
+                    var label = Bootstrap.Interactivity.Molecule.formatInfo(sel.selectionInfo);
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, [label /*, 'some additional label'*/]);
+                }
+                else {
+                    // Hide tooltip
+                    Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
+                }
+            };
+            SequenceView.prototype.parsePocketName = function (featureData) {
                 // Using the fact that * is greedy, so it will match everything up to and including the last space.
-                var res = pocketFeatureType.match(".* ");
-                if (!res)
+                if (!featureData)
                     return void 0;
-                var pocketName = res[0].trim();
+                var featureDataParsed = JSON.parse(featureData);
+                if (!featureDataParsed)
+                    return void 0;
+                var pocketName = featureDataParsed['Pocket name'];
+                if (!pocketName)
+                    return void 0;
                 var pocketRes = void 0;
                 this.controller.latestState.pockets.forEach(function (pocket) {
                     if (pocket.name == pocketName)
@@ -540,12 +591,12 @@ var LiteMol;
                     Bootstrap.Event.Interactivity.Highlight.dispatch(ctx, []);
                 }
             };
-            SequenceView.prototype.onLetterClick = function (seqNumber, letter) {
+            SequenceView.prototype.onPocketClick = function (pocket) {
                 var ctx = this.controller.context;
                 var model = ctx.select('model')[0];
-                if (!model)
+                if (!model || !pocket)
                     return;
-                var query = this.getResidue(seqNumber, model).query;
+                var query = this.getPocket(pocket, model).query;
                 Bootstrap.Command.Molecule.FocusQuery.dispatch(ctx, { model: model, query: query });
             };
             SequenceView.prototype.render = function () {

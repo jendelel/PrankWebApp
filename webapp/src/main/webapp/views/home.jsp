@@ -6,6 +6,9 @@
         <script src="htps://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
         <link rel="stylesheet"
               href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"/>
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/css/home.css"/>
+
     </jsp:attribute>
     <jsp:body>
         <div class="jumbotron">

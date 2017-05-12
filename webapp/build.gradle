@@ -48,7 +48,7 @@ dependencies {
     compile project(':pranklib')
 
     compile group: 'org.biojava', name: 'biojava-core', version: '4.2.6'
-    // compile 'org.biojava:biojava-structure:4.2.6-rdk1'
+    compile 'org.biojava:biojava-structure:4.2.6'
     compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.1'
     compile 'commons-beanutils:commons-beanutils:1.9.3'
     compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0.1'
@@ -74,7 +74,7 @@ dependencies {
     compile 'org.openscience.cdk:cdk-qsarmolecular:1.5.13'    // for NumericalSurface class
     compile 'org.openscience.cdk:cdk-data:1.5.13'             // for Atom class
     compile 'nz.ac.waikato.cms.weka:weka-dev:3.9.0'
-    compile files('libs/biojava-structure-4.2.6-rdk1.jar')     // customized fork for pocket-rank
+    //compile files('libs/biojava-structure-4.2.6-rdk1.jar')     // customized fork for pocket-rank
     compile fileTree(dir: 'libs', include: '*.jar')
     // Prank dependencies end
     

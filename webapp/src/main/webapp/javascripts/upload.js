@@ -34,7 +34,8 @@ function uploadPdbFile() {
             processData: false,
             success: function (data) {
                 console.log('Upload successful!\n' + data);
-                window.location.assign(data);
+                var newUrl = '/analyze/upload/'.concat(data);
+                window.location.assign(newUrl);
             },
             xhr: function () {
                 // create an XMLHttpRequest

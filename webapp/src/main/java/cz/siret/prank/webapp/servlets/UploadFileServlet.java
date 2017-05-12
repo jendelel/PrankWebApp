@@ -68,7 +68,6 @@ public class UploadFileServlet extends HttpServlet {
             }
         }
 
-
         File tempFile;
         try (InputStream fileContent = filePart.getInputStream()) {
             try {
@@ -94,7 +93,7 @@ public class UploadFileServlet extends HttpServlet {
                 JobRunner.INSTANCE.runPrediction(tempFile, msas);
             }
             request.setAttribute("upload", tempFile.getName());
-            response.getWriter().write("/analyze/upload/" + removeExtension(tempFile.getName()));
+            response.getWriter().write(removeExtension(tempFile.getName()));
             response.getWriter().close();
         } catch (RejectedExecutionException e) {
             tempFile.delete();
