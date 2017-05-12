@@ -1,4 +1,4 @@
-.jumbotron::after {
+body::after {
     background-image: url(/images/proteins.png);
     opacity: 0.25;
     top:0;
@@ -16,6 +16,11 @@
     z-index: -1;
 }
 
-.jumbotron{
+.jumbotron {
     background-color: transparent;
+}
+
+body{
+    background-color: transparent;
+    position: relative;
 }

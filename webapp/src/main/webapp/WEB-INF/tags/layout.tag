@@ -56,9 +56,10 @@
                 <button type="submit" class="btn btn-default">Submit</button>
             </form>--%>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">Download</a></li>
-                <li><a href="contact.html">Authors</a></li>
-                <li><a href="blog.html">Help</a></li>
+                <li><a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">Download
+                    P2rank</a></li>
+                <li><a href="/views/credits.jsp">Credits</a></li>
+                <li><a href="/views/help.jsp">Help</a></li>
             </ul>
         </div>
     </div>
