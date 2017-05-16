@@ -15,6 +15,11 @@
                     class="fa fa-spinner fa-spin"></i><br/>
                 <p class="text-center">Please wait, running analysis...</p>
                 <p class="text-center">This page refreshes every 5 seconds.</p>
+                <div class="row">
+                    <code class="col-xs-6 col-xs-offset-3" style="text-align: left">
+                            ${progress}
+                    </code>
+                </div>
             </div>
         </div>
     </jsp:body>

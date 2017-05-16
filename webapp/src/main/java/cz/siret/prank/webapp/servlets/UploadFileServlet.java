@@ -1,5 +1,6 @@
 package cz.siret.prank.webapp.servlets;
 
+import org.biojava.nbio.structure.Structure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
@@ -26,9 +28,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import cz.siret.prank.lib.utils.BioUtils;
 import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
+import cz.siret.prank.webapp.utils.DataGetter;
 import cz.siret.prank.webapp.utils.JobRunner;
+import cz.siret.prank.webapp.utils.PrankUtils;
 
 @WebServlet(
         name = "UploadFileServlet",
@@ -51,6 +56,7 @@ public class UploadFileServlet extends HttpServlet {
         boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
         String chain = request.getParameter("chain");
         String pdbId = request.getParameter("pdbId");
+        Path predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
 
         Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
         Collection<Part> files = request.getParts();
@@ -70,16 +76,18 @@ public class UploadFileServlet extends HttpServlet {
 
         File tempFile;
         try (InputStream fileContent = filePart.getInputStream()) {
+            String uploadId =dateTimeFormatter.format(LocalDateTime.now());
+            File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
+            tempFile = File.createTempFile(String.format("upload_%s_", uploadId),
+                    ".pdb.gz", uploadsFolder);
             try {
-                File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
-                tempFile = File.createTempFile(String.format("upload_%s_",
-                        dateTimeFormatter.format(LocalDateTime.now())), ".pdb.gz", uploadsFolder);
                 try (GZIPOutputStream outputStream = new GZIPOutputStream(
                         new FileOutputStream(tempFile, false))) {
                     Utils.INSTANCE.copyStream(fileContent, outputStream);
                     fileContent.close();
                     outputStream.close();
                 }
+                PrankUtils.INSTANCE.updateStatus(tempFile, predictionDir, "File uploaded.");
             } catch (Exception e) {
                 e.printStackTrace(response.getWriter());
                 return;
@@ -87,10 +95,20 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         try {
-            if (msas.size() <= 0) {
-                JobRunner.INSTANCE.runPrediction(tempFile, pdbId, doConservation);
-            } else {
-                JobRunner.INSTANCE.runPrediction(tempFile, msas);
+            boolean checkOK = true;
+            String errors = BioUtils.INSTANCE.checkForPdbFileErrors(tempFile);
+            if (errors != null) {
+                checkOK = false;
+                logger.info("Found errors. File: {}, Errors: {}", tempFile.getName(), errors);
+                PrankUtils.INSTANCE.updateStatus(tempFile, predictionDir, "ERROR: ".concat(errors));
+            }
+
+            if (checkOK) {
+                if (msas.size() <= 0) {
+                    JobRunner.INSTANCE.runPrediction(tempFile, predictionDir, pdbId, doConservation);
+                } else {
+                    JobRunner.INSTANCE.runPrediction(tempFile, predictionDir, msas);
+                }
             }
             request.setAttribute("upload", tempFile.getName());
             response.getWriter().write(removeExtension(tempFile.getName()));

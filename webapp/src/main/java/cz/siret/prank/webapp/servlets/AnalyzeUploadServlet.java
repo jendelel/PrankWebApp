@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.DataGetter;
 
@@ -44,10 +45,21 @@ public class AnalyzeUploadServlet extends HttpServlet {
             if (!csvFile.exists()) {
                 // The analysis has not completed yet!
                 req.setAttribute("inputId", inputId);
-                RequestDispatcher rd = getServletContext()
-                        .getRequestDispatcher("/views/in_progress.jsp");
-                rd.forward(req, resp);
-                return;
+                String progress = Utils.INSTANCE.convertStreamToString(
+                        Utils.INSTANCE.readFile(data.statusFile().toFile()), true);
+                if (progress.toLowerCase().contains("error")) {
+                    req.setAttribute("msg", progress.replace("\n", "<br/>"));
+                    RequestDispatcher rd = getServletContext()
+                            .getRequestDispatcher("/error/error.jsp");
+                    rd.forward(req, resp);
+                    return;
+                } else {
+                    req.setAttribute("progress", progress.replace("\n", "<br/>"));
+                    RequestDispatcher rd = getServletContext()
+                            .getRequestDispatcher("/views/in_progress.jsp");
+                    rd.forward(req, resp);
+                    return;
+                }
             }
 
             req.setAttribute("inputType", "upload");

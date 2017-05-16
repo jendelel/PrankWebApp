@@ -40,7 +40,7 @@
             <h1 id="user-guide">User guide</h1>
             <p>PrankWeb is a web-based application that allows to predict and visualize
                 protein-ligand
-                binding site. Furthermore, it allows to compare the location of predicted pockets
+                binding sites. Furthermore, it allows to compare the location of predicted pockets
                 with
                 highly conserved areas as well as actual ligand binding sites. All one needs to use
                 PrankWeb is a device with a web-browser that supports WebGL.</p>
@@ -69,7 +69,7 @@
                 visualization, structural visualization and the control panel.</p>
             <h3 id="structural-visualization-1">Structural visualization</h3>
             <p>The largest panel contains the three-dimensional visualization of the protein. By
-                default, the protein surface is displayed where individual pocket areas are
+                default, the protein surface is displayed, and individual pocket areas are
                 highlighted
                 with different colors. If conservation is available, the protein surface is colored
                 with
@@ -104,7 +104,8 @@
                 left
                 (subsection of polymer). Now, in the update visual section, expand the visual type
                 section and use the probe radius trackbar to update the value. Please be cautious,
-                because as of now, LiteMol does not support Undo operation. It will be added soon,
+                because as of May 2017, LiteMol does not support Undo operation. It will be added
+                soon,
                 though. For more help with LiteMol, please visit its wiki page.<a href="#fn4"
                                                                                   class="footnoteRef"
                                                                                   id="fnref4"><sup>4</sup></a>
@@ -141,7 +142,8 @@
                 <li><p>PyMol script for offline visualization. (Output of P2Rank).</p></li>
                 <li><p>Conservation scores for each residue of the protein calculated using JSD
                     method
-                    (see Section [sec:homology_calc] for more details). The file is in TSV (Tab
+                    (see the <a href="#thesis">original thesis</a> for more details). The file is in
+                                TSV (Tab
                     Separated Values) format. First column identifies the index, second contains the
                     score and the last column contains the residues from multiple sequence
                     alignment.
@@ -162,7 +164,7 @@
                 visibility
                 in both structural and sequence visualizations.</p>
             <h2 id="more-details">More details</h2>
-            <p>For more details about this project, please see
+            <p id="thesis">For more details about this project, please see
                 <a href="/other/thesis.pdf">the original thesis document.</a></p>
             <div class="footnotes">
                 <hr/>

@@ -82,6 +82,12 @@ public class DataGetter {
         return conservationOrMsaFiles(".hom.gz");
     }
 
+    public Path statusFile() {
+        assert inputType.equals("id");
+        String fileName = pdbFile().toFile().getName().concat(".status");
+        return csvFile().getParent().resolve(fileName);
+    }
+
     public Path visualizationZip() {
         Path predictionDir;
         if (inputType.equals("id")) {

@@ -61,7 +61,8 @@ public class RestAPI extends Application {
         Structure structure = BioUtils.INSTANCE.loadPdbFile(path.toFile());
         Map<String, File> scoresFiles = data.conservationFiles();
         ConservationScore scores = ConservationScore.fromFiles(structure, scoresFiles::get);
-        return Sequence.fromStructure(structure, scores, PrankUtils.getBindingSites(path.toFile()));
+        return Sequence.fromStructure(structure, scores, PrankUtils.INSTANCE
+                .getBindingSites(path.toFile()));
     }
 
     @GET

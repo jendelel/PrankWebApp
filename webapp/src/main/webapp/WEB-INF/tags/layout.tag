@@ -58,7 +58,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">Download
                     P2rank</a></li>
-                <li><a href="/views/credits.jsp">Credits</a></li>
+                <li><a href="/views/about.jsp">About</a></li>
                 <li><a href="/views/help.jsp">Help</a></li>
             </ul>
         </div>

@@ -17,7 +17,7 @@ function uploadPdbFile() {
 
         if (doConservation) {
             var pdbId = $("#pdbId_opt").val();
-            if (pdbId.length === 4 && /^[a-zA-Z0-9]*/.test(pdbId)) {
+            if (isValidPdbId(pdbId)) {
                 formData.append('pdbId',pdbId);
             }
             for (i = 0; i < msaFiles.length; i++) {
@@ -34,7 +34,15 @@ function uploadPdbFile() {
             processData: false,
             success: function (data) {
                 console.log('Upload successful!\n' + data);
-                var newUrl = '/analyze/upload/'.concat(data);
+                var newUrl;
+                if (data.startsWith("/")) {
+                    newUrl = data;
+                } else if (data.length < 50) {
+                    newUrl = '/analyze/upload/'.concat(data);
+                } else {
+                    document.write(data);
+                    document.close();
+                }
                 window.location.assign(newUrl);
             },
             xhr: function () {
@@ -78,14 +86,19 @@ function doConservationClicked() {
     }
 }
 
+function isValidPdbId(pdbId) {
+    return pdbId.length === 4 && /^[a-zA-Z0-9]*$/.test(pdbId);
+}
+
 function submitPdbId() {
     var pdbId = $('#pdbId').val();
-    //TODO: Improve validation
     if (pdbId === "") {
         window.location.href = '/analyze/id/4x09';
-    } else if (pdbId.length === 4 && /^[a-zA-Z0-9]*$/.test(pdbId)) {
+    } else if (isValidPdbId(pdbId)) {
         var hostName = window.location.hostname;
         window.location.href = '/analyze/id/' + pdbId;
+    } else {
+        alert("Invalid PDB code.")
     }
 }
 
