@@ -73,6 +73,8 @@ function uploadPdbFile() {
                 return xhr;
             }
         });
+    } else {
+        alert("Please select some files to upload.")
     }
 }
 
