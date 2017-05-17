@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cz.siret.prank.lib.utils.BioUtils;
 import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.DataGetter;
@@ -76,8 +77,21 @@ public class AnalyzeIdServlet extends HttpServlet {
                         Files.copy(in, data.pdbFile(), StandardCopyOption.REPLACE_EXISTING);
                         PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
                                 data.csvFile().getParent(), "File downloaded.");
-                        JobRunner.INSTANCE.runPrediction(data.pdbFile().toFile(),
-                                Paths.get(AppSettings.INSTANCE.getCsvDataPath()), pdbId, true);
+
+                        boolean checkOK = true;
+                        String errors = BioUtils.INSTANCE.checkForPdbFileErrors(data.pdbFile().toFile());
+                        if (errors != null) {
+                            checkOK = false;
+                            logger.info("Found errors. File: {}, Errors: {}",
+                                    data.pdbFile().toFile().getName(), errors);
+                            PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
+                                    data.csvFile().getParent(), "ERROR: ".concat(errors));
+                        }
+
+                        if (checkOK) {
+                            JobRunner.INSTANCE.runPrediction(data.pdbFile().toFile(),
+                                    Paths.get(AppSettings.INSTANCE.getCsvDataPath()), pdbId, true);
+                        }
                     }
                 } catch (Exception e) {
                     PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
