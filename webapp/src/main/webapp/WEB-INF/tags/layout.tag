@@ -68,7 +68,7 @@
 <jsp:doBody/>
 
 <footer>
-    <p class="text-center">Copyright &copy; Lukas Jendele, Siret group, Charles University 2016</p>
+    <p class="text-center">Copyright &copy; Lukas Jendele, Siret group, Charles University 2017</p>
 </footer>
 </body>
 </html>

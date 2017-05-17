@@ -38,18 +38,19 @@
     <jsp:body>
         <div class="container">
             <h2 id="about"> About </h2>
-            <p>Proteins are fundamental building blocks of all living organisms. They perform their function by binding to other molecules. This thesis deals with interactions between proteins and small molecules (so called ligands) because most of the currently used drugs are small molecules.
+            <p>Proteins are fundamental building blocks of all living organisms. They perform their function by binding to other molecules. This project deals with interactions
+                between proteins and small molecules (so called ligands) because most of the currently used drugs are small molecules.
                 While there are several tools that can predict these interactions, they are almost none for their visualization. Thus, we built a new visualization website by combining several protein visualizers together. Since evolutionary homology correlates with binding sites, our web interface also displays homology for comparison. We developed several ways how to calculate homology, and used it to improve detection of protein-ligand binding sites.
                 Here we present PrankWeb, a modern web application for structure and sequence visualization of a protein and its protein-ligand binding sites as well as evolutionary homology. We hope that it will provide a quick and convenient way for scientists to analyze proteins.</p>
+            <p>The source code of this project can be found at
+                <a href="http://github.com/jendelel/PrankWebApp" target="_blank">GitHub</a></p>
             <h2 id="authors">Authors</h2>
             <p>This project was created as bachelor thesis by Lukáš Jendele under supervision of
                 RNDr. David Hoksza Ph.D. at Charles University. </p>
+            <h2 id="visualization">Used projects</h2>
             <p> PrankWeb utilizes P2Rank for
                 pocket detection and LiteMol together with Protael for its visualization.
             </p>
-            <p>The source code of this project can be found at
-                <a href="http://github.com/jendelel/PrankWebApp" target="_blank">GitHub</a></p>
-            <h2 id="visualization">Used projects</h2>
             <ul>
                 <li><p><a href="http://siret.ms.mff.cuni.cz/p2rank">P2Rank</a></p></li>
                 <li><p><a href="http://webchemdev.ncbr.muni.cz/Litemol/">LiteMol</a> </p></li>
