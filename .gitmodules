@@ -4,3 +4,6 @@
 [submodule "pranklib"]
 	path = pranklib
 	url = https://github.com/jendelel/pranklib.git
+[submodule "p2rank"]
+	path = p2rank
+	url = https://github.com/jendelel/p2rank.git
