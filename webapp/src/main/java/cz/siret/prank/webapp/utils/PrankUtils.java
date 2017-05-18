@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import cz.siret.prank.domain.LoaderParams;
 import cz.siret.prank.domain.Protein;
 import cz.siret.prank.geom.Atoms;
 import cz.siret.prank.lib.ResidueNumberWrapper;
@@ -22,11 +23,15 @@ public enum PrankUtils {
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     public Set<ResidueNumberWrapper> getBindingSites(File pdbFile) {
-        Protein p = Protein.load(pdbFile.getAbsolutePath());
-        Atoms bindingAtoms = p.getProteinAtoms().cutoffAtoms(p.getAllLigandAtoms(), 4);
-        return bindingAtoms.getDistinctGroups().stream()
+        LoaderParams loaderParams = new LoaderParams();
+        loaderParams.setIgnoreLigands(false);
+
+        Protein p = Protein.load(pdbFile.getAbsolutePath(), loaderParams);
+        Atoms bindingAtoms = p.getProteinAtoms().cutoffAtoms(p.getAllLigandAtoms(), 4.0);
+        Set<ResidueNumberWrapper> res = bindingAtoms.getDistinctGroups().stream()
                 .map(g -> new ResidueNumberWrapper(g.getResidueNumber()))
                 .collect(Collectors.toSet());
+        return res;
     }
 
     public void updateStatus(File fileToAnalyze, Path predictionDir, String status) {
