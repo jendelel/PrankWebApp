@@ -3,7 +3,6 @@
 
 <t:layout>
     <jsp:attribute name="header_after">
-        <script src="htps://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
         <link rel="stylesheet"
               href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"/>
         <link rel="stylesheet"
