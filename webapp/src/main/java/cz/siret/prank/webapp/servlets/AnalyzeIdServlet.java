@@ -33,7 +33,7 @@ public class AnalyzeIdServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String urlSuffix = req.getPathInfo();
         if (urlSuffix != null && urlSuffix.length() == 5 && urlSuffix.charAt(0) == '/' ) {
-            String pdbId = urlSuffix.substring(1);
+            String pdbId = urlSuffix.substring(1).toLowerCase();
             DataGetter data = new DataGetter("id", pdbId);
 
             if (data.csvFile().toFile().exists()) {

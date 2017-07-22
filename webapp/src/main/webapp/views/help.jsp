@@ -48,13 +48,13 @@
             <p>To analyze a protein from PDB database, one has to know its identification code. Go
                 to a
                 website, where PrankWeb server is running<a href="#fn2" class="footnoteRef"
-                                                            id="fnref2"><sup>2</sup></a>
+                                                            id="fnref2"><sup>1</sup></a>
                 and enter the identification code of the protein. For analysis of custom PDB file,
                 upload it by clicking the browse button. Please note that it might take a while
                 before
                 PrankWeb analyzes the custom file. For description of PDB format, please see its
                 official documentation.<a href="#fn3" class="footnoteRef"
-                                          id="fnref3"><sup>3</sup></a>
+                                          id="fnref3"><sup>2</sup></a>
             </p>
             <p>Besides selecting what protein to analyze, one can also specify if evolutionary
                 conservation should be included in the prediction model. PrankWeb contains two
@@ -108,7 +108,7 @@
                 soon,
                 though. For more help with LiteMol, please visit its wiki page.<a href="#fn4"
                                                                                   class="footnoteRef"
-                                                                                  id="fnref4"><sup>4</sup></a>
+                                                                                  id="fnref4"><sup>3</sup></a>
             </p>
             <h3 id="sequence-visualization-1">Sequence visualization</h3>
             <p>The panel above protein 3D visualization displays protein sequence. All chains are

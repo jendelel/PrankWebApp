@@ -3,7 +3,6 @@
 
 <t:layout>
     <jsp:attribute name="header_after">
-        <script src="htps://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
         <link rel="stylesheet"
               href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"/>
         <link rel="stylesheet"
@@ -65,7 +64,7 @@
 
             <div class="form-group form-inline text-center" style="margin: 0 auto; width: 350px;">
                 <label for="pdbId">PDB code:</label>
-                <input type="text" id="pdbId" placeholder="4X09" class="form-control"/>
+                <input type="text" id="pdbId" placeholder="2SRC" class="form-control"/>
                 <button id="pdbIdSumbit" type="submit" class="btn btn-default"
                         onclick="submitPdbId()">Submit
                 </button>
