@@ -24,3 +24,8 @@ body{
     background-color: transparent;
     position: relative;
 }
+
+.disabled {
+    color: darkgrey;
+    /*background-color: lightgrey;*/
+}

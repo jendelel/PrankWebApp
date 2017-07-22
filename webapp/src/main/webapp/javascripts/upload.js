@@ -82,9 +82,13 @@ function doConservationClicked() {
     if ($('#conservation-checkbox').prop('checked')) {
         $('#pdbId_opt').prop('disabled', false);
         $('#upload-msas').prop('disabled', false);
+        $('#pdbId_opt_lbl').removeClass('disabled');
+        $('#msa_opt_lbl').removeClass('disabled');
     } else {
         $('#pdbId_opt').prop('disabled', true);
         $('#upload-msas').prop('disabled', true);
+        $('#pdbId_opt_lbl').addClass('disabled');
+        $('#msa_opt_lbl').addClass('disabled');
     }
 }
 
@@ -106,4 +110,5 @@ function submitPdbId() {
 
 $(document).ready(function () {
    doConservationClicked();
+    $("a.msa-hint").tooltip();
 });

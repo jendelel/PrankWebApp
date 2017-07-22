@@ -41,12 +41,18 @@
                 </div>
                     <%--<br>--%>
                 <div class="form-group">
-                    <label for="pdbId_opt">PDB code (optinal):</label>
+                    <label id="pdbId_opt_lbl" for="pdbId_opt">PDB code (optional):</label>
                     <input type="text" id="pdbId_opt"/> <br>
-                    <label>MSA files (optional):</label>
+                    <label id="msa_opt_lbl">MSA files
+                        <a class='msa-hint' data-toggle="tooltip" data-placement="top"
+                               title="Alignments in FASTA and CLUSTAL formats are supported.">
+                            <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                        </a>(optional):
+                    </label>
                     <label for="upload-msas" class="btn btn-default btn-file">
                         <input id="upload-msas" name="msaFiles" type="file"
-                               accept=".fasta, .aln" multiple/>
+                               accept=".fasta, .aln" multiple>
+                        </input>
                     </label>
                 </div>
                     <%--<br>--%>
