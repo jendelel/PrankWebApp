@@ -9,6 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Prank WebApp">
     <meta name="author" content="Lukas Jendele">
+    <link rel="icon" 
+      type="image/png" 
+      href="/images/icon.png" />
+    
     <title>PrankWeb</title>
 
     <jsp:invoke fragment="header_before"/>
