@@ -95,7 +95,7 @@ function isValidPdbId(pdbId) {
 function submitPdbId() {
     var pdbId = $('#pdbId').val();
     if (pdbId === "") {
-        window.location.href = '/analyze/id/4x09';
+        window.location.href = '/analyze/id/2src';
     } else if (isValidPdbId(pdbId)) {
         var hostName = window.location.hostname;
         window.location.href = '/analyze/id/' + pdbId;
