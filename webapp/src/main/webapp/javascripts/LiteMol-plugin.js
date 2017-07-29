@@ -8069,7 +8069,7 @@ var __LiteMolRx = __LiteMolRxTemp.Rx;
  */
 var CIFTools;
 (function (CIFTools) {
-    CIFTools.VERSION = { number: "1.1.5", date: "April 20 2017" };
+    CIFTools.VERSION = { number: "1.1.6", date: "June 26 2017" };
 })(CIFTools || (CIFTools = {}));
 /*
  * Copyright (c) 2016 - now David Sehnal, licensed under MIT License, See LICENSE file for more info.
@@ -10836,14 +10836,15 @@ var CIFTools;
                     if (value === 0) {
                         size += 1;
                     }
-                    else if (value === upperLimit || value === lowerLimit) {
-                        size += 2;
-                    }
                     else if (value > 0) {
                         size += Math.ceil(value / upperLimit);
+                        if (value % upperLimit === 0)
+                            size += 1;
                     }
                     else {
                         size += Math.ceil(value / lowerLimit);
+                        if (value % lowerLimit === 0)
+                            size += 1;
                     }
                 }
                 return size;
@@ -11158,7 +11159,6 @@ var CIFTools;
         Binary.Writer = Writer;
     })(Binary = CIFTools.Binary || (CIFTools.Binary = {}));
 })(CIFTools || (CIFTools = {}));
-
 // File:src/Three.js
 
 var LiteMolTHREE = (function () {
@@ -33316,7 +33316,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 		if ( material.needsUpdate ) {
 
 			if ( material.program ) deallocateMaterial( material );
-
 			initMaterial( material, lights, fog, object );
 			material.needsUpdate = false;
 
@@ -51520,7 +51519,7 @@ var LiteMolZlib = __LiteMolZlib.Zlib;
 
 
 /**
- * React v15.4.2
+ * React v15.6.1
  *
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -51530,7 +51529,6 @@ var LiteMolZlib = __LiteMolZlib.Zlib;
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-
 
 /*
 
@@ -51572,17 +51570,16 @@ var __LiteMolReact;
 (function() {
 
     var exports = {};
-    var module = {};
-    var require = void 0;
+    var __module__ = {};
 
-!function(t){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var e;e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,e.React=t()}}(function(){return function t(e,n,r){function o(u,a){if(!n[u]){if(!e[u]){var s="function"==typeof require&&require;if(!a&&s)return s(u,!0);if(i)return i(u,!0);var c=new Error("Cannot find module '"+u+"'");throw c.code="MODULE_NOT_FOUND",c}var l=n[u]={exports:{}};e[u][0].call(l.exports,function(t){var n=e[u][1][t];return o(n?n:t)},l,l.exports,t,e,n,r)}return n[u].exports}for(var i="function"==typeof require&&require,u=0;u<r.length;u++)o(r[u]);return o}({1:[function(t,e,n){"use strict";function r(t){var e=/[=:]/g,n={"=":"=0",":":"=2"},r=(""+t).replace(e,function(t){return n[t]});return"$"+r}function o(t){var e=/(=0|=2)/g,n={"=0":"=","=2":":"},r="."===t[0]&&"$"===t[1]?t.substring(2):t.substring(1);return(""+r).replace(e,function(t){return n[t]})}var i={escape:r,unescape:o};e.exports=i},{}],2:[function(t,e,n){"use strict";var r=t(21),o=(t(25),function(t){var e=this;if(e.instancePool.length){var n=e.instancePool.pop();return e.call(n,t),n}return new e(t)}),i=function(t,e){var n=this;if(n.instancePool.length){var r=n.instancePool.pop();return n.call(r,t,e),r}return new n(t,e)},u=function(t,e,n){var r=this;if(r.instancePool.length){var o=r.instancePool.pop();return r.call(o,t,e,n),o}return new r(t,e,n)},a=function(t,e,n,r){var o=this;if(o.instancePool.length){var i=o.instancePool.pop();return o.call(i,t,e,n,r),i}return new o(t,e,n,r)},s=function(t){var e=this;t instanceof e?void 0:r("25"),t.destructor(),e.instancePool.length<e.poolSize&&e.instancePool.push(t)},c=10,l=o,f=function(t,e){var n=t;return n.instancePool=[],n.getPooled=e||l,n.poolSize||(n.poolSize=c),n.release=s,n},p={addPoolingTo:f,oneArgumentPooler:o,twoArgumentPooler:i,threeArgumentPooler:u,fourArgumentPooler:a};e.exports=p},{21:21,25:25}],3:[function(t,e,n){"use strict";var r=t(27),o=t(4),i=t(6),u=t(15),a=t(5),s=t(8),c=t(9),l=t(13),f=t(17),p=t(20),d=(t(26),c.createElement),y=c.createFactory,v=c.cloneElement,h=r,m={Children:{map:o.map,forEach:o.forEach,count:o.count,toArray:o.toArray,only:p},Component:i,PureComponent:u,createElement:d,cloneElement:v,isValidElement:c.isValidElement,PropTypes:l,createClass:a.createClass,createFactory:y,createMixin:function(t){return t},DOM:s,version:f,__spread:h};e.exports=m},{13:13,15:15,17:17,20:20,26:26,27:27,4:4,5:5,6:6,8:8,9:9}],4:[function(t,e,n){"use strict";function r(t){return(""+t).replace(E,"$&/")}function o(t,e){this.func=t,this.context=e,this.count=0}function i(t,e,n){var r=t.func,o=t.context;r.call(o,e,t.count++)}function u(t,e,n){if(null==t)return t;var r=o.getPooled(e,n);m(t,i,r),o.release(r)}function a(t,e,n,r){this.result=t,this.keyPrefix=e,this.func=n,this.context=r,this.count=0}function s(t,e,n){var o=t.result,i=t.keyPrefix,u=t.func,a=t.context,s=u.call(a,e,t.count++);Array.isArray(s)?c(s,o,n,h.thatReturnsArgument):null!=s&&(v.isValidElement(s)&&(s=v.cloneAndReplaceKey(s,i+(!s.key||e&&e.key===s.key?"":r(s.key)+"/")+n)),o.push(s))}function c(t,e,n,o,i){var u="";null!=n&&(u=r(n)+"/");var c=a.getPooled(e,u,o,i);m(t,s,c),a.release(c)}function l(t,e,n){if(null==t)return t;var r=[];return c(t,r,null,e,n),r}function f(t,e,n){return null}function p(t,e){return m(t,f,null)}function d(t){var e=[];return c(t,e,null,h.thatReturnsArgument),e}var y=t(2),v=t(9),h=t(23),m=t(22),b=y.twoArgumentPooler,g=y.fourArgumentPooler,E=/\/+/g;o.prototype.destructor=function(){this.func=null,this.context=null,this.count=0},y.addPoolingTo(o,b),a.prototype.destructor=function(){this.result=null,this.keyPrefix=null,this.func=null,this.context=null,this.count=0},y.addPoolingTo(a,g);var x={forEach:u,map:l,mapIntoWithKeyPrefixInternal:c,count:p,toArray:d};e.exports=x},{2:2,22:22,23:23,9:9}],5:[function(t,e,n){"use strict";function r(t){return t}function o(t,e){var n=E.hasOwnProperty(e)?E[e]:null;_.hasOwnProperty(e)&&("OVERRIDE_BASE"!==n?p("73",e):void 0),t&&("DEFINE_MANY"!==n&&"DEFINE_MANY_MERGED"!==n?p("74",e):void 0)}function i(t,e){if(e){"function"==typeof e?p("75"):void 0,v.isValidElement(e)?p("76"):void 0;var n=t.prototype,r=n.__reactAutoBindPairs;e.hasOwnProperty(b)&&x.mixins(t,e.mixins);for(var i in e)if(e.hasOwnProperty(i)&&i!==b){var u=e[i],a=n.hasOwnProperty(i);if(o(a,i),x.hasOwnProperty(i))x[i](t,u);else{var l=E.hasOwnProperty(i),f="function"==typeof u,d=f&&!l&&!a&&e.autobind!==!1;if(d)r.push(i,u),n[i]=u;else if(a){var y=E[i];!l||"DEFINE_MANY_MERGED"!==y&&"DEFINE_MANY"!==y?p("77",y,i):void 0,"DEFINE_MANY_MERGED"===y?n[i]=s(n[i],u):"DEFINE_MANY"===y&&(n[i]=c(n[i],u))}else n[i]=u}}}}function u(t,e){if(e)for(var n in e){var r=e[n];if(e.hasOwnProperty(n)){var o=n in x;o?p("78",n):void 0;var i=n in t;i?p("79",n):void 0,t[n]=r}}}function a(t,e){t&&e&&"object"==typeof t&&"object"==typeof e?void 0:p("80");for(var n in e)e.hasOwnProperty(n)&&(void 0!==t[n]?p("81",n):void 0,t[n]=e[n]);return t}function s(t,e){return function(){var n=t.apply(this,arguments),r=e.apply(this,arguments);if(null==n)return r;if(null==r)return n;var o={};return a(o,n),a(o,r),o}}function c(t,e){return function(){t.apply(this,arguments),e.apply(this,arguments)}}function l(t,e){var n=e.bind(t);return n}function f(t){for(var e=t.__reactAutoBindPairs,n=0;n<e.length;n+=2){var r=e[n],o=e[n+1];t[r]=l(t,o)}}var p=t(21),d=t(27),y=t(6),v=t(9),h=(t(12),t(11)),m=t(24),b=(t(25),t(26),"mixins"),g=[],E={mixins:"DEFINE_MANY",statics:"DEFINE_MANY",propTypes:"DEFINE_MANY",contextTypes:"DEFINE_MANY",childContextTypes:"DEFINE_MANY",getDefaultProps:"DEFINE_MANY_MERGED",getInitialState:"DEFINE_MANY_MERGED",getChildContext:"DEFINE_MANY_MERGED",render:"DEFINE_ONCE",componentWillMount:"DEFINE_MANY",componentDidMount:"DEFINE_MANY",componentWillReceiveProps:"DEFINE_MANY",shouldComponentUpdate:"DEFINE_ONCE",componentWillUpdate:"DEFINE_MANY",componentDidUpdate:"DEFINE_MANY",componentWillUnmount:"DEFINE_MANY",updateComponent:"OVERRIDE_BASE"},x={displayName:function(t,e){t.displayName=e},mixins:function(t,e){if(e)for(var n=0;n<e.length;n++)i(t,e[n])},childContextTypes:function(t,e){t.childContextTypes=d({},t.childContextTypes,e)},contextTypes:function(t,e){t.contextTypes=d({},t.contextTypes,e)},getDefaultProps:function(t,e){t.getDefaultProps?t.getDefaultProps=s(t.getDefaultProps,e):t.getDefaultProps=e},propTypes:function(t,e){t.propTypes=d({},t.propTypes,e)},statics:function(t,e){u(t,e)},autobind:function(){}},_={replaceState:function(t,e){this.updater.enqueueReplaceState(this,t),e&&this.updater.enqueueCallback(this,e,"replaceState")},isMounted:function(){return this.updater.isMounted(this)}},P=function(){};d(P.prototype,y.prototype,_);var w={createClass:function(t){var e=r(function(t,n,r){this.__reactAutoBindPairs.length&&f(this),this.props=t,this.context=n,this.refs=m,this.updater=r||h,this.state=null;var o=this.getInitialState?this.getInitialState():null;"object"!=typeof o||Array.isArray(o)?p("82",e.displayName||"ReactCompositeComponent"):void 0,this.state=o});e.prototype=new P,e.prototype.constructor=e,e.prototype.__reactAutoBindPairs=[],g.forEach(i.bind(null,e)),i(e,t),e.getDefaultProps&&(e.defaultProps=e.getDefaultProps()),e.prototype.render?void 0:p("83");for(var n in E)e.prototype[n]||(e.prototype[n]=null);return e},injection:{injectMixin:function(t){g.push(t)}}};e.exports=w},{11:11,12:12,21:21,24:24,25:25,26:26,27:27,6:6,9:9}],6:[function(t,e,n){"use strict";function r(t,e,n){this.props=t,this.context=e,this.refs=u,this.updater=n||i}var o=t(21),i=t(11),u=(t(18),t(24));t(25),t(26);r.prototype.isReactComponent={},r.prototype.setState=function(t,e){"object"!=typeof t&&"function"!=typeof t&&null!=t?o("85"):void 0,this.updater.enqueueSetState(this,t),e&&this.updater.enqueueCallback(this,e,"setState")},r.prototype.forceUpdate=function(t){this.updater.enqueueForceUpdate(this),t&&this.updater.enqueueCallback(this,t,"forceUpdate")};e.exports=r},{11:11,18:18,21:21,24:24,25:25,26:26}],7:[function(t,e,n){"use strict";var r={current:null};e.exports=r},{}],8:[function(t,e,n){"use strict";var r=t(9),o=r.createFactory,i={a:o("a"),abbr:o("abbr"),address:o("address"),area:o("area"),article:o("article"),aside:o("aside"),audio:o("audio"),b:o("b"),base:o("base"),bdi:o("bdi"),bdo:o("bdo"),big:o("big"),blockquote:o("blockquote"),body:o("body"),br:o("br"),button:o("button"),canvas:o("canvas"),caption:o("caption"),cite:o("cite"),code:o("code"),col:o("col"),colgroup:o("colgroup"),data:o("data"),datalist:o("datalist"),dd:o("dd"),del:o("del"),details:o("details"),dfn:o("dfn"),dialog:o("dialog"),div:o("div"),dl:o("dl"),dt:o("dt"),em:o("em"),embed:o("embed"),fieldset:o("fieldset"),figcaption:o("figcaption"),figure:o("figure"),footer:o("footer"),form:o("form"),h1:o("h1"),h2:o("h2"),h3:o("h3"),h4:o("h4"),h5:o("h5"),h6:o("h6"),head:o("head"),header:o("header"),hgroup:o("hgroup"),hr:o("hr"),html:o("html"),i:o("i"),iframe:o("iframe"),img:o("img"),input:o("input"),ins:o("ins"),kbd:o("kbd"),keygen:o("keygen"),label:o("label"),legend:o("legend"),li:o("li"),link:o("link"),main:o("main"),map:o("map"),mark:o("mark"),menu:o("menu"),menuitem:o("menuitem"),meta:o("meta"),meter:o("meter"),nav:o("nav"),noscript:o("noscript"),object:o("object"),ol:o("ol"),optgroup:o("optgroup"),option:o("option"),output:o("output"),p:o("p"),param:o("param"),picture:o("picture"),pre:o("pre"),progress:o("progress"),q:o("q"),rp:o("rp"),rt:o("rt"),ruby:o("ruby"),s:o("s"),samp:o("samp"),script:o("script"),section:o("section"),select:o("select"),small:o("small"),source:o("source"),span:o("span"),strong:o("strong"),style:o("style"),sub:o("sub"),summary:o("summary"),sup:o("sup"),table:o("table"),tbody:o("tbody"),td:o("td"),textarea:o("textarea"),tfoot:o("tfoot"),th:o("th"),thead:o("thead"),time:o("time"),title:o("title"),tr:o("tr"),track:o("track"),u:o("u"),ul:o("ul"),var:o("var"),video:o("video"),wbr:o("wbr"),circle:o("circle"),clipPath:o("clipPath"),defs:o("defs"),ellipse:o("ellipse"),g:o("g"),image:o("image"),line:o("line"),linearGradient:o("linearGradient"),mask:o("mask"),path:o("path"),pattern:o("pattern"),polygon:o("polygon"),polyline:o("polyline"),radialGradient:o("radialGradient"),rect:o("rect"),stop:o("stop"),svg:o("svg"),text:o("text"),tspan:o("tspan")};e.exports=i},{9:9}],9:[function(t,e,n){"use strict";function r(t){return void 0!==t.ref}function o(t){return void 0!==t.key}var i=t(27),u=t(7),a=(t(26),t(18),Object.prototype.hasOwnProperty),s=t(10),c={key:!0,ref:!0,__self:!0,__source:!0},l=function(t,e,n,r,o,i,u){var a={$$typeof:s,type:t,key:e,ref:n,props:u,_owner:i};return a};l.createElement=function(t,e,n){var i,s={},f=null,p=null,d=null,y=null;if(null!=e){r(e)&&(p=e.ref),o(e)&&(f=""+e.key),d=void 0===e.__self?null:e.__self,y=void 0===e.__source?null:e.__source;for(i in e)a.call(e,i)&&!c.hasOwnProperty(i)&&(s[i]=e[i])}var v=arguments.length-2;if(1===v)s.children=n;else if(v>1){for(var h=Array(v),m=0;m<v;m++)h[m]=arguments[m+2];s.children=h}if(t&&t.defaultProps){var b=t.defaultProps;for(i in b)void 0===s[i]&&(s[i]=b[i])}return l(t,f,p,d,y,u.current,s)},l.createFactory=function(t){var e=l.createElement.bind(null,t);return e.type=t,e},l.cloneAndReplaceKey=function(t,e){var n=l(t.type,e,t.ref,t._self,t._source,t._owner,t.props);return n},l.cloneElement=function(t,e,n){var s,f=i({},t.props),p=t.key,d=t.ref,y=t._self,v=t._source,h=t._owner;if(null!=e){r(e)&&(d=e.ref,h=u.current),o(e)&&(p=""+e.key);var m;t.type&&t.type.defaultProps&&(m=t.type.defaultProps);for(s in e)a.call(e,s)&&!c.hasOwnProperty(s)&&(void 0===e[s]&&void 0!==m?f[s]=m[s]:f[s]=e[s])}var b=arguments.length-2;if(1===b)f.children=n;else if(b>1){for(var g=Array(b),E=0;E<b;E++)g[E]=arguments[E+2];f.children=g}return l(t.type,p,d,y,v,h,f)},l.isValidElement=function(t){return"object"==typeof t&&null!==t&&t.$$typeof===s},e.exports=l},{10:10,18:18,26:26,27:27,7:7}],10:[function(t,e,n){"use strict";var r="function"==typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103;e.exports=r},{}],11:[function(t,e,n){"use strict";function r(t,e){}var o=(t(26),{isMounted:function(t){return!1},enqueueCallback:function(t,e){},enqueueForceUpdate:function(t){r(t,"forceUpdate")},enqueueReplaceState:function(t,e){r(t,"replaceState")},enqueueSetState:function(t,e){r(t,"setState")}});e.exports=o},{26:26}],12:[function(t,e,n){"use strict";var r={};e.exports=r},{}],13:[function(t,e,n){"use strict";function r(t,e){return t===e?0!==t||1/t===1/e:t!==t&&e!==e}function o(t){this.message=t,this.stack=""}function i(t){function e(e,n,r,i,u,a,s){if(i=i||N,a=a||r,null==n[r]){var c=_[u];return e?new o(null===n[r]?"The "+c+" `"+a+"` is marked as required "+("in `"+i+"`, but its value is `null`."):"The "+c+" `"+a+"` is marked as required in "+("`"+i+"`, but its value is `undefined`.")):null}return t(n,r,i,u,a)}var n=e.bind(null,!1);return n.isRequired=e.bind(null,!0),n}function u(t){function e(e,n,r,i,u,a){var s=e[n],c=b(s);if(c!==t){var l=_[i],f=g(s);return new o("Invalid "+l+" `"+u+"` of type "+("`"+f+"` supplied to `"+r+"`, expected ")+("`"+t+"`."))}return null}return i(e)}function a(){return i(w.thatReturns(null))}function s(t){function e(e,n,r,i,u){if("function"!=typeof t)return new o("Property `"+u+"` of component `"+r+"` has invalid PropType notation inside arrayOf.");var a=e[n];if(!Array.isArray(a)){var s=_[i],c=b(a);return new o("Invalid "+s+" `"+u+"` of type "+("`"+c+"` supplied to `"+r+"`, expected an array."))}for(var l=0;l<a.length;l++){var f=t(a,l,r,i,u+"["+l+"]",P);if(f instanceof Error)return f}return null}return i(e)}function c(){function t(t,e,n,r,i){var u=t[e];if(!x.isValidElement(u)){var a=_[r],s=b(u);return new o("Invalid "+a+" `"+i+"` of type "+("`"+s+"` supplied to `"+n+"`, expected a single ReactElement."))}return null}return i(t)}function l(t){function e(e,n,r,i,u){if(!(e[n]instanceof t)){var a=_[i],s=t.name||N,c=E(e[n]);return new o("Invalid "+a+" `"+u+"` of type "+("`"+c+"` supplied to `"+r+"`, expected ")+("instance of `"+s+"`."))}return null}return i(e)}function f(t){function e(e,n,i,u,a){for(var s=e[n],c=0;c<t.length;c++)if(r(s,t[c]))return null;var l=_[u],f=JSON.stringify(t);return new o("Invalid "+l+" `"+a+"` of value `"+s+"` "+("supplied to `"+i+"`, expected one of "+f+"."))}return Array.isArray(t)?i(e):w.thatReturnsNull}function p(t){function e(e,n,r,i,u){if("function"!=typeof t)return new o("Property `"+u+"` of component `"+r+"` has invalid PropType notation inside objectOf.");var a=e[n],s=b(a);if("object"!==s){var c=_[i];return new o("Invalid "+c+" `"+u+"` of type "+("`"+s+"` supplied to `"+r+"`, expected an object."))}for(var l in a)if(a.hasOwnProperty(l)){var f=t(a,l,r,i,u+"."+l,P);if(f instanceof Error)return f}return null}return i(e)}function d(t){function e(e,n,r,i,u){for(var a=0;a<t.length;a++){var s=t[a];if(null==s(e,n,r,i,u,P))return null}var c=_[i];return new o("Invalid "+c+" `"+u+"` supplied to "+("`"+r+"`."))}return Array.isArray(t)?i(e):w.thatReturnsNull}function y(){function t(t,e,n,r,i){if(!h(t[e])){var u=_[r];return new o("Invalid "+u+" `"+i+"` supplied to "+("`"+n+"`, expected a ReactNode."))}return null}return i(t)}function v(t){function e(e,n,r,i,u){var a=e[n],s=b(a);if("object"!==s){var c=_[i];return new o("Invalid "+c+" `"+u+"` of type `"+s+"` "+("supplied to `"+r+"`, expected `object`."))}for(var l in t){var f=t[l];if(f){var p=f(a,l,r,i,u+"."+l,P);if(p)return p}}return null}return i(e)}function h(t){switch(typeof t){case"number":case"string":case"undefined":return!0;case"boolean":return!t;case"object":if(Array.isArray(t))return t.every(h);if(null===t||x.isValidElement(t))return!0;var e=A(t);if(!e)return!1;var n,r=e.call(t);if(e!==t.entries){for(;!(n=r.next()).done;)if(!h(n.value))return!1}else for(;!(n=r.next()).done;){var o=n.value;if(o&&!h(o[1]))return!1}return!0;default:return!1}}function m(t,e){return"symbol"===t||"Symbol"===e["@@toStringTag"]||"function"==typeof Symbol&&e instanceof Symbol}function b(t){var e=typeof t;return Array.isArray(t)?"array":t instanceof RegExp?"object":m(e,t)?"symbol":e}function g(t){var e=b(t);if("object"===e){if(t instanceof Date)return"date";if(t instanceof RegExp)return"regexp"}return e}function E(t){return t.constructor&&t.constructor.name?t.constructor.name:N}var x=t(9),_=t(12),P=t(14),w=t(23),A=t(19),N=(t(26),"<<anonymous>>"),O={array:u("array"),bool:u("boolean"),func:u("function"),number:u("number"),object:u("object"),string:u("string"),symbol:u("symbol"),any:a(),arrayOf:s,element:c(),instanceOf:l,node:y(),objectOf:p,oneOf:f,oneOfType:d,shape:v};o.prototype=Error.prototype,e.exports=O},{12:12,14:14,19:19,23:23,26:26,9:9}],14:[function(t,e,n){"use strict";var r="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED";e.exports=r},{}],15:[function(t,e,n){"use strict";function r(t,e,n){this.props=t,this.context=e,this.refs=s,this.updater=n||a}function o(){}var i=t(27),u=t(6),a=t(11),s=t(24);o.prototype=u.prototype,r.prototype=new o,r.prototype.constructor=r,i(r.prototype,u.prototype),r.prototype.isPureReactComponent=!0,e.exports=r},{11:11,24:24,27:27,6:6}],16:[function(t,e,n){"use strict";var r=t(27),o=t(3),i=r({__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentOwner:t(7)}},o);e.exports=i},{27:27,3:3,7:7}],17:[function(t,e,n){"use strict";e.exports="15.4.2"},{}],18:[function(t,e,n){"use strict";var r=!1;e.exports=r},{}],19:[function(t,e,n){"use strict";function r(t){var e=t&&(o&&t[o]||t[i]);if("function"==typeof e)return e}var o="function"==typeof Symbol&&Symbol.iterator,i="@@iterator";e.exports=r},{}],20:[function(t,e,n){"use strict";function r(t){return i.isValidElement(t)?void 0:o("143"),t}var o=t(21),i=t(9);t(25);e.exports=r},{21:21,25:25,9:9}],21:[function(t,e,n){"use strict";function r(t){for(var e=arguments.length-1,n="Minified React error #"+t+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant="+t,r=0;r<e;r++)n+="&args[]="+encodeURIComponent(arguments[r+1]);n+=" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";var o=new Error(n);throw o.name="Invariant Violation",o.framesToPop=1,o}e.exports=r},{}],22:[function(t,e,n){"use strict";function r(t,e){return t&&"object"==typeof t&&null!=t.key?c.escape(t.key):e.toString(36)}function o(t,e,n,i){var p=typeof t;if("undefined"!==p&&"boolean"!==p||(t=null),null===t||"string"===p||"number"===p||"object"===p&&t.$$typeof===a)return n(i,t,""===e?l+r(t,0):e),1;var d,y,v=0,h=""===e?l:e+f;if(Array.isArray(t))for(var m=0;m<t.length;m++)d=t[m],y=h+r(d,m),v+=o(d,y,n,i);else{var b=s(t);if(b){var g,E=b.call(t);if(b!==t.entries)for(var x=0;!(g=E.next()).done;)d=g.value,y=h+r(d,x++),v+=o(d,y,n,i);else for(;!(g=E.next()).done;){var _=g.value;_&&(d=_[1],y=h+c.escape(_[0])+f+r(d,0),v+=o(d,y,n,i))}}else if("object"===p){var P="",w=String(t);u("31","[object Object]"===w?"object with keys {"+Object.keys(t).join(", ")+"}":w,P)}}return v}function i(t,e,n){return null==t?0:o(t,"",e,n)}var u=t(21),a=(t(7),t(10)),s=t(19),c=(t(25),t(1)),l=(t(26),"."),f=":";e.exports=i},{1:1,10:10,19:19,21:21,25:25,26:26,7:7}],23:[function(t,e,n){"use strict";function r(t){return function(){return t}}var o=function(){};o.thatReturns=r,o.thatReturnsFalse=r(!1),o.thatReturnsTrue=r(!0),o.thatReturnsNull=r(null),o.thatReturnsThis=function(){return this},o.thatReturnsArgument=function(t){return t},e.exports=o},{}],24:[function(t,e,n){"use strict";var r={};e.exports=r},{}],25:[function(t,e,n){"use strict";function r(t,e,n,r,i,u,a,s){if(o(e),!t){var c;if(void 0===e)c=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var l=[n,r,i,u,a,s],f=0;c=new Error(e.replace(/%s/g,function(){return l[f++]})),c.name="Invariant Violation"}throw c.framesToPop=1,c}}var o=function(t){};e.exports=r},{}],26:[function(t,e,n){"use strict";var r=t(23),o=r;e.exports=o},{23:23}],27:[function(t,e,n){"use strict";function r(t){if(null===t||void 0===t)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(t)}function o(){try{if(!Object.assign)return!1;var t=new String("abc");if(t[5]="de","5"===Object.getOwnPropertyNames(t)[0])return!1;for(var e={},n=0;n<10;n++)e["_"+String.fromCharCode(n)]=n;var r=Object.getOwnPropertyNames(e).map(function(t){return e[t]});if("0123456789"!==r.join(""))return!1;var o={};return"abcdefghijklmnopqrst".split("").forEach(function(t){o[t]=t}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},o)).join("")}catch(t){return!1}}var i=Object.prototype.hasOwnProperty,u=Object.prototype.propertyIsEnumerable;e.exports=o()?Object.assign:function(t,e){for(var n,o,a=r(t),s=1;s<arguments.length;s++){n=Object(arguments[s]);for(var c in n)i.call(n,c)&&(a[c]=n[c]);if(Object.getOwnPropertySymbols){o=Object.getOwnPropertySymbols(n);for(var l=0;l<o.length;l++)u.call(n,o[l])&&(a[o[l]]=n[o[l]])}}return a}},{}]},{},[16])(16)});
+!function(t){if("object"==typeof exports&&"undefined"!=typeof __module__)__module__.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var e;e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,e.React=t()}}(function(){return function t(e,n,r){function o(a,u){if(!n[a]){if(!e[a]){var s=void 0;if(!u&&s)return s(a,!0);if(i)return i(a,!0);var c=new Error("Cannot find __module__ '"+a+"'");throw c.code="__module___NOT_FOUND",c}var l=n[a]={exports:{}};e[a][0].call(l.exports,function(t){var n=e[a][1][t];return o(n||t)},l,l.exports,t,e,n,r)}return n[a].exports}for(var i=void 0,a=0;a<r.length;a++)o(r[a]);return o}({1:[function(t,e,n){"use strict";function r(t){var e={"=":"=0",":":"=2"};return"$"+(""+t).replace(/[=:]/g,function(t){return e[t]})}function o(t){var e=/(=0|=2)/g,n={"=0":"=","=2":":"};return(""+("."===t[0]&&"$"===t[1]?t.substring(2):t.substring(1))).replace(e,function(t){return n[t]})}var i={escape:r,unescape:o};e.exports=i},{}],2:[function(t,e,n){"use strict";var r=t(19),o=(t(24),function(t){var e=this;if(e.instancePool.length){var n=e.instancePool.pop();return e.call(n,t),n}return new e(t)}),i=function(t,e){var n=this;if(n.instancePool.length){var r=n.instancePool.pop();return n.call(r,t,e),r}return new n(t,e)},a=function(t,e,n){var r=this;if(r.instancePool.length){var o=r.instancePool.pop();return r.call(o,t,e,n),o}return new r(t,e,n)},u=function(t,e,n,r){var o=this;if(o.instancePool.length){var i=o.instancePool.pop();return o.call(i,t,e,n,r),i}return new o(t,e,n,r)},s=function(t){var e=this;t instanceof e||r("25"),t.destructor(),e.instancePool.length<e.poolSize&&e.instancePool.push(t)},c=o,l=function(t,e){var n=t;return n.instancePool=[],n.getPooled=e||c,n.poolSize||(n.poolSize=10),n.release=s,n},f={addPoolingTo:l,oneArgumentPooler:o,twoArgumentPooler:i,threeArgumentPooler:a,fourArgumentPooler:u};e.exports=f},{19:19,24:24}],3:[function(t,e,n){"use strict";var r=t(26),o=t(4),i=t(5),a=t(7),u=t(8),s=t(11),c=t(13),l=t(15),f=t(18),p=u.createElement,d=u.createFactory,y=u.cloneElement,h=r,m=function(t){return t},v={Children:{map:i.map,forEach:i.forEach,count:i.count,toArray:i.toArray,only:f},Component:o.Component,PureComponent:o.PureComponent,createElement:p,cloneElement:y,isValidElement:u.isValidElement,PropTypes:s,createClass:l,createFactory:d,createMixin:m,DOM:a,version:c,__spread:h};e.exports=v},{11:11,13:13,15:15,18:18,26:26,4:4,5:5,7:7,8:8}],4:[function(t,e,n){"use strict";function r(t,e,n){this.props=t,this.context=e,this.refs=c,this.updater=n||s}function o(t,e,n){this.props=t,this.context=e,this.refs=c,this.updater=n||s}function i(){}var a=t(19),u=t(26),s=t(10),c=(t(14),t(23));t(24),t(17);r.prototype.isReactComponent={},r.prototype.setState=function(t,e){"object"!=typeof t&&"function"!=typeof t&&null!=t&&a("85"),this.updater.enqueueSetState(this,t),e&&this.updater.enqueueCallback(this,e,"setState")},r.prototype.forceUpdate=function(t){this.updater.enqueueForceUpdate(this),t&&this.updater.enqueueCallback(this,t,"forceUpdate")};i.prototype=r.prototype,o.prototype=new i,o.prototype.constructor=o,u(o.prototype,r.prototype),o.prototype.isPureReactComponent=!0,e.exports={Component:r,PureComponent:o}},{10:10,14:14,17:17,19:19,23:23,24:24,26:26}],5:[function(t,e,n){"use strict";function r(t){return(""+t).replace(E,"$&/")}function o(t,e){this.func=t,this.context=e,this.count=0}function i(t,e,n){var r=t.func,o=t.context;r.call(o,e,t.count++)}function a(t,e,n){if(null==t)return t;var r=o.getPooled(e,n);v(t,i,r),o.release(r)}function u(t,e,n,r){this.result=t,this.keyPrefix=e,this.func=n,this.context=r,this.count=0}function s(t,e,n){var o=t.result,i=t.keyPrefix,a=t.func,u=t.context,s=a.call(u,e,t.count++);Array.isArray(s)?c(s,o,n,m.thatReturnsArgument):null!=s&&(h.isValidElement(s)&&(s=h.cloneAndReplaceKey(s,i+(!s.key||e&&e.key===s.key?"":r(s.key)+"/")+n)),o.push(s))}function c(t,e,n,o,i){var a="";null!=n&&(a=r(n)+"/");var c=u.getPooled(e,a,o,i);v(t,s,c),u.release(c)}function l(t,e,n){if(null==t)return t;var r=[];return c(t,r,null,e,n),r}function f(t,e,n){return null}function p(t,e){return v(t,f,null)}function d(t){var e=[];return c(t,e,null,m.thatReturnsArgument),e}var y=t(2),h=t(8),m=t(22),v=t(20),b=y.twoArgumentPooler,g=y.fourArgumentPooler,E=/\/+/g;o.prototype.destructor=function(){this.func=null,this.context=null,this.count=0},y.addPoolingTo(o,b),u.prototype.destructor=function(){this.result=null,this.keyPrefix=null,this.func=null,this.context=null,this.count=0},y.addPoolingTo(u,g);var x={forEach:a,map:l,mapIntoWithKeyPrefixInternal:c,count:p,toArray:d};e.exports=x},{2:2,20:20,22:22,8:8}],6:[function(t,e,n){"use strict";var r={current:null};e.exports=r},{}],7:[function(t,e,n){"use strict";var r=t(8),o=r.createFactory,i={a:o("a"),abbr:o("abbr"),address:o("address"),area:o("area"),article:o("article"),aside:o("aside"),audio:o("audio"),b:o("b"),base:o("base"),bdi:o("bdi"),bdo:o("bdo"),big:o("big"),blockquote:o("blockquote"),body:o("body"),br:o("br"),button:o("button"),canvas:o("canvas"),caption:o("caption"),cite:o("cite"),code:o("code"),col:o("col"),colgroup:o("colgroup"),data:o("data"),datalist:o("datalist"),dd:o("dd"),del:o("del"),details:o("details"),dfn:o("dfn"),dialog:o("dialog"),div:o("div"),dl:o("dl"),dt:o("dt"),em:o("em"),embed:o("embed"),fieldset:o("fieldset"),figcaption:o("figcaption"),figure:o("figure"),footer:o("footer"),form:o("form"),h1:o("h1"),h2:o("h2"),h3:o("h3"),h4:o("h4"),h5:o("h5"),h6:o("h6"),head:o("head"),header:o("header"),hgroup:o("hgroup"),hr:o("hr"),html:o("html"),i:o("i"),iframe:o("iframe"),img:o("img"),input:o("input"),ins:o("ins"),kbd:o("kbd"),keygen:o("keygen"),label:o("label"),legend:o("legend"),li:o("li"),link:o("link"),main:o("main"),map:o("map"),mark:o("mark"),menu:o("menu"),menuitem:o("menuitem"),meta:o("meta"),meter:o("meter"),nav:o("nav"),noscript:o("noscript"),object:o("object"),ol:o("ol"),optgroup:o("optgroup"),option:o("option"),output:o("output"),p:o("p"),param:o("param"),picture:o("picture"),pre:o("pre"),progress:o("progress"),q:o("q"),rp:o("rp"),rt:o("rt"),ruby:o("ruby"),s:o("s"),samp:o("samp"),script:o("script"),section:o("section"),select:o("select"),small:o("small"),source:o("source"),span:o("span"),strong:o("strong"),style:o("style"),sub:o("sub"),summary:o("summary"),sup:o("sup"),table:o("table"),tbody:o("tbody"),td:o("td"),textarea:o("textarea"),tfoot:o("tfoot"),th:o("th"),thead:o("thead"),time:o("time"),title:o("title"),tr:o("tr"),track:o("track"),u:o("u"),ul:o("ul"),var:o("var"),video:o("video"),wbr:o("wbr"),circle:o("circle"),clipPath:o("clipPath"),defs:o("defs"),ellipse:o("ellipse"),g:o("g"),image:o("image"),line:o("line"),linearGradient:o("linearGradient"),mask:o("mask"),path:o("path"),pattern:o("pattern"),polygon:o("polygon"),polyline:o("polyline"),radialGradient:o("radialGradient"),rect:o("rect"),stop:o("stop"),svg:o("svg"),text:o("text"),tspan:o("tspan")};e.exports=i},{8:8}],8:[function(t,e,n){"use strict";function r(t){return void 0!==t.ref}function o(t){return void 0!==t.key}var i=t(26),a=t(6),u=(t(25),t(14),Object.prototype.hasOwnProperty),s=t(9),c={key:!0,ref:!0,__self:!0,__source:!0},l=function(t,e,n,r,o,i,a){return{$$typeof:s,type:t,key:e,ref:n,props:a,_owner:i}};l.createElement=function(t,e,n){var i,s={},f=null,p=null;if(null!=e){r(e)&&(p=e.ref),o(e)&&(f=""+e.key),void 0===e.__self?null:e.__self,void 0===e.__source?null:e.__source;for(i in e)u.call(e,i)&&!c.hasOwnProperty(i)&&(s[i]=e[i])}var d=arguments.length-2;if(1===d)s.children=n;else if(d>1){for(var y=Array(d),h=0;h<d;h++)y[h]=arguments[h+2];s.children=y}if(t&&t.defaultProps){var m=t.defaultProps;for(i in m)void 0===s[i]&&(s[i]=m[i])}return l(t,f,p,0,0,a.current,s)},l.createFactory=function(t){var e=l.createElement.bind(null,t);return e.type=t,e},l.cloneAndReplaceKey=function(t,e){return l(t.type,e,t.ref,t._self,t._source,t._owner,t.props)},l.cloneElement=function(t,e,n){var s,f=i({},t.props),p=t.key,d=t.ref,y=(t._self,t._source,t._owner);if(null!=e){r(e)&&(d=e.ref,y=a.current),o(e)&&(p=""+e.key);var h;t.type&&t.type.defaultProps&&(h=t.type.defaultProps);for(s in e)u.call(e,s)&&!c.hasOwnProperty(s)&&(void 0===e[s]&&void 0!==h?f[s]=h[s]:f[s]=e[s])}var m=arguments.length-2;if(1===m)f.children=n;else if(m>1){for(var v=Array(m),b=0;b<m;b++)v[b]=arguments[b+2];f.children=v}return l(t.type,p,d,0,0,y,f)},l.isValidElement=function(t){return"object"==typeof t&&null!==t&&t.$$typeof===s},e.exports=l},{14:14,25:25,26:26,6:6,9:9}],9:[function(t,e,n){"use strict";var r="function"==typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103;e.exports=r},{}],10:[function(t,e,n){"use strict";var r=(t(25),{isMounted:function(t){return!1},enqueueCallback:function(t,e){},enqueueForceUpdate:function(t){},enqueueReplaceState:function(t,e){},enqueueSetState:function(t,e){}});e.exports=r},{25:25}],11:[function(t,e,n){"use strict";var r=t(8),o=r.isValidElement,i=t(28);e.exports=i(o)},{28:28,8:8}],12:[function(t,e,n){"use strict";var r=t(26),o=t(3),i=r(o,{__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentOwner:t(6)}});e.exports=i},{26:26,3:3,6:6}],13:[function(t,e,n){"use strict";e.exports="15.6.1"},{}],14:[function(t,e,n){"use strict";e.exports=!1},{}],15:[function(t,e,n){"use strict";var r=t(4),o=r.Component,i=t(8),a=i.isValidElement,u=t(10),s=t(21);e.exports=s(o,a,u)},{10:10,21:21,4:4,8:8}],16:[function(t,e,n){"use strict";function r(t){var e=t&&(o&&t[o]||t[i]);if("function"==typeof e)return e}var o="function"==typeof Symbol&&Symbol.iterator,i="@@iterator";e.exports=r},{}],17:[function(t,e,n){"use strict";var r=function(){};e.exports=r},{}],18:[function(t,e,n){"use strict";function r(t){return i.isValidElement(t)||o("143"),t}var o=t(19),i=t(8);t(24);e.exports=r},{19:19,24:24,8:8}],19:[function(t,e,n){"use strict";function r(t){for(var e=arguments.length-1,n="Minified React error #"+t+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant="+t,r=0;r<e;r++)n+="&args[]="+encodeURIComponent(arguments[r+1]);n+=" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";var o=new Error(n);throw o.name="Invariant Violation",o.framesToPop=1,o}e.exports=r},{}],20:[function(t,e,n){"use strict";function r(t,e){return t&&"object"==typeof t&&null!=t.key?c.escape(t.key):e.toString(36)}function o(t,e,n,i){var p=typeof t;if("undefined"!==p&&"boolean"!==p||(t=null),null===t||"string"===p||"number"===p||"object"===p&&t.$$typeof===u)return n(i,t,""===e?l+r(t,0):e),1;var d,y,h=0,m=""===e?l:e+f;if(Array.isArray(t))for(var v=0;v<t.length;v++)d=t[v],y=m+r(d,v),h+=o(d,y,n,i);else{var b=s(t);if(b){var g,E=b.call(t);if(b!==t.entries)for(var x=0;!(g=E.next()).done;)d=g.value,y=m+r(d,x++),h+=o(d,y,n,i);else for(;!(g=E.next()).done;){var _=g.value;_&&(d=_[1],y=m+c.escape(_[0])+f+r(d,0),h+=o(d,y,n,i))}}else if("object"===p){var P=String(t);a("31","[object Object]"===P?"object with keys {"+Object.keys(t).join(", ")+"}":P,"")}}return h}function i(t,e,n){return null==t?0:o(t,"",e,n)}var a=t(19),u=(t(6),t(9)),s=t(16),c=(t(24),t(1)),l=(t(25),"."),f=":";e.exports=i},{1:1,16:16,19:19,24:24,25:25,6:6,9:9}],21:[function(t,e,n){"use strict";function r(t){return t}function o(t,e,n){function o(t,e){var n=b.hasOwnProperty(e)?b[e]:null;_.hasOwnProperty(e)&&u("OVERRIDE_BASE"===n,"ReactClassInterface: You are attempting to override `%s` from your class specification. Ensure that your method names do not overlap with React methods.",e),t&&u("DEFINE_MANY"===n||"DEFINE_MANY_MERGED"===n,"ReactClassInterface: You are attempting to define `%s` on your component more than once. This conflict may be due to a mixin.",e)}function c(t,n){if(n){u("function"!=typeof n,"ReactClass: You're attempting to use a component class or function as a mixin. Instead, just use a regular object."),u(!e(n),"ReactClass: You're attempting to use a component as a mixin. Instead, just use a regular object.");var r=t.prototype,i=r.__reactAutoBindPairs;n.hasOwnProperty(s)&&g.mixins(t,n.mixins);for(var a in n)if(n.hasOwnProperty(a)&&a!==s){var c=n[a],l=r.hasOwnProperty(a);if(o(l,a),g.hasOwnProperty(a))g[a](t,c);else{var f=b.hasOwnProperty(a),y="function"==typeof c,h=y&&!f&&!l&&!1!==n.autobind;if(h)i.push(a,c),r[a]=c;else if(l){var m=b[a];u(f&&("DEFINE_MANY_MERGED"===m||"DEFINE_MANY"===m),"ReactClass: Unexpected spec policy %s for key %s when mixing in component specs.",m,a),"DEFINE_MANY_MERGED"===m?r[a]=p(r[a],c):"DEFINE_MANY"===m&&(r[a]=d(r[a],c))}else r[a]=c}}}else;}function l(t,e){if(e)for(var n in e){var r=e[n];if(e.hasOwnProperty(n)){var o=n in g;u(!o,'ReactClass: You are attempting to define a reserved property, `%s`, that shouldn\'t be on the "statics" key. Define it as an instance property instead; it will still be accessible on the constructor.',n);var i=n in t;u(!i,"ReactClass: You are attempting to define `%s` on your component more than once. This conflict may be due to a mixin.",n),t[n]=r}}}function f(t,e){u(t&&e&&"object"==typeof t&&"object"==typeof e,"mergeIntoWithNoDuplicateKeys(): Cannot merge non-objects.");for(var n in e)e.hasOwnProperty(n)&&(u(void 0===t[n],"mergeIntoWithNoDuplicateKeys(): Tried to merge two objects with the same key: `%s`. This conflict may be due to a mixin; in particular, this may be caused by two getInitialState() or getDefaultProps() methods returning objects with clashing keys.",n),t[n]=e[n]);return t}function p(t,e){return function(){var n=t.apply(this,arguments),r=e.apply(this,arguments);if(null==n)return r;if(null==r)return n;var o={};return f(o,n),f(o,r),o}}function d(t,e){return function(){t.apply(this,arguments),e.apply(this,arguments)}}function y(t,e){var n=e.bind(t);return n}function h(t){for(var e=t.__reactAutoBindPairs,n=0;n<e.length;n+=2){var r=e[n],o=e[n+1];t[r]=y(t,o)}}function m(t){var e=r(function(t,r,o){this.__reactAutoBindPairs.length&&h(this),this.props=t,this.context=r,this.refs=a,this.updater=o||n,this.state=null;var i=this.getInitialState?this.getInitialState():null;u("object"==typeof i&&!Array.isArray(i),"%s.getInitialState(): must return an object or null",e.displayName||"ReactCompositeComponent"),this.state=i});e.prototype=new P,e.prototype.constructor=e,e.prototype.__reactAutoBindPairs=[],v.forEach(c.bind(null,e)),c(e,E),c(e,t),c(e,x),e.getDefaultProps&&(e.defaultProps=e.getDefaultProps()),u(e.prototype.render,"createClass(...): Class specification must implement a `render` method.");for(var o in b)e.prototype[o]||(e.prototype[o]=null);return e}var v=[],b={mixins:"DEFINE_MANY",statics:"DEFINE_MANY",propTypes:"DEFINE_MANY",contextTypes:"DEFINE_MANY",childContextTypes:"DEFINE_MANY",getDefaultProps:"DEFINE_MANY_MERGED",getInitialState:"DEFINE_MANY_MERGED",getChildContext:"DEFINE_MANY_MERGED",render:"DEFINE_ONCE",componentWillMount:"DEFINE_MANY",componentDidMount:"DEFINE_MANY",componentWillReceiveProps:"DEFINE_MANY",shouldComponentUpdate:"DEFINE_ONCE",componentWillUpdate:"DEFINE_MANY",componentDidUpdate:"DEFINE_MANY",componentWillUnmount:"DEFINE_MANY",updateComponent:"OVERRIDE_BASE"},g={displayName:function(t,e){t.displayName=e},mixins:function(t,e){if(e)for(var n=0;n<e.length;n++)c(t,e[n])},childContextTypes:function(t,e){t.childContextTypes=i({},t.childContextTypes,e)},contextTypes:function(t,e){t.contextTypes=i({},t.contextTypes,e)},getDefaultProps:function(t,e){t.getDefaultProps?t.getDefaultProps=p(t.getDefaultProps,e):t.getDefaultProps=e},propTypes:function(t,e){t.propTypes=i({},t.propTypes,e)},statics:function(t,e){l(t,e)},autobind:function(){}},E={componentDidMount:function(){this.__isMounted=!0}},x={componentWillUnmount:function(){this.__isMounted=!1}},_={replaceState:function(t,e){this.updater.enqueueReplaceState(this,t,e)},isMounted:function(){return!!this.__isMounted}},P=function(){};return i(P.prototype,t.prototype,_),m}var i=t(26),a=t(23),u=t(24),s="mixins";e.exports=o},{23:23,24:24,25:25,26:26}],22:[function(t,e,n){"use strict";function r(t){return function(){return t}}var o=function(){};o.thatReturns=r,o.thatReturnsFalse=r(!1),o.thatReturnsTrue=r(!0),o.thatReturnsNull=r(null),o.thatReturnsThis=function(){return this},o.thatReturnsArgument=function(t){return t},e.exports=o},{}],23:[function(t,e,n){"use strict";var r={};e.exports=r},{}],24:[function(t,e,n){"use strict";function r(t,e,n,r,i,a,u,s){if(o(e),!t){var c;if(void 0===e)c=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var l=[n,r,i,a,u,s],f=0;c=new Error(e.replace(/%s/g,function(){return l[f++]})),c.name="Invariant Violation"}throw c.framesToPop=1,c}}var o=function(t){};e.exports=r},{}],25:[function(t,e,n){"use strict";var r=t(22),o=r;e.exports=o},{22:22}],26:[function(t,e,n){"use strict";function r(t){if(null===t||void 0===t)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(t)}var o=Object.getOwnPropertySymbols,i=Object.prototype.hasOwnProperty,a=Object.prototype.propertyIsEnumerable;e.exports=function(){try{if(!Object.assign)return!1;var t=new String("abc");if(t[5]="de","5"===Object.getOwnPropertyNames(t)[0])return!1;for(var e={},n=0;n<10;n++)e["_"+String.fromCharCode(n)]=n;if("0123456789"!==Object.getOwnPropertyNames(e).map(function(t){return e[t]}).join(""))return!1;var r={};return"abcdefghijklmnopqrst".split("").forEach(function(t){r[t]=t}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},r)).join("")}catch(t){return!1}}()?Object.assign:function(t,e){for(var n,u,s=r(t),c=1;c<arguments.length;c++){n=Object(arguments[c]);for(var l in n)i.call(n,l)&&(s[l]=n[l]);if(o){u=o(n);for(var f=0;f<u.length;f++)a.call(n,u[f])&&(s[u[f]]=n[u[f]])}}return s}},{}],27:[function(t,e,n){"use strict";function r(t,e,n,r,o){}e.exports=r},{24:24,25:25,30:30}],28:[function(t,e,n){"use strict";var r=t(29);e.exports=function(t){return r(t,!1)}},{29:29}],29:[function(t,e,n){"use strict";var r=t(22),o=t(24),i=t(25),a=t(30),u=t(27);e.exports=function(t,e){function n(t){var e=t&&(w&&t[w]||t[N]);if("function"==typeof e)return e}function s(t,e){return t===e?0!==t||1/t==1/e:t!==t&&e!==e}function c(t){this.message=t,this.stack=""}function l(t){function n(n,r,i,u,s,l,f){if(u=u||A,l=l||i,f!==a)if(e)o(!1,"Calling PropTypes validators directly is not supported by the `prop-types` package. Use `PropTypes.checkPropTypes()` to call them. Read more at http://fb.me/use-check-prop-types");else;return null==r[i]?n?new c(null===r[i]?"The "+s+" `"+l+"` is marked as required in `"+u+"`, but its value is `null`.":"The "+s+" `"+l+"` is marked as required in `"+u+"`, but its value is `undefined`."):null:t(r,i,u,s,l)}var r=n.bind(null,!1);return r.isRequired=n.bind(null,!0),r}function f(t){function e(e,n,r,o,i,a){var u=e[n];if(E(u)!==t)return new c("Invalid "+o+" `"+i+"` of type `"+x(u)+"` supplied to `"+r+"`, expected `"+t+"`.");return null}return l(e)}function p(t){function e(e,n,r,o,i){if("function"!=typeof t)return new c("Property `"+i+"` of component `"+r+"` has invalid PropType notation inside arrayOf.");var u=e[n];if(!Array.isArray(u)){return new c("Invalid "+o+" `"+i+"` of type `"+E(u)+"` supplied to `"+r+"`, expected an array.")}for(var s=0;s<u.length;s++){var l=t(u,s,r,o,i+"["+s+"]",a);if(l instanceof Error)return l}return null}return l(e)}function d(t){function e(e,n,r,o,i){if(!(e[n]instanceof t)){var a=t.name||A;return new c("Invalid "+o+" `"+i+"` of type `"+P(e[n])+"` supplied to `"+r+"`, expected instance of `"+a+"`.")}return null}return l(e)}function y(t){function e(e,n,r,o,i){for(var a=e[n],u=0;u<t.length;u++)if(s(a,t[u]))return null;return new c("Invalid "+o+" `"+i+"` of value `"+a+"` supplied to `"+r+"`, expected one of "+JSON.stringify(t)+".")}return Array.isArray(t)?l(e):r.thatReturnsNull}function h(t){function e(e,n,r,o,i){if("function"!=typeof t)return new c("Property `"+i+"` of component `"+r+"` has invalid PropType notation inside objectOf.");var u=e[n],s=E(u);if("object"!==s)return new c("Invalid "+o+" `"+i+"` of type `"+s+"` supplied to `"+r+"`, expected an object.");for(var l in u)if(u.hasOwnProperty(l)){var f=t(u,l,r,o,i+"."+l,a);if(f instanceof Error)return f}return null}return l(e)}function m(t){function e(e,n,r,o,i){for(var u=0;u<t.length;u++){if(null==(0,t[u])(e,n,r,o,i,a))return null}return new c("Invalid "+o+" `"+i+"` supplied to `"+r+"`.")}if(!Array.isArray(t))return r.thatReturnsNull;for(var n=0;n<t.length;n++){var o=t[n];if("function"!=typeof o)return i(!1,"Invalid argument supplid to oneOfType. Expected an array of check functions, but received %s at index %s.",_(o),n),r.thatReturnsNull}return l(e)}function v(t){function e(e,n,r,o,i){var u=e[n],s=E(u);if("object"!==s)return new c("Invalid "+o+" `"+i+"` of type `"+s+"` supplied to `"+r+"`, expected `object`.");for(var l in t){var f=t[l];if(f){var p=f(u,l,r,o,i+"."+l,a);if(p)return p}}return null}return l(e)}function b(e){switch(typeof e){case"number":case"string":case"undefined":return!0;case"boolean":return!e;case"object":if(Array.isArray(e))return e.every(b);if(null===e||t(e))return!0;var r=n(e);if(!r)return!1;var o,i=r.call(e);if(r!==e.entries){for(;!(o=i.next()).done;)if(!b(o.value))return!1}else for(;!(o=i.next()).done;){var a=o.value;if(a&&!b(a[1]))return!1}return!0;default:return!1}}function g(t,e){return"symbol"===t||("Symbol"===e["@@toStringTag"]||"function"==typeof Symbol&&e instanceof Symbol)}function E(t){var e=typeof t;return Array.isArray(t)?"array":t instanceof RegExp?"object":g(e,t)?"symbol":e}function x(t){if(void 0===t||null===t)return""+t;var e=E(t);if("object"===e){if(t instanceof Date)return"date";if(t instanceof RegExp)return"regexp"}return e}function _(t){var e=x(t);switch(e){case"array":case"object":return"an "+e;case"boolean":case"date":case"regexp":return"a "+e;default:return e}}function P(t){return t.constructor&&t.constructor.name?t.constructor.name:A}var w="function"==typeof Symbol&&Symbol.iterator,N="@@iterator",A="<<anonymous>>",O={array:f("array"),bool:f("boolean"),func:f("function"),number:f("number"),object:f("object"),string:f("string"),symbol:f("symbol"),any:function(){return l(r.thatReturnsNull)}(),arrayOf:p,element:function(){function e(e,n,r,o,i){var a=e[n];if(!t(a)){return new c("Invalid "+o+" `"+i+"` of type `"+E(a)+"` supplied to `"+r+"`, expected a single ReactElement.")}return null}return l(e)}(),instanceOf:d,node:function(){function t(t,e,n,r,o){return b(t[e])?null:new c("Invalid "+r+" `"+o+"` supplied to `"+n+"`, expected a ReactNode.")}return l(t)}(),objectOf:h,oneOf:y,oneOfType:m,shape:v};return c.prototype=Error.prototype,O.checkPropTypes=u,O.PropTypes=O,O}},{22:22,24:24,25:25,27:27,30:30}],30:[function(t,e,n){"use strict";e.exports="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED"},{}]},{},[12])(12)});
 
-    __LiteMolReact = module.exports;
+    __LiteMolReact = __module__.exports;
 })();
 
 
 /**
- * ReactDOM v15.4.2
+ * ReactDOM v15.6.1
  *
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -51632,16 +51629,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 var __LiteMolReactDOM;
 (function () {
     var exports = {};
-    var module = {};
-    var require = void 0;
+    var __module__ = {};
 
     // REPLACE require("react") by __LiteMolReact
-    !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e(__LiteMolReact);else if("function"==typeof define&&define.amd)define(["react"],e);else{var t;t="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,t.ReactDOM=e(t.React)}}(function(e){return function(e){return e()}(function(){return function e(t,n,r){function o(a,s){if(!n[a]){if(!t[a]){var u="function"==typeof require&&require;if(!s&&u)return u(a,!0);if(i)return i(a,!0);var l=new Error("Cannot find module '"+a+"'");throw l.code="MODULE_NOT_FOUND",l}var c=n[a]={exports:{}};t[a][0].call(c.exports,function(e){var n=t[a][1][e];return o(n?n:e)},c,c.exports,e,t,n,r)}return n[a].exports}for(var i="function"==typeof require&&require,a=0;a<r.length;a++)o(r[a]);return o}({1:[function(e,t,n){"use strict";var r={Properties:{"aria-current":0,"aria-details":0,"aria-disabled":0,"aria-hidden":0,"aria-invalid":0,"aria-keyshortcuts":0,"aria-label":0,"aria-roledescription":0,"aria-autocomplete":0,"aria-checked":0,"aria-expanded":0,"aria-haspopup":0,"aria-level":0,"aria-modal":0,"aria-multiline":0,"aria-multiselectable":0,"aria-orientation":0,"aria-placeholder":0,"aria-pressed":0,"aria-readonly":0,"aria-required":0,"aria-selected":0,"aria-sort":0,"aria-valuemax":0,"aria-valuemin":0,"aria-valuenow":0,"aria-valuetext":0,"aria-atomic":0,"aria-busy":0,"aria-live":0,"aria-relevant":0,"aria-dropeffect":0,"aria-grabbed":0,"aria-activedescendant":0,"aria-colcount":0,"aria-colindex":0,"aria-colspan":0,"aria-controls":0,"aria-describedby":0,"aria-errormessage":0,"aria-flowto":0,"aria-labelledby":0,"aria-owns":0,"aria-posinset":0,"aria-rowcount":0,"aria-rowindex":0,"aria-rowspan":0,"aria-setsize":0},DOMAttributeNames:{},DOMPropertyNames:{}};t.exports=r},{}],2:[function(e,t,n){"use strict";var r=e(33),o=e(131),i={focusDOMComponent:function(){o(r.getNodeFromInstance(this))}};t.exports=i},{131:131,33:33}],3:[function(e,t,n){"use strict";function r(){var e=window.opera;return"object"==typeof e&&"function"==typeof e.version&&parseInt(e.version(),10)<=12}function o(e){return(e.ctrlKey||e.altKey||e.metaKey)&&!(e.ctrlKey&&e.altKey)}function i(e){switch(e){case"topCompositionStart":return k.compositionStart;case"topCompositionEnd":return k.compositionEnd;case"topCompositionUpdate":return k.compositionUpdate}}function a(e,t){return"topKeyDown"===e&&t.keyCode===_}function s(e,t){switch(e){case"topKeyUp":return y.indexOf(t.keyCode)!==-1;case"topKeyDown":return t.keyCode!==_;case"topKeyPress":case"topMouseDown":case"topBlur":return!0;default:return!1}}function u(e){var t=e.detail;return"object"==typeof t&&"data"in t?t.data:null}function l(e,t,n,r){var o,l;if(C?o=i(e):N?s(e,n)&&(o=k.compositionEnd):a(e,n)&&(o=k.compositionStart),!o)return null;x&&(N||o!==k.compositionStart?o===k.compositionEnd&&N&&(l=N.getData()):N=m.getPooled(r));var c=v.getPooled(o,t,n,r);if(l)c.data=l;else{var p=u(n);null!==p&&(c.data=p)}return f.accumulateTwoPhaseDispatches(c),c}function c(e,t){switch(e){case"topCompositionEnd":return u(t);case"topKeyPress":var n=t.which;return n!==w?null:(P=!0,T);case"topTextInput":var r=t.data;return r===T&&P?null:r;default:return null}}function p(e,t){if(N){if("topCompositionEnd"===e||!C&&s(e,t)){var n=N.getData();return m.release(N),N=null,n}return null}switch(e){case"topPaste":return null;case"topKeyPress":return t.which&&!o(t)?String.fromCharCode(t.which):null;case"topCompositionEnd":return x?null:t.data;default:return null}}function d(e,t,n,r){var o;if(o=E?c(e,n):p(e,n),!o)return null;var i=g.getPooled(k.beforeInput,t,n,r);return i.data=o,f.accumulateTwoPhaseDispatches(i),i}var f=e(19),h=e(123),m=e(20),v=e(78),g=e(82),y=[9,13,27,32],_=229,C=h.canUseDOM&&"CompositionEvent"in window,b=null;h.canUseDOM&&"documentMode"in document&&(b=document.documentMode);var E=h.canUseDOM&&"TextEvent"in window&&!b&&!r(),x=h.canUseDOM&&(!C||b&&b>8&&b<=11),w=32,T=String.fromCharCode(w),k={beforeInput:{phasedRegistrationNames:{bubbled:"onBeforeInput",captured:"onBeforeInputCapture"},dependencies:["topCompositionEnd","topKeyPress","topTextInput","topPaste"]},compositionEnd:{phasedRegistrationNames:{bubbled:"onCompositionEnd",captured:"onCompositionEndCapture"},dependencies:["topBlur","topCompositionEnd","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]},compositionStart:{phasedRegistrationNames:{bubbled:"onCompositionStart",captured:"onCompositionStartCapture"},dependencies:["topBlur","topCompositionStart","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]},compositionUpdate:{phasedRegistrationNames:{bubbled:"onCompositionUpdate",captured:"onCompositionUpdateCapture"},dependencies:["topBlur","topCompositionUpdate","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]}},P=!1,N=null,S={eventTypes:k,extractEvents:function(e,t,n,r){return[l(e,t,n,r),d(e,t,n,r)]}};t.exports=S},{123:123,19:19,20:20,78:78,82:82}],4:[function(e,t,n){"use strict";function r(e,t){return e+t.charAt(0).toUpperCase()+t.substring(1)}var o={animationIterationCount:!0,borderImageOutset:!0,borderImageSlice:!0,borderImageWidth:!0,boxFlex:!0,boxFlexGroup:!0,boxOrdinalGroup:!0,columnCount:!0,flex:!0,flexGrow:!0,flexPositive:!0,flexShrink:!0,flexNegative:!0,flexOrder:!0,gridRow:!0,gridColumn:!0,fontWeight:!0,lineClamp:!0,lineHeight:!0,opacity:!0,order:!0,orphans:!0,tabSize:!0,widows:!0,zIndex:!0,zoom:!0,fillOpacity:!0,floodOpacity:!0,stopOpacity:!0,strokeDasharray:!0,strokeDashoffset:!0,strokeMiterlimit:!0,strokeOpacity:!0,strokeWidth:!0},i=["Webkit","ms","Moz","O"];Object.keys(o).forEach(function(e){i.forEach(function(t){o[r(t,e)]=o[e]})});var a={background:{backgroundAttachment:!0,backgroundColor:!0,backgroundImage:!0,backgroundPositionX:!0,backgroundPositionY:!0,backgroundRepeat:!0},backgroundPosition:{backgroundPositionX:!0,backgroundPositionY:!0},border:{borderWidth:!0,borderStyle:!0,borderColor:!0},borderBottom:{borderBottomWidth:!0,borderBottomStyle:!0,borderBottomColor:!0},borderLeft:{borderLeftWidth:!0,borderLeftStyle:!0,borderLeftColor:!0},borderRight:{borderRightWidth:!0,borderRightStyle:!0,borderRightColor:!0},borderTop:{borderTopWidth:!0,borderTopStyle:!0,borderTopColor:!0},font:{fontStyle:!0,fontVariant:!0,fontWeight:!0,fontSize:!0,lineHeight:!0,fontFamily:!0},outline:{outlineWidth:!0,outlineStyle:!0,outlineColor:!0}},s={isUnitlessNumber:o,shorthandPropertyExpansions:a};t.exports=s},{}],5:[function(e,t,n){"use strict";var r=e(4),o=e(123),i=(e(58),e(125),e(94)),a=e(136),s=e(140),u=(e(142),s(function(e){return a(e)})),l=!1,c="cssFloat";if(o.canUseDOM){var p=document.createElement("div").style;try{p.font=""}catch(e){l=!0}void 0===document.documentElement.style.cssFloat&&(c="styleFloat")}var d={createMarkupForStyles:function(e,t){var n="";for(var r in e)if(e.hasOwnProperty(r)){var o=e[r];null!=o&&(n+=u(r)+":",n+=i(r,o,t)+";")}return n||null},setValueForStyles:function(e,t,n){var o=e.style;for(var a in t)if(t.hasOwnProperty(a)){var s=i(a,t[a],n);if("float"!==a&&"cssFloat"!==a||(a=c),s)o[a]=s;else{var u=l&&r.shorthandPropertyExpansions[a];if(u)for(var p in u)o[p]="";else o[a]=""}}}};t.exports=d},{123:123,125:125,136:136,140:140,142:142,4:4,58:58,94:94}],6:[function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var o=e(113),i=e(24),a=(e(137),function(){function e(t){r(this,e),this._callbacks=null,this._contexts=null,this._arg=t}return e.prototype.enqueue=function(e,t){this._callbacks=this._callbacks||[],this._callbacks.push(e),this._contexts=this._contexts||[],this._contexts.push(t)},e.prototype.notifyAll=function(){var e=this._callbacks,t=this._contexts,n=this._arg;if(e&&t){e.length!==t.length?o("24"):void 0,this._callbacks=null,this._contexts=null;for(var r=0;r<e.length;r++)e[r].call(t[r],n);e.length=0,t.length=0}},e.prototype.checkpoint=function(){return this._callbacks?this._callbacks.length:0},e.prototype.rollback=function(e){this._callbacks&&this._contexts&&(this._callbacks.length=e,this._contexts.length=e)},e.prototype.reset=function(){this._callbacks=null,this._contexts=null},e.prototype.destructor=function(){this.reset()},e}());t.exports=i.addPoolingTo(a)},{113:113,137:137,24:24}],7:[function(e,t,n){"use strict";function r(e){var t=e.nodeName&&e.nodeName.toLowerCase();return"select"===t||"input"===t&&"file"===e.type}function o(e){var t=x.getPooled(P.change,S,e,w(e));_.accumulateTwoPhaseDispatches(t),E.batchedUpdates(i,t)}function i(e){y.enqueueEvents(e),y.processEventQueue(!1)}function a(e,t){N=e,S=t,N.attachEvent("onchange",o)}function s(){N&&(N.detachEvent("onchange",o),N=null,S=null)}function u(e,t){if("topChange"===e)return t}function l(e,t,n){"topFocus"===e?(s(),a(t,n)):"topBlur"===e&&s()}function c(e,t){N=e,S=t,M=e.value,I=Object.getOwnPropertyDescriptor(e.constructor.prototype,"value"),Object.defineProperty(N,"value",A),N.attachEvent?N.attachEvent("onpropertychange",d):N.addEventListener("propertychange",d,!1)}function p(){N&&(delete N.value,N.detachEvent?N.detachEvent("onpropertychange",d):N.removeEventListener("propertychange",d,!1),N=null,S=null,M=null,I=null)}function d(e){if("value"===e.propertyName){var t=e.srcElement.value;t!==M&&(M=t,o(e))}}function f(e,t){if("topInput"===e)return t}function h(e,t,n){"topFocus"===e?(p(),c(t,n)):"topBlur"===e&&p()}function m(e,t){if(("topSelectionChange"===e||"topKeyUp"===e||"topKeyDown"===e)&&N&&N.value!==M)return M=N.value,S}function v(e){return e.nodeName&&"input"===e.nodeName.toLowerCase()&&("checkbox"===e.type||"radio"===e.type)}function g(e,t){if("topClick"===e)return t}var y=e(16),_=e(19),C=e(123),b=e(33),E=e(71),x=e(80),w=e(102),T=e(110),k=e(111),P={change:{phasedRegistrationNames:{bubbled:"onChange",captured:"onChangeCapture"},dependencies:["topBlur","topChange","topClick","topFocus","topInput","topKeyDown","topKeyUp","topSelectionChange"]}},N=null,S=null,M=null,I=null,O=!1;C.canUseDOM&&(O=T("change")&&(!document.documentMode||document.documentMode>8));var R=!1;C.canUseDOM&&(R=T("input")&&(!document.documentMode||document.documentMode>11));var A={get:function(){return I.get.call(this)},set:function(e){M=""+e,I.set.call(this,e)}},D={eventTypes:P,extractEvents:function(e,t,n,o){var i,a,s=t?b.getNodeFromInstance(t):window;if(r(s)?O?i=u:a=l:k(s)?R?i=f:(i=m,a=h):v(s)&&(i=g),i){var c=i(e,t);if(c){var p=x.getPooled(P.change,c,n,o);return p.type="change",_.accumulateTwoPhaseDispatches(p),p}}a&&a(e,s,t)}};t.exports=D},{102:102,110:110,111:111,123:123,16:16,19:19,33:33,71:71,80:80}],8:[function(e,t,n){"use strict";function r(e,t){return Array.isArray(t)&&(t=t[1]),t?t.nextSibling:e.firstChild}function o(e,t,n){c.insertTreeBefore(e,t,n)}function i(e,t,n){Array.isArray(t)?s(e,t[0],t[1],n):m(e,t,n)}function a(e,t){if(Array.isArray(t)){var n=t[1];t=t[0],u(e,t,n),e.removeChild(n)}e.removeChild(t)}function s(e,t,n,r){for(var o=t;;){var i=o.nextSibling;if(m(e,o,r),o===n)break;o=i}}function u(e,t,n){for(;;){var r=t.nextSibling;if(r===n)break;e.removeChild(r)}}function l(e,t,n){var r=e.parentNode,o=e.nextSibling;o===t?n&&m(r,document.createTextNode(n),o):n?(h(o,n),u(r,o,t)):u(r,e,t)}var c=e(9),p=e(13),d=(e(33),e(58),e(93)),f=e(115),h=e(116),m=d(function(e,t,n){e.insertBefore(t,n)}),v=p.dangerouslyReplaceNodeWithMarkup,g={dangerouslyReplaceNodeWithMarkup:v,replaceDelimitedText:l,processUpdates:function(e,t){for(var n=0;n<t.length;n++){var s=t[n];switch(s.type){case"INSERT_MARKUP":o(e,s.content,r(e,s.afterNode));break;case"MOVE_EXISTING":i(e,s.fromNode,r(e,s.afterNode));break;case"SET_MARKUP":f(e,s.content);break;case"TEXT_CONTENT":h(e,s.content);break;case"REMOVE_NODE":a(e,s.fromNode)}}}};t.exports=g},{115:115,116:116,13:13,33:33,58:58,9:9,93:93}],9:[function(e,t,n){"use strict";function r(e){if(v){var t=e.node,n=e.children;if(n.length)for(var r=0;r<n.length;r++)g(t,n[r],null);else null!=e.html?p(t,e.html):null!=e.text&&f(t,e.text)}}function o(e,t){e.parentNode.replaceChild(t.node,e),r(t)}function i(e,t){v?e.children.push(t):e.node.appendChild(t.node)}function a(e,t){v?e.html=t:p(e.node,t)}function s(e,t){v?e.text=t:f(e.node,t)}function u(){return this.node.nodeName}function l(e){return{node:e,children:[],html:null,text:null,toString:u}}var c=e(10),p=e(115),d=e(93),f=e(116),h=1,m=11,v="undefined"!=typeof document&&"number"==typeof document.documentMode||"undefined"!=typeof navigator&&"string"==typeof navigator.userAgent&&/\bEdge\/\d/.test(navigator.userAgent),g=d(function(e,t,n){t.node.nodeType===m||t.node.nodeType===h&&"object"===t.node.nodeName.toLowerCase()&&(null==t.node.namespaceURI||t.node.namespaceURI===c.html)?(r(t),e.insertBefore(t.node,n)):(e.insertBefore(t.node,n),r(t))});l.insertTreeBefore=g,l.replaceChildWithTree=o,l.queueChild=i,l.queueHTML=a,l.queueText=s,t.exports=l},{10:10,115:115,116:116,93:93}],10:[function(e,t,n){"use strict";var r={html:"http://www.w3.org/1999/xhtml",mathml:"http://www.w3.org/1998/Math/MathML",svg:"http://www.w3.org/2000/svg"};t.exports=r},{}],11:[function(e,t,n){"use strict";function r(e,t){return(e&t)===t}var o=e(113),i=(e(137),{MUST_USE_PROPERTY:1,HAS_BOOLEAN_VALUE:4,HAS_NUMERIC_VALUE:8,HAS_POSITIVE_NUMERIC_VALUE:24,HAS_OVERLOADED_BOOLEAN_VALUE:32,injectDOMPropertyConfig:function(e){var t=i,n=e.Properties||{},a=e.DOMAttributeNamespaces||{},u=e.DOMAttributeNames||{},l=e.DOMPropertyNames||{},c=e.DOMMutationMethods||{};e.isCustomAttribute&&s._isCustomAttributeFunctions.push(e.isCustomAttribute);for(var p in n){s.properties.hasOwnProperty(p)?o("48",p):void 0;var d=p.toLowerCase(),f=n[p],h={attributeName:d,attributeNamespace:null,propertyName:p,mutationMethod:null,mustUseProperty:r(f,t.MUST_USE_PROPERTY),hasBooleanValue:r(f,t.HAS_BOOLEAN_VALUE),hasNumericValue:r(f,t.HAS_NUMERIC_VALUE),hasPositiveNumericValue:r(f,t.HAS_POSITIVE_NUMERIC_VALUE),hasOverloadedBooleanValue:r(f,t.HAS_OVERLOADED_BOOLEAN_VALUE)};if(h.hasBooleanValue+h.hasNumericValue+h.hasOverloadedBooleanValue<=1?void 0:o("50",p),u.hasOwnProperty(p)){var m=u[p];h.attributeName=m}a.hasOwnProperty(p)&&(h.attributeNamespace=a[p]),l.hasOwnProperty(p)&&(h.propertyName=l[p]),c.hasOwnProperty(p)&&(h.mutationMethod=c[p]),s.properties[p]=h}}}),a=":A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD",s={ID_ATTRIBUTE_NAME:"data-reactid",ROOT_ATTRIBUTE_NAME:"data-reactroot",ATTRIBUTE_NAME_START_CHAR:a,ATTRIBUTE_NAME_CHAR:a+"\\-.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040",properties:{},getPossibleStandardName:null,_isCustomAttributeFunctions:[],isCustomAttribute:function(e){for(var t=0;t<s._isCustomAttributeFunctions.length;t++){var n=s._isCustomAttributeFunctions[t];if(n(e))return!0}return!1},injection:i};t.exports=s},{113:113,137:137}],12:[function(e,t,n){"use strict";function r(e){return!!l.hasOwnProperty(e)||!u.hasOwnProperty(e)&&(s.test(e)?(l[e]=!0,!0):(u[e]=!0,!1))}function o(e,t){return null==t||e.hasBooleanValue&&!t||e.hasNumericValue&&isNaN(t)||e.hasPositiveNumericValue&&t<1||e.hasOverloadedBooleanValue&&t===!1}var i=e(11),a=(e(33),e(58),e(112)),s=(e(142),new RegExp("^["+i.ATTRIBUTE_NAME_START_CHAR+"]["+i.ATTRIBUTE_NAME_CHAR+"]*$")),u={},l={},c={createMarkupForID:function(e){return i.ID_ATTRIBUTE_NAME+"="+a(e)},setAttributeForID:function(e,t){e.setAttribute(i.ID_ATTRIBUTE_NAME,t)},createMarkupForRoot:function(){return i.ROOT_ATTRIBUTE_NAME+'=""'},setAttributeForRoot:function(e){e.setAttribute(i.ROOT_ATTRIBUTE_NAME,"")},createMarkupForProperty:function(e,t){var n=i.properties.hasOwnProperty(e)?i.properties[e]:null;if(n){if(o(n,t))return"";var r=n.attributeName;return n.hasBooleanValue||n.hasOverloadedBooleanValue&&t===!0?r+'=""':r+"="+a(t)}return i.isCustomAttribute(e)?null==t?"":e+"="+a(t):null},createMarkupForCustomAttribute:function(e,t){return r(e)&&null!=t?e+"="+a(t):""},setValueForProperty:function(e,t,n){var r=i.properties.hasOwnProperty(t)?i.properties[t]:null;if(r){var a=r.mutationMethod;if(a)a(e,n);else{if(o(r,n))return void this.deleteValueForProperty(e,t);if(r.mustUseProperty)e[r.propertyName]=n;else{var s=r.attributeName,u=r.attributeNamespace;u?e.setAttributeNS(u,s,""+n):r.hasBooleanValue||r.hasOverloadedBooleanValue&&n===!0?e.setAttribute(s,""):e.setAttribute(s,""+n)}}}else if(i.isCustomAttribute(t))return void c.setValueForAttribute(e,t,n)},setValueForAttribute:function(e,t,n){r(t)&&(null==n?e.removeAttribute(t):e.setAttribute(t,""+n))},deleteValueForAttribute:function(e,t){e.removeAttribute(t)},deleteValueForProperty:function(e,t){var n=i.properties.hasOwnProperty(t)?i.properties[t]:null;if(n){var r=n.mutationMethod;if(r)r(e,void 0);else if(n.mustUseProperty){var o=n.propertyName;n.hasBooleanValue?e[o]=!1:e[o]=""}else e.removeAttribute(n.attributeName)}else i.isCustomAttribute(t)&&e.removeAttribute(t)}};t.exports=c},{11:11,112:112,142:142,33:33,58:58}],13:[function(e,t,n){"use strict";var r=e(113),o=e(9),i=e(123),a=e(128),s=e(129),u=(e(137),{dangerouslyReplaceNodeWithMarkup:function(e,t){if(i.canUseDOM?void 0:r("56"),t?void 0:r("57"),"HTML"===e.nodeName?r("58"):void 0,"string"==typeof t){var n=a(t,s)[0];e.parentNode.replaceChild(n,e)}else o.replaceChildWithTree(e,t)}});t.exports=u},{113:113,123:123,128:128,129:129,137:137,9:9}],14:[function(e,t,n){"use strict";var r=["ResponderEventPlugin","SimpleEventPlugin","TapEventPlugin","EnterLeaveEventPlugin","ChangeEventPlugin","SelectEventPlugin","BeforeInputEventPlugin"];t.exports=r},{}],15:[function(e,t,n){"use strict";var r=e(19),o=e(33),i=e(84),a={mouseEnter:{registrationName:"onMouseEnter",dependencies:["topMouseOut","topMouseOver"]},mouseLeave:{registrationName:"onMouseLeave",dependencies:["topMouseOut","topMouseOver"]}},s={eventTypes:a,extractEvents:function(e,t,n,s){if("topMouseOver"===e&&(n.relatedTarget||n.fromElement))return null;if("topMouseOut"!==e&&"topMouseOver"!==e)return null;var u;if(s.window===s)u=s;else{var l=s.ownerDocument;u=l?l.defaultView||l.parentWindow:window}var c,p;if("topMouseOut"===e){c=t;var d=n.relatedTarget||n.toElement;p=d?o.getClosestInstanceFromNode(d):null}else c=null,p=t;if(c===p)return null;var f=null==c?u:o.getNodeFromInstance(c),h=null==p?u:o.getNodeFromInstance(p),m=i.getPooled(a.mouseLeave,c,n,s);m.type="mouseleave",m.target=f,m.relatedTarget=h;var v=i.getPooled(a.mouseEnter,p,n,s);return v.type="mouseenter",v.target=h,v.relatedTarget=f,r.accumulateEnterLeaveDispatches(m,v,c,p),[m,v]}};t.exports=s},{19:19,33:33,84:84}],16:[function(e,t,n){"use strict";function r(e){return"button"===e||"input"===e||"select"===e||"textarea"===e}function o(e,t,n){switch(e){case"onClick":case"onClickCapture":case"onDoubleClick":case"onDoubleClickCapture":case"onMouseDown":case"onMouseDownCapture":case"onMouseMove":case"onMouseMoveCapture":case"onMouseUp":case"onMouseUpCapture":return!(!n.disabled||!r(t));default:return!1}}var i=e(113),a=e(17),s=e(18),u=e(50),l=e(91),c=e(98),p=(e(137),{}),d=null,f=function(e,t){e&&(s.executeDispatchesInOrder(e,t),e.isPersistent()||e.constructor.release(e))},h=function(e){return f(e,!0)},m=function(e){return f(e,!1)},v=function(e){return"."+e._rootNodeID},g={injection:{injectEventPluginOrder:a.injectEventPluginOrder,injectEventPluginsByName:a.injectEventPluginsByName},putListener:function(e,t,n){"function"!=typeof n?i("94",t,typeof n):void 0;var r=v(e),o=p[t]||(p[t]={});o[r]=n;var s=a.registrationNameModules[t];s&&s.didPutListener&&s.didPutListener(e,t,n)},getListener:function(e,t){var n=p[t];if(o(t,e._currentElement.type,e._currentElement.props))return null;var r=v(e);return n&&n[r]},deleteListener:function(e,t){var n=a.registrationNameModules[t];n&&n.willDeleteListener&&n.willDeleteListener(e,t);var r=p[t];if(r){var o=v(e);delete r[o]}},deleteAllListeners:function(e){var t=v(e);for(var n in p)if(p.hasOwnProperty(n)&&p[n][t]){var r=a.registrationNameModules[n];r&&r.willDeleteListener&&r.willDeleteListener(e,n),delete p[n][t]}},extractEvents:function(e,t,n,r){for(var o,i=a.plugins,s=0;s<i.length;s++){var u=i[s];if(u){var c=u.extractEvents(e,t,n,r);c&&(o=l(o,c))}}return o},enqueueEvents:function(e){e&&(d=l(d,e))},processEventQueue:function(e){var t=d;d=null,e?c(t,h):c(t,m),d?i("95"):void 0,u.rethrowCaughtError()},__purge:function(){p={}},__getListenerBank:function(){return p}};t.exports=g},{113:113,137:137,17:17,18:18,50:50,91:91,98:98}],17:[function(e,t,n){"use strict";function r(){if(s)for(var e in u){var t=u[e],n=s.indexOf(e);if(n>-1?void 0:a("96",e),!l.plugins[n]){t.extractEvents?void 0:a("97",e),l.plugins[n]=t;var r=t.eventTypes;for(var i in r)o(r[i],t,i)?void 0:a("98",i,e)}}}function o(e,t,n){l.eventNameDispatchConfigs.hasOwnProperty(n)?a("99",n):void 0,l.eventNameDispatchConfigs[n]=e;var r=e.phasedRegistrationNames;if(r){for(var o in r)if(r.hasOwnProperty(o)){var s=r[o];i(s,t,n)}return!0}return!!e.registrationName&&(i(e.registrationName,t,n),!0)}function i(e,t,n){l.registrationNameModules[e]?a("100",e):void 0,l.registrationNameModules[e]=t,l.registrationNameDependencies[e]=t.eventTypes[n].dependencies}var a=e(113),s=(e(137),null),u={},l={plugins:[],eventNameDispatchConfigs:{},registrationNameModules:{},registrationNameDependencies:{},possibleRegistrationNames:null,injectEventPluginOrder:function(e){s?a("101"):void 0,s=Array.prototype.slice.call(e),r()},injectEventPluginsByName:function(e){var t=!1;for(var n in e)if(e.hasOwnProperty(n)){var o=e[n];u.hasOwnProperty(n)&&u[n]===o||(u[n]?a("102",n):void 0,u[n]=o,t=!0)}t&&r()},getPluginModuleForEvent:function(e){var t=e.dispatchConfig;if(t.registrationName)return l.registrationNameModules[t.registrationName]||null;if(void 0!==t.phasedRegistrationNames){var n=t.phasedRegistrationNames;for(var r in n)if(n.hasOwnProperty(r)){var o=l.registrationNameModules[n[r]];if(o)return o}}return null},_resetEventPlugins:function(){s=null;for(var e in u)u.hasOwnProperty(e)&&delete u[e];l.plugins.length=0;var t=l.eventNameDispatchConfigs;for(var n in t)t.hasOwnProperty(n)&&delete t[n];var r=l.registrationNameModules;for(var o in r)r.hasOwnProperty(o)&&delete r[o]}};t.exports=l},{113:113,137:137}],18:[function(e,t,n){"use strict";function r(e){return"topMouseUp"===e||"topTouchEnd"===e||"topTouchCancel"===e}function o(e){return"topMouseMove"===e||"topTouchMove"===e}function i(e){return"topMouseDown"===e||"topTouchStart"===e}function a(e,t,n,r){var o=e.type||"unknown-event";e.currentTarget=g.getNodeFromInstance(r),t?m.invokeGuardedCallbackWithCatch(o,n,e):m.invokeGuardedCallback(o,n,e),e.currentTarget=null}function s(e,t){var n=e._dispatchListeners,r=e._dispatchInstances;if(Array.isArray(n))for(var o=0;o<n.length&&!e.isPropagationStopped();o++)a(e,t,n[o],r[o]);else n&&a(e,t,n,r);e._dispatchListeners=null,e._dispatchInstances=null}function u(e){var t=e._dispatchListeners,n=e._dispatchInstances;if(Array.isArray(t)){for(var r=0;r<t.length&&!e.isPropagationStopped();r++)if(t[r](e,n[r]))return n[r]}else if(t&&t(e,n))return n;return null}function l(e){var t=u(e);return e._dispatchInstances=null,e._dispatchListeners=null,t}function c(e){var t=e._dispatchListeners,n=e._dispatchInstances;Array.isArray(t)?h("103"):void 0,e.currentTarget=t?g.getNodeFromInstance(n):null;var r=t?t(e):null;return e.currentTarget=null,e._dispatchListeners=null,e._dispatchInstances=null,r}function p(e){return!!e._dispatchListeners}var d,f,h=e(113),m=e(50),v=(e(137),e(142),{injectComponentTree:function(e){d=e},injectTreeTraversal:function(e){f=e}}),g={isEndish:r,isMoveish:o,isStartish:i,executeDirectDispatch:c,executeDispatchesInOrder:s,executeDispatchesInOrderStopAtTrue:l,hasDispatches:p,getInstanceFromNode:function(e){return d.getInstanceFromNode(e)},getNodeFromInstance:function(e){return d.getNodeFromInstance(e)},isAncestor:function(e,t){return f.isAncestor(e,t)},getLowestCommonAncestor:function(e,t){return f.getLowestCommonAncestor(e,t)},getParentInstance:function(e){return f.getParentInstance(e)},traverseTwoPhase:function(e,t,n){return f.traverseTwoPhase(e,t,n)},traverseEnterLeave:function(e,t,n,r,o){return f.traverseEnterLeave(e,t,n,r,o)},injection:v};t.exports=g},{113:113,137:137,142:142,50:50}],19:[function(e,t,n){"use strict";function r(e,t,n){var r=t.dispatchConfig.phasedRegistrationNames[n];return g(e,r)}function o(e,t,n){var o=r(e,n,t);o&&(n._dispatchListeners=m(n._dispatchListeners,o),n._dispatchInstances=m(n._dispatchInstances,e))}function i(e){e&&e.dispatchConfig.phasedRegistrationNames&&h.traverseTwoPhase(e._targetInst,o,e)}function a(e){if(e&&e.dispatchConfig.phasedRegistrationNames){var t=e._targetInst,n=t?h.getParentInstance(t):null;h.traverseTwoPhase(n,o,e)}}function s(e,t,n){if(n&&n.dispatchConfig.registrationName){var r=n.dispatchConfig.registrationName,o=g(e,r);o&&(n._dispatchListeners=m(n._dispatchListeners,o),n._dispatchInstances=m(n._dispatchInstances,e))}}function u(e){e&&e.dispatchConfig.registrationName&&s(e._targetInst,null,e)}function l(e){v(e,i)}function c(e){v(e,a)}function p(e,t,n,r){h.traverseEnterLeave(n,r,s,e,t)}function d(e){v(e,u)}var f=e(16),h=e(18),m=e(91),v=e(98),g=(e(142),f.getListener),y={accumulateTwoPhaseDispatches:l,accumulateTwoPhaseDispatchesSkipTarget:c,accumulateDirectDispatches:d,accumulateEnterLeaveDispatches:p};t.exports=y},{142:142,16:16,18:18,91:91,98:98}],20:[function(e,t,n){"use strict";function r(e){this._root=e,this._startText=this.getText(),this._fallbackText=null}var o=e(143),i=e(24),a=e(107);o(r.prototype,{destructor:function(){this._root=null,this._startText=null,this._fallbackText=null},getText:function(){return"value"in this._root?this._root.value:this._root[a()]},getData:function(){if(this._fallbackText)return this._fallbackText;var e,t,n=this._startText,r=n.length,o=this.getText(),i=o.length;for(e=0;e<r&&n[e]===o[e];e++);var a=r-e;for(t=1;t<=a&&n[r-t]===o[i-t];t++);var s=t>1?1-t:void 0;return this._fallbackText=o.slice(e,s),this._fallbackText}}),i.addPoolingTo(r),t.exports=r},{107:107,143:143,24:24}],21:[function(e,t,n){"use strict";var r=e(11),o=r.injection.MUST_USE_PROPERTY,i=r.injection.HAS_BOOLEAN_VALUE,a=r.injection.HAS_NUMERIC_VALUE,s=r.injection.HAS_POSITIVE_NUMERIC_VALUE,u=r.injection.HAS_OVERLOADED_BOOLEAN_VALUE,l={isCustomAttribute:RegExp.prototype.test.bind(new RegExp("^(data|aria)-["+r.ATTRIBUTE_NAME_CHAR+"]*$")),Properties:{accept:0,acceptCharset:0,accessKey:0,action:0,allowFullScreen:i,allowTransparency:0,alt:0,as:0,async:i,autoComplete:0,autoPlay:i,capture:i,cellPadding:0,cellSpacing:0,charSet:0,challenge:0,checked:o|i,cite:0,classID:0,className:0,cols:s,colSpan:0,content:0,contentEditable:0,contextMenu:0,controls:i,coords:0,crossOrigin:0,data:0,dateTime:0,default:i,defer:i,dir:0,disabled:i,download:u,draggable:0,encType:0,form:0,formAction:0,formEncType:0,formMethod:0,formNoValidate:i,formTarget:0,frameBorder:0,headers:0,height:0,hidden:i,high:0,href:0,hrefLang:0,htmlFor:0,httpEquiv:0,icon:0,id:0,inputMode:0,integrity:0,is:0,keyParams:0,keyType:0,kind:0,label:0,lang:0,list:0,loop:i,low:0,manifest:0,marginHeight:0,marginWidth:0,max:0,maxLength:0,media:0,mediaGroup:0,method:0,min:0,minLength:0,multiple:o|i,muted:o|i,name:0,nonce:0,noValidate:i,open:i,optimum:0,pattern:0,placeholder:0,playsInline:i,poster:0,preload:0,profile:0,radioGroup:0,readOnly:i,referrerPolicy:0,rel:0,required:i,reversed:i,role:0,rows:s,rowSpan:a,sandbox:0,scope:0,scoped:i,scrolling:0,seamless:i,selected:o|i,shape:0,size:s,sizes:0,span:s,spellCheck:0,src:0,srcDoc:0,srcLang:0,srcSet:0,start:a,step:0,style:0,summary:0,tabIndex:0,target:0,title:0,type:0,useMap:0,value:0,width:0,wmode:0,wrap:0,about:0,datatype:0,inlist:0,prefix:0,property:0,resource:0,typeof:0,vocab:0,autoCapitalize:0,autoCorrect:0,autoSave:0,color:0,itemProp:0,itemScope:i,itemType:0,itemID:0,itemRef:0,results:0,security:0,unselectable:0},DOMAttributeNames:{acceptCharset:"accept-charset",className:"class",htmlFor:"for",httpEquiv:"http-equiv"},DOMPropertyNames:{}};t.exports=l},{11:11}],22:[function(e,t,n){"use strict";function r(e){var t=/[=:]/g,n={"=":"=0",":":"=2"},r=(""+e).replace(t,function(e){return n[e]});return"$"+r}function o(e){var t=/(=0|=2)/g,n={"=0":"=","=2":":"},r="."===e[0]&&"$"===e[1]?e.substring(2):e.substring(1);return(""+r).replace(t,function(e){return n[e]})}var i={escape:r,unescape:o};t.exports=i},{}],23:[function(e,t,n){"use strict";function r(e){null!=e.checkedLink&&null!=e.valueLink?s("87"):void 0}function o(e){r(e),null!=e.value||null!=e.onChange?s("88"):void 0}function i(e){r(e),null!=e.checked||null!=e.onChange?s("89"):void 0}function a(e){if(e){var t=e.getName();if(t)return" Check the render method of `"+t+"`."}return""}var s=e(113),u=e(121),l=e(64),c=(e(137),e(142),{button:!0,checkbox:!0,image:!0,hidden:!0,radio:!0,reset:!0,submit:!0}),p={value:function(e,t,n){return!e[t]||c[e.type]||e.onChange||e.readOnly||e.disabled?null:new Error("You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.")},checked:function(e,t,n){return!e[t]||e.onChange||e.readOnly||e.disabled?null:new Error("You provided a `checked` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultChecked`. Otherwise, set either `onChange` or `readOnly`.")},onChange:u.PropTypes.func},d={},f={checkPropTypes:function(e,t,n){for(var r in p){if(p.hasOwnProperty(r))var o=p[r](t,r,e,"prop",null,l);o instanceof Error&&!(o.message in d)&&(d[o.message]=!0,a(n))}},getValue:function(e){return e.valueLink?(o(e),e.valueLink.value):e.value},getChecked:function(e){return e.checkedLink?(i(e),e.checkedLink.value):e.checked},executeOnChange:function(e,t){return e.valueLink?(o(e),e.valueLink.requestChange(t.target.value)):e.checkedLink?(i(e),e.checkedLink.requestChange(t.target.checked)):e.onChange?e.onChange.call(void 0,t):void 0}};t.exports=f},{113:113,121:121,137:137,142:142,64:64}],24:[function(e,t,n){"use strict";var r=e(113),o=(e(137),function(e){var t=this;if(t.instancePool.length){var n=t.instancePool.pop();return t.call(n,e),n}return new t(e)}),i=function(e,t){var n=this;if(n.instancePool.length){var r=n.instancePool.pop();return n.call(r,e,t),r}return new n(e,t)},a=function(e,t,n){var r=this;if(r.instancePool.length){var o=r.instancePool.pop();return r.call(o,e,t,n),o}return new r(e,t,n)},s=function(e,t,n,r){var o=this;if(o.instancePool.length){var i=o.instancePool.pop();return o.call(i,e,t,n,r),i}return new o(e,t,n,r)},u=function(e){var t=this;e instanceof t?void 0:r("25"),e.destructor(),t.instancePool.length<t.poolSize&&t.instancePool.push(e)},l=10,c=o,p=function(e,t){var n=e;return n.instancePool=[],n.getPooled=t||c,n.poolSize||(n.poolSize=l),n.release=u,n},d={addPoolingTo:p,oneArgumentPooler:o,twoArgumentPooler:i,threeArgumentPooler:a,fourArgumentPooler:s};t.exports=d},{113:113,137:137}],25:[function(e,t,n){"use strict";function r(e){return Object.prototype.hasOwnProperty.call(e,m)||(e[m]=f++,p[e[m]]={}),p[e[m]]}var o,i=e(143),a=e(17),s=e(51),u=e(90),l=e(108),c=e(110),p={},d=!1,f=0,h={topAbort:"abort",topAnimationEnd:l("animationend")||"animationend",topAnimationIteration:l("animationiteration")||"animationiteration",topAnimationStart:l("animationstart")||"animationstart",topBlur:"blur",topCanPlay:"canplay",topCanPlayThrough:"canplaythrough",topChange:"change",topClick:"click",topCompositionEnd:"compositionend",topCompositionStart:"compositionstart",topCompositionUpdate:"compositionupdate",topContextMenu:"contextmenu",topCopy:"copy",topCut:"cut",topDoubleClick:"dblclick",topDrag:"drag",topDragEnd:"dragend",topDragEnter:"dragenter",topDragExit:"dragexit",topDragLeave:"dragleave",topDragOver:"dragover",topDragStart:"dragstart",topDrop:"drop",topDurationChange:"durationchange",topEmptied:"emptied",topEncrypted:"encrypted",topEnded:"ended",topError:"error",topFocus:"focus",topInput:"input",topKeyDown:"keydown",topKeyPress:"keypress",topKeyUp:"keyup",topLoadedData:"loadeddata",topLoadedMetadata:"loadedmetadata",topLoadStart:"loadstart",topMouseDown:"mousedown",topMouseMove:"mousemove",topMouseOut:"mouseout",topMouseOver:"mouseover",topMouseUp:"mouseup",topPaste:"paste",topPause:"pause",
-topPlay:"play",topPlaying:"playing",topProgress:"progress",topRateChange:"ratechange",topScroll:"scroll",topSeeked:"seeked",topSeeking:"seeking",topSelectionChange:"selectionchange",topStalled:"stalled",topSuspend:"suspend",topTextInput:"textInput",topTimeUpdate:"timeupdate",topTouchCancel:"touchcancel",topTouchEnd:"touchend",topTouchMove:"touchmove",topTouchStart:"touchstart",topTransitionEnd:l("transitionend")||"transitionend",topVolumeChange:"volumechange",topWaiting:"waiting",topWheel:"wheel"},m="_reactListenersID"+String(Math.random()).slice(2),v=i({},s,{ReactEventListener:null,injection:{injectReactEventListener:function(e){e.setHandleTopLevel(v.handleTopLevel),v.ReactEventListener=e}},setEnabled:function(e){v.ReactEventListener&&v.ReactEventListener.setEnabled(e)},isEnabled:function(){return!(!v.ReactEventListener||!v.ReactEventListener.isEnabled())},listenTo:function(e,t){for(var n=t,o=r(n),i=a.registrationNameDependencies[e],s=0;s<i.length;s++){var u=i[s];o.hasOwnProperty(u)&&o[u]||("topWheel"===u?c("wheel")?v.ReactEventListener.trapBubbledEvent("topWheel","wheel",n):c("mousewheel")?v.ReactEventListener.trapBubbledEvent("topWheel","mousewheel",n):v.ReactEventListener.trapBubbledEvent("topWheel","DOMMouseScroll",n):"topScroll"===u?c("scroll",!0)?v.ReactEventListener.trapCapturedEvent("topScroll","scroll",n):v.ReactEventListener.trapBubbledEvent("topScroll","scroll",v.ReactEventListener.WINDOW_HANDLE):"topFocus"===u||"topBlur"===u?(c("focus",!0)?(v.ReactEventListener.trapCapturedEvent("topFocus","focus",n),v.ReactEventListener.trapCapturedEvent("topBlur","blur",n)):c("focusin")&&(v.ReactEventListener.trapBubbledEvent("topFocus","focusin",n),v.ReactEventListener.trapBubbledEvent("topBlur","focusout",n)),o.topBlur=!0,o.topFocus=!0):h.hasOwnProperty(u)&&v.ReactEventListener.trapBubbledEvent(u,h[u],n),o[u]=!0)}},trapBubbledEvent:function(e,t,n){return v.ReactEventListener.trapBubbledEvent(e,t,n)},trapCapturedEvent:function(e,t,n){return v.ReactEventListener.trapCapturedEvent(e,t,n)},supportsEventPageXY:function(){if(!document.createEvent)return!1;var e=document.createEvent("MouseEvent");return null!=e&&"pageX"in e},ensureScrollValueMonitoring:function(){if(void 0===o&&(o=v.supportsEventPageXY()),!o&&!d){var e=u.refreshScrollValues;v.ReactEventListener.monitorScrollValue(e),d=!0}}});t.exports=v},{108:108,110:110,143:143,17:17,51:51,90:90}],26:[function(e,t,n){(function(n){"use strict";function r(e,t,n,r){var o=void 0===e[n];null!=t&&o&&(e[n]=i(t,!0))}var o=e(66),i=e(109),a=(e(22),e(117)),s=e(118);e(142);"undefined"!=typeof n&&n.env,1;var u={instantiateChildren:function(e,t,n,o){if(null==e)return null;var i={};return s(e,r,i),i},updateChildren:function(e,t,n,r,s,u,l,c,p){if(t||e){var d,f;for(d in t)if(t.hasOwnProperty(d)){f=e&&e[d];var h=f&&f._currentElement,m=t[d];if(null!=f&&a(h,m))o.receiveComponent(f,m,s,c),t[d]=f;else{f&&(r[d]=o.getHostNode(f),o.unmountComponent(f,!1));var v=i(m,!0);t[d]=v;var g=o.mountComponent(v,s,u,l,c,p);n.push(g)}}for(d in e)!e.hasOwnProperty(d)||t&&t.hasOwnProperty(d)||(f=e[d],r[d]=o.getHostNode(f),o.unmountComponent(f,!1))}},unmountChildren:function(e,t){for(var n in e)if(e.hasOwnProperty(n)){var r=e[n];o.unmountComponent(r,t)}}};t.exports=u}).call(this,void 0)},{109:109,117:117,118:118,142:142,22:22,66:66}],27:[function(e,t,n){"use strict";var r=e(8),o=e(37),i={processChildrenUpdates:o.dangerouslyProcessChildrenUpdates,replaceNodeWithMarkup:r.dangerouslyReplaceNodeWithMarkup};t.exports=i},{37:37,8:8}],28:[function(e,t,n){"use strict";var r=e(113),o=(e(137),!1),i={replaceNodeWithMarkup:null,processChildrenUpdates:null,injection:{injectEnvironment:function(e){o?r("104"):void 0,i.replaceNodeWithMarkup=e.replaceNodeWithMarkup,i.processChildrenUpdates=e.processChildrenUpdates,o=!0}}};t.exports=i},{113:113,137:137}],29:[function(e,t,n){"use strict";function r(e){}function o(e,t){}function i(e){return!(!e.prototype||!e.prototype.isReactComponent)}function a(e){return!(!e.prototype||!e.prototype.isPureReactComponent)}var s=e(113),u=e(143),l=e(121),c=e(28),p=e(120),d=e(50),f=e(57),h=(e(58),e(62)),m=e(66),v=e(130),g=(e(137),e(141)),y=e(117),_=(e(142),{ImpureClass:0,PureClass:1,StatelessFunctional:2});r.prototype.render=function(){var e=f.get(this)._currentElement.type,t=e(this.props,this.context,this.updater);return o(e,t),t};var C=1,b={construct:function(e){this._currentElement=e,this._rootNodeID=0,this._compositeType=null,this._instance=null,this._hostParent=null,this._hostContainerInfo=null,this._updateBatchNumber=null,this._pendingElement=null,this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1,this._renderedNodeType=null,this._renderedComponent=null,this._context=null,this._mountOrder=0,this._topLevelWrapper=null,this._pendingCallbacks=null,this._calledComponentWillUnmount=!1},mountComponent:function(e,t,n,u){this._context=u,this._mountOrder=C++,this._hostParent=t,this._hostContainerInfo=n;var c,p=this._currentElement.props,d=this._processContext(u),h=this._currentElement.type,m=e.getUpdateQueue(),g=i(h),y=this._constructComponent(g,p,d,m);g||null!=y&&null!=y.render?a(h)?this._compositeType=_.PureClass:this._compositeType=_.ImpureClass:(c=y,o(h,c),null===y||y===!1||l.isValidElement(y)?void 0:s("105",h.displayName||h.name||"Component"),y=new r(h),this._compositeType=_.StatelessFunctional),y.props=p,y.context=d,y.refs=v,y.updater=m,this._instance=y,f.set(y,this);var b=y.state;void 0===b&&(y.state=b=null),"object"!=typeof b||Array.isArray(b)?s("106",this.getName()||"ReactCompositeComponent"):void 0,this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1;var E;return E=y.unstable_handleError?this.performInitialMountWithErrorHandling(c,t,n,e,u):this.performInitialMount(c,t,n,e,u),y.componentDidMount&&e.getReactMountReady().enqueue(y.componentDidMount,y),E},_constructComponent:function(e,t,n,r){return this._constructComponentWithoutOwner(e,t,n,r)},_constructComponentWithoutOwner:function(e,t,n,r){var o=this._currentElement.type;return e?new o(t,n,r):o(t,n,r)},performInitialMountWithErrorHandling:function(e,t,n,r,o){var i,a=r.checkpoint();try{i=this.performInitialMount(e,t,n,r,o)}catch(s){r.rollback(a),this._instance.unstable_handleError(s),this._pendingStateQueue&&(this._instance.state=this._processPendingState(this._instance.props,this._instance.context)),a=r.checkpoint(),this._renderedComponent.unmountComponent(!0),r.rollback(a),i=this.performInitialMount(e,t,n,r,o)}return i},performInitialMount:function(e,t,n,r,o){var i=this._instance,a=0;i.componentWillMount&&(i.componentWillMount(),this._pendingStateQueue&&(i.state=this._processPendingState(i.props,i.context))),void 0===e&&(e=this._renderValidatedComponent());var s=h.getType(e);this._renderedNodeType=s;var u=this._instantiateReactComponent(e,s!==h.EMPTY);this._renderedComponent=u;var l=m.mountComponent(u,r,t,n,this._processChildContext(o),a);return l},getHostNode:function(){return m.getHostNode(this._renderedComponent)},unmountComponent:function(e){if(this._renderedComponent){var t=this._instance;if(t.componentWillUnmount&&!t._calledComponentWillUnmount)if(t._calledComponentWillUnmount=!0,e){var n=this.getName()+".componentWillUnmount()";d.invokeGuardedCallback(n,t.componentWillUnmount.bind(t))}else t.componentWillUnmount();this._renderedComponent&&(m.unmountComponent(this._renderedComponent,e),this._renderedNodeType=null,this._renderedComponent=null,this._instance=null),this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1,this._pendingCallbacks=null,this._pendingElement=null,this._context=null,this._rootNodeID=0,this._topLevelWrapper=null,f.remove(t)}},_maskContext:function(e){var t=this._currentElement.type,n=t.contextTypes;if(!n)return v;var r={};for(var o in n)r[o]=e[o];return r},_processContext:function(e){var t=this._maskContext(e);return t},_processChildContext:function(e){var t,n=this._currentElement.type,r=this._instance;if(r.getChildContext&&(t=r.getChildContext()),t){"object"!=typeof n.childContextTypes?s("107",this.getName()||"ReactCompositeComponent"):void 0;for(var o in t)o in n.childContextTypes?void 0:s("108",this.getName()||"ReactCompositeComponent",o);return u({},e,t)}return e},_checkContextTypes:function(e,t,n){},receiveComponent:function(e,t,n){var r=this._currentElement,o=this._context;this._pendingElement=null,this.updateComponent(t,r,e,o,n)},performUpdateIfNecessary:function(e){null!=this._pendingElement?m.receiveComponent(this,this._pendingElement,e,this._context):null!==this._pendingStateQueue||this._pendingForceUpdate?this.updateComponent(e,this._currentElement,this._currentElement,this._context,this._context):this._updateBatchNumber=null},updateComponent:function(e,t,n,r,o){var i=this._instance;null==i?s("136",this.getName()||"ReactCompositeComponent"):void 0;var a,u=!1;this._context===o?a=i.context:(a=this._processContext(o),u=!0);var l=t.props,c=n.props;t!==n&&(u=!0),u&&i.componentWillReceiveProps&&i.componentWillReceiveProps(c,a);var p=this._processPendingState(c,a),d=!0;this._pendingForceUpdate||(i.shouldComponentUpdate?d=i.shouldComponentUpdate(c,p,a):this._compositeType===_.PureClass&&(d=!g(l,c)||!g(i.state,p))),this._updateBatchNumber=null,d?(this._pendingForceUpdate=!1,this._performComponentUpdate(n,c,p,a,e,o)):(this._currentElement=n,this._context=o,i.props=c,i.state=p,i.context=a)},_processPendingState:function(e,t){var n=this._instance,r=this._pendingStateQueue,o=this._pendingReplaceState;if(this._pendingReplaceState=!1,this._pendingStateQueue=null,!r)return n.state;if(o&&1===r.length)return r[0];for(var i=u({},o?r[0]:n.state),a=o?1:0;a<r.length;a++){var s=r[a];u(i,"function"==typeof s?s.call(n,i,e,t):s)}return i},_performComponentUpdate:function(e,t,n,r,o,i){var a,s,u,l=this._instance,c=Boolean(l.componentDidUpdate);c&&(a=l.props,s=l.state,u=l.context),l.componentWillUpdate&&l.componentWillUpdate(t,n,r),this._currentElement=e,this._context=i,l.props=t,l.state=n,l.context=r,this._updateRenderedComponent(o,i),c&&o.getReactMountReady().enqueue(l.componentDidUpdate.bind(l,a,s,u),l)},_updateRenderedComponent:function(e,t){var n=this._renderedComponent,r=n._currentElement,o=this._renderValidatedComponent(),i=0;if(y(r,o))m.receiveComponent(n,o,e,this._processChildContext(t));else{var a=m.getHostNode(n);m.unmountComponent(n,!1);var s=h.getType(o);this._renderedNodeType=s;var u=this._instantiateReactComponent(o,s!==h.EMPTY);this._renderedComponent=u;var l=m.mountComponent(u,e,this._hostParent,this._hostContainerInfo,this._processChildContext(t),i);this._replaceNodeWithMarkup(a,l,n)}},_replaceNodeWithMarkup:function(e,t,n){c.replaceNodeWithMarkup(e,t,n)},_renderValidatedComponentWithoutOwnerOrContext:function(){var e,t=this._instance;return e=t.render()},_renderValidatedComponent:function(){var e;if(this._compositeType!==_.StatelessFunctional){p.current=this;try{e=this._renderValidatedComponentWithoutOwnerOrContext()}finally{p.current=null}}else e=this._renderValidatedComponentWithoutOwnerOrContext();return null===e||e===!1||l.isValidElement(e)?void 0:s("109",this.getName()||"ReactCompositeComponent"),e},attachRef:function(e,t){var n=this.getPublicInstance();null==n?s("110"):void 0;var r=t.getPublicInstance(),o=n.refs===v?n.refs={}:n.refs;o[e]=r},detachRef:function(e){var t=this.getPublicInstance().refs;delete t[e]},getName:function(){var e=this._currentElement.type,t=this._instance&&this._instance.constructor;return e.displayName||t&&t.displayName||e.name||t&&t.name||null},getPublicInstance:function(){var e=this._instance;return this._compositeType===_.StatelessFunctional?null:e},_instantiateReactComponent:null};t.exports=b},{113:113,117:117,120:120,121:121,130:130,137:137,141:141,142:142,143:143,28:28,50:50,57:57,58:58,62:62,66:66}],30:[function(e,t,n){"use strict";var r=e(33),o=e(47),i=e(60),a=e(66),s=e(71),u=e(72),l=e(96),c=e(103),p=e(114);e(142);o.inject();var d={findDOMNode:l,render:i.render,unmountComponentAtNode:i.unmountComponentAtNode,version:u,unstable_batchedUpdates:s.batchedUpdates,unstable_renderSubtreeIntoContainer:p};"undefined"!=typeof __REACT_DEVTOOLS_GLOBAL_HOOK__&&"function"==typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.inject&&__REACT_DEVTOOLS_GLOBAL_HOOK__.inject({ComponentTree:{getClosestInstanceFromNode:r.getClosestInstanceFromNode,getNodeFromInstance:function(e){return e._renderedComponent&&(e=c(e)),e?r.getNodeFromInstance(e):null}},Mount:i,Reconciler:a});t.exports=d},{103:103,114:114,142:142,33:33,47:47,60:60,66:66,71:71,72:72,96:96}],31:[function(e,t,n){"use strict";function r(e){if(e){var t=e._currentElement._owner||null;if(t){var n=t.getName();if(n)return" This DOM node was rendered by `"+n+"`."}}return""}function o(e,t){t&&(X[e._tag]&&(null!=t.children||null!=t.dangerouslySetInnerHTML?m("137",e._tag,e._currentElement._owner?" Check the render method of "+e._currentElement._owner.getName()+".":""):void 0),null!=t.dangerouslySetInnerHTML&&(null!=t.children?m("60"):void 0,"object"==typeof t.dangerouslySetInnerHTML&&W in t.dangerouslySetInnerHTML?void 0:m("61")),null!=t.style&&"object"!=typeof t.style?m("62",r(e)):void 0)}function i(e,t,n,r){if(!(r instanceof R)){var o=e._hostContainerInfo,i=o._node&&o._node.nodeType===q,s=i?o._node:o._ownerDocument;F(t,s),r.getReactMountReady().enqueue(a,{inst:e,registrationName:t,listener:n})}}function a(){var e=this;x.putListener(e.inst,e.registrationName,e.listener)}function s(){var e=this;N.postMountWrapper(e)}function u(){var e=this;I.postMountWrapper(e)}function l(){var e=this;S.postMountWrapper(e)}function c(){var e=this;e._rootNodeID?void 0:m("63");var t=U(e);switch(t?void 0:m("64"),e._tag){case"iframe":case"object":e._wrapperState.listeners=[T.trapBubbledEvent("topLoad","load",t)];break;case"video":case"audio":e._wrapperState.listeners=[];for(var n in K)K.hasOwnProperty(n)&&e._wrapperState.listeners.push(T.trapBubbledEvent(n,K[n],t));break;case"source":e._wrapperState.listeners=[T.trapBubbledEvent("topError","error",t)];break;case"img":e._wrapperState.listeners=[T.trapBubbledEvent("topError","error",t),T.trapBubbledEvent("topLoad","load",t)];break;case"form":e._wrapperState.listeners=[T.trapBubbledEvent("topReset","reset",t),T.trapBubbledEvent("topSubmit","submit",t)];break;case"input":case"select":case"textarea":e._wrapperState.listeners=[T.trapBubbledEvent("topInvalid","invalid",t)]}}function p(){M.postUpdateWrapper(this)}function d(e){$.call(G,e)||(Q.test(e)?void 0:m("65",e),G[e]=!0)}function f(e,t){return e.indexOf("-")>=0||null!=t.is}function h(e){var t=e.type;d(t),this._currentElement=e,this._tag=t.toLowerCase(),this._namespaceURI=null,this._renderedChildren=null,this._previousStyle=null,this._previousStyleCopy=null,this._hostNode=null,this._hostParent=null,this._rootNodeID=0,this._domID=0,this._hostContainerInfo=null,this._wrapperState=null,this._topLevelWrapper=null,this._flags=0}var m=e(113),v=e(143),g=e(2),y=e(5),_=e(9),C=e(10),b=e(11),E=e(12),x=e(16),w=e(17),T=e(25),k=e(32),P=e(33),N=e(38),S=e(39),M=e(40),I=e(43),O=(e(58),e(61)),R=e(68),A=(e(129),e(95)),D=(e(137),e(110),e(141),e(119),e(142),k),L=x.deleteListener,U=P.getNodeFromInstance,F=T.listenTo,V=w.registrationNameModules,B={string:!0,number:!0},j="style",W="__html",H={children:null,dangerouslySetInnerHTML:null,suppressContentEditableWarning:null},q=11,K={topAbort:"abort",topCanPlay:"canplay",topCanPlayThrough:"canplaythrough",topDurationChange:"durationchange",topEmptied:"emptied",topEncrypted:"encrypted",topEnded:"ended",topError:"error",topLoadedData:"loadeddata",topLoadedMetadata:"loadedmetadata",topLoadStart:"loadstart",topPause:"pause",topPlay:"play",topPlaying:"playing",topProgress:"progress",topRateChange:"ratechange",topSeeked:"seeked",topSeeking:"seeking",topStalled:"stalled",topSuspend:"suspend",topTimeUpdate:"timeupdate",topVolumeChange:"volumechange",topWaiting:"waiting"},z={area:!0,base:!0,br:!0,col:!0,embed:!0,hr:!0,img:!0,input:!0,keygen:!0,link:!0,meta:!0,param:!0,source:!0,track:!0,wbr:!0},Y={listing:!0,pre:!0,textarea:!0},X=v({menuitem:!0},z),Q=/^[a-zA-Z][a-zA-Z:_\.\-\d]*$/,G={},$={}.hasOwnProperty,Z=1;h.displayName="ReactDOMComponent",h.Mixin={mountComponent:function(e,t,n,r){this._rootNodeID=Z++,this._domID=n._idCounter++,this._hostParent=t,this._hostContainerInfo=n;var i=this._currentElement.props;switch(this._tag){case"audio":case"form":case"iframe":case"img":case"link":case"object":case"source":case"video":this._wrapperState={listeners:null},e.getReactMountReady().enqueue(c,this);break;case"input":N.mountWrapper(this,i,t),i=N.getHostProps(this,i),e.getReactMountReady().enqueue(c,this);break;case"option":S.mountWrapper(this,i,t),i=S.getHostProps(this,i);break;case"select":M.mountWrapper(this,i,t),i=M.getHostProps(this,i),e.getReactMountReady().enqueue(c,this);break;case"textarea":I.mountWrapper(this,i,t),i=I.getHostProps(this,i),e.getReactMountReady().enqueue(c,this)}o(this,i);var a,p;null!=t?(a=t._namespaceURI,p=t._tag):n._tag&&(a=n._namespaceURI,p=n._tag),(null==a||a===C.svg&&"foreignobject"===p)&&(a=C.html),a===C.html&&("svg"===this._tag?a=C.svg:"math"===this._tag&&(a=C.mathml)),this._namespaceURI=a;var d;if(e.useCreateElement){var f,h=n._ownerDocument;if(a===C.html)if("script"===this._tag){var m=h.createElement("div"),v=this._currentElement.type;m.innerHTML="<"+v+"></"+v+">",f=m.removeChild(m.firstChild)}else f=i.is?h.createElement(this._currentElement.type,i.is):h.createElement(this._currentElement.type);else f=h.createElementNS(a,this._currentElement.type);P.precacheNode(this,f),this._flags|=D.hasCachedChildNodes,this._hostParent||E.setAttributeForRoot(f),this._updateDOMProperties(null,i,e);var y=_(f);this._createInitialChildren(e,i,r,y),d=y}else{var b=this._createOpenTagMarkupAndPutListeners(e,i),x=this._createContentMarkup(e,i,r);d=!x&&z[this._tag]?b+"/>":b+">"+x+"</"+this._currentElement.type+">"}switch(this._tag){case"input":e.getReactMountReady().enqueue(s,this),i.autoFocus&&e.getReactMountReady().enqueue(g.focusDOMComponent,this);break;case"textarea":e.getReactMountReady().enqueue(u,this),i.autoFocus&&e.getReactMountReady().enqueue(g.focusDOMComponent,this);break;case"select":i.autoFocus&&e.getReactMountReady().enqueue(g.focusDOMComponent,this);break;case"button":i.autoFocus&&e.getReactMountReady().enqueue(g.focusDOMComponent,this);break;case"option":e.getReactMountReady().enqueue(l,this)}return d},_createOpenTagMarkupAndPutListeners:function(e,t){var n="<"+this._currentElement.type;for(var r in t)if(t.hasOwnProperty(r)){var o=t[r];if(null!=o)if(V.hasOwnProperty(r))o&&i(this,r,o,e);else{r===j&&(o&&(o=this._previousStyleCopy=v({},t.style)),o=y.createMarkupForStyles(o,this));var a=null;null!=this._tag&&f(this._tag,t)?H.hasOwnProperty(r)||(a=E.createMarkupForCustomAttribute(r,o)):a=E.createMarkupForProperty(r,o),a&&(n+=" "+a)}}return e.renderToStaticMarkup?n:(this._hostParent||(n+=" "+E.createMarkupForRoot()),n+=" "+E.createMarkupForID(this._domID))},_createContentMarkup:function(e,t,n){var r="",o=t.dangerouslySetInnerHTML;if(null!=o)null!=o.__html&&(r=o.__html);else{var i=B[typeof t.children]?t.children:null,a=null!=i?null:t.children;if(null!=i)r=A(i);else if(null!=a){var s=this.mountChildren(a,e,n);r=s.join("")}}return Y[this._tag]&&"\n"===r.charAt(0)?"\n"+r:r},_createInitialChildren:function(e,t,n,r){var o=t.dangerouslySetInnerHTML;if(null!=o)null!=o.__html&&_.queueHTML(r,o.__html);else{var i=B[typeof t.children]?t.children:null,a=null!=i?null:t.children;if(null!=i)""!==i&&_.queueText(r,i);else if(null!=a)for(var s=this.mountChildren(a,e,n),u=0;u<s.length;u++)_.queueChild(r,s[u])}},receiveComponent:function(e,t,n){var r=this._currentElement;this._currentElement=e,this.updateComponent(t,r,e,n)},updateComponent:function(e,t,n,r){var i=t.props,a=this._currentElement.props;switch(this._tag){case"input":i=N.getHostProps(this,i),a=N.getHostProps(this,a);break;case"option":i=S.getHostProps(this,i),a=S.getHostProps(this,a);break;case"select":i=M.getHostProps(this,i),a=M.getHostProps(this,a);break;case"textarea":i=I.getHostProps(this,i),a=I.getHostProps(this,a)}switch(o(this,a),this._updateDOMProperties(i,a,e),this._updateDOMChildren(i,a,e,r),this._tag){case"input":N.updateWrapper(this);break;case"textarea":I.updateWrapper(this);break;case"select":e.getReactMountReady().enqueue(p,this)}},_updateDOMProperties:function(e,t,n){var r,o,a;for(r in e)if(!t.hasOwnProperty(r)&&e.hasOwnProperty(r)&&null!=e[r])if(r===j){var s=this._previousStyleCopy;for(o in s)s.hasOwnProperty(o)&&(a=a||{},a[o]="");this._previousStyleCopy=null}else V.hasOwnProperty(r)?e[r]&&L(this,r):f(this._tag,e)?H.hasOwnProperty(r)||E.deleteValueForAttribute(U(this),r):(b.properties[r]||b.isCustomAttribute(r))&&E.deleteValueForProperty(U(this),r);for(r in t){var u=t[r],l=r===j?this._previousStyleCopy:null!=e?e[r]:void 0;if(t.hasOwnProperty(r)&&u!==l&&(null!=u||null!=l))if(r===j)if(u?u=this._previousStyleCopy=v({},u):this._previousStyleCopy=null,l){for(o in l)!l.hasOwnProperty(o)||u&&u.hasOwnProperty(o)||(a=a||{},a[o]="");for(o in u)u.hasOwnProperty(o)&&l[o]!==u[o]&&(a=a||{},a[o]=u[o])}else a=u;else if(V.hasOwnProperty(r))u?i(this,r,u,n):l&&L(this,r);else if(f(this._tag,t))H.hasOwnProperty(r)||E.setValueForAttribute(U(this),r,u);else if(b.properties[r]||b.isCustomAttribute(r)){var c=U(this);null!=u?E.setValueForProperty(c,r,u):E.deleteValueForProperty(c,r)}}a&&y.setValueForStyles(U(this),a,this)},_updateDOMChildren:function(e,t,n,r){var o=B[typeof e.children]?e.children:null,i=B[typeof t.children]?t.children:null,a=e.dangerouslySetInnerHTML&&e.dangerouslySetInnerHTML.__html,s=t.dangerouslySetInnerHTML&&t.dangerouslySetInnerHTML.__html,u=null!=o?null:e.children,l=null!=i?null:t.children,c=null!=o||null!=a,p=null!=i||null!=s;null!=u&&null==l?this.updateChildren(null,n,r):c&&!p&&this.updateTextContent(""),null!=i?o!==i&&this.updateTextContent(""+i):null!=s?a!==s&&this.updateMarkup(""+s):null!=l&&this.updateChildren(l,n,r)},getHostNode:function(){return U(this)},unmountComponent:function(e){switch(this._tag){case"audio":case"form":case"iframe":case"img":case"link":case"object":case"source":case"video":var t=this._wrapperState.listeners;if(t)for(var n=0;n<t.length;n++)t[n].remove();break;case"html":case"head":case"body":m("66",this._tag)}this.unmountChildren(e),P.uncacheNode(this),x.deleteAllListeners(this),this._rootNodeID=0,this._domID=0,this._wrapperState=null},getPublicInstance:function(){return U(this)}},v(h.prototype,h.Mixin,O.Mixin),t.exports=h},{10:10,11:11,110:110,113:113,119:119,12:12,129:129,137:137,141:141,142:142,143:143,16:16,17:17,2:2,25:25,32:32,33:33,38:38,39:39,40:40,43:43,5:5,58:58,61:61,68:68,9:9,95:95}],32:[function(e,t,n){"use strict";var r={hasCachedChildNodes:1};t.exports=r},{}],33:[function(e,t,n){"use strict";function r(e,t){return 1===e.nodeType&&e.getAttribute(h)===String(t)||8===e.nodeType&&e.nodeValue===" react-text: "+t+" "||8===e.nodeType&&e.nodeValue===" react-empty: "+t+" "}function o(e){for(var t;t=e._renderedComponent;)e=t;return e}function i(e,t){var n=o(e);n._hostNode=t,t[v]=n}function a(e){var t=e._hostNode;t&&(delete t[v],e._hostNode=null)}function s(e,t){if(!(e._flags&m.hasCachedChildNodes)){var n=e._renderedChildren,a=t.firstChild;e:for(var s in n)if(n.hasOwnProperty(s)){var u=n[s],l=o(u)._domID;if(0!==l){for(;null!==a;a=a.nextSibling)if(r(a,l)){i(u,a);continue e}p("32",l)}}e._flags|=m.hasCachedChildNodes}}function u(e){if(e[v])return e[v];for(var t=[];!e[v];){if(t.push(e),!e.parentNode)return null;e=e.parentNode}for(var n,r;e&&(r=e[v]);e=t.pop())n=r,t.length&&s(r,e);return n}function l(e){var t=u(e);return null!=t&&t._hostNode===e?t:null}function c(e){if(void 0===e._hostNode?p("33"):void 0,e._hostNode)return e._hostNode;for(var t=[];!e._hostNode;)t.push(e),e._hostParent?void 0:p("34"),e=e._hostParent;for(;t.length;e=t.pop())s(e,e._hostNode);return e._hostNode}var p=e(113),d=e(11),f=e(32),h=(e(137),d.ID_ATTRIBUTE_NAME),m=f,v="__reactInternalInstance$"+Math.random().toString(36).slice(2),g={getClosestInstanceFromNode:u,getInstanceFromNode:l,getNodeFromInstance:c,precacheChildNodes:s,precacheNode:i,uncacheNode:a};t.exports=g},{11:11,113:113,137:137,32:32}],34:[function(e,t,n){"use strict";function r(e,t){var n={_topLevelWrapper:e,_idCounter:1,_ownerDocument:t?t.nodeType===o?t:t.ownerDocument:null,_node:t,_tag:t?t.nodeName.toLowerCase():null,_namespaceURI:t?t.namespaceURI:null};return n}var o=(e(119),9);t.exports=r},{119:119}],35:[function(e,t,n){"use strict";var r=e(143),o=e(9),i=e(33),a=function(e){this._currentElement=null,this._hostNode=null,this._hostParent=null,this._hostContainerInfo=null,this._domID=0};r(a.prototype,{mountComponent:function(e,t,n,r){var a=n._idCounter++;this._domID=a,this._hostParent=t,this._hostContainerInfo=n;var s=" react-empty: "+this._domID+" ";if(e.useCreateElement){var u=n._ownerDocument,l=u.createComment(s);return i.precacheNode(this,l),o(l)}return e.renderToStaticMarkup?"":"<!--"+s+"-->"},receiveComponent:function(){},getHostNode:function(){return i.getNodeFromInstance(this)},unmountComponent:function(){i.uncacheNode(this)}}),t.exports=a},{143:143,33:33,9:9}],36:[function(e,t,n){"use strict";var r={useCreateElement:!0,useFiber:!1};t.exports=r},{}],37:[function(e,t,n){"use strict";var r=e(8),o=e(33),i={dangerouslyProcessChildrenUpdates:function(e,t){var n=o.getNodeFromInstance(e);r.processUpdates(n,t)}};t.exports=i},{33:33,8:8}],38:[function(e,t,n){"use strict";function r(){this._rootNodeID&&p.updateWrapper(this)}function o(e){var t=this._currentElement.props,n=u.executeOnChange(t,e);c.asap(r,this);var o=t.name;if("radio"===t.type&&null!=o){for(var a=l.getNodeFromInstance(this),s=a;s.parentNode;)s=s.parentNode;for(var p=s.querySelectorAll("input[name="+JSON.stringify(""+o)+'][type="radio"]'),d=0;d<p.length;d++){var f=p[d];if(f!==a&&f.form===a.form){var h=l.getInstanceFromNode(f);h?void 0:i("90"),c.asap(r,h)}}}return n}var i=e(113),a=e(143),s=e(12),u=e(23),l=e(33),c=e(71),p=(e(137),e(142),{getHostProps:function(e,t){var n=u.getValue(t),r=u.getChecked(t),o=a({type:void 0,step:void 0,min:void 0,max:void 0},t,{defaultChecked:void 0,defaultValue:void 0,value:null!=n?n:e._wrapperState.initialValue,checked:null!=r?r:e._wrapperState.initialChecked,onChange:e._wrapperState.onChange});return o},mountWrapper:function(e,t){var n=t.defaultValue;e._wrapperState={initialChecked:null!=t.checked?t.checked:t.defaultChecked,initialValue:null!=t.value?t.value:n,listeners:null,onChange:o.bind(e)}},updateWrapper:function(e){var t=e._currentElement.props,n=t.checked;null!=n&&s.setValueForProperty(l.getNodeFromInstance(e),"checked",n||!1);var r=l.getNodeFromInstance(e),o=u.getValue(t);if(null!=o){var i=""+o;i!==r.value&&(r.value=i)}else null==t.value&&null!=t.defaultValue&&r.defaultValue!==""+t.defaultValue&&(r.defaultValue=""+t.defaultValue),null==t.checked&&null!=t.defaultChecked&&(r.defaultChecked=!!t.defaultChecked)},postMountWrapper:function(e){var t=e._currentElement.props,n=l.getNodeFromInstance(e);switch(t.type){case"submit":case"reset":break;case"color":case"date":case"datetime":case"datetime-local":case"month":case"time":case"week":n.value="",n.value=n.defaultValue;break;default:n.value=n.value}var r=n.name;""!==r&&(n.name=""),n.defaultChecked=!n.defaultChecked,n.defaultChecked=!n.defaultChecked,""!==r&&(n.name=r)}});t.exports=p},{113:113,12:12,137:137,142:142,143:143,23:23,33:33,71:71}],39:[function(e,t,n){"use strict";function r(e){var t="";return i.Children.forEach(e,function(e){null!=e&&("string"==typeof e||"number"==typeof e?t+=e:u||(u=!0))}),t}var o=e(143),i=e(121),a=e(33),s=e(40),u=(e(142),!1),l={mountWrapper:function(e,t,n){var o=null;if(null!=n){var i=n;"optgroup"===i._tag&&(i=i._hostParent),null!=i&&"select"===i._tag&&(o=s.getSelectValueContext(i))}var a=null;if(null!=o){var u;if(u=null!=t.value?t.value+"":r(t.children),a=!1,Array.isArray(o)){for(var l=0;l<o.length;l++)if(""+o[l]===u){a=!0;break}}else a=""+o===u}e._wrapperState={selected:a}},postMountWrapper:function(e){var t=e._currentElement.props;if(null!=t.value){var n=a.getNodeFromInstance(e);n.setAttribute("value",t.value)}},getHostProps:function(e,t){var n=o({selected:void 0,children:void 0},t);null!=e._wrapperState.selected&&(n.selected=e._wrapperState.selected);var i=r(t.children);return i&&(n.children=i),n}};t.exports=l},{121:121,142:142,143:143,33:33,40:40}],40:[function(e,t,n){"use strict";function r(){if(this._rootNodeID&&this._wrapperState.pendingUpdate){this._wrapperState.pendingUpdate=!1;var e=this._currentElement.props,t=s.getValue(e);null!=t&&o(this,Boolean(e.multiple),t)}}function o(e,t,n){var r,o,i=u.getNodeFromInstance(e).options;if(t){for(r={},o=0;o<n.length;o++)r[""+n[o]]=!0;for(o=0;o<i.length;o++){var a=r.hasOwnProperty(i[o].value);i[o].selected!==a&&(i[o].selected=a)}}else{for(r=""+n,o=0;o<i.length;o++)if(i[o].value===r)return void(i[o].selected=!0);i.length&&(i[0].selected=!0)}}function i(e){var t=this._currentElement.props,n=s.executeOnChange(t,e);return this._rootNodeID&&(this._wrapperState.pendingUpdate=!0),l.asap(r,this),n}var a=e(143),s=e(23),u=e(33),l=e(71),c=(e(142),!1),p={getHostProps:function(e,t){return a({},t,{onChange:e._wrapperState.onChange,value:void 0})},mountWrapper:function(e,t){var n=s.getValue(t);e._wrapperState={pendingUpdate:!1,initialValue:null!=n?n:t.defaultValue,listeners:null,onChange:i.bind(e),wasMultiple:Boolean(t.multiple)},void 0===t.value||void 0===t.defaultValue||c||(c=!0)},getSelectValueContext:function(e){return e._wrapperState.initialValue},postUpdateWrapper:function(e){var t=e._currentElement.props;e._wrapperState.initialValue=void 0;var n=e._wrapperState.wasMultiple;e._wrapperState.wasMultiple=Boolean(t.multiple);var r=s.getValue(t);null!=r?(e._wrapperState.pendingUpdate=!1,o(e,Boolean(t.multiple),r)):n!==Boolean(t.multiple)&&(null!=t.defaultValue?o(e,Boolean(t.multiple),t.defaultValue):o(e,Boolean(t.multiple),t.multiple?[]:""))}};t.exports=p},{142:142,143:143,23:23,33:33,71:71}],41:[function(e,t,n){"use strict";function r(e,t,n,r){return e===n&&t===r}function o(e){var t=document.selection,n=t.createRange(),r=n.text.length,o=n.duplicate();o.moveToElementText(e),o.setEndPoint("EndToStart",n);var i=o.text.length,a=i+r;return{start:i,end:a}}function i(e){var t=window.getSelection&&window.getSelection();if(!t||0===t.rangeCount)return null;var n=t.anchorNode,o=t.anchorOffset,i=t.focusNode,a=t.focusOffset,s=t.getRangeAt(0);try{s.startContainer.nodeType,s.endContainer.nodeType}catch(e){return null}var u=r(t.anchorNode,t.anchorOffset,t.focusNode,t.focusOffset),l=u?0:s.toString().length,c=s.cloneRange();c.selectNodeContents(e),c.setEnd(s.startContainer,s.startOffset);var p=r(c.startContainer,c.startOffset,c.endContainer,c.endOffset),d=p?0:c.toString().length,f=d+l,h=document.createRange();h.setStart(n,o),h.setEnd(i,a);var m=h.collapsed;return{start:m?f:d,end:m?d:f}}function a(e,t){var n,r,o=document.selection.createRange().duplicate();void 0===t.end?(n=t.start,r=n):t.start>t.end?(n=t.end,r=t.start):(n=t.start,r=t.end),o.moveToElementText(e),o.moveStart("character",n),o.setEndPoint("EndToStart",o),o.moveEnd("character",r-n),o.select()}function s(e,t){if(window.getSelection){var n=window.getSelection(),r=e[c()].length,o=Math.min(t.start,r),i=void 0===t.end?o:Math.min(t.end,r);if(!n.extend&&o>i){var a=i;i=o,o=a}var s=l(e,o),u=l(e,i);if(s&&u){var p=document.createRange();p.setStart(s.node,s.offset),n.removeAllRanges(),o>i?(n.addRange(p),n.extend(u.node,u.offset)):(p.setEnd(u.node,u.offset),n.addRange(p))}}}var u=e(123),l=e(106),c=e(107),p=u.canUseDOM&&"selection"in document&&!("getSelection"in window),d={getOffsets:p?o:i,setOffsets:p?a:s};t.exports=d},{106:106,107:107,123:123}],42:[function(e,t,n){"use strict";var r=e(113),o=e(143),i=e(8),a=e(9),s=e(33),u=e(95),l=(e(137),e(119),function(e){this._currentElement=e,this._stringText=""+e,this._hostNode=null,this._hostParent=null,this._domID=0,this._mountIndex=0,this._closingComment=null,this._commentNodes=null});o(l.prototype,{mountComponent:function(e,t,n,r){var o=n._idCounter++,i=" react-text: "+o+" ",l=" /react-text ";if(this._domID=o,this._hostParent=t,e.useCreateElement){
-var c=n._ownerDocument,p=c.createComment(i),d=c.createComment(l),f=a(c.createDocumentFragment());return a.queueChild(f,a(p)),this._stringText&&a.queueChild(f,a(c.createTextNode(this._stringText))),a.queueChild(f,a(d)),s.precacheNode(this,p),this._closingComment=d,f}var h=u(this._stringText);return e.renderToStaticMarkup?h:"<!--"+i+"-->"+h+"<!--"+l+"-->"},receiveComponent:function(e,t){if(e!==this._currentElement){this._currentElement=e;var n=""+e;if(n!==this._stringText){this._stringText=n;var r=this.getHostNode();i.replaceDelimitedText(r[0],r[1],n)}}},getHostNode:function(){var e=this._commentNodes;if(e)return e;if(!this._closingComment)for(var t=s.getNodeFromInstance(this),n=t.nextSibling;;){if(null==n?r("67",this._domID):void 0,8===n.nodeType&&" /react-text "===n.nodeValue){this._closingComment=n;break}n=n.nextSibling}return e=[this._hostNode,this._closingComment],this._commentNodes=e,e},unmountComponent:function(){this._closingComment=null,this._commentNodes=null,s.uncacheNode(this)}}),t.exports=l},{113:113,119:119,137:137,143:143,33:33,8:8,9:9,95:95}],43:[function(e,t,n){"use strict";function r(){this._rootNodeID&&c.updateWrapper(this)}function o(e){var t=this._currentElement.props,n=s.executeOnChange(t,e);return l.asap(r,this),n}var i=e(113),a=e(143),s=e(23),u=e(33),l=e(71),c=(e(137),e(142),{getHostProps:function(e,t){null!=t.dangerouslySetInnerHTML?i("91"):void 0;var n=a({},t,{value:void 0,defaultValue:void 0,children:""+e._wrapperState.initialValue,onChange:e._wrapperState.onChange});return n},mountWrapper:function(e,t){var n=s.getValue(t),r=n;if(null==n){var a=t.defaultValue,u=t.children;null!=u&&(null!=a?i("92"):void 0,Array.isArray(u)&&(u.length<=1?void 0:i("93"),u=u[0]),a=""+u),null==a&&(a=""),r=a}e._wrapperState={initialValue:""+r,listeners:null,onChange:o.bind(e)}},updateWrapper:function(e){var t=e._currentElement.props,n=u.getNodeFromInstance(e),r=s.getValue(t);if(null!=r){var o=""+r;o!==n.value&&(n.value=o),null==t.defaultValue&&(n.defaultValue=o)}null!=t.defaultValue&&(n.defaultValue=t.defaultValue)},postMountWrapper:function(e){var t=u.getNodeFromInstance(e),n=t.textContent;n===e._wrapperState.initialValue&&(t.value=n)}});t.exports=c},{113:113,137:137,142:142,143:143,23:23,33:33,71:71}],44:[function(e,t,n){"use strict";function r(e,t){"_hostNode"in e?void 0:u("33"),"_hostNode"in t?void 0:u("33");for(var n=0,r=e;r;r=r._hostParent)n++;for(var o=0,i=t;i;i=i._hostParent)o++;for(;n-o>0;)e=e._hostParent,n--;for(;o-n>0;)t=t._hostParent,o--;for(var a=n;a--;){if(e===t)return e;e=e._hostParent,t=t._hostParent}return null}function o(e,t){"_hostNode"in e?void 0:u("35"),"_hostNode"in t?void 0:u("35");for(;t;){if(t===e)return!0;t=t._hostParent}return!1}function i(e){return"_hostNode"in e?void 0:u("36"),e._hostParent}function a(e,t,n){for(var r=[];e;)r.push(e),e=e._hostParent;var o;for(o=r.length;o-- >0;)t(r[o],"captured",n);for(o=0;o<r.length;o++)t(r[o],"bubbled",n)}function s(e,t,n,o,i){for(var a=e&&t?r(e,t):null,s=[];e&&e!==a;)s.push(e),e=e._hostParent;for(var u=[];t&&t!==a;)u.push(t),t=t._hostParent;var l;for(l=0;l<s.length;l++)n(s[l],"bubbled",o);for(l=u.length;l-- >0;)n(u[l],"captured",i)}var u=e(113);e(137);t.exports={isAncestor:o,getLowestCommonAncestor:r,getParentInstance:i,traverseTwoPhase:a,traverseEnterLeave:s}},{113:113,137:137}],45:[function(e,t,n){"use strict";var r=e(121),o=e(30),i=o;r.addons&&(r.__SECRET_INJECTED_REACT_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED=i),t.exports=i},{121:121,30:30}],46:[function(e,t,n){"use strict";function r(){this.reinitializeTransaction()}var o=e(143),i=e(71),a=e(89),s=e(129),u={initialize:s,close:function(){d.isBatchingUpdates=!1}},l={initialize:s,close:i.flushBatchedUpdates.bind(i)},c=[l,u];o(r.prototype,a,{getTransactionWrappers:function(){return c}});var p=new r,d={isBatchingUpdates:!1,batchedUpdates:function(e,t,n,r,o,i){var a=d.isBatchingUpdates;return d.isBatchingUpdates=!0,a?e(t,n,r,o,i):p.perform(e,null,t,n,r,o,i)}};t.exports=d},{129:129,143:143,71:71,89:89}],47:[function(e,t,n){"use strict";function r(){x||(x=!0,y.EventEmitter.injectReactEventListener(g),y.EventPluginHub.injectEventPluginOrder(s),y.EventPluginUtils.injectComponentTree(d),y.EventPluginUtils.injectTreeTraversal(h),y.EventPluginHub.injectEventPluginsByName({SimpleEventPlugin:E,EnterLeaveEventPlugin:u,ChangeEventPlugin:a,SelectEventPlugin:b,BeforeInputEventPlugin:i}),y.HostComponent.injectGenericComponentClass(p),y.HostComponent.injectTextComponentClass(m),y.DOMProperty.injectDOMPropertyConfig(o),y.DOMProperty.injectDOMPropertyConfig(l),y.DOMProperty.injectDOMPropertyConfig(C),y.EmptyComponent.injectEmptyComponentFactory(function(e){return new f(e)}),y.Updates.injectReconcileTransaction(_),y.Updates.injectBatchingStrategy(v),y.Component.injectEnvironment(c))}var o=e(1),i=e(3),a=e(7),s=e(14),u=e(15),l=e(21),c=e(27),p=e(31),d=e(33),f=e(35),h=e(44),m=e(42),v=e(46),g=e(52),y=e(55),_=e(65),C=e(73),b=e(74),E=e(75),x=!1;t.exports={inject:r}},{1:1,14:14,15:15,21:21,27:27,3:3,31:31,33:33,35:35,42:42,44:44,46:46,52:52,55:55,65:65,7:7,73:73,74:74,75:75}],48:[function(e,t,n){"use strict";var r="function"==typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103;t.exports=r},{}],49:[function(e,t,n){"use strict";var r,o={injectEmptyComponentFactory:function(e){r=e}},i={create:function(e){return r(e)}};i.injection=o,t.exports=i},{}],50:[function(e,t,n){"use strict";function r(e,t,n){try{t(n)}catch(e){null===o&&(o=e)}}var o=null,i={invokeGuardedCallback:r,invokeGuardedCallbackWithCatch:r,rethrowCaughtError:function(){if(o){var e=o;throw o=null,e}}};t.exports=i},{}],51:[function(e,t,n){"use strict";function r(e){o.enqueueEvents(e),o.processEventQueue(!1)}var o=e(16),i={handleTopLevel:function(e,t,n,i){var a=o.extractEvents(e,t,n,i);r(a)}};t.exports=i},{16:16}],52:[function(e,t,n){"use strict";function r(e){for(;e._hostParent;)e=e._hostParent;var t=p.getNodeFromInstance(e),n=t.parentNode;return p.getClosestInstanceFromNode(n)}function o(e,t){this.topLevelType=e,this.nativeEvent=t,this.ancestors=[]}function i(e){var t=f(e.nativeEvent),n=p.getClosestInstanceFromNode(t),o=n;do e.ancestors.push(o),o=o&&r(o);while(o);for(var i=0;i<e.ancestors.length;i++)n=e.ancestors[i],m._handleTopLevel(e.topLevelType,n,e.nativeEvent,f(e.nativeEvent))}function a(e){var t=h(window);e(t)}var s=e(143),u=e(122),l=e(123),c=e(24),p=e(33),d=e(71),f=e(102),h=e(134);s(o.prototype,{destructor:function(){this.topLevelType=null,this.nativeEvent=null,this.ancestors.length=0}}),c.addPoolingTo(o,c.twoArgumentPooler);var m={_enabled:!0,_handleTopLevel:null,WINDOW_HANDLE:l.canUseDOM?window:null,setHandleTopLevel:function(e){m._handleTopLevel=e},setEnabled:function(e){m._enabled=!!e},isEnabled:function(){return m._enabled},trapBubbledEvent:function(e,t,n){return n?u.listen(n,t,m.dispatchEvent.bind(null,e)):null},trapCapturedEvent:function(e,t,n){return n?u.capture(n,t,m.dispatchEvent.bind(null,e)):null},monitorScrollValue:function(e){var t=a.bind(null,e);u.listen(window,"scroll",t)},dispatchEvent:function(e,t){if(m._enabled){var n=o.getPooled(e,t);try{d.batchedUpdates(i,n)}finally{o.release(n)}}}};t.exports=m},{102:102,122:122,123:123,134:134,143:143,24:24,33:33,71:71}],53:[function(e,t,n){"use strict";var r={logTopLevelRenders:!1};t.exports=r},{}],54:[function(e,t,n){"use strict";function r(e){return s?void 0:a("111",e.type),new s(e)}function o(e){return new u(e)}function i(e){return e instanceof u}var a=e(113),s=(e(137),null),u=null,l={injectGenericComponentClass:function(e){s=e},injectTextComponentClass:function(e){u=e}},c={createInternalComponent:r,createInstanceForText:o,isTextComponent:i,injection:l};t.exports=c},{113:113,137:137}],55:[function(e,t,n){"use strict";var r=e(11),o=e(16),i=e(18),a=e(28),s=e(49),u=e(25),l=e(54),c=e(71),p={Component:a.injection,DOMProperty:r.injection,EmptyComponent:s.injection,EventPluginHub:o.injection,EventPluginUtils:i.injection,EventEmitter:u.injection,HostComponent:l.injection,Updates:c.injection};t.exports=p},{11:11,16:16,18:18,25:25,28:28,49:49,54:54,71:71}],56:[function(e,t,n){"use strict";function r(e){return i(document.documentElement,e)}var o=e(41),i=e(126),a=e(131),s=e(132),u={hasSelectionCapabilities:function(e){var t=e&&e.nodeName&&e.nodeName.toLowerCase();return t&&("input"===t&&"text"===e.type||"textarea"===t||"true"===e.contentEditable)},getSelectionInformation:function(){var e=s();return{focusedElem:e,selectionRange:u.hasSelectionCapabilities(e)?u.getSelection(e):null}},restoreSelection:function(e){var t=s(),n=e.focusedElem,o=e.selectionRange;t!==n&&r(n)&&(u.hasSelectionCapabilities(n)&&u.setSelection(n,o),a(n))},getSelection:function(e){var t;if("selectionStart"in e)t={start:e.selectionStart,end:e.selectionEnd};else if(document.selection&&e.nodeName&&"input"===e.nodeName.toLowerCase()){var n=document.selection.createRange();n.parentElement()===e&&(t={start:-n.moveStart("character",-e.value.length),end:-n.moveEnd("character",-e.value.length)})}else t=o.getOffsets(e);return t||{start:0,end:0}},setSelection:function(e,t){var n=t.start,r=t.end;if(void 0===r&&(r=n),"selectionStart"in e)e.selectionStart=n,e.selectionEnd=Math.min(r,e.value.length);else if(document.selection&&e.nodeName&&"input"===e.nodeName.toLowerCase()){var i=e.createTextRange();i.collapse(!0),i.moveStart("character",n),i.moveEnd("character",r-n),i.select()}else o.setOffsets(e,t)}};t.exports=u},{126:126,131:131,132:132,41:41}],57:[function(e,t,n){"use strict";var r={remove:function(e){e._reactInternalInstance=void 0},get:function(e){return e._reactInternalInstance},has:function(e){return void 0!==e._reactInternalInstance},set:function(e,t){e._reactInternalInstance=t}};t.exports=r},{}],58:[function(e,t,n){"use strict";var r=null;t.exports={debugTool:r}},{}],59:[function(e,t,n){"use strict";var r=e(92),o=/\/?>/,i=/^<\!\-\-/,a={CHECKSUM_ATTR_NAME:"data-react-checksum",addChecksumToMarkup:function(e){var t=r(e);return i.test(e)?e:e.replace(o," "+a.CHECKSUM_ATTR_NAME+'="'+t+'"$&')},canReuseMarkup:function(e,t){var n=t.getAttribute(a.CHECKSUM_ATTR_NAME);n=n&&parseInt(n,10);var o=r(e);return o===n}};t.exports=a},{92:92}],60:[function(e,t,n){"use strict";function r(e,t){for(var n=Math.min(e.length,t.length),r=0;r<n;r++)if(e.charAt(r)!==t.charAt(r))return r;return e.length===t.length?-1:n}function o(e){return e?e.nodeType===A?e.documentElement:e.firstChild:null}function i(e){return e.getAttribute&&e.getAttribute(I)||""}function a(e,t,n,r,o){var i;if(b.logTopLevelRenders){var a=e._currentElement.props.child,s=a.type;i="React mount: "+("string"==typeof s?s:s.displayName||s.name),console.time(i)}var u=w.mountComponent(e,n,null,_(e,t),o,0);i&&console.timeEnd(i),e._renderedComponent._topLevelWrapper=e,V._mountImageIntoNode(u,t,e,r,n)}function s(e,t,n,r){var o=k.ReactReconcileTransaction.getPooled(!n&&C.useCreateElement);o.perform(a,null,e,t,o,n,r),k.ReactReconcileTransaction.release(o)}function u(e,t,n){for(w.unmountComponent(e,n),t.nodeType===A&&(t=t.documentElement);t.lastChild;)t.removeChild(t.lastChild)}function l(e){var t=o(e);if(t){var n=y.getInstanceFromNode(t);return!(!n||!n._hostParent)}}function c(e){return!(!e||e.nodeType!==R&&e.nodeType!==A&&e.nodeType!==D)}function p(e){var t=o(e),n=t&&y.getInstanceFromNode(t);return n&&!n._hostParent?n:null}function d(e){var t=p(e);return t?t._hostContainerInfo._topLevelWrapper:null}var f=e(113),h=e(9),m=e(11),v=e(121),g=e(25),y=(e(120),e(33)),_=e(34),C=e(36),b=e(53),E=e(57),x=(e(58),e(59)),w=e(66),T=e(70),k=e(71),P=e(130),N=e(109),S=(e(137),e(115)),M=e(117),I=(e(142),m.ID_ATTRIBUTE_NAME),O=m.ROOT_ATTRIBUTE_NAME,R=1,A=9,D=11,L={},U=1,F=function(){this.rootID=U++};F.prototype.isReactComponent={},F.prototype.render=function(){return this.props.child},F.isReactTopLevelWrapper=!0;var V={TopLevelWrapper:F,_instancesByReactRootID:L,scrollMonitor:function(e,t){t()},_updateRootComponent:function(e,t,n,r,o){return V.scrollMonitor(r,function(){T.enqueueElementInternal(e,t,n),o&&T.enqueueCallbackInternal(e,o)}),e},_renderNewRootComponent:function(e,t,n,r){c(t)?void 0:f("37"),g.ensureScrollValueMonitoring();var o=N(e,!1);k.batchedUpdates(s,o,t,n,r);var i=o._instance.rootID;return L[i]=o,o},renderSubtreeIntoContainer:function(e,t,n,r){return null!=e&&E.has(e)?void 0:f("38"),V._renderSubtreeIntoContainer(e,t,n,r)},_renderSubtreeIntoContainer:function(e,t,n,r){T.validateCallback(r,"ReactDOM.render"),v.isValidElement(t)?void 0:f("39","string"==typeof t?" Instead of passing a string like 'div', pass React.createElement('div') or <div />.":"function"==typeof t?" Instead of passing a class like Foo, pass React.createElement(Foo) or <Foo />.":null!=t&&void 0!==t.props?" This may be caused by unintentionally loading two independent copies of React.":"");var a,s=v.createElement(F,{child:t});if(e){var u=E.get(e);a=u._processChildContext(u._context)}else a=P;var c=d(n);if(c){var p=c._currentElement,h=p.props.child;if(M(h,t)){var m=c._renderedComponent.getPublicInstance(),g=r&&function(){r.call(m)};return V._updateRootComponent(c,s,a,n,g),m}V.unmountComponentAtNode(n)}var y=o(n),_=y&&!!i(y),C=l(n),b=_&&!c&&!C,x=V._renderNewRootComponent(s,n,b,a)._renderedComponent.getPublicInstance();return r&&r.call(x),x},render:function(e,t,n){return V._renderSubtreeIntoContainer(null,e,t,n)},unmountComponentAtNode:function(e){c(e)?void 0:f("40");var t=d(e);return t?(delete L[t._instance.rootID],k.batchedUpdates(u,t,e,!1),!0):(l(e),1===e.nodeType&&e.hasAttribute(O),!1)},_mountImageIntoNode:function(e,t,n,i,a){if(c(t)?void 0:f("41"),i){var s=o(t);if(x.canReuseMarkup(e,s))return void y.precacheNode(n,s);var u=s.getAttribute(x.CHECKSUM_ATTR_NAME);s.removeAttribute(x.CHECKSUM_ATTR_NAME);var l=s.outerHTML;s.setAttribute(x.CHECKSUM_ATTR_NAME,u);var p=e,d=r(p,l),m=" (client) "+p.substring(d-20,d+20)+"\n (server) "+l.substring(d-20,d+20);t.nodeType===A?f("42",m):void 0}if(t.nodeType===A?f("43"):void 0,a.useCreateElement){for(;t.lastChild;)t.removeChild(t.lastChild);h.insertTreeBefore(t,e,null)}else S(t,e),y.precacheNode(n,t.firstChild)}};t.exports=V},{109:109,11:11,113:113,115:115,117:117,120:120,121:121,130:130,137:137,142:142,25:25,33:33,34:34,36:36,53:53,57:57,58:58,59:59,66:66,70:70,71:71,9:9}],61:[function(e,t,n){"use strict";function r(e,t,n){return{type:"INSERT_MARKUP",content:e,fromIndex:null,fromNode:null,toIndex:n,afterNode:t}}function o(e,t,n){return{type:"MOVE_EXISTING",content:null,fromIndex:e._mountIndex,fromNode:d.getHostNode(e),toIndex:n,afterNode:t}}function i(e,t){return{type:"REMOVE_NODE",content:null,fromIndex:e._mountIndex,fromNode:t,toIndex:null,afterNode:null}}function a(e){return{type:"SET_MARKUP",content:e,fromIndex:null,fromNode:null,toIndex:null,afterNode:null}}function s(e){return{type:"TEXT_CONTENT",content:e,fromIndex:null,fromNode:null,toIndex:null,afterNode:null}}function u(e,t){return t&&(e=e||[],e.push(t)),e}function l(e,t){p.processChildrenUpdates(e,t)}var c=e(113),p=e(28),d=(e(57),e(58),e(120),e(66)),f=e(26),h=(e(129),e(97)),m=(e(137),{Mixin:{_reconcilerInstantiateChildren:function(e,t,n){return f.instantiateChildren(e,t,n)},_reconcilerUpdateChildren:function(e,t,n,r,o,i){var a,s=0;return a=h(t,s),f.updateChildren(e,a,n,r,o,this,this._hostContainerInfo,i,s),a},mountChildren:function(e,t,n){var r=this._reconcilerInstantiateChildren(e,t,n);this._renderedChildren=r;var o=[],i=0;for(var a in r)if(r.hasOwnProperty(a)){var s=r[a],u=0,l=d.mountComponent(s,t,this,this._hostContainerInfo,n,u);s._mountIndex=i++,o.push(l)}return o},updateTextContent:function(e){var t=this._renderedChildren;f.unmountChildren(t,!1);for(var n in t)t.hasOwnProperty(n)&&c("118");var r=[s(e)];l(this,r)},updateMarkup:function(e){var t=this._renderedChildren;f.unmountChildren(t,!1);for(var n in t)t.hasOwnProperty(n)&&c("118");var r=[a(e)];l(this,r)},updateChildren:function(e,t,n){this._updateChildren(e,t,n)},_updateChildren:function(e,t,n){var r=this._renderedChildren,o={},i=[],a=this._reconcilerUpdateChildren(r,e,i,o,t,n);if(a||r){var s,c=null,p=0,f=0,h=0,m=null;for(s in a)if(a.hasOwnProperty(s)){var v=r&&r[s],g=a[s];v===g?(c=u(c,this.moveChild(v,m,p,f)),f=Math.max(v._mountIndex,f),v._mountIndex=p):(v&&(f=Math.max(v._mountIndex,f)),c=u(c,this._mountChildAtIndex(g,i[h],m,p,t,n)),h++),p++,m=d.getHostNode(g)}for(s in o)o.hasOwnProperty(s)&&(c=u(c,this._unmountChild(r[s],o[s])));c&&l(this,c),this._renderedChildren=a}},unmountChildren:function(e){var t=this._renderedChildren;f.unmountChildren(t,e),this._renderedChildren=null},moveChild:function(e,t,n,r){if(e._mountIndex<r)return o(e,t,n)},createChild:function(e,t,n){return r(n,t,e._mountIndex)},removeChild:function(e,t){return i(e,t)},_mountChildAtIndex:function(e,t,n,r,o,i){return e._mountIndex=r,this.createChild(e,n,t)},_unmountChild:function(e,t){var n=this.removeChild(e,t);return e._mountIndex=null,n}}});t.exports=m},{113:113,120:120,129:129,137:137,26:26,28:28,57:57,58:58,66:66,97:97}],62:[function(e,t,n){"use strict";var r=e(113),o=e(121),i=(e(137),{HOST:0,COMPOSITE:1,EMPTY:2,getType:function(e){return null===e||e===!1?i.EMPTY:o.isValidElement(e)?"function"==typeof e.type?i.COMPOSITE:i.HOST:void r("26",e)}});t.exports=i},{113:113,121:121,137:137}],63:[function(e,t,n){"use strict";function r(e){return!(!e||"function"!=typeof e.attachRef||"function"!=typeof e.detachRef)}var o=e(113),i=(e(137),{addComponentAsRefTo:function(e,t,n){r(n)?void 0:o("119"),n.attachRef(t,e)},removeComponentAsRefFrom:function(e,t,n){r(n)?void 0:o("120");var i=n.getPublicInstance();i&&i.refs[t]===e.getPublicInstance()&&n.detachRef(t)}});t.exports=i},{113:113,137:137}],64:[function(e,t,n){"use strict";var r="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED";t.exports=r},{}],65:[function(e,t,n){"use strict";function r(e){this.reinitializeTransaction(),this.renderToStaticMarkup=!1,this.reactMountReady=i.getPooled(null),this.useCreateElement=e}var o=e(143),i=e(6),a=e(24),s=e(25),u=e(56),l=(e(58),e(89)),c=e(70),p={initialize:u.getSelectionInformation,close:u.restoreSelection},d={initialize:function(){var e=s.isEnabled();return s.setEnabled(!1),e},close:function(e){s.setEnabled(e)}},f={initialize:function(){this.reactMountReady.reset()},close:function(){this.reactMountReady.notifyAll()}},h=[p,d,f],m={getTransactionWrappers:function(){return h},getReactMountReady:function(){return this.reactMountReady},getUpdateQueue:function(){return c},checkpoint:function(){return this.reactMountReady.checkpoint()},rollback:function(e){this.reactMountReady.rollback(e)},destructor:function(){i.release(this.reactMountReady),this.reactMountReady=null}};o(r.prototype,l,m),a.addPoolingTo(r),t.exports=r},{143:143,24:24,25:25,56:56,58:58,6:6,70:70,89:89}],66:[function(e,t,n){"use strict";function r(){o.attachRefs(this,this._currentElement)}var o=e(67),i=(e(58),e(142),{mountComponent:function(e,t,n,o,i,a){var s=e.mountComponent(t,n,o,i,a);return e._currentElement&&null!=e._currentElement.ref&&t.getReactMountReady().enqueue(r,e),s},getHostNode:function(e){return e.getHostNode()},unmountComponent:function(e,t){o.detachRefs(e,e._currentElement),e.unmountComponent(t)},receiveComponent:function(e,t,n,i){var a=e._currentElement;if(t!==a||i!==e._context){var s=o.shouldUpdateRefs(a,t);s&&o.detachRefs(e,a),e.receiveComponent(t,n,i),s&&e._currentElement&&null!=e._currentElement.ref&&n.getReactMountReady().enqueue(r,e)}},performUpdateIfNecessary:function(e,t,n){e._updateBatchNumber===n&&e.performUpdateIfNecessary(t)}});t.exports=i},{142:142,58:58,67:67}],67:[function(e,t,n){"use strict";function r(e,t,n){"function"==typeof e?e(t.getPublicInstance()):i.addComponentAsRefTo(t,e,n)}function o(e,t,n){"function"==typeof e?e(null):i.removeComponentAsRefFrom(t,e,n)}var i=e(63),a={};a.attachRefs=function(e,t){if(null!==t&&"object"==typeof t){var n=t.ref;null!=n&&r(n,e,t._owner)}},a.shouldUpdateRefs=function(e,t){var n=null,r=null;null!==e&&"object"==typeof e&&(n=e.ref,r=e._owner);var o=null,i=null;return null!==t&&"object"==typeof t&&(o=t.ref,i=t._owner),n!==o||"string"==typeof o&&i!==r},a.detachRefs=function(e,t){if(null!==t&&"object"==typeof t){var n=t.ref;null!=n&&o(n,e,t._owner)}},t.exports=a},{63:63}],68:[function(e,t,n){"use strict";function r(e){this.reinitializeTransaction(),this.renderToStaticMarkup=e,this.useCreateElement=!1,this.updateQueue=new s(this)}var o=e(143),i=e(24),a=e(89),s=(e(58),e(69)),u=[],l={enqueue:function(){}},c={getTransactionWrappers:function(){return u},getReactMountReady:function(){return l},getUpdateQueue:function(){return this.updateQueue},destructor:function(){},checkpoint:function(){},rollback:function(){}};o(r.prototype,a,c),i.addPoolingTo(r),t.exports=r},{143:143,24:24,58:58,69:69,89:89}],69:[function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function o(e,t){}var i=e(70),a=(e(142),function(){function e(t){r(this,e),this.transaction=t}return e.prototype.isMounted=function(e){return!1},e.prototype.enqueueCallback=function(e,t,n){this.transaction.isInTransaction()&&i.enqueueCallback(e,t,n)},e.prototype.enqueueForceUpdate=function(e){this.transaction.isInTransaction()?i.enqueueForceUpdate(e):o(e,"forceUpdate")},e.prototype.enqueueReplaceState=function(e,t){this.transaction.isInTransaction()?i.enqueueReplaceState(e,t):o(e,"replaceState")},e.prototype.enqueueSetState=function(e,t){this.transaction.isInTransaction()?i.enqueueSetState(e,t):o(e,"setState")},e}());t.exports=a},{142:142,70:70}],70:[function(e,t,n){"use strict";function r(e){u.enqueueUpdate(e)}function o(e){var t=typeof e;if("object"!==t)return t;var n=e.constructor&&e.constructor.name||t,r=Object.keys(e);return r.length>0&&r.length<20?n+" (keys: "+r.join(", ")+")":n}function i(e,t){var n=s.get(e);return n?n:null}var a=e(113),s=(e(120),e(57)),u=(e(58),e(71)),l=(e(137),e(142),{isMounted:function(e){var t=s.get(e);return!!t&&!!t._renderedComponent},enqueueCallback:function(e,t,n){l.validateCallback(t,n);var o=i(e);return o?(o._pendingCallbacks?o._pendingCallbacks.push(t):o._pendingCallbacks=[t],void r(o)):null},enqueueCallbackInternal:function(e,t){e._pendingCallbacks?e._pendingCallbacks.push(t):e._pendingCallbacks=[t],r(e)},enqueueForceUpdate:function(e){var t=i(e,"forceUpdate");t&&(t._pendingForceUpdate=!0,r(t))},enqueueReplaceState:function(e,t){var n=i(e,"replaceState");n&&(n._pendingStateQueue=[t],n._pendingReplaceState=!0,r(n))},enqueueSetState:function(e,t){var n=i(e,"setState");if(n){var o=n._pendingStateQueue||(n._pendingStateQueue=[]);o.push(t),r(n)}},enqueueElementInternal:function(e,t,n){e._pendingElement=t,e._context=n,r(e)},validateCallback:function(e,t){e&&"function"!=typeof e?a("122",t,o(e)):void 0}});t.exports=l},{113:113,120:120,137:137,142:142,57:57,58:58,71:71}],71:[function(e,t,n){"use strict";function r(){P.ReactReconcileTransaction&&b?void 0:c("123")}function o(){this.reinitializeTransaction(),this.dirtyComponentsLength=null,this.callbackQueue=d.getPooled(),this.reconcileTransaction=P.ReactReconcileTransaction.getPooled(!0)}function i(e,t,n,o,i,a){return r(),b.batchedUpdates(e,t,n,o,i,a)}function a(e,t){return e._mountOrder-t._mountOrder}function s(e){var t=e.dirtyComponentsLength;t!==g.length?c("124",t,g.length):void 0,g.sort(a),y++;for(var n=0;n<t;n++){var r=g[n],o=r._pendingCallbacks;r._pendingCallbacks=null;var i;if(h.logTopLevelRenders){var s=r;r._currentElement.type.isReactTopLevelWrapper&&(s=r._renderedComponent),i="React update: "+s.getName(),console.time(i)}if(m.performUpdateIfNecessary(r,e.reconcileTransaction,y),i&&console.timeEnd(i),o)for(var u=0;u<o.length;u++)e.callbackQueue.enqueue(o[u],r.getPublicInstance())}}function u(e){return r(),b.isBatchingUpdates?(g.push(e),void(null==e._updateBatchNumber&&(e._updateBatchNumber=y+1))):void b.batchedUpdates(u,e)}function l(e,t){b.isBatchingUpdates?void 0:c("125"),_.enqueue(e,t),C=!0}var c=e(113),p=e(143),d=e(6),f=e(24),h=e(53),m=e(66),v=e(89),g=(e(137),[]),y=0,_=d.getPooled(),C=!1,b=null,E={initialize:function(){this.dirtyComponentsLength=g.length},close:function(){this.dirtyComponentsLength!==g.length?(g.splice(0,this.dirtyComponentsLength),T()):g.length=0}},x={initialize:function(){this.callbackQueue.reset()},close:function(){this.callbackQueue.notifyAll()}},w=[E,x];p(o.prototype,v,{getTransactionWrappers:function(){return w},destructor:function(){this.dirtyComponentsLength=null,d.release(this.callbackQueue),this.callbackQueue=null,P.ReactReconcileTransaction.release(this.reconcileTransaction),this.reconcileTransaction=null},perform:function(e,t,n){return v.perform.call(this,this.reconcileTransaction.perform,this.reconcileTransaction,e,t,n)}}),f.addPoolingTo(o);var T=function(){for(;g.length||C;){if(g.length){var e=o.getPooled();e.perform(s,null,e),o.release(e)}if(C){C=!1;var t=_;_=d.getPooled(),t.notifyAll(),d.release(t)}}},k={injectReconcileTransaction:function(e){e?void 0:c("126"),P.ReactReconcileTransaction=e},injectBatchingStrategy:function(e){e?void 0:c("127"),"function"!=typeof e.batchedUpdates?c("128"):void 0,"boolean"!=typeof e.isBatchingUpdates?c("129"):void 0,b=e}},P={ReactReconcileTransaction:null,batchedUpdates:i,enqueueUpdate:u,flushBatchedUpdates:T,injection:k,asap:l};t.exports=P},{113:113,137:137,143:143,24:24,53:53,6:6,66:66,89:89}],72:[function(e,t,n){"use strict";t.exports="15.4.2"},{}],73:[function(e,t,n){"use strict";var r={xlink:"http://www.w3.org/1999/xlink",xml:"http://www.w3.org/XML/1998/namespace"},o={accentHeight:"accent-height",accumulate:0,additive:0,alignmentBaseline:"alignment-baseline",allowReorder:"allowReorder",alphabetic:0,amplitude:0,arabicForm:"arabic-form",ascent:0,attributeName:"attributeName",attributeType:"attributeType",autoReverse:"autoReverse",azimuth:0,baseFrequency:"baseFrequency",baseProfile:"baseProfile",baselineShift:"baseline-shift",bbox:0,begin:0,bias:0,by:0,calcMode:"calcMode",capHeight:"cap-height",clip:0,clipPath:"clip-path",clipRule:"clip-rule",clipPathUnits:"clipPathUnits",colorInterpolation:"color-interpolation",colorInterpolationFilters:"color-interpolation-filters",colorProfile:"color-profile",colorRendering:"color-rendering",contentScriptType:"contentScriptType",contentStyleType:"contentStyleType",cursor:0,cx:0,cy:0,d:0,decelerate:0,descent:0,diffuseConstant:"diffuseConstant",direction:0,display:0,divisor:0,dominantBaseline:"dominant-baseline",dur:0,dx:0,dy:0,edgeMode:"edgeMode",elevation:0,enableBackground:"enable-background",end:0,exponent:0,externalResourcesRequired:"externalResourcesRequired",fill:0,fillOpacity:"fill-opacity",fillRule:"fill-rule",filter:0,filterRes:"filterRes",filterUnits:"filterUnits",floodColor:"flood-color",floodOpacity:"flood-opacity",focusable:0,fontFamily:"font-family",fontSize:"font-size",fontSizeAdjust:"font-size-adjust",fontStretch:"font-stretch",fontStyle:"font-style",fontVariant:"font-variant",fontWeight:"font-weight",format:0,from:0,fx:0,fy:0,g1:0,g2:0,glyphName:"glyph-name",glyphOrientationHorizontal:"glyph-orientation-horizontal",glyphOrientationVertical:"glyph-orientation-vertical",glyphRef:"glyphRef",gradientTransform:"gradientTransform",gradientUnits:"gradientUnits",hanging:0,horizAdvX:"horiz-adv-x",horizOriginX:"horiz-origin-x",ideographic:0,imageRendering:"image-rendering",in:0,in2:0,intercept:0,k:0,k1:0,k2:0,k3:0,k4:0,kernelMatrix:"kernelMatrix",kernelUnitLength:"kernelUnitLength",kerning:0,keyPoints:"keyPoints",keySplines:"keySplines",keyTimes:"keyTimes",lengthAdjust:"lengthAdjust",letterSpacing:"letter-spacing",lightingColor:"lighting-color",limitingConeAngle:"limitingConeAngle",local:0,markerEnd:"marker-end",markerMid:"marker-mid",markerStart:"marker-start",markerHeight:"markerHeight",markerUnits:"markerUnits",markerWidth:"markerWidth",mask:0,maskContentUnits:"maskContentUnits",maskUnits:"maskUnits",mathematical:0,mode:0,numOctaves:"numOctaves",offset:0,opacity:0,operator:0,order:0,orient:0,orientation:0,origin:0,overflow:0,overlinePosition:"overline-position",overlineThickness:"overline-thickness",paintOrder:"paint-order",panose1:"panose-1",pathLength:"pathLength",patternContentUnits:"patternContentUnits",patternTransform:"patternTransform",patternUnits:"patternUnits",pointerEvents:"pointer-events",points:0,pointsAtX:"pointsAtX",pointsAtY:"pointsAtY",pointsAtZ:"pointsAtZ",preserveAlpha:"preserveAlpha",preserveAspectRatio:"preserveAspectRatio",primitiveUnits:"primitiveUnits",r:0,radius:0,refX:"refX",refY:"refY",renderingIntent:"rendering-intent",repeatCount:"repeatCount",repeatDur:"repeatDur",requiredExtensions:"requiredExtensions",requiredFeatures:"requiredFeatures",restart:0,result:0,rotate:0,rx:0,ry:0,scale:0,seed:0,shapeRendering:"shape-rendering",slope:0,spacing:0,specularConstant:"specularConstant",specularExponent:"specularExponent",speed:0,spreadMethod:"spreadMethod",startOffset:"startOffset",stdDeviation:"stdDeviation",stemh:0,stemv:0,stitchTiles:"stitchTiles",stopColor:"stop-color",stopOpacity:"stop-opacity",strikethroughPosition:"strikethrough-position",strikethroughThickness:"strikethrough-thickness",string:0,stroke:0,strokeDasharray:"stroke-dasharray",strokeDashoffset:"stroke-dashoffset",strokeLinecap:"stroke-linecap",strokeLinejoin:"stroke-linejoin",strokeMiterlimit:"stroke-miterlimit",strokeOpacity:"stroke-opacity",strokeWidth:"stroke-width",surfaceScale:"surfaceScale",systemLanguage:"systemLanguage",tableValues:"tableValues",targetX:"targetX",targetY:"targetY",textAnchor:"text-anchor",textDecoration:"text-decoration",textRendering:"text-rendering",textLength:"textLength",to:0,transform:0,u1:0,u2:0,underlinePosition:"underline-position",underlineThickness:"underline-thickness",unicode:0,unicodeBidi:"unicode-bidi",unicodeRange:"unicode-range",unitsPerEm:"units-per-em",vAlphabetic:"v-alphabetic",vHanging:"v-hanging",vIdeographic:"v-ideographic",vMathematical:"v-mathematical",values:0,vectorEffect:"vector-effect",version:0,vertAdvY:"vert-adv-y",vertOriginX:"vert-origin-x",vertOriginY:"vert-origin-y",viewBox:"viewBox",viewTarget:"viewTarget",visibility:0,widths:0,wordSpacing:"word-spacing",writingMode:"writing-mode",x:0,xHeight:"x-height",x1:0,x2:0,xChannelSelector:"xChannelSelector",xlinkActuate:"xlink:actuate",xlinkArcrole:"xlink:arcrole",xlinkHref:"xlink:href",xlinkRole:"xlink:role",xlinkShow:"xlink:show",xlinkTitle:"xlink:title",xlinkType:"xlink:type",xmlBase:"xml:base",xmlns:0,xmlnsXlink:"xmlns:xlink",xmlLang:"xml:lang",xmlSpace:"xml:space",y:0,y1:0,y2:0,yChannelSelector:"yChannelSelector",z:0,zoomAndPan:"zoomAndPan"},i={Properties:{},DOMAttributeNamespaces:{xlinkActuate:r.xlink,xlinkArcrole:r.xlink,xlinkHref:r.xlink,xlinkRole:r.xlink,xlinkShow:r.xlink,xlinkTitle:r.xlink,xlinkType:r.xlink,xmlBase:r.xml,xmlLang:r.xml,xmlSpace:r.xml},DOMAttributeNames:{}};Object.keys(o).forEach(function(e){i.Properties[e]=0,o[e]&&(i.DOMAttributeNames[e]=o[e])}),t.exports=i},{}],74:[function(e,t,n){"use strict";function r(e){if("selectionStart"in e&&u.hasSelectionCapabilities(e))return{start:e.selectionStart,end:e.selectionEnd};if(window.getSelection){var t=window.getSelection();return{anchorNode:t.anchorNode,anchorOffset:t.anchorOffset,focusNode:t.focusNode,focusOffset:t.focusOffset}}if(document.selection){var n=document.selection.createRange();return{parentElement:n.parentElement(),text:n.text,top:n.boundingTop,left:n.boundingLeft}}}function o(e,t){if(y||null==m||m!==c())return null;var n=r(m);if(!g||!d(g,n)){g=n;var o=l.getPooled(h.select,v,e,t);return o.type="select",o.target=m,i.accumulateTwoPhaseDispatches(o),o}return null}var i=e(19),a=e(123),s=e(33),u=e(56),l=e(80),c=e(132),p=e(111),d=e(141),f=a.canUseDOM&&"documentMode"in document&&document.documentMode<=11,h={select:{phasedRegistrationNames:{bubbled:"onSelect",captured:"onSelectCapture"},dependencies:["topBlur","topContextMenu","topFocus","topKeyDown","topKeyUp","topMouseDown","topMouseUp","topSelectionChange"]}},m=null,v=null,g=null,y=!1,_=!1,C={eventTypes:h,extractEvents:function(e,t,n,r){if(!_)return null;var i=t?s.getNodeFromInstance(t):window;switch(e){case"topFocus":(p(i)||"true"===i.contentEditable)&&(m=i,v=t,g=null);break;case"topBlur":m=null,v=null,g=null;break;case"topMouseDown":y=!0;break;case"topContextMenu":case"topMouseUp":return y=!1,
-o(n,r);case"topSelectionChange":if(f)break;case"topKeyDown":case"topKeyUp":return o(n,r)}return null},didPutListener:function(e,t,n){"onSelect"===t&&(_=!0)}};t.exports=C},{111:111,123:123,132:132,141:141,19:19,33:33,56:56,80:80}],75:[function(e,t,n){"use strict";function r(e){return"."+e._rootNodeID}function o(e){return"button"===e||"input"===e||"select"===e||"textarea"===e}var i=e(113),a=e(122),s=e(19),u=e(33),l=e(76),c=e(77),p=e(80),d=e(81),f=e(83),h=e(84),m=e(79),v=e(85),g=e(86),y=e(87),_=e(88),C=e(129),b=e(99),E=(e(137),{}),x={};["abort","animationEnd","animationIteration","animationStart","blur","canPlay","canPlayThrough","click","contextMenu","copy","cut","doubleClick","drag","dragEnd","dragEnter","dragExit","dragLeave","dragOver","dragStart","drop","durationChange","emptied","encrypted","ended","error","focus","input","invalid","keyDown","keyPress","keyUp","load","loadedData","loadedMetadata","loadStart","mouseDown","mouseMove","mouseOut","mouseOver","mouseUp","paste","pause","play","playing","progress","rateChange","reset","scroll","seeked","seeking","stalled","submit","suspend","timeUpdate","touchCancel","touchEnd","touchMove","touchStart","transitionEnd","volumeChange","waiting","wheel"].forEach(function(e){var t=e[0].toUpperCase()+e.slice(1),n="on"+t,r="top"+t,o={phasedRegistrationNames:{bubbled:n,captured:n+"Capture"},dependencies:[r]};E[e]=o,x[r]=o});var w={},T={eventTypes:E,extractEvents:function(e,t,n,r){var o=x[e];if(!o)return null;var a;switch(e){case"topAbort":case"topCanPlay":case"topCanPlayThrough":case"topDurationChange":case"topEmptied":case"topEncrypted":case"topEnded":case"topError":case"topInput":case"topInvalid":case"topLoad":case"topLoadedData":case"topLoadedMetadata":case"topLoadStart":case"topPause":case"topPlay":case"topPlaying":case"topProgress":case"topRateChange":case"topReset":case"topSeeked":case"topSeeking":case"topStalled":case"topSubmit":case"topSuspend":case"topTimeUpdate":case"topVolumeChange":case"topWaiting":a=p;break;case"topKeyPress":if(0===b(n))return null;case"topKeyDown":case"topKeyUp":a=f;break;case"topBlur":case"topFocus":a=d;break;case"topClick":if(2===n.button)return null;case"topDoubleClick":case"topMouseDown":case"topMouseMove":case"topMouseUp":case"topMouseOut":case"topMouseOver":case"topContextMenu":a=h;break;case"topDrag":case"topDragEnd":case"topDragEnter":case"topDragExit":case"topDragLeave":case"topDragOver":case"topDragStart":case"topDrop":a=m;break;case"topTouchCancel":case"topTouchEnd":case"topTouchMove":case"topTouchStart":a=v;break;case"topAnimationEnd":case"topAnimationIteration":case"topAnimationStart":a=l;break;case"topTransitionEnd":a=g;break;case"topScroll":a=y;break;case"topWheel":a=_;break;case"topCopy":case"topCut":case"topPaste":a=c}a?void 0:i("86",e);var u=a.getPooled(o,t,n,r);return s.accumulateTwoPhaseDispatches(u),u},didPutListener:function(e,t,n){if("onClick"===t&&!o(e._tag)){var i=r(e),s=u.getNodeFromInstance(e);w[i]||(w[i]=a.listen(s,"click",C))}},willDeleteListener:function(e,t){if("onClick"===t&&!o(e._tag)){var n=r(e);w[n].remove(),delete w[n]}}};t.exports=T},{113:113,122:122,129:129,137:137,19:19,33:33,76:76,77:77,79:79,80:80,81:81,83:83,84:84,85:85,86:86,87:87,88:88,99:99}],76:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={animationName:null,elapsedTime:null,pseudoElement:null};o.augmentClass(r,i),t.exports=r},{80:80}],77:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={clipboardData:function(e){return"clipboardData"in e?e.clipboardData:window.clipboardData}};o.augmentClass(r,i),t.exports=r},{80:80}],78:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={data:null};o.augmentClass(r,i),t.exports=r},{80:80}],79:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(84),i={dataTransfer:null};o.augmentClass(r,i),t.exports=r},{84:84}],80:[function(e,t,n){"use strict";function r(e,t,n,r){this.dispatchConfig=e,this._targetInst=t,this.nativeEvent=n;var o=this.constructor.Interface;for(var i in o)if(o.hasOwnProperty(i)){var s=o[i];s?this[i]=s(n):"target"===i?this.target=r:this[i]=n[i]}var u=null!=n.defaultPrevented?n.defaultPrevented:n.returnValue===!1;return u?this.isDefaultPrevented=a.thatReturnsTrue:this.isDefaultPrevented=a.thatReturnsFalse,this.isPropagationStopped=a.thatReturnsFalse,this}var o=e(143),i=e(24),a=e(129),s=(e(142),"function"==typeof Proxy,["dispatchConfig","_targetInst","nativeEvent","isDefaultPrevented","isPropagationStopped","_dispatchListeners","_dispatchInstances"]),u={type:null,target:null,currentTarget:a.thatReturnsNull,eventPhase:null,bubbles:null,cancelable:null,timeStamp:function(e){return e.timeStamp||Date.now()},defaultPrevented:null,isTrusted:null};o(r.prototype,{preventDefault:function(){this.defaultPrevented=!0;var e=this.nativeEvent;e&&(e.preventDefault?e.preventDefault():"unknown"!=typeof e.returnValue&&(e.returnValue=!1),this.isDefaultPrevented=a.thatReturnsTrue)},stopPropagation:function(){var e=this.nativeEvent;e&&(e.stopPropagation?e.stopPropagation():"unknown"!=typeof e.cancelBubble&&(e.cancelBubble=!0),this.isPropagationStopped=a.thatReturnsTrue)},persist:function(){this.isPersistent=a.thatReturnsTrue},isPersistent:a.thatReturnsFalse,destructor:function(){var e=this.constructor.Interface;for(var t in e)this[t]=null;for(var n=0;n<s.length;n++)this[s[n]]=null}}),r.Interface=u,r.augmentClass=function(e,t){var n=this,r=function(){};r.prototype=n.prototype;var a=new r;o(a,e.prototype),e.prototype=a,e.prototype.constructor=e,e.Interface=o({},n.Interface,t),e.augmentClass=n.augmentClass,i.addPoolingTo(e,i.fourArgumentPooler)},i.addPoolingTo(r,i.fourArgumentPooler),t.exports=r},{129:129,142:142,143:143,24:24}],81:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i={relatedTarget:null};o.augmentClass(r,i),t.exports=r},{87:87}],82:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={data:null};o.augmentClass(r,i),t.exports=r},{80:80}],83:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(99),a=e(100),s=e(101),u={key:a,location:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,repeat:null,locale:null,getModifierState:s,charCode:function(e){return"keypress"===e.type?i(e):0},keyCode:function(e){return"keydown"===e.type||"keyup"===e.type?e.keyCode:0},which:function(e){return"keypress"===e.type?i(e):"keydown"===e.type||"keyup"===e.type?e.keyCode:0}};o.augmentClass(r,u),t.exports=r},{100:100,101:101,87:87,99:99}],84:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(90),a=e(101),s={screenX:null,screenY:null,clientX:null,clientY:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,getModifierState:a,button:function(e){var t=e.button;return"which"in e?t:2===t?2:4===t?1:0},buttons:null,relatedTarget:function(e){return e.relatedTarget||(e.fromElement===e.srcElement?e.toElement:e.fromElement)},pageX:function(e){return"pageX"in e?e.pageX:e.clientX+i.currentScrollLeft},pageY:function(e){return"pageY"in e?e.pageY:e.clientY+i.currentScrollTop}};o.augmentClass(r,s),t.exports=r},{101:101,87:87,90:90}],85:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(101),a={touches:null,targetTouches:null,changedTouches:null,altKey:null,metaKey:null,ctrlKey:null,shiftKey:null,getModifierState:i};o.augmentClass(r,a),t.exports=r},{101:101,87:87}],86:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={propertyName:null,elapsedTime:null,pseudoElement:null};o.augmentClass(r,i),t.exports=r},{80:80}],87:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i=e(102),a={view:function(e){if(e.view)return e.view;var t=i(e);if(t.window===t)return t;var n=t.ownerDocument;return n?n.defaultView||n.parentWindow:window},detail:function(e){return e.detail||0}};o.augmentClass(r,a),t.exports=r},{102:102,80:80}],88:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(84),i={deltaX:function(e){return"deltaX"in e?e.deltaX:"wheelDeltaX"in e?-e.wheelDeltaX:0},deltaY:function(e){return"deltaY"in e?e.deltaY:"wheelDeltaY"in e?-e.wheelDeltaY:"wheelDelta"in e?-e.wheelDelta:0},deltaZ:null,deltaMode:null};o.augmentClass(r,i),t.exports=r},{84:84}],89:[function(e,t,n){"use strict";var r=e(113),o=(e(137),{}),i={reinitializeTransaction:function(){this.transactionWrappers=this.getTransactionWrappers(),this.wrapperInitData?this.wrapperInitData.length=0:this.wrapperInitData=[],this._isInTransaction=!1},_isInTransaction:!1,getTransactionWrappers:null,isInTransaction:function(){return!!this._isInTransaction},perform:function(e,t,n,o,i,a,s,u){this.isInTransaction()?r("27"):void 0;var l,c;try{this._isInTransaction=!0,l=!0,this.initializeAll(0),c=e.call(t,n,o,i,a,s,u),l=!1}finally{try{if(l)try{this.closeAll(0)}catch(e){}else this.closeAll(0)}finally{this._isInTransaction=!1}}return c},initializeAll:function(e){for(var t=this.transactionWrappers,n=e;n<t.length;n++){var r=t[n];try{this.wrapperInitData[n]=o,this.wrapperInitData[n]=r.initialize?r.initialize.call(this):null}finally{if(this.wrapperInitData[n]===o)try{this.initializeAll(n+1)}catch(e){}}}},closeAll:function(e){this.isInTransaction()?void 0:r("28");for(var t=this.transactionWrappers,n=e;n<t.length;n++){var i,a=t[n],s=this.wrapperInitData[n];try{i=!0,s!==o&&a.close&&a.close.call(this,s),i=!1}finally{if(i)try{this.closeAll(n+1)}catch(e){}}}this.wrapperInitData.length=0}};t.exports=i},{113:113,137:137}],90:[function(e,t,n){"use strict";var r={currentScrollLeft:0,currentScrollTop:0,refreshScrollValues:function(e){r.currentScrollLeft=e.x,r.currentScrollTop=e.y}};t.exports=r},{}],91:[function(e,t,n){"use strict";function r(e,t){return null==t?o("30"):void 0,null==e?t:Array.isArray(e)?Array.isArray(t)?(e.push.apply(e,t),e):(e.push(t),e):Array.isArray(t)?[e].concat(t):[e,t]}var o=e(113);e(137);t.exports=r},{113:113,137:137}],92:[function(e,t,n){"use strict";function r(e){for(var t=1,n=0,r=0,i=e.length,a=i&-4;r<a;){for(var s=Math.min(r+4096,a);r<s;r+=4)n+=(t+=e.charCodeAt(r))+(t+=e.charCodeAt(r+1))+(t+=e.charCodeAt(r+2))+(t+=e.charCodeAt(r+3));t%=o,n%=o}for(;r<i;r++)n+=t+=e.charCodeAt(r);return t%=o,n%=o,t|n<<16}var o=65521;t.exports=r},{}],93:[function(e,t,n){"use strict";var r=function(e){return"undefined"!=typeof MSApp&&MSApp.execUnsafeLocalFunction?function(t,n,r,o){MSApp.execUnsafeLocalFunction(function(){return e(t,n,r,o)})}:e};t.exports=r},{}],94:[function(e,t,n){"use strict";function r(e,t,n){var r=null==t||"boolean"==typeof t||""===t;if(r)return"";var o=isNaN(t);return o||0===t||i.hasOwnProperty(e)&&i[e]?""+t:("string"==typeof t&&(t=t.trim()),t+"px")}var o=e(4),i=(e(142),o.isUnitlessNumber);t.exports=r},{142:142,4:4}],95:[function(e,t,n){"use strict";function r(e){var t=""+e,n=i.exec(t);if(!n)return t;var r,o="",a=0,s=0;for(a=n.index;a<t.length;a++){switch(t.charCodeAt(a)){case 34:r="&quot;";break;case 38:r="&amp;";break;case 39:r="&#x27;";break;case 60:r="&lt;";break;case 62:r="&gt;";break;default:continue}s!==a&&(o+=t.substring(s,a)),s=a+1,o+=r}return s!==a?o+t.substring(s,a):o}function o(e){return"boolean"==typeof e||"number"==typeof e?""+e:r(e)}var i=/["'&<>]/;t.exports=o},{}],96:[function(e,t,n){"use strict";function r(e){if(null==e)return null;if(1===e.nodeType)return e;var t=a.get(e);return t?(t=s(t),t?i.getNodeFromInstance(t):null):void("function"==typeof e.render?o("44"):o("45",Object.keys(e)))}var o=e(113),i=(e(120),e(33)),a=e(57),s=e(103);e(137),e(142);t.exports=r},{103:103,113:113,120:120,137:137,142:142,33:33,57:57}],97:[function(e,t,n){(function(n){"use strict";function r(e,t,n,r){if(e&&"object"==typeof e){var o=e,i=void 0===o[n];i&&null!=t&&(o[n]=t)}}function o(e,t){if(null==e)return e;var n={};return i(e,r,n),n}var i=(e(22),e(118));e(142);"undefined"!=typeof n&&n.env,t.exports=o}).call(this,void 0)},{118:118,142:142,22:22}],98:[function(e,t,n){"use strict";function r(e,t,n){Array.isArray(e)?e.forEach(t,n):e&&t.call(n,e)}t.exports=r},{}],99:[function(e,t,n){"use strict";function r(e){var t,n=e.keyCode;return"charCode"in e?(t=e.charCode,0===t&&13===n&&(t=13)):t=n,t>=32||13===t?t:0}t.exports=r},{}],100:[function(e,t,n){"use strict";function r(e){if(e.key){var t=i[e.key]||e.key;if("Unidentified"!==t)return t}if("keypress"===e.type){var n=o(e);return 13===n?"Enter":String.fromCharCode(n)}return"keydown"===e.type||"keyup"===e.type?a[e.keyCode]||"Unidentified":""}var o=e(99),i={Esc:"Escape",Spacebar:" ",Left:"ArrowLeft",Up:"ArrowUp",Right:"ArrowRight",Down:"ArrowDown",Del:"Delete",Win:"OS",Menu:"ContextMenu",Apps:"ContextMenu",Scroll:"ScrollLock",MozPrintableKey:"Unidentified"},a={8:"Backspace",9:"Tab",12:"Clear",13:"Enter",16:"Shift",17:"Control",18:"Alt",19:"Pause",20:"CapsLock",27:"Escape",32:" ",33:"PageUp",34:"PageDown",35:"End",36:"Home",37:"ArrowLeft",38:"ArrowUp",39:"ArrowRight",40:"ArrowDown",45:"Insert",46:"Delete",112:"F1",113:"F2",114:"F3",115:"F4",116:"F5",117:"F6",118:"F7",119:"F8",120:"F9",121:"F10",122:"F11",123:"F12",144:"NumLock",145:"ScrollLock",224:"Meta"};t.exports=r},{99:99}],101:[function(e,t,n){"use strict";function r(e){var t=this,n=t.nativeEvent;if(n.getModifierState)return n.getModifierState(e);var r=i[e];return!!r&&!!n[r]}function o(e){return r}var i={Alt:"altKey",Control:"ctrlKey",Meta:"metaKey",Shift:"shiftKey"};t.exports=o},{}],102:[function(e,t,n){"use strict";function r(e){var t=e.target||e.srcElement||window;return t.correspondingUseElement&&(t=t.correspondingUseElement),3===t.nodeType?t.parentNode:t}t.exports=r},{}],103:[function(e,t,n){"use strict";function r(e){for(var t;(t=e._renderedNodeType)===o.COMPOSITE;)e=e._renderedComponent;return t===o.HOST?e._renderedComponent:t===o.EMPTY?null:void 0}var o=e(62);t.exports=r},{62:62}],104:[function(e,t,n){"use strict";function r(e){var t=e&&(o&&e[o]||e[i]);if("function"==typeof t)return t}var o="function"==typeof Symbol&&Symbol.iterator,i="@@iterator";t.exports=r},{}],105:[function(e,t,n){"use strict";function r(){return o++}var o=1;t.exports=r},{}],106:[function(e,t,n){"use strict";function r(e){for(;e&&e.firstChild;)e=e.firstChild;return e}function o(e){for(;e;){if(e.nextSibling)return e.nextSibling;e=e.parentNode}}function i(e,t){for(var n=r(e),i=0,a=0;n;){if(3===n.nodeType){if(a=i+n.textContent.length,i<=t&&a>=t)return{node:n,offset:t-i};i=a}n=r(o(n))}}t.exports=i},{}],107:[function(e,t,n){"use strict";function r(){return!i&&o.canUseDOM&&(i="textContent"in document.documentElement?"textContent":"innerText"),i}var o=e(123),i=null;t.exports=r},{123:123}],108:[function(e,t,n){"use strict";function r(e,t){var n={};return n[e.toLowerCase()]=t.toLowerCase(),n["Webkit"+e]="webkit"+t,n["Moz"+e]="moz"+t,n["ms"+e]="MS"+t,n["O"+e]="o"+t.toLowerCase(),n}function o(e){if(s[e])return s[e];if(!a[e])return e;var t=a[e];for(var n in t)if(t.hasOwnProperty(n)&&n in u)return s[e]=t[n];return""}var i=e(123),a={animationend:r("Animation","AnimationEnd"),animationiteration:r("Animation","AnimationIteration"),animationstart:r("Animation","AnimationStart"),transitionend:r("Transition","TransitionEnd")},s={},u={};i.canUseDOM&&(u=document.createElement("div").style,"AnimationEvent"in window||(delete a.animationend.animation,delete a.animationiteration.animation,delete a.animationstart.animation),"TransitionEvent"in window||delete a.transitionend.transition),t.exports=o},{123:123}],109:[function(e,t,n){"use strict";function r(e){if(e){var t=e.getName();if(t)return" Check the render method of `"+t+"`."}return""}function o(e){return"function"==typeof e&&"undefined"!=typeof e.prototype&&"function"==typeof e.prototype.mountComponent&&"function"==typeof e.prototype.receiveComponent}function i(e,t){var n;if(null===e||e===!1)n=l.create(i);else if("object"==typeof e){var s=e,u=s.type;if("function"!=typeof u&&"string"!=typeof u){var d="";d+=r(s._owner),a("130",null==u?u:typeof u,d)}"string"==typeof s.type?n=c.createInternalComponent(s):o(s.type)?(n=new s.type(s),n.getHostNode||(n.getHostNode=n.getNativeNode)):n=new p(s)}else"string"==typeof e||"number"==typeof e?n=c.createInstanceForText(e):a("131",typeof e);return n._mountIndex=0,n._mountImage=null,n}var a=e(113),s=e(143),u=e(29),l=e(49),c=e(54),p=(e(105),e(137),e(142),function(e){this.construct(e)});s(p.prototype,u,{_instantiateReactComponent:i}),t.exports=i},{105:105,113:113,137:137,142:142,143:143,29:29,49:49,54:54}],110:[function(e,t,n){"use strict";function r(e,t){if(!i.canUseDOM||t&&!("addEventListener"in document))return!1;var n="on"+e,r=n in document;if(!r){var a=document.createElement("div");a.setAttribute(n,"return;"),r="function"==typeof a[n]}return!r&&o&&"wheel"===e&&(r=document.implementation.hasFeature("Events.wheel","3.0")),r}var o,i=e(123);i.canUseDOM&&(o=document.implementation&&document.implementation.hasFeature&&document.implementation.hasFeature("","")!==!0),t.exports=r},{123:123}],111:[function(e,t,n){"use strict";function r(e){var t=e&&e.nodeName&&e.nodeName.toLowerCase();return"input"===t?!!o[e.type]:"textarea"===t}var o={color:!0,date:!0,datetime:!0,"datetime-local":!0,email:!0,month:!0,number:!0,password:!0,range:!0,search:!0,tel:!0,text:!0,time:!0,url:!0,week:!0};t.exports=r},{}],112:[function(e,t,n){"use strict";function r(e){return'"'+o(e)+'"'}var o=e(95);t.exports=r},{95:95}],113:[function(e,t,n){"use strict";function r(e){for(var t=arguments.length-1,n="Minified React error #"+e+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant="+e,r=0;r<t;r++)n+="&args[]="+encodeURIComponent(arguments[r+1]);n+=" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";var o=new Error(n);throw o.name="Invariant Violation",o.framesToPop=1,o}t.exports=r},{}],114:[function(e,t,n){"use strict";var r=e(60);t.exports=r.renderSubtreeIntoContainer},{60:60}],115:[function(e,t,n){"use strict";var r,o=e(123),i=e(10),a=/^[ \r\n\t\f]/,s=/<(!--|link|noscript|meta|script|style)[ \r\n\t\f\/>]/,u=e(93),l=u(function(e,t){if(e.namespaceURI!==i.svg||"innerHTML"in e)e.innerHTML=t;else{r=r||document.createElement("div"),r.innerHTML="<svg>"+t+"</svg>";for(var n=r.firstChild;n.firstChild;)e.appendChild(n.firstChild)}});if(o.canUseDOM){var c=document.createElement("div");c.innerHTML=" ",""===c.innerHTML&&(l=function(e,t){if(e.parentNode&&e.parentNode.replaceChild(e,e),a.test(t)||"<"===t[0]&&s.test(t)){e.innerHTML=String.fromCharCode(65279)+t;var n=e.firstChild;1===n.data.length?e.removeChild(n):n.deleteData(0,1)}else e.innerHTML=t}),c=null}t.exports=l},{10:10,123:123,93:93}],116:[function(e,t,n){"use strict";var r=e(123),o=e(95),i=e(115),a=function(e,t){if(t){var n=e.firstChild;if(n&&n===e.lastChild&&3===n.nodeType)return void(n.nodeValue=t)}e.textContent=t};r.canUseDOM&&("textContent"in document.documentElement||(a=function(e,t){return 3===e.nodeType?void(e.nodeValue=t):void i(e,o(t))})),t.exports=a},{115:115,123:123,95:95}],117:[function(e,t,n){"use strict";function r(e,t){var n=null===e||e===!1,r=null===t||t===!1;if(n||r)return n===r;var o=typeof e,i=typeof t;return"string"===o||"number"===o?"string"===i||"number"===i:"object"===i&&e.type===t.type&&e.key===t.key}t.exports=r},{}],118:[function(e,t,n){"use strict";function r(e,t){return e&&"object"==typeof e&&null!=e.key?l.escape(e.key):t.toString(36)}function o(e,t,n,i){var d=typeof e;if("undefined"!==d&&"boolean"!==d||(e=null),null===e||"string"===d||"number"===d||"object"===d&&e.$$typeof===s)return n(i,e,""===t?c+r(e,0):t),1;var f,h,m=0,v=""===t?c:t+p;if(Array.isArray(e))for(var g=0;g<e.length;g++)f=e[g],h=v+r(f,g),m+=o(f,h,n,i);else{var y=u(e);if(y){var _,C=y.call(e);if(y!==e.entries)for(var b=0;!(_=C.next()).done;)f=_.value,h=v+r(f,b++),m+=o(f,h,n,i);else for(;!(_=C.next()).done;){var E=_.value;E&&(f=E[1],h=v+l.escape(E[0])+p+r(f,0),m+=o(f,h,n,i))}}else if("object"===d){var x="",w=String(e);a("31","[object Object]"===w?"object with keys {"+Object.keys(e).join(", ")+"}":w,x)}}return m}function i(e,t,n){return null==e?0:o(e,"",t,n)}var a=e(113),s=(e(120),e(48)),u=e(104),l=(e(137),e(22)),c=(e(142),"."),p=":";t.exports=i},{104:104,113:113,120:120,137:137,142:142,22:22,48:48}],119:[function(e,t,n){"use strict";var r=(e(143),e(129)),o=(e(142),r);t.exports=o},{129:129,142:142,143:143}],120:[function(t,n,r){"use strict";var o=e.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;n.exports=o.ReactCurrentOwner},{}],121:[function(t,n,r){"use strict";n.exports=e},{}],122:[function(e,t,n){"use strict";var r=e(129),o={listen:function(e,t,n){return e.addEventListener?(e.addEventListener(t,n,!1),{remove:function(){e.removeEventListener(t,n,!1)}}):e.attachEvent?(e.attachEvent("on"+t,n),{remove:function(){e.detachEvent("on"+t,n)}}):void 0},capture:function(e,t,n){return e.addEventListener?(e.addEventListener(t,n,!0),{remove:function(){e.removeEventListener(t,n,!0)}}):{remove:r}},registerDefault:function(){}};t.exports=o},{129:129}],123:[function(e,t,n){"use strict";var r=!("undefined"==typeof window||!window.document||!window.document.createElement),o={canUseDOM:r,canUseWorkers:"undefined"!=typeof Worker,canUseEventListeners:r&&!(!window.addEventListener&&!window.attachEvent),canUseViewport:r&&!!window.screen,isInWorker:!r};t.exports=o},{}],124:[function(e,t,n){"use strict";function r(e){return e.replace(o,function(e,t){return t.toUpperCase()})}var o=/-(.)/g;t.exports=r},{}],125:[function(e,t,n){"use strict";function r(e){return o(e.replace(i,"ms-"))}var o=e(124),i=/^-ms-/;t.exports=r},{124:124}],126:[function(e,t,n){"use strict";function r(e,t){return!(!e||!t)&&(e===t||!o(e)&&(o(t)?r(e,t.parentNode):"contains"in e?e.contains(t):!!e.compareDocumentPosition&&!!(16&e.compareDocumentPosition(t))))}var o=e(139);t.exports=r},{139:139}],127:[function(e,t,n){"use strict";function r(e){var t=e.length;if(Array.isArray(e)||"object"!=typeof e&&"function"!=typeof e?a(!1):void 0,"number"!=typeof t?a(!1):void 0,0===t||t-1 in e?void 0:a(!1),"function"==typeof e.callee?a(!1):void 0,e.hasOwnProperty)try{return Array.prototype.slice.call(e)}catch(e){}for(var n=Array(t),r=0;r<t;r++)n[r]=e[r];return n}function o(e){return!!e&&("object"==typeof e||"function"==typeof e)&&"length"in e&&!("setInterval"in e)&&"number"!=typeof e.nodeType&&(Array.isArray(e)||"callee"in e||"item"in e)}function i(e){return o(e)?Array.isArray(e)?e.slice():r(e):[e]}var a=e(137);t.exports=i},{137:137}],128:[function(e,t,n){"use strict";function r(e){var t=e.match(c);return t&&t[1].toLowerCase()}function o(e,t){var n=l;l?void 0:u(!1);var o=r(e),i=o&&s(o);if(i){n.innerHTML=i[1]+e+i[2];for(var c=i[0];c--;)n=n.lastChild}else n.innerHTML=e;var p=n.getElementsByTagName("script");p.length&&(t?void 0:u(!1),a(p).forEach(t));for(var d=Array.from(n.childNodes);n.lastChild;)n.removeChild(n.lastChild);return d}var i=e(123),a=e(127),s=e(133),u=e(137),l=i.canUseDOM?document.createElement("div"):null,c=/^\s*<(\w+)/;t.exports=o},{123:123,127:127,133:133,137:137}],129:[function(e,t,n){"use strict";function r(e){return function(){return e}}var o=function(){};o.thatReturns=r,o.thatReturnsFalse=r(!1),o.thatReturnsTrue=r(!0),o.thatReturnsNull=r(null),o.thatReturnsThis=function(){return this},o.thatReturnsArgument=function(e){return e},t.exports=o},{}],130:[function(e,t,n){"use strict";var r={};t.exports=r},{}],131:[function(e,t,n){"use strict";function r(e){try{e.focus()}catch(e){}}t.exports=r},{}],132:[function(e,t,n){"use strict";function r(){if("undefined"==typeof document)return null;try{return document.activeElement||document.body}catch(e){return document.body}}t.exports=r},{}],133:[function(e,t,n){"use strict";function r(e){return a?void 0:i(!1),d.hasOwnProperty(e)||(e="*"),s.hasOwnProperty(e)||("*"===e?a.innerHTML="<link />":a.innerHTML="<"+e+"></"+e+">",s[e]=!a.firstChild),s[e]?d[e]:null}var o=e(123),i=e(137),a=o.canUseDOM?document.createElement("div"):null,s={},u=[1,'<select multiple="true">',"</select>"],l=[1,"<table>","</table>"],c=[3,"<table><tbody><tr>","</tr></tbody></table>"],p=[1,'<svg xmlns="http://www.w3.org/2000/svg">',"</svg>"],d={"*":[1,"?<div>","</div>"],area:[1,"<map>","</map>"],col:[2,"<table><tbody></tbody><colgroup>","</colgroup></table>"],legend:[1,"<fieldset>","</fieldset>"],param:[1,"<object>","</object>"],tr:[2,"<table><tbody>","</tbody></table>"],optgroup:u,option:u,caption:l,colgroup:l,tbody:l,tfoot:l,thead:l,td:c,th:c},f=["circle","clipPath","defs","ellipse","g","image","line","linearGradient","mask","path","pattern","polygon","polyline","radialGradient","rect","stop","text","tspan"];f.forEach(function(e){d[e]=p,s[e]=!0}),t.exports=r},{123:123,137:137}],134:[function(e,t,n){"use strict";function r(e){return e===window?{x:window.pageXOffset||document.documentElement.scrollLeft,y:window.pageYOffset||document.documentElement.scrollTop}:{x:e.scrollLeft,y:e.scrollTop}}t.exports=r},{}],135:[function(e,t,n){"use strict";function r(e){return e.replace(o,"-$1").toLowerCase()}var o=/([A-Z])/g;t.exports=r},{}],136:[function(e,t,n){"use strict";function r(e){return o(e).replace(i,"-ms-")}var o=e(135),i=/^ms-/;t.exports=r},{135:135}],137:[function(e,t,n){"use strict";function r(e,t,n,r,i,a,s,u){if(o(t),!e){var l;if(void 0===t)l=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var c=[n,r,i,a,s,u],p=0;l=new Error(t.replace(/%s/g,function(){return c[p++]})),l.name="Invariant Violation"}throw l.framesToPop=1,l}}var o=function(e){};t.exports=r},{}],138:[function(e,t,n){"use strict";function r(e){return!(!e||!("function"==typeof Node?e instanceof Node:"object"==typeof e&&"number"==typeof e.nodeType&&"string"==typeof e.nodeName))}t.exports=r},{}],139:[function(e,t,n){"use strict";function r(e){return o(e)&&3==e.nodeType}var o=e(138);t.exports=r},{138:138}],140:[function(e,t,n){"use strict";function r(e){var t={};return function(n){return t.hasOwnProperty(n)||(t[n]=e.call(this,n)),t[n]}}t.exports=r},{}],141:[function(e,t,n){"use strict";function r(e,t){return e===t?0!==e||0!==t||1/e===1/t:e!==e&&t!==t}function o(e,t){if(r(e,t))return!0;if("object"!=typeof e||null===e||"object"!=typeof t||null===t)return!1;var n=Object.keys(e),o=Object.keys(t);if(n.length!==o.length)return!1;for(var a=0;a<n.length;a++)if(!i.call(t,n[a])||!r(e[n[a]],t[n[a]]))return!1;return!0}var i=Object.prototype.hasOwnProperty;t.exports=o},{}],142:[function(e,t,n){"use strict";var r=e(129),o=r;t.exports=o},{129:129}],143:[function(e,t,n){"use strict";function r(e){if(null===e||void 0===e)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(e)}function o(){try{if(!Object.assign)return!1;var e=new String("abc");if(e[5]="de","5"===Object.getOwnPropertyNames(e)[0])return!1;for(var t={},n=0;n<10;n++)t["_"+String.fromCharCode(n)]=n;var r=Object.getOwnPropertyNames(t).map(function(e){return t[e]});if("0123456789"!==r.join(""))return!1;var o={};return"abcdefghijklmnopqrst".split("").forEach(function(e){o[e]=e}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},o)).join("")}catch(e){return!1}}var i=Object.prototype.hasOwnProperty,a=Object.prototype.propertyIsEnumerable;t.exports=o()?Object.assign:function(e,t){for(var n,o,s=r(e),u=1;u<arguments.length;u++){n=Object(arguments[u]);for(var l in n)i.call(n,l)&&(s[l]=n[l]);if(Object.getOwnPropertySymbols){o=Object.getOwnPropertySymbols(n);for(var c=0;c<o.length;c++)a.call(n,o[c])&&(s[o[c]]=n[o[c]])}}return s}},{}]},{},[45])(45)})});
+!function(e){if("object"==typeof exports&&"undefined"!=typeof __module__)__module__.exports=e(__LiteMolReact);else{var t;t="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,t.ReactDOM=e(t.React)}}(function(e){return function(t){return function(){return function e(t,n,r){function o(a,s){if(!n[a]){if(!t[a]){var u=void 0;if(!s&&u)return u(a,!0);if(i)return i(a,!0);var l=new Error("Cannot find __module__ '"+a+"'");throw l.code="__module___NOT_FOUND",l}var c=n[a]={exports:{}};t[a][0].call(c.exports,function(e){var n=t[a][1][e];return o(n||e)},c,c.exports,e,t,n,r)}return n[a].exports}for(var i=void 0,a=0;a<r.length;a++)o(r[a]);return o}({1:[function(e,t,n){"use strict";var r={Properties:{"aria-current":0,"aria-details":0,"aria-disabled":0,"aria-hidden":0,"aria-invalid":0,"aria-keyshortcuts":0,"aria-label":0,"aria-roledescription":0,"aria-autocomplete":0,"aria-checked":0,"aria-expanded":0,"aria-haspopup":0,"aria-level":0,"aria-modal":0,"aria-multiline":0,"aria-multiselectable":0,"aria-orientation":0,"aria-placeholder":0,"aria-pressed":0,"aria-readonly":0,"aria-required":0,"aria-selected":0,"aria-sort":0,"aria-valuemax":0,"aria-valuemin":0,"aria-valuenow":0,"aria-valuetext":0,"aria-atomic":0,"aria-busy":0,"aria-live":0,"aria-relevant":0,"aria-dropeffect":0,"aria-grabbed":0,"aria-activedescendant":0,"aria-colcount":0,"aria-colindex":0,"aria-colspan":0,"aria-controls":0,"aria-describedby":0,"aria-errormessage":0,"aria-flowto":0,"aria-labelledby":0,"aria-owns":0,"aria-posinset":0,"aria-rowcount":0,"aria-rowindex":0,"aria-rowspan":0,"aria-setsize":0},DOMAttributeNames:{},DOMPropertyNames:{}};t.exports=r},{}],2:[function(e,t,n){"use strict";var r=e(33),o=e(132),i={focusDOMComponent:function(){o(r.getNodeFromInstance(this))}};t.exports=i},{132:132,33:33}],3:[function(e,t,n){"use strict";function r(e){return(e.ctrlKey||e.altKey||e.metaKey)&&!(e.ctrlKey&&e.altKey)}function o(e){switch(e){case"topCompositionStart":return T.compositionStart;case"topCompositionEnd":return T.compositionEnd;case"topCompositionUpdate":return T.compositionUpdate}}function i(e,t){return"topKeyDown"===e&&t.keyCode===y}function a(e,t){switch(e){case"topKeyUp":return-1!==g.indexOf(t.keyCode);case"topKeyDown":return t.keyCode!==y;case"topKeyPress":case"topMouseDown":case"topBlur":return!0;default:return!1}}function s(e){var t=e.detail;return"object"==typeof t&&"data"in t?t.data:null}function u(e,t,n,r){var u,l;if(_?u=o(e):P?a(e,n)&&(u=T.compositionEnd):i(e,n)&&(u=T.compositionStart),!u)return null;E&&(P||u!==T.compositionStart?u===T.compositionEnd&&P&&(l=P.getData()):P=h.getPooled(r));var c=m.getPooled(u,t,n,r);if(l)c.data=l;else{var p=s(n);null!==p&&(c.data=p)}return d.accumulateTwoPhaseDispatches(c),c}function l(e,t){switch(e){case"topCompositionEnd":return s(t);case"topKeyPress":return t.which!==x?null:(k=!0,w);case"topTextInput":var n=t.data;return n===w&&k?null:n;default:return null}}function c(e,t){if(P){if("topCompositionEnd"===e||!_&&a(e,t)){var n=P.getData();return h.release(P),P=null,n}return null}switch(e){case"topPaste":return null;case"topKeyPress":return t.which&&!r(t)?String.fromCharCode(t.which):null;case"topCompositionEnd":return E?null:t.data;default:return null}}function p(e,t,n,r){var o;if(!(o=b?l(e,n):c(e,n)))return null;var i=v.getPooled(T.beforeInput,t,n,r);return i.data=o,d.accumulateTwoPhaseDispatches(i),i}var d=e(19),f=e(124),h=e(20),m=e(78),v=e(82),g=[9,13,27,32],y=229,_=f.canUseDOM&&"CompositionEvent"in window,C=null;f.canUseDOM&&"documentMode"in document&&(C=document.documentMode);var b=f.canUseDOM&&"TextEvent"in window&&!C&&!function(){var e=window.opera;return"object"==typeof e&&"function"==typeof e.version&&parseInt(e.version(),10)<=12}(),E=f.canUseDOM&&(!_||C&&C>8&&C<=11),x=32,w=String.fromCharCode(x),T={beforeInput:{phasedRegistrationNames:{bubbled:"onBeforeInput",captured:"onBeforeInputCapture"},dependencies:["topCompositionEnd","topKeyPress","topTextInput","topPaste"]},compositionEnd:{phasedRegistrationNames:{bubbled:"onCompositionEnd",captured:"onCompositionEndCapture"},dependencies:["topBlur","topCompositionEnd","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]},compositionStart:{phasedRegistrationNames:{bubbled:"onCompositionStart",captured:"onCompositionStartCapture"},dependencies:["topBlur","topCompositionStart","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]},compositionUpdate:{phasedRegistrationNames:{bubbled:"onCompositionUpdate",captured:"onCompositionUpdateCapture"},dependencies:["topBlur","topCompositionUpdate","topKeyDown","topKeyPress","topKeyUp","topMouseDown"]}},k=!1,P=null,S={eventTypes:T,extractEvents:function(e,t,n,r){return[u(e,t,n,r),p(e,t,n,r)]}};t.exports=S},{124:124,19:19,20:20,78:78,82:82}],4:[function(e,t,n){"use strict";function r(e,t){return e+t.charAt(0).toUpperCase()+t.substring(1)}var o={animationIterationCount:!0,borderImageOutset:!0,borderImageSlice:!0,borderImageWidth:!0,boxFlex:!0,boxFlexGroup:!0,boxOrdinalGroup:!0,columnCount:!0,flex:!0,flexGrow:!0,flexPositive:!0,flexShrink:!0,flexNegative:!0,flexOrder:!0,gridRow:!0,gridRowEnd:!0,gridRowSpan:!0,gridRowStart:!0,gridColumn:!0,gridColumnEnd:!0,gridColumnSpan:!0,gridColumnStart:!0,fontWeight:!0,lineClamp:!0,lineHeight:!0,opacity:!0,order:!0,orphans:!0,tabSize:!0,widows:!0,zIndex:!0,zoom:!0,fillOpacity:!0,floodOpacity:!0,stopOpacity:!0,strokeDasharray:!0,strokeDashoffset:!0,strokeMiterlimit:!0,strokeOpacity:!0,strokeWidth:!0},i=["Webkit","ms","Moz","O"];Object.keys(o).forEach(function(e){i.forEach(function(t){o[r(t,e)]=o[e]})});var a={background:{backgroundAttachment:!0,backgroundColor:!0,backgroundImage:!0,backgroundPositionX:!0,backgroundPositionY:!0,backgroundRepeat:!0},backgroundPosition:{backgroundPositionX:!0,backgroundPositionY:!0},border:{borderWidth:!0,borderStyle:!0,borderColor:!0},borderBottom:{borderBottomWidth:!0,borderBottomStyle:!0,borderBottomColor:!0},borderLeft:{borderLeftWidth:!0,borderLeftStyle:!0,borderLeftColor:!0},borderRight:{borderRightWidth:!0,borderRightStyle:!0,borderRightColor:!0},borderTop:{borderTopWidth:!0,borderTopStyle:!0,borderTopColor:!0},font:{fontStyle:!0,fontVariant:!0,fontWeight:!0,fontSize:!0,lineHeight:!0,fontFamily:!0},outline:{outlineWidth:!0,outlineStyle:!0,outlineColor:!0}},s={isUnitlessNumber:o,shorthandPropertyExpansions:a};t.exports=s},{}],5:[function(e,t,n){"use strict";var r=e(4),o=e(124),i=(e(58),e(126),e(94)),a=e(137),s=e(141),u=(e(143),s(function(e){return a(e)})),l=!1,c="cssFloat";if(o.canUseDOM){var p=document.createElement("div").style;try{p.font=""}catch(e){l=!0}void 0===document.documentElement.style.cssFloat&&(c="styleFloat")}var d={createMarkupForStyles:function(e,t){var n="";for(var r in e)if(e.hasOwnProperty(r)){var o=0===r.indexOf("--"),a=e[r];null!=a&&(n+=u(r)+":",n+=i(r,a,t,o)+";")}return n||null},setValueForStyles:function(e,t,n){var o=e.style;for(var a in t)if(t.hasOwnProperty(a)){var s=0===a.indexOf("--"),u=i(a,t[a],n,s);if("float"!==a&&"cssFloat"!==a||(a=c),s)o.setProperty(a,u);else if(u)o[a]=u;else{var p=l&&r.shorthandPropertyExpansions[a];if(p)for(var d in p)o[d]="";else o[a]=""}}}};t.exports=d},{124:124,126:126,137:137,141:141,143:143,4:4,58:58,94:94}],6:[function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var o=e(113),i=e(24),a=(e(138),function(){function e(t){r(this,e),this._callbacks=null,this._contexts=null,this._arg=t}return e.prototype.enqueue=function(e,t){this._callbacks=this._callbacks||[],this._callbacks.push(e),this._contexts=this._contexts||[],this._contexts.push(t)},e.prototype.notifyAll=function(){var e=this._callbacks,t=this._contexts,n=this._arg;if(e&&t){e.length!==t.length&&o("24"),this._callbacks=null,this._contexts=null;for(var r=0;r<e.length;r++)e[r].call(t[r],n);e.length=0,t.length=0}},e.prototype.checkpoint=function(){return this._callbacks?this._callbacks.length:0},e.prototype.rollback=function(e){this._callbacks&&this._contexts&&(this._callbacks.length=e,this._contexts.length=e)},e.prototype.reset=function(){this._callbacks=null,this._contexts=null},e.prototype.destructor=function(){this.reset()},e}());t.exports=i.addPoolingTo(a)},{113:113,138:138,24:24}],7:[function(e,t,n){"use strict";function r(e,t,n){var r=k.getPooled(I.change,e,t,n);return r.type="change",E.accumulateTwoPhaseDispatches(r),r}function o(e){var t=e.nodeName&&e.nodeName.toLowerCase();return"select"===t||"input"===t&&"file"===e.type}function i(e){var t=r(R,e,S(e));T.batchedUpdates(a,t)}function a(e){b.enqueueEvents(e),b.processEventQueue(!1)}function s(e,t){O=e,R=t,O.attachEvent("onchange",i)}function u(){O&&(O.detachEvent("onchange",i),O=null,R=null)}function l(e,t){var n=P.updateValueIfChanged(e),r=!0===t.simulated&&L._allowSimulatedPassThrough;if(n||r)return e}function c(e,t){if("topChange"===e)return t}function p(e,t,n){"topFocus"===e?(u(),s(t,n)):"topBlur"===e&&u()}function d(e,t){O=e,R=t,O.attachEvent("onpropertychange",h)}function f(){O&&(O.detachEvent("onpropertychange",h),O=null,R=null)}function h(e){"value"===e.propertyName&&l(R,e)&&i(e)}function m(e,t,n){"topFocus"===e?(f(),d(t,n)):"topBlur"===e&&f()}function v(e,t,n){if("topSelectionChange"===e||"topKeyUp"===e||"topKeyDown"===e)return l(R,n)}function g(e){var t=e.nodeName;return t&&"input"===t.toLowerCase()&&("checkbox"===e.type||"radio"===e.type)}function y(e,t,n){if("topClick"===e)return l(t,n)}function _(e,t,n){if("topInput"===e||"topChange"===e)return l(t,n)}function C(e,t){if(null!=e){var n=e._wrapperState||t._wrapperState;if(n&&n.controlled&&"number"===t.type){var r=""+t.value;t.getAttribute("value")!==r&&t.setAttribute("value",r)}}}var b=e(16),E=e(19),x=e(124),w=e(33),T=e(71),k=e(80),P=e(108),S=e(102),N=e(110),M=e(111),I={change:{phasedRegistrationNames:{bubbled:"onChange",captured:"onChangeCapture"},dependencies:["topBlur","topChange","topClick","topFocus","topInput","topKeyDown","topKeyUp","topSelectionChange"]}},O=null,R=null,A=!1;x.canUseDOM&&(A=N("change")&&(!document.documentMode||document.documentMode>8));var D=!1;x.canUseDOM&&(D=N("input")&&(!("documentMode"in document)||document.documentMode>9));var L={eventTypes:I,_allowSimulatedPassThrough:!0,_isInputEventSupported:D,extractEvents:function(e,t,n,i){var a,s,u=t?w.getNodeFromInstance(t):window;if(o(u)?A?a=c:s=p:M(u)?D?a=_:(a=v,s=m):g(u)&&(a=y),a){var l=a(e,t,n);if(l)return r(l,n,i)}s&&s(e,u,t),"topBlur"===e&&C(t,u)}};t.exports=L},{102:102,108:108,110:110,111:111,124:124,16:16,19:19,33:33,71:71,80:80}],8:[function(e,t,n){"use strict";function r(e,t){return Array.isArray(t)&&(t=t[1]),t?t.nextSibling:e.firstChild}function o(e,t,n){c.insertTreeBefore(e,t,n)}function i(e,t,n){Array.isArray(t)?s(e,t[0],t[1],n):m(e,t,n)}function a(e,t){if(Array.isArray(t)){var n=t[1];t=t[0],u(e,t,n),e.removeChild(n)}e.removeChild(t)}function s(e,t,n,r){for(var o=t;;){var i=o.nextSibling;if(m(e,o,r),o===n)break;o=i}}function u(e,t,n){for(;;){var r=t.nextSibling;if(r===n)break;e.removeChild(r)}}function l(e,t,n){var r=e.parentNode,o=e.nextSibling;o===t?n&&m(r,document.createTextNode(n),o):n?(h(o,n),u(r,o,t)):u(r,e,t)}var c=e(9),p=e(13),d=(e(33),e(58),e(93)),f=e(115),h=e(116),m=d(function(e,t,n){e.insertBefore(t,n)}),v=p.dangerouslyReplaceNodeWithMarkup,g={dangerouslyReplaceNodeWithMarkup:v,replaceDelimitedText:l,processUpdates:function(e,t){for(var n=0;n<t.length;n++){var s=t[n];switch(s.type){case"INSERT_MARKUP":o(e,s.content,r(e,s.afterNode));break;case"MOVE_EXISTING":i(e,s.fromNode,r(e,s.afterNode));break;case"SET_MARKUP":f(e,s.content);break;case"TEXT_CONTENT":h(e,s.content);break;case"REMOVE_NODE":a(e,s.fromNode)}}}};t.exports=g},{115:115,116:116,13:13,33:33,58:58,9:9,93:93}],9:[function(e,t,n){"use strict";function r(e){if(h){var t=e.node,n=e.children;if(n.length)for(var r=0;r<n.length;r++)m(t,n[r],null);else null!=e.html?p(t,e.html):null!=e.text&&f(t,e.text)}}function o(e,t){e.parentNode.replaceChild(t.node,e),r(t)}function i(e,t){h?e.children.push(t):e.node.appendChild(t.node)}function a(e,t){h?e.html=t:p(e.node,t)}function s(e,t){h?e.text=t:f(e.node,t)}function u(){return this.node.nodeName}function l(e){return{node:e,children:[],html:null,text:null,toString:u}}var c=e(10),p=e(115),d=e(93),f=e(116),h="undefined"!=typeof document&&"number"==typeof document.documentMode||"undefined"!=typeof navigator&&"string"==typeof navigator.userAgent&&/\bEdge\/\d/.test(navigator.userAgent),m=d(function(e,t,n){11===t.node.nodeType||1===t.node.nodeType&&"object"===t.node.nodeName.toLowerCase()&&(null==t.node.namespaceURI||t.node.namespaceURI===c.html)?(r(t),e.insertBefore(t.node,n)):(e.insertBefore(t.node,n),r(t))});l.insertTreeBefore=m,l.replaceChildWithTree=o,l.queueChild=i,l.queueHTML=a,l.queueText=s,t.exports=l},{10:10,115:115,116:116,93:93}],10:[function(e,t,n){"use strict";var r={html:"http://www.w3.org/1999/xhtml",mathml:"http://www.w3.org/1998/Math/MathML",svg:"http://www.w3.org/2000/svg"};t.exports=r},{}],11:[function(e,t,n){"use strict";function r(e,t){return(e&t)===t}var o=e(113),i=(e(138),{MUST_USE_PROPERTY:1,HAS_BOOLEAN_VALUE:4,HAS_NUMERIC_VALUE:8,HAS_POSITIVE_NUMERIC_VALUE:24,HAS_OVERLOADED_BOOLEAN_VALUE:32,injectDOMPropertyConfig:function(e){var t=i,n=e.Properties||{},a=e.DOMAttributeNamespaces||{},u=e.DOMAttributeNames||{},l=e.DOMPropertyNames||{},c=e.DOMMutationMethods||{};e.isCustomAttribute&&s._isCustomAttributeFunctions.push(e.isCustomAttribute);for(var p in n){s.properties.hasOwnProperty(p)&&o("48",p);var d=p.toLowerCase(),f=n[p],h={attributeName:d,attributeNamespace:null,propertyName:p,mutationMethod:null,mustUseProperty:r(f,t.MUST_USE_PROPERTY),hasBooleanValue:r(f,t.HAS_BOOLEAN_VALUE),hasNumericValue:r(f,t.HAS_NUMERIC_VALUE),hasPositiveNumericValue:r(f,t.HAS_POSITIVE_NUMERIC_VALUE),hasOverloadedBooleanValue:r(f,t.HAS_OVERLOADED_BOOLEAN_VALUE)};if(h.hasBooleanValue+h.hasNumericValue+h.hasOverloadedBooleanValue<=1||o("50",p),u.hasOwnProperty(p)){var m=u[p];h.attributeName=m}a.hasOwnProperty(p)&&(h.attributeNamespace=a[p]),l.hasOwnProperty(p)&&(h.propertyName=l[p]),c.hasOwnProperty(p)&&(h.mutationMethod=c[p]),s.properties[p]=h}}}),a=":A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD",s={ID_ATTRIBUTE_NAME:"data-reactid",ROOT_ATTRIBUTE_NAME:"data-reactroot",ATTRIBUTE_NAME_START_CHAR:a,ATTRIBUTE_NAME_CHAR:a+"\\-.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040",properties:{},getPossibleStandardName:null,_isCustomAttributeFunctions:[],isCustomAttribute:function(e){for(var t=0;t<s._isCustomAttributeFunctions.length;t++)if((0,s._isCustomAttributeFunctions[t])(e))return!0;return!1},injection:i};t.exports=s},{113:113,138:138}],12:[function(e,t,n){"use strict";function r(e){return!!l.hasOwnProperty(e)||!u.hasOwnProperty(e)&&(s.test(e)?(l[e]=!0,!0):(u[e]=!0,!1))}function o(e,t){return null==t||e.hasBooleanValue&&!t||e.hasNumericValue&&isNaN(t)||e.hasPositiveNumericValue&&t<1||e.hasOverloadedBooleanValue&&!1===t}var i=e(11),a=(e(33),e(58),e(112)),s=(e(143),new RegExp("^["+i.ATTRIBUTE_NAME_START_CHAR+"]["+i.ATTRIBUTE_NAME_CHAR+"]*$")),u={},l={},c={createMarkupForID:function(e){return i.ID_ATTRIBUTE_NAME+"="+a(e)},setAttributeForID:function(e,t){e.setAttribute(i.ID_ATTRIBUTE_NAME,t)},createMarkupForRoot:function(){return i.ROOT_ATTRIBUTE_NAME+'=""'},setAttributeForRoot:function(e){e.setAttribute(i.ROOT_ATTRIBUTE_NAME,"")},createMarkupForProperty:function(e,t){var n=i.properties.hasOwnProperty(e)?i.properties[e]:null;if(n){if(o(n,t))return"";var r=n.attributeName;return n.hasBooleanValue||n.hasOverloadedBooleanValue&&!0===t?r+'=""':r+"="+a(t)}return i.isCustomAttribute(e)?null==t?"":e+"="+a(t):null},createMarkupForCustomAttribute:function(e,t){return r(e)&&null!=t?e+"="+a(t):""},setValueForProperty:function(e,t,n){var r=i.properties.hasOwnProperty(t)?i.properties[t]:null;if(r){var a=r.mutationMethod;if(a)a(e,n);else{if(o(r,n))return void this.deleteValueForProperty(e,t);if(r.mustUseProperty)e[r.propertyName]=n;else{var s=r.attributeName,u=r.attributeNamespace;u?e.setAttributeNS(u,s,""+n):r.hasBooleanValue||r.hasOverloadedBooleanValue&&!0===n?e.setAttribute(s,""):e.setAttribute(s,""+n)}}}else if(i.isCustomAttribute(t))return void c.setValueForAttribute(e,t,n)},setValueForAttribute:function(e,t,n){r(t)&&(null==n?e.removeAttribute(t):e.setAttribute(t,""+n))},deleteValueForAttribute:function(e,t){e.removeAttribute(t)},deleteValueForProperty:function(e,t){var n=i.properties.hasOwnProperty(t)?i.properties[t]:null;if(n){var r=n.mutationMethod;if(r)r(e,void 0);else if(n.mustUseProperty){var o=n.propertyName;n.hasBooleanValue?e[o]=!1:e[o]=""}else e.removeAttribute(n.attributeName)}else i.isCustomAttribute(t)&&e.removeAttribute(t)}};t.exports=c},{11:11,112:112,143:143,33:33,58:58}],13:[function(e,t,n){"use strict";var r=e(113),o=e(9),i=e(124),a=e(129),s=e(130),u=(e(138),{dangerouslyReplaceNodeWithMarkup:function(e,t){if(i.canUseDOM||r("56"),t||r("57"),"HTML"===e.nodeName&&r("58"),"string"==typeof t){var n=a(t,s)[0];e.parentNode.replaceChild(n,e)}else o.replaceChildWithTree(e,t)}});t.exports=u},{113:113,124:124,129:129,130:130,138:138,9:9}],14:[function(e,t,n){"use strict";var r=["ResponderEventPlugin","SimpleEventPlugin","TapEventPlugin","EnterLeaveEventPlugin","ChangeEventPlugin","SelectEventPlugin","BeforeInputEventPlugin"];t.exports=r},{}],15:[function(e,t,n){"use strict";var r=e(19),o=e(33),i=e(84),a={mouseEnter:{registrationName:"onMouseEnter",dependencies:["topMouseOut","topMouseOver"]},mouseLeave:{registrationName:"onMouseLeave",dependencies:["topMouseOut","topMouseOver"]}},s={eventTypes:a,extractEvents:function(e,t,n,s){if("topMouseOver"===e&&(n.relatedTarget||n.fromElement))return null;if("topMouseOut"!==e&&"topMouseOver"!==e)return null;var u;if(s.window===s)u=s;else{var l=s.ownerDocument;u=l?l.defaultView||l.parentWindow:window}var c,p;if("topMouseOut"===e){c=t;var d=n.relatedTarget||n.toElement;p=d?o.getClosestInstanceFromNode(d):null}else c=null,p=t;if(c===p)return null;var f=null==c?u:o.getNodeFromInstance(c),h=null==p?u:o.getNodeFromInstance(p),m=i.getPooled(a.mouseLeave,c,n,s);m.type="mouseleave",m.target=f,m.relatedTarget=h;var v=i.getPooled(a.mouseEnter,p,n,s);return v.type="mouseenter",v.target=h,v.relatedTarget=f,r.accumulateEnterLeaveDispatches(m,v,c,p),[m,v]}};t.exports=s},{19:19,33:33,84:84}],16:[function(e,t,n){"use strict";function r(e){return"button"===e||"input"===e||"select"===e||"textarea"===e}function o(e,t,n){switch(e){case"onClick":case"onClickCapture":case"onDoubleClick":case"onDoubleClickCapture":case"onMouseDown":case"onMouseDownCapture":case"onMouseMove":case"onMouseMoveCapture":case"onMouseUp":case"onMouseUpCapture":return!(!n.disabled||!r(t));default:return!1}}var i=e(113),a=e(17),s=e(18),u=e(50),l=e(91),c=e(98),p=(e(138),{}),d=null,f=function(e,t){e&&(s.executeDispatchesInOrder(e,t),e.isPersistent()||e.constructor.release(e))},h=function(e){return f(e,!0)},m=function(e){return f(e,!1)},v=function(e){return"."+e._rootNodeID},g={injection:{injectEventPluginOrder:a.injectEventPluginOrder,injectEventPluginsByName:a.injectEventPluginsByName},putListener:function(e,t,n){"function"!=typeof n&&i("94",t,typeof n);var r=v(e);(p[t]||(p[t]={}))[r]=n;var o=a.registrationName__module__s[t];o&&o.didPutListener&&o.didPutListener(e,t,n)},getListener:function(e,t){var n=p[t];if(o(t,e._currentElement.type,e._currentElement.props))return null;var r=v(e);return n&&n[r]},deleteListener:function(e,t){var n=a.registrationName__module__s[t];n&&n.willDeleteListener&&n.willDeleteListener(e,t);var r=p[t];r&&delete r[v(e)]},deleteAllListeners:function(e){var t=v(e);for(var n in p)if(p.hasOwnProperty(n)&&p[n][t]){var r=a.registrationName__module__s[n];r&&r.willDeleteListener&&r.willDeleteListener(e,n),delete p[n][t]}},extractEvents:function(e,t,n,r){for(var o,i=a.plugins,s=0;s<i.length;s++){var u=i[s];if(u){var c=u.extractEvents(e,t,n,r);c&&(o=l(o,c))}}return o},enqueueEvents:function(e){e&&(d=l(d,e))},processEventQueue:function(e){var t=d;d=null,e?c(t,h):c(t,m),d&&i("95"),u.rethrowCaughtError()},__purge:function(){p={}},__getListenerBank:function(){return p}};t.exports=g},{113:113,138:138,17:17,18:18,50:50,91:91,98:98}],17:[function(e,t,n){"use strict";function r(){if(s)for(var e in u){var t=u[e],n=s.indexOf(e);if(n>-1||a("96",e),!l.plugins[n]){t.extractEvents||a("97",e),l.plugins[n]=t;var r=t.eventTypes;for(var i in r)o(r[i],t,i)||a("98",i,e)}}}function o(e,t,n){l.eventNameDispatchConfigs.hasOwnProperty(n)&&a("99",n),l.eventNameDispatchConfigs[n]=e;var r=e.phasedRegistrationNames;if(r){for(var o in r)if(r.hasOwnProperty(o)){var s=r[o];i(s,t,n)}return!0}return!!e.registrationName&&(i(e.registrationName,t,n),!0)}function i(e,t,n){l.registrationName__module__s[e]&&a("100",e),l.registrationName__module__s[e]=t,l.registrationNameDependencies[e]=t.eventTypes[n].dependencies}var a=e(113),s=(e(138),null),u={},l={plugins:[],eventNameDispatchConfigs:{},registrationName__module__s:{},registrationNameDependencies:{},possibleRegistrationNames:null,injectEventPluginOrder:function(e){s&&a("101"),s=Array.prototype.slice.call(e),r()},injectEventPluginsByName:function(e){var t=!1;for(var n in e)if(e.hasOwnProperty(n)){var o=e[n];u.hasOwnProperty(n)&&u[n]===o||(u[n]&&a("102",n),u[n]=o,t=!0)}t&&r()},getPlugin__module__ForEvent:function(e){var t=e.dispatchConfig;if(t.registrationName)return l.registrationName__module__s[t.registrationName]||null;if(void 0!==t.phasedRegistrationNames){var n=t.phasedRegistrationNames;for(var r in n)if(n.hasOwnProperty(r)){var o=l.registrationName__module__s[n[r]];if(o)return o}}return null},_resetEventPlugins:function(){s=null;for(var e in u)u.hasOwnProperty(e)&&delete u[e];l.plugins.length=0;var t=l.eventNameDispatchConfigs;for(var n in t)t.hasOwnProperty(n)&&delete t[n];var r=l.registrationName__module__s;for(var o in r)r.hasOwnProperty(o)&&delete r[o]}};t.exports=l},{113:113,138:138}],18:[function(e,t,n){"use strict";function r(e){return"topMouseUp"===e||"topTouchEnd"===e||"topTouchCancel"===e}function o(e){return"topMouseMove"===e||"topTouchMove"===e}function i(e){return"topMouseDown"===e||"topTouchStart"===e}function a(e,t,n,r){var o=e.type||"unknown-event";e.currentTarget=g.getNodeFromInstance(r),t?m.invokeGuardedCallbackWithCatch(o,n,e):m.invokeGuardedCallback(o,n,e),e.currentTarget=null}function s(e,t){var n=e._dispatchListeners,r=e._dispatchInstances;if(Array.isArray(n))for(var o=0;o<n.length&&!e.isPropagationStopped();o++)a(e,t,n[o],r[o]);else n&&a(e,t,n,r);e._dispatchListeners=null,e._dispatchInstances=null}function u(e){var t=e._dispatchListeners,n=e._dispatchInstances;if(Array.isArray(t)){for(var r=0;r<t.length&&!e.isPropagationStopped();r++)if(t[r](e,n[r]))return n[r]}else if(t&&t(e,n))return n;return null}function l(e){var t=u(e);return e._dispatchInstances=null,e._dispatchListeners=null,t}function c(e){var t=e._dispatchListeners,n=e._dispatchInstances;Array.isArray(t)&&h("103"),e.currentTarget=t?g.getNodeFromInstance(n):null;var r=t?t(e):null;return e.currentTarget=null,e._dispatchListeners=null,e._dispatchInstances=null,r}function p(e){return!!e._dispatchListeners}var d,f,h=e(113),m=e(50),v=(e(138),e(143),{injectComponentTree:function(e){d=e},injectTreeTraversal:function(e){f=e}}),g={isEndish:r,isMoveish:o,isStartish:i,executeDirectDispatch:c,executeDispatchesInOrder:s,executeDispatchesInOrderStopAtTrue:l,hasDispatches:p,getInstanceFromNode:function(e){return d.getInstanceFromNode(e)},getNodeFromInstance:function(e){return d.getNodeFromInstance(e)},isAncestor:function(e,t){return f.isAncestor(e,t)},getLowestCommonAncestor:function(e,t){return f.getLowestCommonAncestor(e,t)},getParentInstance:function(e){return f.getParentInstance(e)},traverseTwoPhase:function(e,t,n){return f.traverseTwoPhase(e,t,n)},traverseEnterLeave:function(e,t,n,r,o){return f.traverseEnterLeave(e,t,n,r,o)},injection:v};t.exports=g},{113:113,138:138,143:143,50:50}],19:[function(e,t,n){"use strict";function r(e,t,n){var r=t.dispatchConfig.phasedRegistrationNames[n];return g(e,r)}function o(e,t,n){var o=r(e,n,t);o&&(n._dispatchListeners=m(n._dispatchListeners,o),n._dispatchInstances=m(n._dispatchInstances,e))}function i(e){e&&e.dispatchConfig.phasedRegistrationNames&&h.traverseTwoPhase(e._targetInst,o,e)}function a(e){if(e&&e.dispatchConfig.phasedRegistrationNames){var t=e._targetInst,n=t?h.getParentInstance(t):null;h.traverseTwoPhase(n,o,e)}}function s(e,t,n){if(n&&n.dispatchConfig.registrationName){var r=n.dispatchConfig.registrationName,o=g(e,r);o&&(n._dispatchListeners=m(n._dispatchListeners,o),n._dispatchInstances=m(n._dispatchInstances,e))}}function u(e){e&&e.dispatchConfig.registrationName&&s(e._targetInst,null,e)}function l(e){v(e,i)}function c(e){v(e,a)}function p(e,t,n,r){h.traverseEnterLeave(n,r,s,e,t)}function d(e){v(e,u)}var f=e(16),h=e(18),m=e(91),v=e(98),g=(e(143),f.getListener),y={accumulateTwoPhaseDispatches:l,accumulateTwoPhaseDispatchesSkipTarget:c,accumulateDirectDispatches:d,accumulateEnterLeaveDispatches:p};t.exports=y},{143:143,16:16,18:18,91:91,98:98}],20:[function(e,t,n){"use strict";function r(e){this._root=e,this._startText=this.getText(),this._fallbackText=null}var o=e(144),i=e(24),a=e(106);o(r.prototype,{destructor:function(){this._root=null,this._startText=null,this._fallbackText=null},getText:function(){return"value"in this._root?this._root.value:this._root[a()]},getData:function(){if(this._fallbackText)return this._fallbackText;var e,t,n=this._startText,r=n.length,o=this.getText(),i=o.length;for(e=0;e<r&&n[e]===o[e];e++);var a=r-e;for(t=1;t<=a&&n[r-t]===o[i-t];t++);var s=t>1?1-t:void 0;return this._fallbackText=o.slice(e,s),this._fallbackText}}),i.addPoolingTo(r),t.exports=r},{106:106,144:144,24:24}],21:[function(e,t,n){"use strict";var r=e(11),o=r.injection.MUST_USE_PROPERTY,i=r.injection.HAS_BOOLEAN_VALUE,a=r.injection.HAS_NUMERIC_VALUE,s=r.injection.HAS_POSITIVE_NUMERIC_VALUE,u=r.injection.HAS_OVERLOADED_BOOLEAN_VALUE,l={isCustomAttribute:RegExp.prototype.test.bind(new RegExp("^(data|aria)-["+r.ATTRIBUTE_NAME_CHAR+"]*$")),Properties:{accept:0,acceptCharset:0,accessKey:0,action:0,allowFullScreen:i,allowTransparency:0,alt:0,as:0,async:i,autoComplete:0,autoPlay:i,capture:i,cellPadding:0,cellSpacing:0,charSet:0,challenge:0,checked:o|i,cite:0,classID:0,className:0,cols:s,colSpan:0,content:0,contentEditable:0,contextMenu:0,controls:i,coords:0,crossOrigin:0,data:0,dateTime:0,default:i,defer:i,dir:0,disabled:i,download:u,draggable:0,encType:0,form:0,formAction:0,formEncType:0,formMethod:0,formNoValidate:i,formTarget:0,frameBorder:0,headers:0,height:0,hidden:i,high:0,href:0,hrefLang:0,htmlFor:0,httpEquiv:0,icon:0,id:0,inputMode:0,integrity:0,is:0,keyParams:0,keyType:0,kind:0,label:0,lang:0,list:0,loop:i,low:0,manifest:0,marginHeight:0,marginWidth:0,max:0,maxLength:0,media:0,mediaGroup:0,method:0,min:0,minLength:0,multiple:o|i,muted:o|i,name:0,nonce:0,noValidate:i,open:i,optimum:0,pattern:0,placeholder:0,playsInline:i,poster:0,preload:0,profile:0,radioGroup:0,readOnly:i,referrerPolicy:0,rel:0,required:i,reversed:i,role:0,rows:s,rowSpan:a,sandbox:0,scope:0,scoped:i,scrolling:0,seamless:i,selected:o|i,shape:0,size:s,sizes:0,span:s,spellCheck:0,src:0,srcDoc:0,srcLang:0,srcSet:0,start:a,step:0,style:0,summary:0,tabIndex:0,target:0,title:0,type:0,useMap:0,value:0,width:0,wmode:0,wrap:0,about:0,datatype:0,inlist:0,prefix:0,property:0,resource:0,typeof:0,vocab:0,autoCapitalize:0,autoCorrect:0,autoSave:0,color:0,itemProp:0,itemScope:i,itemType:0,itemID:0,itemRef:0,results:0,security:0,unselectable:0},DOMAttributeNames:{acceptCharset:"accept-charset",className:"class",htmlFor:"for",httpEquiv:"http-equiv"},DOMPropertyNames:{},DOMMutationMethods:{value:function(e,t){if(null==t)return e.removeAttribute("value");"number"!==e.type||!1===e.hasAttribute("value")?e.setAttribute("value",""+t):e.validity&&!e.validity.badInput&&e.ownerDocument.activeElement!==e&&e.setAttribute("value",""+t)}}};t.exports=l},{11:11}],22:[function(e,t,n){"use strict";function r(e){var t={"=":"=0",":":"=2"};return"$"+(""+e).replace(/[=:]/g,function(e){return t[e]})}function o(e){var t=/(=0|=2)/g,n={"=0":"=","=2":":"};return(""+("."===e[0]&&"$"===e[1]?e.substring(2):e.substring(1))).replace(t,function(e){return n[e]})}var i={escape:r,unescape:o};t.exports=i},{}],23:[function(e,t,n){"use strict";function r(e){null!=e.checkedLink&&null!=e.valueLink&&s("87")}function o(e){r(e),(null!=e.value||null!=e.onChange)&&s("88")}function i(e){r(e),(null!=e.checked||null!=e.onChange)&&s("89")}function a(e){if(e){var t=e.getName();if(t)return" Check the render method of `"+t+"`."}return""}var s=e(113),u=e(64),l=e(146),c=e(121),p=l(c.isValidElement),d=(e(138),e(143),{button:!0,checkbox:!0,image:!0,hidden:!0,radio:!0,reset:!0,submit:!0}),f={value:function(e,t,n){return!e[t]||d[e.type]||e.onChange||e.readOnly||e.disabled?null:new Error("You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.")},checked:function(e,t,n){return!e[t]||e.onChange||e.readOnly||e.disabled?null:new Error("You provided a `checked` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultChecked`. Otherwise, set either `onChange` or `readOnly`.")},onChange:p.func},h={},m={checkPropTypes:function(e,t,n){for(var r in f){if(f.hasOwnProperty(r))var o=f[r](t,r,e,"prop",null,u);o instanceof Error&&!(o.message in h)&&(h[o.message]=!0,a(n))}},getValue:function(e){return e.valueLink?(o(e),e.valueLink.value):e.value},getChecked:function(e){return e.checkedLink?(i(e),e.checkedLink.value):e.checked},executeOnChange:function(e,t){return e.valueLink?(o(e),e.valueLink.requestChange(t.target.value)):e.checkedLink?(i(e),e.checkedLink.requestChange(t.target.checked)):e.onChange?e.onChange.call(void 0,t):void 0}};t.exports=m},{113:113,121:121,138:138,143:143,146:146,64:64}],24:[function(e,t,n){"use strict";var r=e(113),o=(e(138),function(e){var t=this;if(t.instancePool.length){var n=t.instancePool.pop();return t.call(n,e),n}return new t(e)}),i=function(e,t){var n=this;if(n.instancePool.length){var r=n.instancePool.pop();return n.call(r,e,t),r}return new n(e,t)},a=function(e,t,n){var r=this;if(r.instancePool.length){var o=r.instancePool.pop();return r.call(o,e,t,n),o}return new r(e,t,n)},s=function(e,t,n,r){var o=this;if(o.instancePool.length){var i=o.instancePool.pop();return o.call(i,e,t,n,r),i}return new o(e,t,n,r)},u=function(e){var t=this;e instanceof t||r("25"),e.destructor(),t.instancePool.length<t.poolSize&&t.instancePool.push(e)},l=o,c=function(e,t){var n=e;return n.instancePool=[],n.getPooled=t||l,n.poolSize||(n.poolSize=10),n.release=u,n},p={addPoolingTo:c,oneArgumentPooler:o,twoArgumentPooler:i,threeArgumentPooler:a,fourArgumentPooler:s};t.exports=p},{113:113,138:138}],25:[function(e,t,n){"use strict";function r(e){return Object.prototype.hasOwnProperty.call(e,m)||(e[m]=f++,p[e[m]]={}),p[e[m]]}var o,i=e(144),a=e(17),s=e(51),u=e(90),l=e(107),c=e(110),p={},d=!1,f=0,h={topAbort:"abort",topAnimationEnd:l("animationend")||"animationend",topAnimationIteration:l("animationiteration")||"animationiteration",topAnimationStart:l("animationstart")||"animationstart",topBlur:"blur",topCanPlay:"canplay",topCanPlayThrough:"canplaythrough",topChange:"change",topClick:"click",topCompositionEnd:"compositionend",topCompositionStart:"compositionstart",topCompositionUpdate:"compositionupdate",topContextMenu:"contextmenu",topCopy:"copy",topCut:"cut",topDoubleClick:"dblclick",topDrag:"drag",topDragEnd:"dragend",topDragEnter:"dragenter",topDragExit:"dragexit",topDragLeave:"dragleave",topDragOver:"dragover",topDragStart:"dragstart",topDrop:"drop",topDurationChange:"durationchange",topEmptied:"emptied",topEncrypted:"encrypted",topEnded:"ended",topError:"error",topFocus:"focus",topInput:"input",
+topKeyDown:"keydown",topKeyPress:"keypress",topKeyUp:"keyup",topLoadedData:"loadeddata",topLoadedMetadata:"loadedmetadata",topLoadStart:"loadstart",topMouseDown:"mousedown",topMouseMove:"mousemove",topMouseOut:"mouseout",topMouseOver:"mouseover",topMouseUp:"mouseup",topPaste:"paste",topPause:"pause",topPlay:"play",topPlaying:"playing",topProgress:"progress",topRateChange:"ratechange",topScroll:"scroll",topSeeked:"seeked",topSeeking:"seeking",topSelectionChange:"selectionchange",topStalled:"stalled",topSuspend:"suspend",topTextInput:"textInput",topTimeUpdate:"timeupdate",topTouchCancel:"touchcancel",topTouchEnd:"touchend",topTouchMove:"touchmove",topTouchStart:"touchstart",topTransitionEnd:l("transitionend")||"transitionend",topVolumeChange:"volumechange",topWaiting:"waiting",topWheel:"wheel"},m="_reactListenersID"+String(Math.random()).slice(2),v=i({},s,{ReactEventListener:null,injection:{injectReactEventListener:function(e){e.setHandleTopLevel(v.handleTopLevel),v.ReactEventListener=e}},setEnabled:function(e){v.ReactEventListener&&v.ReactEventListener.setEnabled(e)},isEnabled:function(){return!(!v.ReactEventListener||!v.ReactEventListener.isEnabled())},listenTo:function(e,t){for(var n=t,o=r(n),i=a.registrationNameDependencies[e],s=0;s<i.length;s++){var u=i[s];o.hasOwnProperty(u)&&o[u]||("topWheel"===u?c("wheel")?v.ReactEventListener.trapBubbledEvent("topWheel","wheel",n):c("mousewheel")?v.ReactEventListener.trapBubbledEvent("topWheel","mousewheel",n):v.ReactEventListener.trapBubbledEvent("topWheel","DOMMouseScroll",n):"topScroll"===u?c("scroll",!0)?v.ReactEventListener.trapCapturedEvent("topScroll","scroll",n):v.ReactEventListener.trapBubbledEvent("topScroll","scroll",v.ReactEventListener.WINDOW_HANDLE):"topFocus"===u||"topBlur"===u?(c("focus",!0)?(v.ReactEventListener.trapCapturedEvent("topFocus","focus",n),v.ReactEventListener.trapCapturedEvent("topBlur","blur",n)):c("focusin")&&(v.ReactEventListener.trapBubbledEvent("topFocus","focusin",n),v.ReactEventListener.trapBubbledEvent("topBlur","focusout",n)),o.topBlur=!0,o.topFocus=!0):h.hasOwnProperty(u)&&v.ReactEventListener.trapBubbledEvent(u,h[u],n),o[u]=!0)}},trapBubbledEvent:function(e,t,n){return v.ReactEventListener.trapBubbledEvent(e,t,n)},trapCapturedEvent:function(e,t,n){return v.ReactEventListener.trapCapturedEvent(e,t,n)},supportsEventPageXY:function(){if(!document.createEvent)return!1;var e=document.createEvent("MouseEvent");return null!=e&&"pageX"in e},ensureScrollValueMonitoring:function(){if(void 0===o&&(o=v.supportsEventPageXY()),!o&&!d){var e=u.refreshScrollValues;v.ReactEventListener.monitorScrollValue(e),d=!0}}});t.exports=v},{107:107,110:110,144:144,17:17,51:51,90:90}],26:[function(e,t,n){(function(n){"use strict";function r(e,t,n,r){var o=void 0===e[n];null!=t&&o&&(e[n]=i(t,!0))}var o=e(66),i=e(109),a=(e(22),e(117)),s=e(118);e(143);void 0!==n&&n.env;var u={instantiateChildren:function(e,t,n,o){if(null==e)return null;var i={};return s(e,r,i),i},updateChildren:function(e,t,n,r,s,u,l,c,p){if(t||e){var d,f;for(d in t)if(t.hasOwnProperty(d)){f=e&&e[d];var h=f&&f._currentElement,m=t[d];if(null!=f&&a(h,m))o.receiveComponent(f,m,s,c),t[d]=f;else{f&&(r[d]=o.getHostNode(f),o.unmountComponent(f,!1));var v=i(m,!0);t[d]=v;var g=o.mountComponent(v,s,u,l,c,p);n.push(g)}}for(d in e)!e.hasOwnProperty(d)||t&&t.hasOwnProperty(d)||(f=e[d],r[d]=o.getHostNode(f),o.unmountComponent(f,!1))}},unmountChildren:function(e,t){for(var n in e)if(e.hasOwnProperty(n)){var r=e[n];o.unmountComponent(r,t)}}};t.exports=u}).call(this,void 0)},{109:109,117:117,118:118,143:143,22:22,66:66}],27:[function(e,t,n){"use strict";var r=e(8),o=e(37),i={processChildrenUpdates:o.dangerouslyProcessChildrenUpdates,replaceNodeWithMarkup:r.dangerouslyReplaceNodeWithMarkup};t.exports=i},{37:37,8:8}],28:[function(e,t,n){"use strict";var r=e(113),o=(e(138),!1),i={replaceNodeWithMarkup:null,processChildrenUpdates:null,injection:{injectEnvironment:function(e){o&&r("104"),i.replaceNodeWithMarkup=e.replaceNodeWithMarkup,i.processChildrenUpdates=e.processChildrenUpdates,o=!0}}};t.exports=i},{113:113,138:138}],29:[function(e,t,n){"use strict";function r(e){}function o(e){return!(!e.prototype||!e.prototype.isReactComponent)}function i(e){return!(!e.prototype||!e.prototype.isPureReactComponent)}var a=e(113),s=e(144),u=e(121),l=e(28),c=e(120),p=e(50),d=e(57),f=(e(58),e(62)),h=e(66),m=e(131),v=(e(138),e(142)),g=e(117),y=(e(143),{ImpureClass:0,PureClass:1,StatelessFunctional:2});r.prototype.render=function(){var e=d.get(this)._currentElement.type,t=e(this.props,this.context,this.updater);return t};var _=1,C={construct:function(e){this._currentElement=e,this._rootNodeID=0,this._compositeType=null,this._instance=null,this._hostParent=null,this._hostContainerInfo=null,this._updateBatchNumber=null,this._pendingElement=null,this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1,this._renderedNodeType=null,this._renderedComponent=null,this._context=null,this._mountOrder=0,this._topLevelWrapper=null,this._pendingCallbacks=null,this._calledComponentWillUnmount=!1},mountComponent:function(e,t,n,s){this._context=s,this._mountOrder=_++,this._hostParent=t,this._hostContainerInfo=n;var l,c=this._currentElement.props,p=this._processContext(s),f=this._currentElement.type,h=e.getUpdateQueue(),v=o(f),g=this._constructComponent(v,c,p,h);v||null!=g&&null!=g.render?i(f)?this._compositeType=y.PureClass:this._compositeType=y.ImpureClass:(l=g,null===g||!1===g||u.isValidElement(g)||a("105",f.displayName||f.name||"Component"),g=new r(f),this._compositeType=y.StatelessFunctional),g.props=c,g.context=p,g.refs=m,g.updater=h,this._instance=g,d.set(g,this);var C=g.state;void 0===C&&(g.state=C=null),("object"!=typeof C||Array.isArray(C))&&a("106",this.getName()||"ReactCompositeComponent"),this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1;var b;return b=g.unstable_handleError?this.performInitialMountWithErrorHandling(l,t,n,e,s):this.performInitialMount(l,t,n,e,s),g.componentDidMount&&e.getReactMountReady().enqueue(g.componentDidMount,g),b},_constructComponent:function(e,t,n,r){return this._constructComponentWithoutOwner(e,t,n,r)},_constructComponentWithoutOwner:function(e,t,n,r){var o=this._currentElement.type;return e?new o(t,n,r):o(t,n,r)},performInitialMountWithErrorHandling:function(e,t,n,r,o){var i,a=r.checkpoint();try{i=this.performInitialMount(e,t,n,r,o)}catch(s){r.rollback(a),this._instance.unstable_handleError(s),this._pendingStateQueue&&(this._instance.state=this._processPendingState(this._instance.props,this._instance.context)),a=r.checkpoint(),this._renderedComponent.unmountComponent(!0),r.rollback(a),i=this.performInitialMount(e,t,n,r,o)}return i},performInitialMount:function(e,t,n,r,o){var i=this._instance;i.componentWillMount&&(i.componentWillMount(),this._pendingStateQueue&&(i.state=this._processPendingState(i.props,i.context))),void 0===e&&(e=this._renderValidatedComponent());var a=f.getType(e);this._renderedNodeType=a;var s=this._instantiateReactComponent(e,a!==f.EMPTY);return this._renderedComponent=s,h.mountComponent(s,r,t,n,this._processChildContext(o),0)},getHostNode:function(){return h.getHostNode(this._renderedComponent)},unmountComponent:function(e){if(this._renderedComponent){var t=this._instance;if(t.componentWillUnmount&&!t._calledComponentWillUnmount)if(t._calledComponentWillUnmount=!0,e){var n=this.getName()+".componentWillUnmount()";p.invokeGuardedCallback(n,t.componentWillUnmount.bind(t))}else t.componentWillUnmount();this._renderedComponent&&(h.unmountComponent(this._renderedComponent,e),this._renderedNodeType=null,this._renderedComponent=null,this._instance=null),this._pendingStateQueue=null,this._pendingReplaceState=!1,this._pendingForceUpdate=!1,this._pendingCallbacks=null,this._pendingElement=null,this._context=null,this._rootNodeID=0,this._topLevelWrapper=null,d.remove(t)}},_maskContext:function(e){var t=this._currentElement.type,n=t.contextTypes;if(!n)return m;var r={};for(var o in n)r[o]=e[o];return r},_processContext:function(e){return this._maskContext(e)},_processChildContext:function(e){var t,n=this._currentElement.type,r=this._instance;if(r.getChildContext&&(t=r.getChildContext()),t){"object"!=typeof n.childContextTypes&&a("107",this.getName()||"ReactCompositeComponent");for(var o in t)o in n.childContextTypes||a("108",this.getName()||"ReactCompositeComponent",o);return s({},e,t)}return e},_checkContextTypes:function(e,t,n){},receiveComponent:function(e,t,n){var r=this._currentElement,o=this._context;this._pendingElement=null,this.updateComponent(t,r,e,o,n)},performUpdateIfNecessary:function(e){null!=this._pendingElement?h.receiveComponent(this,this._pendingElement,e,this._context):null!==this._pendingStateQueue||this._pendingForceUpdate?this.updateComponent(e,this._currentElement,this._currentElement,this._context,this._context):this._updateBatchNumber=null},updateComponent:function(e,t,n,r,o){var i=this._instance;null==i&&a("136",this.getName()||"ReactCompositeComponent");var s,u=!1;this._context===o?s=i.context:(s=this._processContext(o),u=!0);var l=t.props,c=n.props;t!==n&&(u=!0),u&&i.componentWillReceiveProps&&i.componentWillReceiveProps(c,s);var p=this._processPendingState(c,s),d=!0;this._pendingForceUpdate||(i.shouldComponentUpdate?d=i.shouldComponentUpdate(c,p,s):this._compositeType===y.PureClass&&(d=!v(l,c)||!v(i.state,p))),this._updateBatchNumber=null,d?(this._pendingForceUpdate=!1,this._performComponentUpdate(n,c,p,s,e,o)):(this._currentElement=n,this._context=o,i.props=c,i.state=p,i.context=s)},_processPendingState:function(e,t){var n=this._instance,r=this._pendingStateQueue,o=this._pendingReplaceState;if(this._pendingReplaceState=!1,this._pendingStateQueue=null,!r)return n.state;if(o&&1===r.length)return r[0];for(var i=s({},o?r[0]:n.state),a=o?1:0;a<r.length;a++){var u=r[a];s(i,"function"==typeof u?u.call(n,i,e,t):u)}return i},_performComponentUpdate:function(e,t,n,r,o,i){var a,s,u,l=this._instance,c=Boolean(l.componentDidUpdate);c&&(a=l.props,s=l.state,u=l.context),l.componentWillUpdate&&l.componentWillUpdate(t,n,r),this._currentElement=e,this._context=i,l.props=t,l.state=n,l.context=r,this._updateRenderedComponent(o,i),c&&o.getReactMountReady().enqueue(l.componentDidUpdate.bind(l,a,s,u),l)},_updateRenderedComponent:function(e,t){var n=this._renderedComponent,r=n._currentElement,o=this._renderValidatedComponent();if(g(r,o))h.receiveComponent(n,o,e,this._processChildContext(t));else{var i=h.getHostNode(n);h.unmountComponent(n,!1);var a=f.getType(o);this._renderedNodeType=a;var s=this._instantiateReactComponent(o,a!==f.EMPTY);this._renderedComponent=s;var u=h.mountComponent(s,e,this._hostParent,this._hostContainerInfo,this._processChildContext(t),0);this._replaceNodeWithMarkup(i,u,n)}},_replaceNodeWithMarkup:function(e,t,n){l.replaceNodeWithMarkup(e,t,n)},_renderValidatedComponentWithoutOwnerOrContext:function(){return this._instance.render()},_renderValidatedComponent:function(){var e;if(this._compositeType!==y.StatelessFunctional){c.current=this;try{e=this._renderValidatedComponentWithoutOwnerOrContext()}finally{c.current=null}}else e=this._renderValidatedComponentWithoutOwnerOrContext();return null===e||!1===e||u.isValidElement(e)||a("109",this.getName()||"ReactCompositeComponent"),e},attachRef:function(e,t){var n=this.getPublicInstance();null==n&&a("110");var r=t.getPublicInstance();(n.refs===m?n.refs={}:n.refs)[e]=r},detachRef:function(e){delete this.getPublicInstance().refs[e]},getName:function(){var e=this._currentElement.type,t=this._instance&&this._instance.constructor;return e.displayName||t&&t.displayName||e.name||t&&t.name||null},getPublicInstance:function(){var e=this._instance;return this._compositeType===y.StatelessFunctional?null:e},_instantiateReactComponent:null};t.exports=C},{113:113,117:117,120:120,121:121,131:131,138:138,142:142,143:143,144:144,28:28,50:50,57:57,58:58,62:62,66:66}],30:[function(e,t,n){"use strict";var r=e(33),o=e(47),i=e(60),a=e(66),s=e(71),u=e(72),l=e(96),c=e(103),p=e(114);e(143);o.inject();var d={findDOMNode:l,render:i.render,unmountComponentAtNode:i.unmountComponentAtNode,version:u,unstable_batchedUpdates:s.batchedUpdates,unstable_renderSubtreeIntoContainer:p};"undefined"!=typeof __REACT_DEVTOOLS_GLOBAL_HOOK__&&"function"==typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.inject&&__REACT_DEVTOOLS_GLOBAL_HOOK__.inject({ComponentTree:{getClosestInstanceFromNode:r.getClosestInstanceFromNode,getNodeFromInstance:function(e){return e._renderedComponent&&(e=c(e)),e?r.getNodeFromInstance(e):null}},Mount:i,Reconciler:a});t.exports=d},{103:103,114:114,143:143,33:33,47:47,60:60,66:66,71:71,72:72,96:96}],31:[function(e,t,n){"use strict";function r(e){if(e){var t=e._currentElement._owner||null;if(t){var n=t.getName();if(n)return" This DOM node was rendered by `"+n+"`."}}return""}function o(e,t){t&&(Q[e._tag]&&(null!=t.children||null!=t.dangerouslySetInnerHTML)&&v("137",e._tag,e._currentElement._owner?" Check the render method of "+e._currentElement._owner.getName()+".":""),null!=t.dangerouslySetInnerHTML&&(null!=t.children&&v("60"),"object"==typeof t.dangerouslySetInnerHTML&&H in t.dangerouslySetInnerHTML||v("61")),null!=t.style&&"object"!=typeof t.style&&v("62",r(e)))}function i(e,t,n,r){if(!(r instanceof A)){var o=e._hostContainerInfo,i=o._node&&o._node.nodeType===K,s=i?o._node:o._ownerDocument;j(t,s),r.getReactMountReady().enqueue(a,{inst:e,registrationName:t,listener:n})}}function a(){var e=this;w.putListener(e.inst,e.registrationName,e.listener)}function s(){var e=this;N.postMountWrapper(e)}function u(){var e=this;O.postMountWrapper(e)}function l(){var e=this;M.postMountWrapper(e)}function c(){L.track(this)}function p(){var e=this;e._rootNodeID||v("63");var t=V(e);switch(t||v("64"),e._tag){case"iframe":case"object":e._wrapperState.listeners=[k.trapBubbledEvent("topLoad","load",t)];break;case"video":case"audio":e._wrapperState.listeners=[];for(var n in z)z.hasOwnProperty(n)&&e._wrapperState.listeners.push(k.trapBubbledEvent(n,z[n],t));break;case"source":e._wrapperState.listeners=[k.trapBubbledEvent("topError","error",t)];break;case"img":e._wrapperState.listeners=[k.trapBubbledEvent("topError","error",t),k.trapBubbledEvent("topLoad","load",t)];break;case"form":e._wrapperState.listeners=[k.trapBubbledEvent("topReset","reset",t),k.trapBubbledEvent("topSubmit","submit",t)];break;case"input":case"select":case"textarea":e._wrapperState.listeners=[k.trapBubbledEvent("topInvalid","invalid",t)]}}function d(){I.postUpdateWrapper(this)}function f(e){Z.call($,e)||(G.test(e)||v("65",e),$[e]=!0)}function h(e,t){return e.indexOf("-")>=0||null!=t.is}function m(e){var t=e.type;f(t),this._currentElement=e,this._tag=t.toLowerCase(),this._namespaceURI=null,this._renderedChildren=null,this._previousStyle=null,this._previousStyleCopy=null,this._hostNode=null,this._hostParent=null,this._rootNodeID=0,this._domID=0,this._hostContainerInfo=null,this._wrapperState=null,this._topLevelWrapper=null,this._flags=0}var v=e(113),g=e(144),y=e(2),_=e(5),C=e(9),b=e(10),E=e(11),x=e(12),w=e(16),T=e(17),k=e(25),P=e(32),S=e(33),N=e(38),M=e(39),I=e(40),O=e(43),R=(e(58),e(61)),A=e(68),D=(e(130),e(95)),L=(e(138),e(110),e(142),e(108)),U=(e(119),e(143),P),F=w.deleteListener,V=S.getNodeFromInstance,j=k.listenTo,B=T.registrationName__module__s,W={string:!0,number:!0},H="__html",q={children:null,dangerouslySetInnerHTML:null,suppressContentEditableWarning:null},K=11,z={topAbort:"abort",topCanPlay:"canplay",topCanPlayThrough:"canplaythrough",topDurationChange:"durationchange",topEmptied:"emptied",topEncrypted:"encrypted",topEnded:"ended",topError:"error",topLoadedData:"loadeddata",topLoadedMetadata:"loadedmetadata",topLoadStart:"loadstart",topPause:"pause",topPlay:"play",topPlaying:"playing",topProgress:"progress",topRateChange:"ratechange",topSeeked:"seeked",topSeeking:"seeking",topStalled:"stalled",topSuspend:"suspend",topTimeUpdate:"timeupdate",topVolumeChange:"volumechange",topWaiting:"waiting"},Y={area:!0,base:!0,br:!0,col:!0,embed:!0,hr:!0,img:!0,input:!0,keygen:!0,link:!0,meta:!0,param:!0,source:!0,track:!0,wbr:!0},X={listing:!0,pre:!0,textarea:!0},Q=g({menuitem:!0},Y),G=/^[a-zA-Z][a-zA-Z:_\.\-\d]*$/,$={},Z={}.hasOwnProperty,J=1;m.displayName="ReactDOMComponent",m.Mixin={mountComponent:function(e,t,n,r){this._rootNodeID=J++,this._domID=n._idCounter++,this._hostParent=t,this._hostContainerInfo=n;var i=this._currentElement.props;switch(this._tag){case"audio":case"form":case"iframe":case"img":case"link":case"object":case"source":case"video":this._wrapperState={listeners:null},e.getReactMountReady().enqueue(p,this);break;case"input":N.mountWrapper(this,i,t),i=N.getHostProps(this,i),e.getReactMountReady().enqueue(c,this),e.getReactMountReady().enqueue(p,this);break;case"option":M.mountWrapper(this,i,t),i=M.getHostProps(this,i);break;case"select":I.mountWrapper(this,i,t),i=I.getHostProps(this,i),e.getReactMountReady().enqueue(p,this);break;case"textarea":O.mountWrapper(this,i,t),i=O.getHostProps(this,i),e.getReactMountReady().enqueue(c,this),e.getReactMountReady().enqueue(p,this)}o(this,i);var a,d;null!=t?(a=t._namespaceURI,d=t._tag):n._tag&&(a=n._namespaceURI,d=n._tag),(null==a||a===b.svg&&"foreignobject"===d)&&(a=b.html),a===b.html&&("svg"===this._tag?a=b.svg:"math"===this._tag&&(a=b.mathml)),this._namespaceURI=a;var f;if(e.useCreateElement){var h,m=n._ownerDocument;if(a===b.html)if("script"===this._tag){var v=m.createElement("div"),g=this._currentElement.type;v.innerHTML="<"+g+"></"+g+">",h=v.removeChild(v.firstChild)}else h=i.is?m.createElement(this._currentElement.type,i.is):m.createElement(this._currentElement.type);else h=m.createElementNS(a,this._currentElement.type);S.precacheNode(this,h),this._flags|=U.hasCachedChildNodes,this._hostParent||x.setAttributeForRoot(h),this._updateDOMProperties(null,i,e);var _=C(h);this._createInitialChildren(e,i,r,_),f=_}else{var E=this._createOpenTagMarkupAndPutListeners(e,i),w=this._createContentMarkup(e,i,r);f=!w&&Y[this._tag]?E+"/>":E+">"+w+"</"+this._currentElement.type+">"}switch(this._tag){case"input":e.getReactMountReady().enqueue(s,this),i.autoFocus&&e.getReactMountReady().enqueue(y.focusDOMComponent,this);break;case"textarea":e.getReactMountReady().enqueue(u,this),i.autoFocus&&e.getReactMountReady().enqueue(y.focusDOMComponent,this);break;case"select":case"button":i.autoFocus&&e.getReactMountReady().enqueue(y.focusDOMComponent,this);break;case"option":e.getReactMountReady().enqueue(l,this)}return f},_createOpenTagMarkupAndPutListeners:function(e,t){var n="<"+this._currentElement.type;for(var r in t)if(t.hasOwnProperty(r)){var o=t[r];if(null!=o)if(B.hasOwnProperty(r))o&&i(this,r,o,e);else{"style"===r&&(o&&(o=this._previousStyleCopy=g({},t.style)),o=_.createMarkupForStyles(o,this));var a=null;null!=this._tag&&h(this._tag,t)?q.hasOwnProperty(r)||(a=x.createMarkupForCustomAttribute(r,o)):a=x.createMarkupForProperty(r,o),a&&(n+=" "+a)}}return e.renderToStaticMarkup?n:(this._hostParent||(n+=" "+x.createMarkupForRoot()),n+=" "+x.createMarkupForID(this._domID))},_createContentMarkup:function(e,t,n){var r="",o=t.dangerouslySetInnerHTML;if(null!=o)null!=o.__html&&(r=o.__html);else{var i=W[typeof t.children]?t.children:null,a=null!=i?null:t.children;if(null!=i)r=D(i);else if(null!=a){var s=this.mountChildren(a,e,n);r=s.join("")}}return X[this._tag]&&"\n"===r.charAt(0)?"\n"+r:r},_createInitialChildren:function(e,t,n,r){var o=t.dangerouslySetInnerHTML;if(null!=o)null!=o.__html&&C.queueHTML(r,o.__html);else{var i=W[typeof t.children]?t.children:null,a=null!=i?null:t.children;if(null!=i)""!==i&&C.queueText(r,i);else if(null!=a)for(var s=this.mountChildren(a,e,n),u=0;u<s.length;u++)C.queueChild(r,s[u])}},receiveComponent:function(e,t,n){var r=this._currentElement;this._currentElement=e,this.updateComponent(t,r,e,n)},updateComponent:function(e,t,n,r){var i=t.props,a=this._currentElement.props;switch(this._tag){case"input":i=N.getHostProps(this,i),a=N.getHostProps(this,a);break;case"option":i=M.getHostProps(this,i),a=M.getHostProps(this,a);break;case"select":i=I.getHostProps(this,i),a=I.getHostProps(this,a);break;case"textarea":i=O.getHostProps(this,i),a=O.getHostProps(this,a)}switch(o(this,a),this._updateDOMProperties(i,a,e),this._updateDOMChildren(i,a,e,r),this._tag){case"input":N.updateWrapper(this);break;case"textarea":O.updateWrapper(this);break;case"select":e.getReactMountReady().enqueue(d,this)}},_updateDOMProperties:function(e,t,n){var r,o,a;for(r in e)if(!t.hasOwnProperty(r)&&e.hasOwnProperty(r)&&null!=e[r])if("style"===r){var s=this._previousStyleCopy;for(o in s)s.hasOwnProperty(o)&&(a=a||{},a[o]="");this._previousStyleCopy=null}else B.hasOwnProperty(r)?e[r]&&F(this,r):h(this._tag,e)?q.hasOwnProperty(r)||x.deleteValueForAttribute(V(this),r):(E.properties[r]||E.isCustomAttribute(r))&&x.deleteValueForProperty(V(this),r);for(r in t){var u=t[r],l="style"===r?this._previousStyleCopy:null!=e?e[r]:void 0;if(t.hasOwnProperty(r)&&u!==l&&(null!=u||null!=l))if("style"===r)if(u?u=this._previousStyleCopy=g({},u):this._previousStyleCopy=null,l){for(o in l)!l.hasOwnProperty(o)||u&&u.hasOwnProperty(o)||(a=a||{},a[o]="");for(o in u)u.hasOwnProperty(o)&&l[o]!==u[o]&&(a=a||{},a[o]=u[o])}else a=u;else if(B.hasOwnProperty(r))u?i(this,r,u,n):l&&F(this,r);else if(h(this._tag,t))q.hasOwnProperty(r)||x.setValueForAttribute(V(this),r,u);else if(E.properties[r]||E.isCustomAttribute(r)){var c=V(this);null!=u?x.setValueForProperty(c,r,u):x.deleteValueForProperty(c,r)}}a&&_.setValueForStyles(V(this),a,this)},_updateDOMChildren:function(e,t,n,r){var o=W[typeof e.children]?e.children:null,i=W[typeof t.children]?t.children:null,a=e.dangerouslySetInnerHTML&&e.dangerouslySetInnerHTML.__html,s=t.dangerouslySetInnerHTML&&t.dangerouslySetInnerHTML.__html,u=null!=o?null:e.children,l=null!=i?null:t.children,c=null!=o||null!=a,p=null!=i||null!=s;null!=u&&null==l?this.updateChildren(null,n,r):c&&!p&&this.updateTextContent(""),null!=i?o!==i&&this.updateTextContent(""+i):null!=s?a!==s&&this.updateMarkup(""+s):null!=l&&this.updateChildren(l,n,r)},getHostNode:function(){return V(this)},unmountComponent:function(e){switch(this._tag){case"audio":case"form":case"iframe":case"img":case"link":case"object":case"source":case"video":var t=this._wrapperState.listeners;if(t)for(var n=0;n<t.length;n++)t[n].remove();break;case"input":case"textarea":L.stopTracking(this);break;case"html":case"head":case"body":v("66",this._tag)}this.unmountChildren(e),S.uncacheNode(this),w.deleteAllListeners(this),this._rootNodeID=0,this._domID=0,this._wrapperState=null},getPublicInstance:function(){return V(this)}},g(m.prototype,m.Mixin,R.Mixin),t.exports=m},{10:10,108:108,11:11,110:110,113:113,119:119,12:12,130:130,138:138,142:142,143:143,144:144,16:16,17:17,2:2,25:25,32:32,33:33,38:38,39:39,40:40,43:43,5:5,58:58,61:61,68:68,9:9,95:95}],32:[function(e,t,n){"use strict";var r={hasCachedChildNodes:1};t.exports=r},{}],33:[function(e,t,n){"use strict";function r(e,t){return 1===e.nodeType&&e.getAttribute(h)===String(t)||8===e.nodeType&&e.nodeValue===" react-text: "+t+" "||8===e.nodeType&&e.nodeValue===" react-empty: "+t+" "}function o(e){for(var t;t=e._renderedComponent;)e=t;return e}function i(e,t){var n=o(e);n._hostNode=t,t[v]=n}function a(e){var t=e._hostNode;t&&(delete t[v],e._hostNode=null)}function s(e,t){if(!(e._flags&m.hasCachedChildNodes)){var n=e._renderedChildren,a=t.firstChild;e:for(var s in n)if(n.hasOwnProperty(s)){var u=n[s],l=o(u)._domID;if(0!==l){for(;null!==a;a=a.nextSibling)if(r(a,l)){i(u,a);continue e}p("32",l)}}e._flags|=m.hasCachedChildNodes}}function u(e){if(e[v])return e[v];for(var t=[];!e[v];){if(t.push(e),!e.parentNode)return null;e=e.parentNode}for(var n,r;e&&(r=e[v]);e=t.pop())n=r,t.length&&s(r,e);return n}function l(e){var t=u(e);return null!=t&&t._hostNode===e?t:null}function c(e){if(void 0===e._hostNode&&p("33"),e._hostNode)return e._hostNode;for(var t=[];!e._hostNode;)t.push(e),e._hostParent||p("34"),e=e._hostParent;for(;t.length;e=t.pop())s(e,e._hostNode);return e._hostNode}var p=e(113),d=e(11),f=e(32),h=(e(138),d.ID_ATTRIBUTE_NAME),m=f,v="__reactInternalInstance$"+Math.random().toString(36).slice(2),g={getClosestInstanceFromNode:u,getInstanceFromNode:l,getNodeFromInstance:c,precacheChildNodes:s,precacheNode:i,uncacheNode:a};t.exports=g},{11:11,113:113,138:138,32:32}],34:[function(e,t,n){"use strict";function r(e,t){return{_topLevelWrapper:e,_idCounter:1,_ownerDocument:t?t.nodeType===o?t:t.ownerDocument:null,_node:t,_tag:t?t.nodeName.toLowerCase():null,_namespaceURI:t?t.namespaceURI:null}}var o=(e(119),9);t.exports=r},{119:119}],35:[function(e,t,n){"use strict";var r=e(144),o=e(9),i=e(33),a=function(e){this._currentElement=null,this._hostNode=null,this._hostParent=null,this._hostContainerInfo=null,this._domID=0};r(a.prototype,{mountComponent:function(e,t,n,r){var a=n._idCounter++;this._domID=a,this._hostParent=t,this._hostContainerInfo=n;var s=" react-empty: "+this._domID+" ";if(e.useCreateElement){var u=n._ownerDocument,l=u.createComment(s);return i.precacheNode(this,l),o(l)}return e.renderToStaticMarkup?"":"\x3c!--"+s+"--\x3e"},receiveComponent:function(){},getHostNode:function(){return i.getNodeFromInstance(this)},unmountComponent:function(){i.uncacheNode(this)}}),t.exports=a},{144:144,33:33,9:9}],36:[function(e,t,n){"use strict";var r={useCreateElement:!0,useFiber:!1};t.exports=r},{}],37:[function(e,t,n){"use strict";var r=e(8),o=e(33),i={dangerouslyProcessChildrenUpdates:function(e,t){var n=o.getNodeFromInstance(e);r.processUpdates(n,t)}};t.exports=i},{33:33,8:8}],38:[function(e,t,n){"use strict";function r(){this._rootNodeID&&d.updateWrapper(this)}function o(e){return"checkbox"===e.type||"radio"===e.type?null!=e.checked:null!=e.value}function i(e){var t=this._currentElement.props,n=l.executeOnChange(t,e);p.asap(r,this);var o=t.name;if("radio"===t.type&&null!=o){for(var i=c.getNodeFromInstance(this),s=i;s.parentNode;)s=s.parentNode;for(var u=s.querySelectorAll("input[name="+JSON.stringify(""+o)+'][type="radio"]'),d=0;d<u.length;d++){var f=u[d];if(f!==i&&f.form===i.form){var h=c.getInstanceFromNode(f);h||a("90"),p.asap(r,h)}}}return n}var a=e(113),s=e(144),u=e(12),l=e(23),c=e(33),p=e(71),d=(e(138),e(143),{getHostProps:function(e,t){var n=l.getValue(t),r=l.getChecked(t);return s({type:void 0,step:void 0,min:void 0,max:void 0},t,{defaultChecked:void 0,defaultValue:void 0,value:null!=n?n:e._wrapperState.initialValue,checked:null!=r?r:e._wrapperState.initialChecked,onChange:e._wrapperState.onChange})},mountWrapper:function(e,t){var n=t.defaultValue;e._wrapperState={initialChecked:null!=t.checked?t.checked:t.defaultChecked,initialValue:null!=t.value?t.value:n,listeners:null,onChange:i.bind(e),controlled:o(t)}},updateWrapper:function(e){var t=e._currentElement.props,n=t.checked;null!=n&&u.setValueForProperty(c.getNodeFromInstance(e),"checked",n||!1);var r=c.getNodeFromInstance(e),o=l.getValue(t);if(null!=o)if(0===o&&""===r.value)r.value="0";else if("number"===t.type){var i=parseFloat(r.value,10)||0;(o!=i||o==i&&r.value!=o)&&(r.value=""+o)}else r.value!==""+o&&(r.value=""+o);else null==t.value&&null!=t.defaultValue&&r.defaultValue!==""+t.defaultValue&&(r.defaultValue=""+t.defaultValue),null==t.checked&&null!=t.defaultChecked&&(r.defaultChecked=!!t.defaultChecked)},postMountWrapper:function(e){var t=e._currentElement.props,n=c.getNodeFromInstance(e);switch(t.type){case"submit":case"reset":break;case"color":case"date":case"datetime":case"datetime-local":case"month":case"time":case"week":n.value="",n.value=n.defaultValue;break;default:n.value=n.value}var r=n.name;""!==r&&(n.name=""),n.defaultChecked=!n.defaultChecked,n.defaultChecked=!n.defaultChecked,""!==r&&(n.name=r)}});t.exports=d},{113:113,12:12,138:138,143:143,144:144,23:23,33:33,71:71}],39:[function(e,t,n){"use strict";function r(e){var t="";return i.Children.forEach(e,function(e){null!=e&&("string"==typeof e||"number"==typeof e?t+=e:u||(u=!0))}),t}var o=e(144),i=e(121),a=e(33),s=e(40),u=(e(143),!1),l={mountWrapper:function(e,t,n){var o=null;if(null!=n){var i=n;"optgroup"===i._tag&&(i=i._hostParent),null!=i&&"select"===i._tag&&(o=s.getSelectValueContext(i))}var a=null;if(null!=o){var u;if(u=null!=t.value?t.value+"":r(t.children),a=!1,Array.isArray(o)){for(var l=0;l<o.length;l++)if(""+o[l]===u){a=!0;break}}else a=""+o===u}e._wrapperState={selected:a}},postMountWrapper:function(e){var t=e._currentElement.props;null!=t.value&&a.getNodeFromInstance(e).setAttribute("value",t.value)},getHostProps:function(e,t){var n=o({selected:void 0,children:void 0},t);null!=e._wrapperState.selected&&(n.selected=e._wrapperState.selected);var i=r(t.children);return i&&(n.children=i),n}};t.exports=l},{121:121,143:143,144:144,33:33,40:40}],40:[function(e,t,n){"use strict";function r(){if(this._rootNodeID&&this._wrapperState.pendingUpdate){this._wrapperState.pendingUpdate=!1;var e=this._currentElement.props,t=s.getValue(e);null!=t&&o(this,Boolean(e.multiple),t)}}function o(e,t,n){var r,o,i=u.getNodeFromInstance(e).options;if(t){for(r={},o=0;o<n.length;o++)r[""+n[o]]=!0;for(o=0;o<i.length;o++){var a=r.hasOwnProperty(i[o].value);i[o].selected!==a&&(i[o].selected=a)}}else{for(r=""+n,o=0;o<i.length;o++)if(i[o].value===r)return void(i[o].selected=!0);i.length&&(i[0].selected=!0)}}function i(e){var t=this._currentElement.props,n=s.executeOnChange(t,e);return this._rootNodeID&&(this._wrapperState.pendingUpdate=!0),l.asap(r,this),n}var a=e(144),s=e(23),u=e(33),l=e(71),c=(e(143),!1),p={getHostProps:function(e,t){return a({},t,{onChange:e._wrapperState.onChange,value:void 0})},mountWrapper:function(e,t){var n=s.getValue(t);e._wrapperState={pendingUpdate:!1,initialValue:null!=n?n:t.defaultValue,listeners:null,onChange:i.bind(e),wasMultiple:Boolean(t.multiple)},void 0===t.value||void 0===t.defaultValue||c||(c=!0)},getSelectValueContext:function(e){return e._wrapperState.initialValue},postUpdateWrapper:function(e){var t=e._currentElement.props;e._wrapperState.initialValue=void 0;var n=e._wrapperState.wasMultiple;e._wrapperState.wasMultiple=Boolean(t.multiple);var r=s.getValue(t);null!=r?(e._wrapperState.pendingUpdate=!1,o(e,Boolean(t.multiple),r)):n!==Boolean(t.multiple)&&(null!=t.defaultValue?o(e,Boolean(t.multiple),t.defaultValue):o(e,Boolean(t.multiple),t.multiple?[]:""))}};t.exports=p},{143:143,144:144,23:23,33:33,71:71}],41:[function(e,t,n){"use strict";function r(e,t,n,r){return e===n&&t===r}function o(e){var t=document.selection,n=t.createRange(),r=n.text.length,o=n.duplicate();o.moveToElementText(e),o.setEndPoint("EndToStart",n);var i=o.text.length;return{start:i,end:i+r}}function i(e){var t=window.getSelection&&window.getSelection();if(!t||0===t.rangeCount)return null;var n=t.anchorNode,o=t.anchorOffset,i=t.focusNode,a=t.focusOffset,s=t.getRangeAt(0);try{s.startContainer.nodeType,s.endContainer.nodeType}catch(e){return null}var u=r(t.anchorNode,t.anchorOffset,t.focusNode,t.focusOffset),l=u?0:s.toString().length,c=s.cloneRange();c.selectNodeContents(e),c.setEnd(s.startContainer,s.startOffset);var p=r(c.startContainer,c.startOffset,c.endContainer,c.endOffset),d=p?0:c.toString().length,f=d+l,h=document.createRange();h.setStart(n,o),h.setEnd(i,a);var m=h.collapsed;return{start:m?f:d,end:m?d:f}}function a(e,t){var n,r,o=document.selection.createRange().duplicate();void 0===t.end?(n=t.start,r=n):t.start>t.end?(n=t.end,r=t.start):(n=t.start,r=t.end),o.moveToElementText(e),o.moveStart("character",n),o.setEndPoint("EndToStart",o),o.moveEnd("character",r-n),o.select()}function s(e,t){if(window.getSelection){var n=window.getSelection(),r=e[c()].length,o=Math.min(t.start,r),i=void 0===t.end?o:Math.min(t.end,r);if(!n.extend&&o>i){var a=i;i=o,o=a}var s=l(e,o),u=l(e,i);if(s&&u){var p=document.createRange();p.setStart(s.node,s.offset),n.removeAllRanges(),o>i?(n.addRange(p),n.extend(u.node,u.offset)):(p.setEnd(u.node,u.offset),n.addRange(p))}}}var u=e(124),l=e(105),c=e(106),p=u.canUseDOM&&"selection"in document&&!("getSelection"in window),d={getOffsets:p?o:i,setOffsets:p?a:s};t.exports=d},{105:105,106:106,124:124}],
+42:[function(e,t,n){"use strict";var r=e(113),o=e(144),i=e(8),a=e(9),s=e(33),u=e(95),l=(e(138),e(119),function(e){this._currentElement=e,this._stringText=""+e,this._hostNode=null,this._hostParent=null,this._domID=0,this._mountIndex=0,this._closingComment=null,this._commentNodes=null});o(l.prototype,{mountComponent:function(e,t,n,r){var o=n._idCounter++,i=" react-text: "+o+" ";if(this._domID=o,this._hostParent=t,e.useCreateElement){var l=n._ownerDocument,c=l.createComment(i),p=l.createComment(" /react-text "),d=a(l.createDocumentFragment());return a.queueChild(d,a(c)),this._stringText&&a.queueChild(d,a(l.createTextNode(this._stringText))),a.queueChild(d,a(p)),s.precacheNode(this,c),this._closingComment=p,d}var f=u(this._stringText);return e.renderToStaticMarkup?f:"\x3c!--"+i+"--\x3e"+f+"\x3c!-- /react-text --\x3e"},receiveComponent:function(e,t){if(e!==this._currentElement){this._currentElement=e;var n=""+e;if(n!==this._stringText){this._stringText=n;var r=this.getHostNode();i.replaceDelimitedText(r[0],r[1],n)}}},getHostNode:function(){var e=this._commentNodes;if(e)return e;if(!this._closingComment)for(var t=s.getNodeFromInstance(this),n=t.nextSibling;;){if(null==n&&r("67",this._domID),8===n.nodeType&&" /react-text "===n.nodeValue){this._closingComment=n;break}n=n.nextSibling}return e=[this._hostNode,this._closingComment],this._commentNodes=e,e},unmountComponent:function(){this._closingComment=null,this._commentNodes=null,s.uncacheNode(this)}}),t.exports=l},{113:113,119:119,138:138,144:144,33:33,8:8,9:9,95:95}],43:[function(e,t,n){"use strict";function r(){this._rootNodeID&&c.updateWrapper(this)}function o(e){var t=this._currentElement.props,n=s.executeOnChange(t,e);return l.asap(r,this),n}var i=e(113),a=e(144),s=e(23),u=e(33),l=e(71),c=(e(138),e(143),{getHostProps:function(e,t){return null!=t.dangerouslySetInnerHTML&&i("91"),a({},t,{value:void 0,defaultValue:void 0,children:""+e._wrapperState.initialValue,onChange:e._wrapperState.onChange})},mountWrapper:function(e,t){var n=s.getValue(t),r=n;if(null==n){var a=t.defaultValue,u=t.children;null!=u&&(null!=a&&i("92"),Array.isArray(u)&&(u.length<=1||i("93"),u=u[0]),a=""+u),null==a&&(a=""),r=a}e._wrapperState={initialValue:""+r,listeners:null,onChange:o.bind(e)}},updateWrapper:function(e){var t=e._currentElement.props,n=u.getNodeFromInstance(e),r=s.getValue(t);if(null!=r){var o=""+r;o!==n.value&&(n.value=o),null==t.defaultValue&&(n.defaultValue=o)}null!=t.defaultValue&&(n.defaultValue=t.defaultValue)},postMountWrapper:function(e){var t=u.getNodeFromInstance(e),n=t.textContent;n===e._wrapperState.initialValue&&(t.value=n)}});t.exports=c},{113:113,138:138,143:143,144:144,23:23,33:33,71:71}],44:[function(e,t,n){"use strict";function r(e,t){"_hostNode"in e||u("33"),"_hostNode"in t||u("33");for(var n=0,r=e;r;r=r._hostParent)n++;for(var o=0,i=t;i;i=i._hostParent)o++;for(;n-o>0;)e=e._hostParent,n--;for(;o-n>0;)t=t._hostParent,o--;for(var a=n;a--;){if(e===t)return e;e=e._hostParent,t=t._hostParent}return null}function o(e,t){"_hostNode"in e||u("35"),"_hostNode"in t||u("35");for(;t;){if(t===e)return!0;t=t._hostParent}return!1}function i(e){return"_hostNode"in e||u("36"),e._hostParent}function a(e,t,n){for(var r=[];e;)r.push(e),e=e._hostParent;var o;for(o=r.length;o-- >0;)t(r[o],"captured",n);for(o=0;o<r.length;o++)t(r[o],"bubbled",n)}function s(e,t,n,o,i){for(var a=e&&t?r(e,t):null,s=[];e&&e!==a;)s.push(e),e=e._hostParent;for(var u=[];t&&t!==a;)u.push(t),t=t._hostParent;var l;for(l=0;l<s.length;l++)n(s[l],"bubbled",o);for(l=u.length;l-- >0;)n(u[l],"captured",i)}var u=e(113);e(138);t.exports={isAncestor:o,getLowestCommonAncestor:r,getParentInstance:i,traverseTwoPhase:a,traverseEnterLeave:s}},{113:113,138:138}],45:[function(e,t,n){"use strict";var r=e(121),o=e(30),i=o;r.addons&&(r.__SECRET_INJECTED_REACT_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED=i),t.exports=i},{121:121,30:30}],46:[function(e,t,n){"use strict";function r(){this.reinitializeTransaction()}var o=e(144),i=e(71),a=e(89),s=e(130),u={initialize:s,close:function(){d.isBatchingUpdates=!1}},l={initialize:s,close:i.flushBatchedUpdates.bind(i)},c=[l,u];o(r.prototype,a,{getTransactionWrappers:function(){return c}});var p=new r,d={isBatchingUpdates:!1,batchedUpdates:function(e,t,n,r,o,i){var a=d.isBatchingUpdates;return d.isBatchingUpdates=!0,a?e(t,n,r,o,i):p.perform(e,null,t,n,r,o,i)}};t.exports=d},{130:130,144:144,71:71,89:89}],47:[function(e,t,n){"use strict";function r(){x||(x=!0,y.EventEmitter.injectReactEventListener(g),y.EventPluginHub.injectEventPluginOrder(s),y.EventPluginUtils.injectComponentTree(d),y.EventPluginUtils.injectTreeTraversal(h),y.EventPluginHub.injectEventPluginsByName({SimpleEventPlugin:E,EnterLeaveEventPlugin:u,ChangeEventPlugin:a,SelectEventPlugin:b,BeforeInputEventPlugin:i}),y.HostComponent.injectGenericComponentClass(p),y.HostComponent.injectTextComponentClass(m),y.DOMProperty.injectDOMPropertyConfig(o),y.DOMProperty.injectDOMPropertyConfig(l),y.DOMProperty.injectDOMPropertyConfig(C),y.EmptyComponent.injectEmptyComponentFactory(function(e){return new f(e)}),y.Updates.injectReconcileTransaction(_),y.Updates.injectBatchingStrategy(v),y.Component.injectEnvironment(c))}var o=e(1),i=e(3),a=e(7),s=e(14),u=e(15),l=e(21),c=e(27),p=e(31),d=e(33),f=e(35),h=e(44),m=e(42),v=e(46),g=e(52),y=e(55),_=e(65),C=e(73),b=e(74),E=e(75),x=!1;t.exports={inject:r}},{1:1,14:14,15:15,21:21,27:27,3:3,31:31,33:33,35:35,42:42,44:44,46:46,52:52,55:55,65:65,7:7,73:73,74:74,75:75}],48:[function(e,t,n){"use strict";var r="function"==typeof Symbol&&Symbol.for&&Symbol.for("react.element")||60103;t.exports=r},{}],49:[function(e,t,n){"use strict";var r,o={injectEmptyComponentFactory:function(e){r=e}},i={create:function(e){return r(e)}};i.injection=o,t.exports=i},{}],50:[function(e,t,n){"use strict";function r(e,t,n){try{t(n)}catch(e){null===o&&(o=e)}}var o=null,i={invokeGuardedCallback:r,invokeGuardedCallbackWithCatch:r,rethrowCaughtError:function(){if(o){var e=o;throw o=null,e}}};t.exports=i},{}],51:[function(e,t,n){"use strict";function r(e){o.enqueueEvents(e),o.processEventQueue(!1)}var o=e(16),i={handleTopLevel:function(e,t,n,i){r(o.extractEvents(e,t,n,i))}};t.exports=i},{16:16}],52:[function(e,t,n){"use strict";function r(e){for(;e._hostParent;)e=e._hostParent;var t=p.getNodeFromInstance(e),n=t.parentNode;return p.getClosestInstanceFromNode(n)}function o(e,t){this.topLevelType=e,this.nativeEvent=t,this.ancestors=[]}function i(e){var t=f(e.nativeEvent),n=p.getClosestInstanceFromNode(t),o=n;do{e.ancestors.push(o),o=o&&r(o)}while(o);for(var i=0;i<e.ancestors.length;i++)n=e.ancestors[i],m._handleTopLevel(e.topLevelType,n,e.nativeEvent,f(e.nativeEvent))}function a(e){e(h(window))}var s=e(144),u=e(123),l=e(124),c=e(24),p=e(33),d=e(71),f=e(102),h=e(135);s(o.prototype,{destructor:function(){this.topLevelType=null,this.nativeEvent=null,this.ancestors.length=0}}),c.addPoolingTo(o,c.twoArgumentPooler);var m={_enabled:!0,_handleTopLevel:null,WINDOW_HANDLE:l.canUseDOM?window:null,setHandleTopLevel:function(e){m._handleTopLevel=e},setEnabled:function(e){m._enabled=!!e},isEnabled:function(){return m._enabled},trapBubbledEvent:function(e,t,n){return n?u.listen(n,t,m.dispatchEvent.bind(null,e)):null},trapCapturedEvent:function(e,t,n){return n?u.capture(n,t,m.dispatchEvent.bind(null,e)):null},monitorScrollValue:function(e){var t=a.bind(null,e);u.listen(window,"scroll",t)},dispatchEvent:function(e,t){if(m._enabled){var n=o.getPooled(e,t);try{d.batchedUpdates(i,n)}finally{o.release(n)}}}};t.exports=m},{102:102,123:123,124:124,135:135,144:144,24:24,33:33,71:71}],53:[function(e,t,n){"use strict";var r={logTopLevelRenders:!1};t.exports=r},{}],54:[function(e,t,n){"use strict";function r(e){return s||a("111",e.type),new s(e)}function o(e){return new u(e)}function i(e){return e instanceof u}var a=e(113),s=(e(138),null),u=null,l={injectGenericComponentClass:function(e){s=e},injectTextComponentClass:function(e){u=e}},c={createInternalComponent:r,createInstanceForText:o,isTextComponent:i,injection:l};t.exports=c},{113:113,138:138}],55:[function(e,t,n){"use strict";var r=e(11),o=e(16),i=e(18),a=e(28),s=e(49),u=e(25),l=e(54),c=e(71),p={Component:a.injection,DOMProperty:r.injection,EmptyComponent:s.injection,EventPluginHub:o.injection,EventPluginUtils:i.injection,EventEmitter:u.injection,HostComponent:l.injection,Updates:c.injection};t.exports=p},{11:11,16:16,18:18,25:25,28:28,49:49,54:54,71:71}],56:[function(e,t,n){"use strict";function r(e){return i(document.documentElement,e)}var o=e(41),i=e(127),a=e(132),s=e(133),u={hasSelectionCapabilities:function(e){var t=e&&e.nodeName&&e.nodeName.toLowerCase();return t&&("input"===t&&"text"===e.type||"textarea"===t||"true"===e.contentEditable)},getSelectionInformation:function(){var e=s();return{focusedElem:e,selectionRange:u.hasSelectionCapabilities(e)?u.getSelection(e):null}},restoreSelection:function(e){var t=s(),n=e.focusedElem,o=e.selectionRange;t!==n&&r(n)&&(u.hasSelectionCapabilities(n)&&u.setSelection(n,o),a(n))},getSelection:function(e){var t;if("selectionStart"in e)t={start:e.selectionStart,end:e.selectionEnd};else if(document.selection&&e.nodeName&&"input"===e.nodeName.toLowerCase()){var n=document.selection.createRange();n.parentElement()===e&&(t={start:-n.moveStart("character",-e.value.length),end:-n.moveEnd("character",-e.value.length)})}else t=o.getOffsets(e);return t||{start:0,end:0}},setSelection:function(e,t){var n=t.start,r=t.end;if(void 0===r&&(r=n),"selectionStart"in e)e.selectionStart=n,e.selectionEnd=Math.min(r,e.value.length);else if(document.selection&&e.nodeName&&"input"===e.nodeName.toLowerCase()){var i=e.createTextRange();i.collapse(!0),i.moveStart("character",n),i.moveEnd("character",r-n),i.select()}else o.setOffsets(e,t)}};t.exports=u},{127:127,132:132,133:133,41:41}],57:[function(e,t,n){"use strict";var r={remove:function(e){e._reactInternalInstance=void 0},get:function(e){return e._reactInternalInstance},has:function(e){return void 0!==e._reactInternalInstance},set:function(e,t){e._reactInternalInstance=t}};t.exports=r},{}],58:[function(e,t,n){"use strict";t.exports={debugTool:null}},{}],59:[function(e,t,n){"use strict";var r=e(92),o=/\/?>/,i=/^<\!\-\-/,a={CHECKSUM_ATTR_NAME:"data-react-checksum",addChecksumToMarkup:function(e){var t=r(e);return i.test(e)?e:e.replace(o," "+a.CHECKSUM_ATTR_NAME+'="'+t+'"$&')},canReuseMarkup:function(e,t){var n=t.getAttribute(a.CHECKSUM_ATTR_NAME);return n=n&&parseInt(n,10),r(e)===n}};t.exports=a},{92:92}],60:[function(e,t,n){"use strict";function r(e,t){for(var n=Math.min(e.length,t.length),r=0;r<n;r++)if(e.charAt(r)!==t.charAt(r))return r;return e.length===t.length?-1:n}function o(e){return e?e.nodeType===A?e.documentElement:e.firstChild:null}function i(e){return e.getAttribute&&e.getAttribute(I)||""}function a(e,t,n,r,o){var i;if(b.logTopLevelRenders){var a=e._currentElement.props.child,s=a.type;i="React mount: "+("string"==typeof s?s:s.displayName||s.name),console.time(i)}var u=w.mountComponent(e,n,null,_(e,t),o,0);i&&console.timeEnd(i),e._renderedComponent._topLevelWrapper=e,V._mountImageIntoNode(u,t,e,r,n)}function s(e,t,n,r){var o=k.ReactReconcileTransaction.getPooled(!n&&C.useCreateElement);o.perform(a,null,e,t,o,n,r),k.ReactReconcileTransaction.release(o)}function u(e,t,n){for(w.unmountComponent(e,n),t.nodeType===A&&(t=t.documentElement);t.lastChild;)t.removeChild(t.lastChild)}function l(e){var t=o(e);if(t){var n=y.getInstanceFromNode(t);return!(!n||!n._hostParent)}}function c(e){return!(!e||e.nodeType!==R&&e.nodeType!==A&&e.nodeType!==D)}function p(e){var t=o(e),n=t&&y.getInstanceFromNode(t);return n&&!n._hostParent?n:null}function d(e){var t=p(e);return t?t._hostContainerInfo._topLevelWrapper:null}var f=e(113),h=e(9),m=e(11),v=e(121),g=e(25),y=(e(120),e(33)),_=e(34),C=e(36),b=e(53),E=e(57),x=(e(58),e(59)),w=e(66),T=e(70),k=e(71),P=e(131),S=e(109),N=(e(138),e(115)),M=e(117),I=(e(143),m.ID_ATTRIBUTE_NAME),O=m.ROOT_ATTRIBUTE_NAME,R=1,A=9,D=11,L={},U=1,F=function(){this.rootID=U++};F.prototype.isReactComponent={},F.prototype.render=function(){return this.props.child},F.isReactTopLevelWrapper=!0;var V={TopLevelWrapper:F,_instancesByReactRootID:L,scrollMonitor:function(e,t){t()},_updateRootComponent:function(e,t,n,r,o){return V.scrollMonitor(r,function(){T.enqueueElementInternal(e,t,n),o&&T.enqueueCallbackInternal(e,o)}),e},_renderNewRootComponent:function(e,t,n,r){c(t)||f("37"),g.ensureScrollValueMonitoring();var o=S(e,!1);k.batchedUpdates(s,o,t,n,r);var i=o._instance.rootID;return L[i]=o,o},renderSubtreeIntoContainer:function(e,t,n,r){return null!=e&&E.has(e)||f("38"),V._renderSubtreeIntoContainer(e,t,n,r)},_renderSubtreeIntoContainer:function(e,t,n,r){T.validateCallback(r,"ReactDOM.render"),v.isValidElement(t)||f("39","string"==typeof t?" Instead of passing a string like 'div', pass React.createElement('div') or <div />.":"function"==typeof t?" Instead of passing a class like Foo, pass React.createElement(Foo) or <Foo />.":null!=t&&void 0!==t.props?" This may be caused by unintentionally loading two independent copies of React.":"");var a,s=v.createElement(F,{child:t});if(e){var u=E.get(e);a=u._processChildContext(u._context)}else a=P;var c=d(n);if(c){var p=c._currentElement,h=p.props.child;if(M(h,t)){var m=c._renderedComponent.getPublicInstance(),g=r&&function(){r.call(m)};return V._updateRootComponent(c,s,a,n,g),m}V.unmountComponentAtNode(n)}var y=o(n),_=y&&!!i(y),C=l(n),b=_&&!c&&!C,x=V._renderNewRootComponent(s,n,b,a)._renderedComponent.getPublicInstance();return r&&r.call(x),x},render:function(e,t,n){return V._renderSubtreeIntoContainer(null,e,t,n)},unmountComponentAtNode:function(e){c(e)||f("40");var t=d(e);return t?(delete L[t._instance.rootID],k.batchedUpdates(u,t,e,!1),!0):(l(e),1===e.nodeType&&e.hasAttribute(O),!1)},_mountImageIntoNode:function(e,t,n,i,a){if(c(t)||f("41"),i){var s=o(t);if(x.canReuseMarkup(e,s))return void y.precacheNode(n,s);var u=s.getAttribute(x.CHECKSUM_ATTR_NAME);s.removeAttribute(x.CHECKSUM_ATTR_NAME);var l=s.outerHTML;s.setAttribute(x.CHECKSUM_ATTR_NAME,u);var p=e,d=r(p,l),m=" (client) "+p.substring(d-20,d+20)+"\n (server) "+l.substring(d-20,d+20);t.nodeType===A&&f("42",m)}if(t.nodeType===A&&f("43"),a.useCreateElement){for(;t.lastChild;)t.removeChild(t.lastChild);h.insertTreeBefore(t,e,null)}else N(t,e),y.precacheNode(n,t.firstChild)}};t.exports=V},{109:109,11:11,113:113,115:115,117:117,120:120,121:121,131:131,138:138,143:143,25:25,33:33,34:34,36:36,53:53,57:57,58:58,59:59,66:66,70:70,71:71,9:9}],61:[function(e,t,n){"use strict";function r(e,t,n){return{type:"INSERT_MARKUP",content:e,fromIndex:null,fromNode:null,toIndex:n,afterNode:t}}function o(e,t,n){return{type:"MOVE_EXISTING",content:null,fromIndex:e._mountIndex,fromNode:d.getHostNode(e),toIndex:n,afterNode:t}}function i(e,t){return{type:"REMOVE_NODE",content:null,fromIndex:e._mountIndex,fromNode:t,toIndex:null,afterNode:null}}function a(e){return{type:"SET_MARKUP",content:e,fromIndex:null,fromNode:null,toIndex:null,afterNode:null}}function s(e){return{type:"TEXT_CONTENT",content:e,fromIndex:null,fromNode:null,toIndex:null,afterNode:null}}function u(e,t){return t&&(e=e||[],e.push(t)),e}function l(e,t){p.processChildrenUpdates(e,t)}var c=e(113),p=e(28),d=(e(57),e(58),e(120),e(66)),f=e(26),h=(e(130),e(97)),m=(e(138),{Mixin:{_reconcilerInstantiateChildren:function(e,t,n){return f.instantiateChildren(e,t,n)},_reconcilerUpdateChildren:function(e,t,n,r,o,i){var a;return a=h(t,0),f.updateChildren(e,a,n,r,o,this,this._hostContainerInfo,i,0),a},mountChildren:function(e,t,n){var r=this._reconcilerInstantiateChildren(e,t,n);this._renderedChildren=r;var o=[],i=0;for(var a in r)if(r.hasOwnProperty(a)){var s=r[a],u=d.mountComponent(s,t,this,this._hostContainerInfo,n,0);s._mountIndex=i++,o.push(u)}return o},updateTextContent:function(e){var t=this._renderedChildren;f.unmountChildren(t,!1);for(var n in t)t.hasOwnProperty(n)&&c("118");l(this,[s(e)])},updateMarkup:function(e){var t=this._renderedChildren;f.unmountChildren(t,!1);for(var n in t)t.hasOwnProperty(n)&&c("118");l(this,[a(e)])},updateChildren:function(e,t,n){this._updateChildren(e,t,n)},_updateChildren:function(e,t,n){var r=this._renderedChildren,o={},i=[],a=this._reconcilerUpdateChildren(r,e,i,o,t,n);if(a||r){var s,c=null,p=0,f=0,h=0,m=null;for(s in a)if(a.hasOwnProperty(s)){var v=r&&r[s],g=a[s];v===g?(c=u(c,this.moveChild(v,m,p,f)),f=Math.max(v._mountIndex,f),v._mountIndex=p):(v&&(f=Math.max(v._mountIndex,f)),c=u(c,this._mountChildAtIndex(g,i[h],m,p,t,n)),h++),p++,m=d.getHostNode(g)}for(s in o)o.hasOwnProperty(s)&&(c=u(c,this._unmountChild(r[s],o[s])));c&&l(this,c),this._renderedChildren=a}},unmountChildren:function(e){var t=this._renderedChildren;f.unmountChildren(t,e),this._renderedChildren=null},moveChild:function(e,t,n,r){if(e._mountIndex<r)return o(e,t,n)},createChild:function(e,t,n){return r(n,t,e._mountIndex)},removeChild:function(e,t){return i(e,t)},_mountChildAtIndex:function(e,t,n,r,o,i){return e._mountIndex=r,this.createChild(e,n,t)},_unmountChild:function(e,t){var n=this.removeChild(e,t);return e._mountIndex=null,n}}});t.exports=m},{113:113,120:120,130:130,138:138,26:26,28:28,57:57,58:58,66:66,97:97}],62:[function(e,t,n){"use strict";var r=e(113),o=e(121),i=(e(138),{HOST:0,COMPOSITE:1,EMPTY:2,getType:function(e){return null===e||!1===e?i.EMPTY:o.isValidElement(e)?"function"==typeof e.type?i.COMPOSITE:i.HOST:void r("26",e)}});t.exports=i},{113:113,121:121,138:138}],63:[function(e,t,n){"use strict";function r(e){return!(!e||"function"!=typeof e.attachRef||"function"!=typeof e.detachRef)}var o=e(113),i=(e(138),{addComponentAsRefTo:function(e,t,n){r(n)||o("119"),n.attachRef(t,e)},removeComponentAsRefFrom:function(e,t,n){r(n)||o("120");var i=n.getPublicInstance();i&&i.refs[t]===e.getPublicInstance()&&n.detachRef(t)}});t.exports=i},{113:113,138:138}],64:[function(e,t,n){"use strict";t.exports="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED"},{}],65:[function(e,t,n){"use strict";function r(e){this.reinitializeTransaction(),this.renderToStaticMarkup=!1,this.reactMountReady=i.getPooled(null),this.useCreateElement=e}var o=e(144),i=e(6),a=e(24),s=e(25),u=e(56),l=(e(58),e(89)),c=e(70),p={initialize:u.getSelectionInformation,close:u.restoreSelection},d={initialize:function(){var e=s.isEnabled();return s.setEnabled(!1),e},close:function(e){s.setEnabled(e)}},f={initialize:function(){this.reactMountReady.reset()},close:function(){this.reactMountReady.notifyAll()}},h=[p,d,f],m={getTransactionWrappers:function(){return h},getReactMountReady:function(){return this.reactMountReady},getUpdateQueue:function(){return c},checkpoint:function(){return this.reactMountReady.checkpoint()},rollback:function(e){this.reactMountReady.rollback(e)},destructor:function(){i.release(this.reactMountReady),this.reactMountReady=null}};o(r.prototype,l,m),a.addPoolingTo(r),t.exports=r},{144:144,24:24,25:25,56:56,58:58,6:6,70:70,89:89}],66:[function(e,t,n){"use strict";function r(){o.attachRefs(this,this._currentElement)}var o=e(67),i=(e(58),e(143),{mountComponent:function(e,t,n,o,i,a){var s=e.mountComponent(t,n,o,i,a);return e._currentElement&&null!=e._currentElement.ref&&t.getReactMountReady().enqueue(r,e),s},getHostNode:function(e){return e.getHostNode()},unmountComponent:function(e,t){o.detachRefs(e,e._currentElement),e.unmountComponent(t)},receiveComponent:function(e,t,n,i){var a=e._currentElement;if(t!==a||i!==e._context){var s=o.shouldUpdateRefs(a,t);s&&o.detachRefs(e,a),e.receiveComponent(t,n,i),s&&e._currentElement&&null!=e._currentElement.ref&&n.getReactMountReady().enqueue(r,e)}},performUpdateIfNecessary:function(e,t,n){e._updateBatchNumber===n&&e.performUpdateIfNecessary(t)}});t.exports=i},{143:143,58:58,67:67}],67:[function(e,t,n){"use strict";function r(e,t,n){"function"==typeof e?e(t.getPublicInstance()):i.addComponentAsRefTo(t,e,n)}function o(e,t,n){"function"==typeof e?e(null):i.removeComponentAsRefFrom(t,e,n)}var i=e(63),a={};a.attachRefs=function(e,t){if(null!==t&&"object"==typeof t){var n=t.ref;null!=n&&r(n,e,t._owner)}},a.shouldUpdateRefs=function(e,t){var n=null,r=null;null!==e&&"object"==typeof e&&(n=e.ref,r=e._owner);var o=null,i=null;return null!==t&&"object"==typeof t&&(o=t.ref,i=t._owner),n!==o||"string"==typeof o&&i!==r},a.detachRefs=function(e,t){if(null!==t&&"object"==typeof t){var n=t.ref;null!=n&&o(n,e,t._owner)}},t.exports=a},{63:63}],68:[function(e,t,n){"use strict";function r(e){this.reinitializeTransaction(),this.renderToStaticMarkup=e,this.useCreateElement=!1,this.updateQueue=new s(this)}var o=e(144),i=e(24),a=e(89),s=(e(58),e(69)),u=[],l={enqueue:function(){}},c={getTransactionWrappers:function(){return u},getReactMountReady:function(){return l},getUpdateQueue:function(){return this.updateQueue},destructor:function(){},checkpoint:function(){},rollback:function(){}};o(r.prototype,a,c),i.addPoolingTo(r),t.exports=r},{144:144,24:24,58:58,69:69,89:89}],69:[function(e,t,n){"use strict";function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var o=e(70),i=(e(143),function(){function e(t){r(this,e),this.transaction=t}return e.prototype.isMounted=function(e){return!1},e.prototype.enqueueCallback=function(e,t,n){this.transaction.isInTransaction()&&o.enqueueCallback(e,t,n)},e.prototype.enqueueForceUpdate=function(e){this.transaction.isInTransaction()&&o.enqueueForceUpdate(e)},e.prototype.enqueueReplaceState=function(e,t){this.transaction.isInTransaction()&&o.enqueueReplaceState(e,t)},e.prototype.enqueueSetState=function(e,t){this.transaction.isInTransaction()&&o.enqueueSetState(e,t)},e}());t.exports=i},{143:143,70:70}],70:[function(e,t,n){"use strict";function r(e){u.enqueueUpdate(e)}function o(e){var t=typeof e;if("object"!==t)return t;var n=e.constructor&&e.constructor.name||t,r=Object.keys(e);return r.length>0&&r.length<20?n+" (keys: "+r.join(", ")+")":n}function i(e,t){var n=s.get(e);return n||null}var a=e(113),s=(e(120),e(57)),u=(e(58),e(71)),l=(e(138),e(143),{isMounted:function(e){var t=s.get(e);return!!t&&!!t._renderedComponent},enqueueCallback:function(e,t,n){l.validateCallback(t,n);var o=i(e);if(!o)return null;o._pendingCallbacks?o._pendingCallbacks.push(t):o._pendingCallbacks=[t],r(o)},enqueueCallbackInternal:function(e,t){e._pendingCallbacks?e._pendingCallbacks.push(t):e._pendingCallbacks=[t],r(e)},enqueueForceUpdate:function(e){var t=i(e,"forceUpdate");t&&(t._pendingForceUpdate=!0,r(t))},enqueueReplaceState:function(e,t,n){var o=i(e,"replaceState");o&&(o._pendingStateQueue=[t],o._pendingReplaceState=!0,void 0!==n&&null!==n&&(l.validateCallback(n,"replaceState"),o._pendingCallbacks?o._pendingCallbacks.push(n):o._pendingCallbacks=[n]),r(o))},enqueueSetState:function(e,t){var n=i(e,"setState");n&&((n._pendingStateQueue||(n._pendingStateQueue=[])).push(t),r(n))},enqueueElementInternal:function(e,t,n){e._pendingElement=t,e._context=n,r(e)},validateCallback:function(e,t){e&&"function"!=typeof e&&a("122",t,o(e))}});t.exports=l},{113:113,120:120,138:138,143:143,57:57,58:58,71:71}],71:[function(e,t,n){"use strict";function r(){P.ReactReconcileTransaction&&b||c("123")}function o(){this.reinitializeTransaction(),this.dirtyComponentsLength=null,this.callbackQueue=d.getPooled(),this.reconcileTransaction=P.ReactReconcileTransaction.getPooled(!0)}function i(e,t,n,o,i,a){return r(),b.batchedUpdates(e,t,n,o,i,a)}function a(e,t){return e._mountOrder-t._mountOrder}function s(e){var t=e.dirtyComponentsLength;t!==g.length&&c("124",t,g.length),g.sort(a),y++;for(var n=0;n<t;n++){var r=g[n],o=r._pendingCallbacks;r._pendingCallbacks=null;var i;if(h.logTopLevelRenders){var s=r;r._currentElement.type.isReactTopLevelWrapper&&(s=r._renderedComponent),i="React update: "+s.getName(),console.time(i)}if(m.performUpdateIfNecessary(r,e.reconcileTransaction,y),i&&console.timeEnd(i),o)for(var u=0;u<o.length;u++)e.callbackQueue.enqueue(o[u],r.getPublicInstance())}}function u(e){if(r(),!b.isBatchingUpdates)return void b.batchedUpdates(u,e);g.push(e),null==e._updateBatchNumber&&(e._updateBatchNumber=y+1)}function l(e,t){b.isBatchingUpdates||c("125"),_.enqueue(e,t),C=!0}var c=e(113),p=e(144),d=e(6),f=e(24),h=e(53),m=e(66),v=e(89),g=(e(138),[]),y=0,_=d.getPooled(),C=!1,b=null,E={initialize:function(){this.dirtyComponentsLength=g.length},close:function(){this.dirtyComponentsLength!==g.length?(g.splice(0,this.dirtyComponentsLength),T()):g.length=0}},x={initialize:function(){this.callbackQueue.reset()},close:function(){this.callbackQueue.notifyAll()}},w=[E,x];p(o.prototype,v,{getTransactionWrappers:function(){return w},destructor:function(){this.dirtyComponentsLength=null,d.release(this.callbackQueue),this.callbackQueue=null,P.ReactReconcileTransaction.release(this.reconcileTransaction),this.reconcileTransaction=null},perform:function(e,t,n){return v.perform.call(this,this.reconcileTransaction.perform,this.reconcileTransaction,e,t,n)}}),f.addPoolingTo(o);var T=function(){for(;g.length||C;){if(g.length){var e=o.getPooled();e.perform(s,null,e),o.release(e)}if(C){C=!1;var t=_;_=d.getPooled(),t.notifyAll(),d.release(t)}}},k={injectReconcileTransaction:function(e){e||c("126"),P.ReactReconcileTransaction=e},injectBatchingStrategy:function(e){e||c("127"),"function"!=typeof e.batchedUpdates&&c("128"),"boolean"!=typeof e.isBatchingUpdates&&c("129"),b=e}},P={ReactReconcileTransaction:null,batchedUpdates:i,enqueueUpdate:u,flushBatchedUpdates:T,injection:k,asap:l};t.exports=P},{113:113,138:138,144:144,24:24,53:53,6:6,66:66,89:89}],72:[function(e,t,n){"use strict";t.exports="15.6.1"},{}],73:[function(e,t,n){"use strict";var r={xlink:"http://www.w3.org/1999/xlink",xml:"http://www.w3.org/XML/1998/namespace"},o={accentHeight:"accent-height",accumulate:0,additive:0,alignmentBaseline:"alignment-baseline",allowReorder:"allowReorder",alphabetic:0,amplitude:0,arabicForm:"arabic-form",ascent:0,attributeName:"attributeName",attributeType:"attributeType",autoReverse:"autoReverse",azimuth:0,baseFrequency:"baseFrequency",baseProfile:"baseProfile",baselineShift:"baseline-shift",bbox:0,begin:0,bias:0,by:0,calcMode:"calcMode",capHeight:"cap-height",clip:0,clipPath:"clip-path",clipRule:"clip-rule",clipPathUnits:"clipPathUnits",colorInterpolation:"color-interpolation",colorInterpolationFilters:"color-interpolation-filters",colorProfile:"color-profile",colorRendering:"color-rendering",contentScriptType:"contentScriptType",contentStyleType:"contentStyleType",cursor:0,cx:0,cy:0,d:0,decelerate:0,descent:0,diffuseConstant:"diffuseConstant",direction:0,display:0,divisor:0,dominantBaseline:"dominant-baseline",dur:0,dx:0,dy:0,edgeMode:"edgeMode",elevation:0,enableBackground:"enable-background",end:0,exponent:0,externalResourcesRequired:"externalResourcesRequired",fill:0,fillOpacity:"fill-opacity",fillRule:"fill-rule",filter:0,filterRes:"filterRes",filterUnits:"filterUnits",floodColor:"flood-color",floodOpacity:"flood-opacity",focusable:0,fontFamily:"font-family",fontSize:"font-size",fontSizeAdjust:"font-size-adjust",fontStretch:"font-stretch",fontStyle:"font-style",fontVariant:"font-variant",fontWeight:"font-weight",format:0,from:0,fx:0,fy:0,g1:0,g2:0,glyphName:"glyph-name",glyphOrientationHorizontal:"glyph-orientation-horizontal",glyphOrientationVertical:"glyph-orientation-vertical",glyphRef:"glyphRef",gradientTransform:"gradientTransform",gradientUnits:"gradientUnits",hanging:0,horizAdvX:"horiz-adv-x",horizOriginX:"horiz-origin-x",ideographic:0,imageRendering:"image-rendering",in:0,in2:0,intercept:0,k:0,k1:0,k2:0,k3:0,k4:0,kernelMatrix:"kernelMatrix",kernelUnitLength:"kernelUnitLength",kerning:0,keyPoints:"keyPoints",keySplines:"keySplines",keyTimes:"keyTimes",lengthAdjust:"lengthAdjust",letterSpacing:"letter-spacing",lightingColor:"lighting-color",limitingConeAngle:"limitingConeAngle",local:0,markerEnd:"marker-end",markerMid:"marker-mid",markerStart:"marker-start",markerHeight:"markerHeight",markerUnits:"markerUnits",markerWidth:"markerWidth",mask:0,maskContentUnits:"maskContentUnits",maskUnits:"maskUnits",mathematical:0,mode:0,numOctaves:"numOctaves",offset:0,opacity:0,operator:0,order:0,orient:0,orientation:0,origin:0,overflow:0,overlinePosition:"overline-position",overlineThickness:"overline-thickness",paintOrder:"paint-order",panose1:"panose-1",pathLength:"pathLength",patternContentUnits:"patternContentUnits",patternTransform:"patternTransform",patternUnits:"patternUnits",pointerEvents:"pointer-events",points:0,pointsAtX:"pointsAtX",pointsAtY:"pointsAtY",pointsAtZ:"pointsAtZ",preserveAlpha:"preserveAlpha",preserveAspectRatio:"preserveAspectRatio",primitiveUnits:"primitiveUnits",r:0,radius:0,refX:"refX",refY:"refY",renderingIntent:"rendering-intent",repeatCount:"repeatCount",repeatDur:"repeatDur",requiredExtensions:"requiredExtensions",requiredFeatures:"requiredFeatures",restart:0,result:0,rotate:0,rx:0,ry:0,scale:0,seed:0,shapeRendering:"shape-rendering",slope:0,spacing:0,specularConstant:"specularConstant",specularExponent:"specularExponent",speed:0,spreadMethod:"spreadMethod",startOffset:"startOffset",stdDeviation:"stdDeviation",stemh:0,stemv:0,stitchTiles:"stitchTiles",stopColor:"stop-color",stopOpacity:"stop-opacity",strikethroughPosition:"strikethrough-position",strikethroughThickness:"strikethrough-thickness",string:0,stroke:0,strokeDasharray:"stroke-dasharray",strokeDashoffset:"stroke-dashoffset",strokeLinecap:"stroke-linecap",strokeLinejoin:"stroke-linejoin",strokeMiterlimit:"stroke-miterlimit",strokeOpacity:"stroke-opacity",strokeWidth:"stroke-width",surfaceScale:"surfaceScale",systemLanguage:"systemLanguage",tableValues:"tableValues",targetX:"targetX",targetY:"targetY",textAnchor:"text-anchor",textDecoration:"text-decoration",textRendering:"text-rendering",textLength:"textLength",to:0,transform:0,u1:0,u2:0,underlinePosition:"underline-position",underlineThickness:"underline-thickness",unicode:0,unicodeBidi:"unicode-bidi",unicodeRange:"unicode-range",unitsPerEm:"units-per-em",vAlphabetic:"v-alphabetic",vHanging:"v-hanging",vIdeographic:"v-ideographic",vMathematical:"v-mathematical",values:0,vectorEffect:"vector-effect",version:0,vertAdvY:"vert-adv-y",vertOriginX:"vert-origin-x",vertOriginY:"vert-origin-y",viewBox:"viewBox",viewTarget:"viewTarget",visibility:0,widths:0,wordSpacing:"word-spacing",writingMode:"writing-mode",x:0,xHeight:"x-height",x1:0,x2:0,xChannelSelector:"xChannelSelector",xlinkActuate:"xlink:actuate",xlinkArcrole:"xlink:arcrole",xlinkHref:"xlink:href",xlinkRole:"xlink:role",xlinkShow:"xlink:show",xlinkTitle:"xlink:title",xlinkType:"xlink:type",xmlBase:"xml:base",xmlns:0,xmlnsXlink:"xmlns:xlink",xmlLang:"xml:lang",xmlSpace:"xml:space",y:0,y1:0,y2:0,yChannelSelector:"yChannelSelector",z:0,zoomAndPan:"zoomAndPan"},i={Properties:{},DOMAttributeNamespaces:{xlinkActuate:r.xlink,xlinkArcrole:r.xlink,xlinkHref:r.xlink,xlinkRole:r.xlink,xlinkShow:r.xlink,xlinkTitle:r.xlink,xlinkType:r.xlink,xmlBase:r.xml,xmlLang:r.xml,xmlSpace:r.xml},DOMAttributeNames:{}};Object.keys(o).forEach(function(e){i.Properties[e]=0,o[e]&&(i.DOMAttributeNames[e]=o[e])}),t.exports=i},{}],74:[function(e,t,n){"use strict";function r(e){if("selectionStart"in e&&u.hasSelectionCapabilities(e))return{start:e.selectionStart,end:e.selectionEnd};if(window.getSelection){var t=window.getSelection();return{anchorNode:t.anchorNode,anchorOffset:t.anchorOffset,focusNode:t.focusNode,focusOffset:t.focusOffset}}if(document.selection){var n=document.selection.createRange();return{parentElement:n.parentElement(),text:n.text,top:n.boundingTop,left:n.boundingLeft}}}function o(e,t){if(y||null==m||m!==c())return null;var n=r(m);if(!g||!d(g,n)){g=n;var o=l.getPooled(h.select,v,e,t);return o.type="select",o.target=m,i.accumulateTwoPhaseDispatches(o),o}return null}var i=e(19),a=e(124),s=e(33),u=e(56),l=e(80),c=e(133),p=e(111),d=e(142),f=a.canUseDOM&&"documentMode"in document&&document.documentMode<=11,h={select:{phasedRegistrationNames:{bubbled:"onSelect",captured:"onSelectCapture"},dependencies:["topBlur","topContextMenu","topFocus","topKeyDown","topKeyUp","topMouseDown","topMouseUp","topSelectionChange"]}},m=null,v=null,g=null,y=!1,_=!1,C={eventTypes:h,
+extractEvents:function(e,t,n,r){if(!_)return null;var i=t?s.getNodeFromInstance(t):window;switch(e){case"topFocus":(p(i)||"true"===i.contentEditable)&&(m=i,v=t,g=null);break;case"topBlur":m=null,v=null,g=null;break;case"topMouseDown":y=!0;break;case"topContextMenu":case"topMouseUp":return y=!1,o(n,r);case"topSelectionChange":if(f)break;case"topKeyDown":case"topKeyUp":return o(n,r)}return null},didPutListener:function(e,t,n){"onSelect"===t&&(_=!0)}};t.exports=C},{111:111,124:124,133:133,142:142,19:19,33:33,56:56,80:80}],75:[function(e,t,n){"use strict";function r(e){return"."+e._rootNodeID}function o(e){return"button"===e||"input"===e||"select"===e||"textarea"===e}var i=e(113),a=e(123),s=e(19),u=e(33),l=e(76),c=e(77),p=e(80),d=e(81),f=e(83),h=e(84),m=e(79),v=e(85),g=e(86),y=e(87),_=e(88),C=e(130),b=e(99),E=(e(138),{}),x={};["abort","animationEnd","animationIteration","animationStart","blur","canPlay","canPlayThrough","click","contextMenu","copy","cut","doubleClick","drag","dragEnd","dragEnter","dragExit","dragLeave","dragOver","dragStart","drop","durationChange","emptied","encrypted","ended","error","focus","input","invalid","keyDown","keyPress","keyUp","load","loadedData","loadedMetadata","loadStart","mouseDown","mouseMove","mouseOut","mouseOver","mouseUp","paste","pause","play","playing","progress","rateChange","reset","scroll","seeked","seeking","stalled","submit","suspend","timeUpdate","touchCancel","touchEnd","touchMove","touchStart","transitionEnd","volumeChange","waiting","wheel"].forEach(function(e){var t=e[0].toUpperCase()+e.slice(1),n="on"+t,r="top"+t,o={phasedRegistrationNames:{bubbled:n,captured:n+"Capture"},dependencies:[r]};E[e]=o,x[r]=o});var w={},T={eventTypes:E,extractEvents:function(e,t,n,r){var o=x[e];if(!o)return null;var a;switch(e){case"topAbort":case"topCanPlay":case"topCanPlayThrough":case"topDurationChange":case"topEmptied":case"topEncrypted":case"topEnded":case"topError":case"topInput":case"topInvalid":case"topLoad":case"topLoadedData":case"topLoadedMetadata":case"topLoadStart":case"topPause":case"topPlay":case"topPlaying":case"topProgress":case"topRateChange":case"topReset":case"topSeeked":case"topSeeking":case"topStalled":case"topSubmit":case"topSuspend":case"topTimeUpdate":case"topVolumeChange":case"topWaiting":a=p;break;case"topKeyPress":if(0===b(n))return null;case"topKeyDown":case"topKeyUp":a=f;break;case"topBlur":case"topFocus":a=d;break;case"topClick":if(2===n.button)return null;case"topDoubleClick":case"topMouseDown":case"topMouseMove":case"topMouseUp":case"topMouseOut":case"topMouseOver":case"topContextMenu":a=h;break;case"topDrag":case"topDragEnd":case"topDragEnter":case"topDragExit":case"topDragLeave":case"topDragOver":case"topDragStart":case"topDrop":a=m;break;case"topTouchCancel":case"topTouchEnd":case"topTouchMove":case"topTouchStart":a=v;break;case"topAnimationEnd":case"topAnimationIteration":case"topAnimationStart":a=l;break;case"topTransitionEnd":a=g;break;case"topScroll":a=y;break;case"topWheel":a=_;break;case"topCopy":case"topCut":case"topPaste":a=c}a||i("86",e);var u=a.getPooled(o,t,n,r);return s.accumulateTwoPhaseDispatches(u),u},didPutListener:function(e,t,n){if("onClick"===t&&!o(e._tag)){var i=r(e),s=u.getNodeFromInstance(e);w[i]||(w[i]=a.listen(s,"click",C))}},willDeleteListener:function(e,t){if("onClick"===t&&!o(e._tag)){var n=r(e);w[n].remove(),delete w[n]}}};t.exports=T},{113:113,123:123,130:130,138:138,19:19,33:33,76:76,77:77,79:79,80:80,81:81,83:83,84:84,85:85,86:86,87:87,88:88,99:99}],76:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={animationName:null,elapsedTime:null,pseudoElement:null};o.augmentClass(r,i),t.exports=r},{80:80}],77:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={clipboardData:function(e){return"clipboardData"in e?e.clipboardData:window.clipboardData}};o.augmentClass(r,i),t.exports=r},{80:80}],78:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={data:null};o.augmentClass(r,i),t.exports=r},{80:80}],79:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(84),i={dataTransfer:null};o.augmentClass(r,i),t.exports=r},{84:84}],80:[function(e,t,n){"use strict";function r(e,t,n,r){this.dispatchConfig=e,this._targetInst=t,this.nativeEvent=n;var o=this.constructor.Interface;for(var i in o)if(o.hasOwnProperty(i)){var s=o[i];s?this[i]=s(n):"target"===i?this.target=r:this[i]=n[i]}var u=null!=n.defaultPrevented?n.defaultPrevented:!1===n.returnValue;return this.isDefaultPrevented=u?a.thatReturnsTrue:a.thatReturnsFalse,this.isPropagationStopped=a.thatReturnsFalse,this}var o=e(144),i=e(24),a=e(130),s=(e(143),["dispatchConfig","_targetInst","nativeEvent","isDefaultPrevented","isPropagationStopped","_dispatchListeners","_dispatchInstances"]),u={type:null,target:null,currentTarget:a.thatReturnsNull,eventPhase:null,bubbles:null,cancelable:null,timeStamp:function(e){return e.timeStamp||Date.now()},defaultPrevented:null,isTrusted:null};o(r.prototype,{preventDefault:function(){this.defaultPrevented=!0;var e=this.nativeEvent;e&&(e.preventDefault?e.preventDefault():"unknown"!=typeof e.returnValue&&(e.returnValue=!1),this.isDefaultPrevented=a.thatReturnsTrue)},stopPropagation:function(){var e=this.nativeEvent;e&&(e.stopPropagation?e.stopPropagation():"unknown"!=typeof e.cancelBubble&&(e.cancelBubble=!0),this.isPropagationStopped=a.thatReturnsTrue)},persist:function(){this.isPersistent=a.thatReturnsTrue},isPersistent:a.thatReturnsFalse,destructor:function(){var e=this.constructor.Interface;for(var t in e)this[t]=null;for(var n=0;n<s.length;n++)this[s[n]]=null}}),r.Interface=u,r.augmentClass=function(e,t){var n=this,r=function(){};r.prototype=n.prototype;var a=new r;o(a,e.prototype),e.prototype=a,e.prototype.constructor=e,e.Interface=o({},n.Interface,t),e.augmentClass=n.augmentClass,i.addPoolingTo(e,i.fourArgumentPooler)},i.addPoolingTo(r,i.fourArgumentPooler),t.exports=r},{130:130,143:143,144:144,24:24}],81:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i={relatedTarget:null};o.augmentClass(r,i),t.exports=r},{87:87}],82:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={data:null};o.augmentClass(r,i),t.exports=r},{80:80}],83:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(99),a=e(100),s=e(101),u={key:a,location:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,repeat:null,locale:null,getModifierState:s,charCode:function(e){return"keypress"===e.type?i(e):0},keyCode:function(e){return"keydown"===e.type||"keyup"===e.type?e.keyCode:0},which:function(e){return"keypress"===e.type?i(e):"keydown"===e.type||"keyup"===e.type?e.keyCode:0}};o.augmentClass(r,u),t.exports=r},{100:100,101:101,87:87,99:99}],84:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(90),a=e(101),s={screenX:null,screenY:null,clientX:null,clientY:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,getModifierState:a,button:function(e){var t=e.button;return"which"in e?t:2===t?2:4===t?1:0},buttons:null,relatedTarget:function(e){return e.relatedTarget||(e.fromElement===e.srcElement?e.toElement:e.fromElement)},pageX:function(e){return"pageX"in e?e.pageX:e.clientX+i.currentScrollLeft},pageY:function(e){return"pageY"in e?e.pageY:e.clientY+i.currentScrollTop}};o.augmentClass(r,s),t.exports=r},{101:101,87:87,90:90}],85:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(87),i=e(101),a={touches:null,targetTouches:null,changedTouches:null,altKey:null,metaKey:null,ctrlKey:null,shiftKey:null,getModifierState:i};o.augmentClass(r,a),t.exports=r},{101:101,87:87}],86:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i={propertyName:null,elapsedTime:null,pseudoElement:null};o.augmentClass(r,i),t.exports=r},{80:80}],87:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(80),i=e(102),a={view:function(e){if(e.view)return e.view;var t=i(e);if(t.window===t)return t;var n=t.ownerDocument;return n?n.defaultView||n.parentWindow:window},detail:function(e){return e.detail||0}};o.augmentClass(r,a),t.exports=r},{102:102,80:80}],88:[function(e,t,n){"use strict";function r(e,t,n,r){return o.call(this,e,t,n,r)}var o=e(84),i={deltaX:function(e){return"deltaX"in e?e.deltaX:"wheelDeltaX"in e?-e.wheelDeltaX:0},deltaY:function(e){return"deltaY"in e?e.deltaY:"wheelDeltaY"in e?-e.wheelDeltaY:"wheelDelta"in e?-e.wheelDelta:0},deltaZ:null,deltaMode:null};o.augmentClass(r,i),t.exports=r},{84:84}],89:[function(e,t,n){"use strict";var r=e(113),o=(e(138),{}),i={reinitializeTransaction:function(){this.transactionWrappers=this.getTransactionWrappers(),this.wrapperInitData?this.wrapperInitData.length=0:this.wrapperInitData=[],this._isInTransaction=!1},_isInTransaction:!1,getTransactionWrappers:null,isInTransaction:function(){return!!this._isInTransaction},perform:function(e,t,n,o,i,a,s,u){this.isInTransaction()&&r("27");var l,c;try{this._isInTransaction=!0,l=!0,this.initializeAll(0),c=e.call(t,n,o,i,a,s,u),l=!1}finally{try{if(l)try{this.closeAll(0)}catch(e){}else this.closeAll(0)}finally{this._isInTransaction=!1}}return c},initializeAll:function(e){for(var t=this.transactionWrappers,n=e;n<t.length;n++){var r=t[n];try{this.wrapperInitData[n]=o,this.wrapperInitData[n]=r.initialize?r.initialize.call(this):null}finally{if(this.wrapperInitData[n]===o)try{this.initializeAll(n+1)}catch(e){}}}},closeAll:function(e){this.isInTransaction()||r("28");for(var t=this.transactionWrappers,n=e;n<t.length;n++){var i,a=t[n],s=this.wrapperInitData[n];try{i=!0,s!==o&&a.close&&a.close.call(this,s),i=!1}finally{if(i)try{this.closeAll(n+1)}catch(e){}}}this.wrapperInitData.length=0}};t.exports=i},{113:113,138:138}],90:[function(e,t,n){"use strict";var r={currentScrollLeft:0,currentScrollTop:0,refreshScrollValues:function(e){r.currentScrollLeft=e.x,r.currentScrollTop=e.y}};t.exports=r},{}],91:[function(e,t,n){"use strict";function r(e,t){return null==t&&o("30"),null==e?t:Array.isArray(e)?Array.isArray(t)?(e.push.apply(e,t),e):(e.push(t),e):Array.isArray(t)?[e].concat(t):[e,t]}var o=e(113);e(138);t.exports=r},{113:113,138:138}],92:[function(e,t,n){"use strict";function r(e){for(var t=1,n=0,r=0,i=e.length,a=-4&i;r<a;){for(var s=Math.min(r+4096,a);r<s;r+=4)n+=(t+=e.charCodeAt(r))+(t+=e.charCodeAt(r+1))+(t+=e.charCodeAt(r+2))+(t+=e.charCodeAt(r+3));t%=o,n%=o}for(;r<i;r++)n+=t+=e.charCodeAt(r);return t%=o,n%=o,t|n<<16}var o=65521;t.exports=r},{}],93:[function(e,t,n){"use strict";var r=function(e){return"undefined"!=typeof MSApp&&MSApp.execUnsafeLocalFunction?function(t,n,r,o){MSApp.execUnsafeLocalFunction(function(){return e(t,n,r,o)})}:e};t.exports=r},{}],94:[function(e,t,n){"use strict";function r(e,t,n,r){if(null==t||"boolean"==typeof t||""===t)return"";var o=isNaN(t);return r||o||0===t||i.hasOwnProperty(e)&&i[e]?""+t:("string"==typeof t&&(t=t.trim()),t+"px")}var o=e(4),i=(e(143),o.isUnitlessNumber);t.exports=r},{143:143,4:4}],95:[function(e,t,n){"use strict";function r(e){var t=""+e,n=i.exec(t);if(!n)return t;var r,o="",a=0,s=0;for(a=n.index;a<t.length;a++){switch(t.charCodeAt(a)){case 34:r="&quot;";break;case 38:r="&amp;";break;case 39:r="&#x27;";break;case 60:r="&lt;";break;case 62:r="&gt;";break;default:continue}s!==a&&(o+=t.substring(s,a)),s=a+1,o+=r}return s!==a?o+t.substring(s,a):o}function o(e){return"boolean"==typeof e||"number"==typeof e?""+e:r(e)}var i=/["'&<>]/;t.exports=o},{}],96:[function(e,t,n){"use strict";function r(e){if(null==e)return null;if(1===e.nodeType)return e;var t=a.get(e);if(t)return t=s(t),t?i.getNodeFromInstance(t):null;"function"==typeof e.render?o("44"):o("45",Object.keys(e))}var o=e(113),i=(e(120),e(33)),a=e(57),s=e(103);e(138),e(143);t.exports=r},{103:103,113:113,120:120,138:138,143:143,33:33,57:57}],97:[function(e,t,n){(function(n){"use strict";function r(e,t,n,r){if(e&&"object"==typeof e){var o=e;void 0===o[n]&&null!=t&&(o[n]=t)}}function o(e,t){if(null==e)return e;var n={};return i(e,r,n),n}var i=(e(22),e(118));e(143);void 0!==n&&n.env,t.exports=o}).call(this,void 0)},{118:118,143:143,22:22}],98:[function(e,t,n){"use strict";function r(e,t,n){Array.isArray(e)?e.forEach(t,n):e&&t.call(n,e)}t.exports=r},{}],99:[function(e,t,n){"use strict";function r(e){var t,n=e.keyCode;return"charCode"in e?0===(t=e.charCode)&&13===n&&(t=13):t=n,t>=32||13===t?t:0}t.exports=r},{}],100:[function(e,t,n){"use strict";function r(e){if(e.key){var t=i[e.key]||e.key;if("Unidentified"!==t)return t}if("keypress"===e.type){var n=o(e);return 13===n?"Enter":String.fromCharCode(n)}return"keydown"===e.type||"keyup"===e.type?a[e.keyCode]||"Unidentified":""}var o=e(99),i={Esc:"Escape",Spacebar:" ",Left:"ArrowLeft",Up:"ArrowUp",Right:"ArrowRight",Down:"ArrowDown",Del:"Delete",Win:"OS",Menu:"ContextMenu",Apps:"ContextMenu",Scroll:"ScrollLock",MozPrintableKey:"Unidentified"},a={8:"Backspace",9:"Tab",12:"Clear",13:"Enter",16:"Shift",17:"Control",18:"Alt",19:"Pause",20:"CapsLock",27:"Escape",32:" ",33:"PageUp",34:"PageDown",35:"End",36:"Home",37:"ArrowLeft",38:"ArrowUp",39:"ArrowRight",40:"ArrowDown",45:"Insert",46:"Delete",112:"F1",113:"F2",114:"F3",115:"F4",116:"F5",117:"F6",118:"F7",119:"F8",120:"F9",121:"F10",122:"F11",123:"F12",144:"NumLock",145:"ScrollLock",224:"Meta"};t.exports=r},{99:99}],101:[function(e,t,n){"use strict";function r(e){var t=this,n=t.nativeEvent;if(n.getModifierState)return n.getModifierState(e);var r=i[e];return!!r&&!!n[r]}function o(e){return r}var i={Alt:"altKey",Control:"ctrlKey",Meta:"metaKey",Shift:"shiftKey"};t.exports=o},{}],102:[function(e,t,n){"use strict";function r(e){var t=e.target||e.srcElement||window;return t.correspondingUseElement&&(t=t.correspondingUseElement),3===t.nodeType?t.parentNode:t}t.exports=r},{}],103:[function(e,t,n){"use strict";function r(e){for(var t;(t=e._renderedNodeType)===o.COMPOSITE;)e=e._renderedComponent;return t===o.HOST?e._renderedComponent:t===o.EMPTY?null:void 0}var o=e(62);t.exports=r},{62:62}],104:[function(e,t,n){"use strict";function r(e){var t=e&&(o&&e[o]||e[i]);if("function"==typeof t)return t}var o="function"==typeof Symbol&&Symbol.iterator,i="@@iterator";t.exports=r},{}],105:[function(e,t,n){"use strict";function r(e){for(;e&&e.firstChild;)e=e.firstChild;return e}function o(e){for(;e;){if(e.nextSibling)return e.nextSibling;e=e.parentNode}}function i(e,t){for(var n=r(e),i=0,a=0;n;){if(3===n.nodeType){if(a=i+n.textContent.length,i<=t&&a>=t)return{node:n,offset:t-i};i=a}n=r(o(n))}}t.exports=i},{}],106:[function(e,t,n){"use strict";function r(){return!i&&o.canUseDOM&&(i="textContent"in document.documentElement?"textContent":"innerText"),i}var o=e(124),i=null;t.exports=r},{124:124}],107:[function(e,t,n){"use strict";function r(e,t){var n={};return n[e.toLowerCase()]=t.toLowerCase(),n["Webkit"+e]="webkit"+t,n["Moz"+e]="moz"+t,n["ms"+e]="MS"+t,n["O"+e]="o"+t.toLowerCase(),n}function o(e){if(s[e])return s[e];if(!a[e])return e;var t=a[e];for(var n in t)if(t.hasOwnProperty(n)&&n in u)return s[e]=t[n];return""}var i=e(124),a={animationend:r("Animation","AnimationEnd"),animationiteration:r("Animation","AnimationIteration"),animationstart:r("Animation","AnimationStart"),transitionend:r("Transition","TransitionEnd")},s={},u={};i.canUseDOM&&(u=document.createElement("div").style,"AnimationEvent"in window||(delete a.animationend.animation,delete a.animationiteration.animation,delete a.animationstart.animation),"TransitionEvent"in window||delete a.transitionend.transition),t.exports=o},{124:124}],108:[function(e,t,n){"use strict";function r(e){var t=e.type,n=e.nodeName;return n&&"input"===n.toLowerCase()&&("checkbox"===t||"radio"===t)}function o(e){return e._wrapperState.valueTracker}function i(e,t){e._wrapperState.valueTracker=t}function a(e){delete e._wrapperState.valueTracker}function s(e){var t;return e&&(t=r(e)?""+e.checked:e.value),t}var u=e(33),l={_getTrackerFromNode:function(e){return o(u.getInstanceFromNode(e))},track:function(e){if(!o(e)){var t=u.getNodeFromInstance(e),n=r(t)?"checked":"value",s=Object.getOwnPropertyDescriptor(t.constructor.prototype,n),l=""+t[n];t.hasOwnProperty(n)||"function"!=typeof s.get||"function"!=typeof s.set||(Object.defineProperty(t,n,{enumerable:s.enumerable,configurable:!0,get:function(){return s.get.call(this)},set:function(e){l=""+e,s.set.call(this,e)}}),i(e,{getValue:function(){return l},setValue:function(e){l=""+e},stopTracking:function(){a(e),delete t[n]}}))}},updateValueIfChanged:function(e){if(!e)return!1;var t=o(e);if(!t)return l.track(e),!0;var n=t.getValue(),r=s(u.getNodeFromInstance(e));return r!==n&&(t.setValue(r),!0)},stopTracking:function(e){var t=o(e);t&&t.stopTracking()}};t.exports=l},{33:33}],109:[function(e,t,n){"use strict";function r(e){if(e){var t=e.getName();if(t)return" Check the render method of `"+t+"`."}return""}function o(e){return"function"==typeof e&&void 0!==e.prototype&&"function"==typeof e.prototype.mountComponent&&"function"==typeof e.prototype.receiveComponent}function i(e,t){var n;if(null===e||!1===e)n=l.create(i);else if("object"==typeof e){var s=e,u=s.type;if("function"!=typeof u&&"string"!=typeof u){var d="";d+=r(s._owner),a("130",null==u?u:typeof u,d)}"string"==typeof s.type?n=c.createInternalComponent(s):o(s.type)?(n=new s.type(s),n.getHostNode||(n.getHostNode=n.getNativeNode)):n=new p(s)}else"string"==typeof e||"number"==typeof e?n=c.createInstanceForText(e):a("131",typeof e);return n._mountIndex=0,n._mountImage=null,n}var a=e(113),s=e(144),u=e(29),l=e(49),c=e(54),p=(e(122),e(138),e(143),function(e){this.construct(e)});s(p.prototype,u,{_instantiateReactComponent:i}),t.exports=i},{113:113,122:122,138:138,143:143,144:144,29:29,49:49,54:54}],110:[function(e,t,n){"use strict";function r(e,t){if(!i.canUseDOM||t&&!("addEventListener"in document))return!1;var n="on"+e,r=n in document;if(!r){var a=document.createElement("div");a.setAttribute(n,"return;"),r="function"==typeof a[n]}return!r&&o&&"wheel"===e&&(r=document.implementation.hasFeature("Events.wheel","3.0")),r}var o,i=e(124);i.canUseDOM&&(o=document.implementation&&document.implementation.hasFeature&&!0!==document.implementation.hasFeature("","")),t.exports=r},{124:124}],111:[function(e,t,n){"use strict";function r(e){var t=e&&e.nodeName&&e.nodeName.toLowerCase();return"input"===t?!!o[e.type]:"textarea"===t}var o={color:!0,date:!0,datetime:!0,"datetime-local":!0,email:!0,month:!0,number:!0,password:!0,range:!0,search:!0,tel:!0,text:!0,time:!0,url:!0,week:!0};t.exports=r},{}],112:[function(e,t,n){"use strict";function r(e){return'"'+o(e)+'"'}var o=e(95);t.exports=r},{95:95}],113:[function(e,t,n){"use strict";function r(e){for(var t=arguments.length-1,n="Minified React error #"+e+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant="+e,r=0;r<t;r++)n+="&args[]="+encodeURIComponent(arguments[r+1]);n+=" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";var o=new Error(n);throw o.name="Invariant Violation",o.framesToPop=1,o}t.exports=r},{}],114:[function(e,t,n){"use strict";var r=e(60);t.exports=r.renderSubtreeIntoContainer},{60:60}],115:[function(e,t,n){"use strict";var r,o=e(124),i=e(10),a=/^[ \r\n\t\f]/,s=/<(!--|link|noscript|meta|script|style)[ \r\n\t\f\/>]/,u=e(93),l=u(function(e,t){if(e.namespaceURI!==i.svg||"innerHTML"in e)e.innerHTML=t;else{r=r||document.createElement("div"),r.innerHTML="<svg>"+t+"</svg>";for(var n=r.firstChild;n.firstChild;)e.appendChild(n.firstChild)}});if(o.canUseDOM){var c=document.createElement("div");c.innerHTML=" ",""===c.innerHTML&&(l=function(e,t){if(e.parentNode&&e.parentNode.replaceChild(e,e),a.test(t)||"<"===t[0]&&s.test(t)){e.innerHTML=String.fromCharCode(65279)+t;var n=e.firstChild;1===n.data.length?e.removeChild(n):n.deleteData(0,1)}else e.innerHTML=t}),c=null}t.exports=l},{10:10,124:124,93:93}],116:[function(e,t,n){"use strict";var r=e(124),o=e(95),i=e(115),a=function(e,t){if(t){var n=e.firstChild;if(n&&n===e.lastChild&&3===n.nodeType)return void(n.nodeValue=t)}e.textContent=t};r.canUseDOM&&("textContent"in document.documentElement||(a=function(e,t){if(3===e.nodeType)return void(e.nodeValue=t);i(e,o(t))})),t.exports=a},{115:115,124:124,95:95}],117:[function(e,t,n){"use strict";function r(e,t){var n=null===e||!1===e,r=null===t||!1===t;if(n||r)return n===r;var o=typeof e,i=typeof t;return"string"===o||"number"===o?"string"===i||"number"===i:"object"===i&&e.type===t.type&&e.key===t.key}t.exports=r},{}],118:[function(e,t,n){"use strict";function r(e,t){return e&&"object"==typeof e&&null!=e.key?l.escape(e.key):t.toString(36)}function o(e,t,n,i){var d=typeof e;if("undefined"!==d&&"boolean"!==d||(e=null),null===e||"string"===d||"number"===d||"object"===d&&e.$$typeof===s)return n(i,e,""===t?c+r(e,0):t),1;var f,h,m=0,v=""===t?c:t+p;if(Array.isArray(e))for(var g=0;g<e.length;g++)f=e[g],h=v+r(f,g),m+=o(f,h,n,i);else{var y=u(e);if(y){var _,C=y.call(e);if(y!==e.entries)for(var b=0;!(_=C.next()).done;)f=_.value,h=v+r(f,b++),m+=o(f,h,n,i);else for(;!(_=C.next()).done;){var E=_.value;E&&(f=E[1],h=v+l.escape(E[0])+p+r(f,0),m+=o(f,h,n,i))}}else if("object"===d){var x=String(e);a("31","[object Object]"===x?"object with keys {"+Object.keys(e).join(", ")+"}":x,"")}}return m}function i(e,t,n){return null==e?0:o(e,"",t,n)}var a=e(113),s=(e(120),e(48)),u=e(104),l=(e(138),e(22)),c=(e(143),"."),p=":";t.exports=i},{104:104,113:113,120:120,138:138,143:143,22:22,48:48}],119:[function(e,t,n){"use strict";var r=(e(144),e(130)),o=(e(143),r);t.exports=o},{130:130,143:143,144:144}],120:[function(t,n,r){"use strict";var o=e.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;n.exports=o.ReactCurrentOwner},{}],121:[function(t,n,r){"use strict";n.exports=e},{}],122:[function(t,n,r){"use strict";var o=e.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;n.exports=o.getNextDebugID},{}],123:[function(e,t,n){"use strict";var r=e(130),o={listen:function(e,t,n){return e.addEventListener?(e.addEventListener(t,n,!1),{remove:function(){e.removeEventListener(t,n,!1)}}):e.attachEvent?(e.attachEvent("on"+t,n),{remove:function(){e.detachEvent("on"+t,n)}}):void 0},capture:function(e,t,n){return e.addEventListener?(e.addEventListener(t,n,!0),{remove:function(){e.removeEventListener(t,n,!0)}}):{remove:r}},registerDefault:function(){}};t.exports=o},{130:130}],124:[function(e,t,n){"use strict";var r=!("undefined"==typeof window||!window.document||!window.document.createElement),o={canUseDOM:r,canUseWorkers:"undefined"!=typeof Worker,canUseEventListeners:r&&!(!window.addEventListener&&!window.attachEvent),canUseViewport:r&&!!window.screen,isInWorker:!r};t.exports=o},{}],125:[function(e,t,n){"use strict";function r(e){return e.replace(o,function(e,t){return t.toUpperCase()})}var o=/-(.)/g;t.exports=r},{}],126:[function(e,t,n){"use strict";function r(e){return o(e.replace(i,"ms-"))}var o=e(125),i=/^-ms-/;t.exports=r},{125:125}],127:[function(e,t,n){"use strict";function r(e,t){return!(!e||!t)&&(e===t||!o(e)&&(o(t)?r(e,t.parentNode):"contains"in e?e.contains(t):!!e.compareDocumentPosition&&!!(16&e.compareDocumentPosition(t))))}var o=e(140);t.exports=r},{140:140}],128:[function(e,t,n){"use strict";function r(e){var t=e.length;if((Array.isArray(e)||"object"!=typeof e&&"function"!=typeof e)&&a(!1),"number"!=typeof t&&a(!1),0===t||t-1 in e||a(!1),"function"==typeof e.callee&&a(!1),e.hasOwnProperty)try{return Array.prototype.slice.call(e)}catch(e){}for(var n=Array(t),r=0;r<t;r++)n[r]=e[r];return n}function o(e){return!!e&&("object"==typeof e||"function"==typeof e)&&"length"in e&&!("setInterval"in e)&&"number"!=typeof e.nodeType&&(Array.isArray(e)||"callee"in e||"item"in e)}function i(e){return o(e)?Array.isArray(e)?e.slice():r(e):[e]}var a=e(138);t.exports=i},{138:138}],129:[function(e,t,n){"use strict";function r(e){var t=e.match(c);return t&&t[1].toLowerCase()}function o(e,t){var n=l;l||u(!1);var o=r(e),i=o&&s(o);if(i){n.innerHTML=i[1]+e+i[2];for(var c=i[0];c--;)n=n.lastChild}else n.innerHTML=e;var p=n.getElementsByTagName("script");p.length&&(t||u(!1),a(p).forEach(t));for(var d=Array.from(n.childNodes);n.lastChild;)n.removeChild(n.lastChild);return d}var i=e(124),a=e(128),s=e(134),u=e(138),l=i.canUseDOM?document.createElement("div"):null,c=/^\s*<(\w+)/;t.exports=o},{124:124,128:128,134:134,138:138}],130:[function(e,t,n){"use strict";function r(e){return function(){return e}}var o=function(){};o.thatReturns=r,o.thatReturnsFalse=r(!1),o.thatReturnsTrue=r(!0),o.thatReturnsNull=r(null),o.thatReturnsThis=function(){return this},o.thatReturnsArgument=function(e){return e},t.exports=o},{}],131:[function(e,t,n){"use strict";var r={};t.exports=r},{}],132:[function(e,t,n){"use strict";function r(e){try{e.focus()}catch(e){}}t.exports=r},{}],133:[function(e,t,n){"use strict";function r(e){if(void 0===(e=e||("undefined"!=typeof document?document:void 0)))return null;try{return e.activeElement||e.body}catch(t){return e.body}}t.exports=r},{}],134:[function(e,t,n){"use strict";function r(e){return a||i(!1),d.hasOwnProperty(e)||(e="*"),s.hasOwnProperty(e)||(a.innerHTML="*"===e?"<link />":"<"+e+"></"+e+">",s[e]=!a.firstChild),s[e]?d[e]:null}var o=e(124),i=e(138),a=o.canUseDOM?document.createElement("div"):null,s={},u=[1,'<select multiple="true">',"</select>"],l=[1,"<table>","</table>"],c=[3,"<table><tbody><tr>","</tr></tbody></table>"],p=[1,'<svg xmlns="http://www.w3.org/2000/svg">',"</svg>"],d={"*":[1,"?<div>","</div>"],area:[1,"<map>","</map>"],col:[2,"<table><tbody></tbody><colgroup>","</colgroup></table>"],legend:[1,"<fieldset>","</fieldset>"],param:[1,"<object>","</object>"],tr:[2,"<table><tbody>","</tbody></table>"],optgroup:u,option:u,caption:l,colgroup:l,tbody:l,tfoot:l,thead:l,td:c,th:c};["circle","clipPath","defs","ellipse","g","image","line","linearGradient","mask","path","pattern","polygon","polyline","radialGradient","rect","stop","text","tspan"].forEach(function(e){d[e]=p,s[e]=!0}),t.exports=r},{124:124,138:138}],135:[function(e,t,n){"use strict";function r(e){return e.Window&&e instanceof e.Window?{x:e.pageXOffset||e.document.documentElement.scrollLeft,y:e.pageYOffset||e.document.documentElement.scrollTop}:{x:e.scrollLeft,y:e.scrollTop}}t.exports=r},{}],136:[function(e,t,n){"use strict";function r(e){return e.replace(o,"-$1").toLowerCase()}var o=/([A-Z])/g;t.exports=r},{}],137:[function(e,t,n){"use strict";function r(e){return o(e).replace(i,"-ms-")}var o=e(136),i=/^ms-/;t.exports=r},{136:136}],138:[function(e,t,n){"use strict";function r(e,t,n,r,i,a,s,u){if(o(t),!e){var l;if(void 0===t)l=new Error("Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings.");else{var c=[n,r,i,a,s,u],p=0;l=new Error(t.replace(/%s/g,function(){return c[p++]})),l.name="Invariant Violation"}throw l.framesToPop=1,l}}var o=function(e){};t.exports=r},{}],139:[function(e,t,n){"use strict";function r(e){var t=e?e.ownerDocument||e:document,n=t.defaultView||window;return!(!e||!("function"==typeof n.Node?e instanceof n.Node:"object"==typeof e&&"number"==typeof e.nodeType&&"string"==typeof e.nodeName))}t.exports=r},{}],140:[function(e,t,n){"use strict";function r(e){return o(e)&&3==e.nodeType}var o=e(139);t.exports=r},{139:139}],141:[function(e,t,n){"use strict";function r(e){var t={};return function(n){return t.hasOwnProperty(n)||(t[n]=e.call(this,n)),t[n]}}t.exports=r},{}],142:[function(e,t,n){"use strict";function r(e,t){return e===t?0!==e||0!==t||1/e==1/t:e!==e&&t!==t}function o(e,t){if(r(e,t))return!0;if("object"!=typeof e||null===e||"object"!=typeof t||null===t)return!1;var n=Object.keys(e),o=Object.keys(t);if(n.length!==o.length)return!1;for(var a=0;a<n.length;a++)if(!i.call(t,n[a])||!r(e[n[a]],t[n[a]]))return!1;return!0}var i=Object.prototype.hasOwnProperty;t.exports=o},{}],143:[function(e,t,n){"use strict";var r=e(130),o=r;t.exports=o},{130:130}],144:[function(e,t,n){"use strict";function r(e){if(null===e||void 0===e)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(e)}var o=Object.getOwnPropertySymbols,i=Object.prototype.hasOwnProperty,a=Object.prototype.propertyIsEnumerable;t.exports=function(){try{if(!Object.assign)return!1;var e=new String("abc");if(e[5]="de","5"===Object.getOwnPropertyNames(e)[0])return!1;for(var t={},n=0;n<10;n++)t["_"+String.fromCharCode(n)]=n;if("0123456789"!==Object.getOwnPropertyNames(t).map(function(e){return t[e]}).join(""))return!1;var r={};return"abcdefghijklmnopqrst".split("").forEach(function(e){r[e]=e}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},r)).join("")}catch(e){return!1}}()?Object.assign:function(e,t){for(var n,s,u=r(e),l=1;l<arguments.length;l++){n=Object(arguments[l]);for(var c in n)i.call(n,c)&&(u[c]=n[c]);if(o){s=o(n);for(var p=0;p<s.length;p++)a.call(n,s[p])&&(u[s[p]]=n[s[p]])}}return u}},{}],145:[function(e,t,n){"use strict";function r(e,t,n,r,o){}t.exports=r},{138:138,143:143,148:148}],146:[function(e,t,n){"use strict";var r=e(147);t.exports=function(e){return r(e,!1)}},{147:147}],147:[function(e,t,n){"use strict";var r=e(130),o=e(138),i=e(143),a=e(148),s=e(145);t.exports=function(e,t){function n(e){var t=e&&(w&&e[w]||e[T]);if("function"==typeof t)return t}function u(e,t){return e===t?0!==e||1/e==1/t:e!==e&&t!==t}function l(e){this.message=e,this.stack=""}function c(e){function n(n,r,i,s,u,c,p){if(s=s||k,c=c||i,p!==a)if(t)o(!1,"Calling PropTypes validators directly is not supported by the `prop-types` package. Use `PropTypes.checkPropTypes()` to call them. Read more at http://fb.me/use-check-prop-types");else;return null==r[i]?n?new l(null===r[i]?"The "+u+" `"+c+"` is marked as required in `"+s+"`, but its value is `null`.":"The "+u+" `"+c+"` is marked as required in `"+s+"`, but its value is `undefined`."):null:e(r,i,s,u,c)}var r=n.bind(null,!1);return r.isRequired=n.bind(null,!0),r}function p(e){function t(t,n,r,o,i,a){var s=t[n];if(C(s)!==e)return new l("Invalid "+o+" `"+i+"` of type `"+b(s)+"` supplied to `"+r+"`, expected `"+e+"`.");return null}return c(t)}function d(e){function t(t,n,r,o,i){if("function"!=typeof e)return new l("Property `"+i+"` of component `"+r+"` has invalid PropType notation inside arrayOf.");var s=t[n];if(!Array.isArray(s)){return new l("Invalid "+o+" `"+i+"` of type `"+C(s)+"` supplied to `"+r+"`, expected an array.")}for(var u=0;u<s.length;u++){var c=e(s,u,r,o,i+"["+u+"]",a);if(c instanceof Error)return c}return null}return c(t)}function f(e){function t(t,n,r,o,i){if(!(t[n]instanceof e)){var a=e.name||k;return new l("Invalid "+o+" `"+i+"` of type `"+x(t[n])+"` supplied to `"+r+"`, expected instance of `"+a+"`.")}return null}return c(t)}function h(e){function t(t,n,r,o,i){for(var a=t[n],s=0;s<e.length;s++)if(u(a,e[s]))return null;return new l("Invalid "+o+" `"+i+"` of value `"+a+"` supplied to `"+r+"`, expected one of "+JSON.stringify(e)+".")}return Array.isArray(e)?c(t):r.thatReturnsNull}function m(e){function t(t,n,r,o,i){if("function"!=typeof e)return new l("Property `"+i+"` of component `"+r+"` has invalid PropType notation inside objectOf.");var s=t[n],u=C(s);if("object"!==u)return new l("Invalid "+o+" `"+i+"` of type `"+u+"` supplied to `"+r+"`, expected an object.");for(var c in s)if(s.hasOwnProperty(c)){var p=e(s,c,r,o,i+"."+c,a);if(p instanceof Error)return p}return null}return c(t)}function v(e){function t(t,n,r,o,i){for(var s=0;s<e.length;s++){if(null==(0,e[s])(t,n,r,o,i,a))return null}return new l("Invalid "+o+" `"+i+"` supplied to `"+r+"`.")}if(!Array.isArray(e))return r.thatReturnsNull;for(var n=0;n<e.length;n++){var o=e[n];if("function"!=typeof o)return i(!1,"Invalid argument supplid to oneOfType. Expected an array of check functions, but received %s at index %s.",E(o),n),r.thatReturnsNull}return c(t)}function g(e){function t(t,n,r,o,i){var s=t[n],u=C(s);if("object"!==u)return new l("Invalid "+o+" `"+i+"` of type `"+u+"` supplied to `"+r+"`, expected `object`.");for(var c in e){
+var p=e[c];if(p){var d=p(s,c,r,o,i+"."+c,a);if(d)return d}}return null}return c(t)}function y(t){switch(typeof t){case"number":case"string":case"undefined":return!0;case"boolean":return!t;case"object":if(Array.isArray(t))return t.every(y);if(null===t||e(t))return!0;var r=n(t);if(!r)return!1;var o,i=r.call(t);if(r!==t.entries){for(;!(o=i.next()).done;)if(!y(o.value))return!1}else for(;!(o=i.next()).done;){var a=o.value;if(a&&!y(a[1]))return!1}return!0;default:return!1}}function _(e,t){return"symbol"===e||("Symbol"===t["@@toStringTag"]||"function"==typeof Symbol&&t instanceof Symbol)}function C(e){var t=typeof e;return Array.isArray(e)?"array":e instanceof RegExp?"object":_(t,e)?"symbol":t}function b(e){if(void 0===e||null===e)return""+e;var t=C(e);if("object"===t){if(e instanceof Date)return"date";if(e instanceof RegExp)return"regexp"}return t}function E(e){var t=b(e);switch(t){case"array":case"object":return"an "+t;case"boolean":case"date":case"regexp":return"a "+t;default:return t}}function x(e){return e.constructor&&e.constructor.name?e.constructor.name:k}var w="function"==typeof Symbol&&Symbol.iterator,T="@@iterator",k="<<anonymous>>",P={array:p("array"),bool:p("boolean"),func:p("function"),number:p("number"),object:p("object"),string:p("string"),symbol:p("symbol"),any:function(){return c(r.thatReturnsNull)}(),arrayOf:d,element:function(){function t(t,n,r,o,i){var a=t[n];if(!e(a)){return new l("Invalid "+o+" `"+i+"` of type `"+C(a)+"` supplied to `"+r+"`, expected a single ReactElement.")}return null}return c(t)}(),instanceOf:f,node:function(){function e(e,t,n,r,o){return y(e[t])?null:new l("Invalid "+r+" `"+o+"` supplied to `"+n+"`, expected a ReactNode.")}return c(e)}(),objectOf:m,oneOf:h,oneOfType:v,shape:g};return l.prototype=Error.prototype,P.checkPropTypes=s,P.PropTypes=P,P}},{130:130,138:138,143:143,145:145,148:148}],148:[function(e,t,n){"use strict";t.exports="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED"},{}]},{},[45])(45)}()}()});
 
-    __LiteMolReactDOM = module.exports;
+    __LiteMolReactDOM = __module__.exports;
 })();
 
 
@@ -56162,11 +56159,13 @@ SOFTWARE.
 
 /***/ }
 /******/ ]);
+"use strict";
 /*
  * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
 (function (LiteMol) {
+    //export type Promise<T> = GlobalPromise<T>;// __Promise.Promise<T>;
     LiteMol.Promise = __LiteMolPromise;
 })(LiteMol || (LiteMol = {}));
 (function (LiteMol) {
@@ -56188,7 +56187,7 @@ var LiteMol;
 (function (LiteMol) {
     var Core;
     (function (Core) {
-        Core.VERSION = { number: "3.1.2", date: "April 12 2017" };
+        Core.VERSION = { number: "3.2.1", date: "July 5 2017" };
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -56264,6 +56263,8 @@ var LiteMol;
                                     return [3 /*break*/, 4];
                                 case 2:
                                     e_1 = _a.sent();
+                                    if (Computation.PRINT_CONSOLE_ERROR)
+                                        console.error(e_1);
                                     reject(e_1);
                                     return [3 /*break*/, 4];
                                 case 3:
@@ -56279,6 +56280,7 @@ var LiteMol;
         }());
         Core.Computation = Computation;
         (function (Computation) {
+            Computation.PRINT_CONSOLE_ERROR = false;
             function resolve(a) {
                 return computation(function () { return Core.Promise.resolve(a); });
             }
@@ -56398,11 +56400,8 @@ var LiteMol;
             var FastMap;
             (function (FastMap) {
                 function forEach(data, f, ctx) {
-                    var hasOwn = Object.prototype.hasOwnProperty;
                     for (var _i = 0, _a = Object.keys(data); _i < _a.length; _i++) {
                         var key = _a[_i];
-                        if (!hasOwn.call(data, key))
-                            continue;
                         var v = data[key];
                         if (v === void 0)
                             continue;
@@ -56464,11 +56463,8 @@ var LiteMol;
                  */
                 function ofObject(data) {
                     var ret = create();
-                    var hasOwn = Object.prototype.hasOwnProperty;
                     for (var _i = 0, _a = Object.keys(data); _i < _a.length; _i++) {
                         var key = _a[_i];
-                        if (!hasOwn.call(data, key))
-                            continue;
                         var v = data[key];
                         ret.set(key, v);
                     }
@@ -56479,10 +56475,9 @@ var LiteMol;
             var FastSet;
             (function (FastSet) {
                 function forEach(data, f, ctx) {
-                    var hasOwn = Object.prototype.hasOwnProperty;
                     for (var _i = 0, _a = Object.keys(data); _i < _a.length; _i++) {
                         var p = _a[_i];
-                        if (!hasOwn.call(data, p) || data[p] !== null)
+                        if (data[p] !== null)
                             continue;
                         f(p, ctx);
                     }
@@ -56538,6 +56533,103 @@ var LiteMol;
                 }
                 FastSet.ofArray = ofArray;
             })(FastSet = Utils.FastSet || (Utils.FastSet = {}));
+            var Mask;
+            (function (Mask) {
+                var EmptyMask = (function () {
+                    function EmptyMask(size) {
+                        this.size = size;
+                    }
+                    EmptyMask.prototype.has = function (i) { return false; };
+                    return EmptyMask;
+                }());
+                var SingletonMask = (function () {
+                    function SingletonMask(idx, size) {
+                        this.idx = idx;
+                        this.size = size;
+                    }
+                    SingletonMask.prototype.has = function (i) { return i === this.idx; };
+                    return SingletonMask;
+                }());
+                var BitMask = (function () {
+                    function BitMask(mask, size) {
+                        this.mask = mask;
+                        this.size = size;
+                    }
+                    BitMask.prototype.has = function (i) { return this.mask[i]; };
+                    return BitMask;
+                }());
+                var AllMask = (function () {
+                    function AllMask(size) {
+                        this.size = size;
+                    }
+                    AllMask.prototype.has = function (i) { return true; };
+                    return AllMask;
+                }());
+                function ofStructure(structure) {
+                    return new AllMask(structure.data.atoms.count);
+                }
+                Mask.ofStructure = ofStructure;
+                function ofIndices(totalCount, indices) {
+                    var len = indices.length;
+                    if (len === 0)
+                        return new EmptyMask(totalCount);
+                    if (len === 1)
+                        return new SingletonMask(indices[0], totalCount);
+                    var f = len / totalCount;
+                    if (f < 1 / 12) {
+                        var set = Utils.FastSet.create();
+                        for (var _i = 0, indices_1 = indices; _i < indices_1.length; _i++) {
+                            var i = indices_1[_i];
+                            set.add(i);
+                        }
+                        return set;
+                    }
+                    var mask = new Int8Array(totalCount);
+                    for (var _a = 0, indices_2 = indices; _a < indices_2.length; _a++) {
+                        var i = indices_2[_a];
+                        mask[i] = 1;
+                    }
+                    return new BitMask(mask, len);
+                }
+                Mask.ofIndices = ofIndices;
+                function ofFragments(seq) {
+                    var sizeEstimate = 0;
+                    for (var _i = 0, _a = seq.fragments; _i < _a.length; _i++) {
+                        var f = _a[_i];
+                        sizeEstimate += f.atomCount;
+                    }
+                    var count = seq.context.structure.data.atoms.count;
+                    if (sizeEstimate / count < 1 / 12) {
+                        // create set;
+                        var mask = Utils.FastSet.create();
+                        for (var _b = 0, _c = seq.fragments; _b < _c.length; _b++) {
+                            var f = _c[_b];
+                            for (var _d = 0, _e = f.atomIndices; _d < _e.length; _d++) {
+                                var i = _e[_d];
+                                mask.add(i);
+                            }
+                        }
+                        return mask;
+                    }
+                    else {
+                        var mask = new Int8Array(count);
+                        for (var _f = 0, _g = seq.fragments; _f < _g.length; _f++) {
+                            var f = _g[_f];
+                            for (var _h = 0, _j = f.atomIndices; _h < _j.length; _h++) {
+                                var i = _j[_h];
+                                mask[i] = 1;
+                            }
+                        }
+                        var size = 0;
+                        for (var i = 0; i < count; i++) {
+                            if (mask[i] !== 0)
+                                size++;
+                        }
+                        return new BitMask(mask, size);
+                    }
+                }
+                Mask.ofFragments = ofFragments;
+            })(Mask = Utils.Mask || (Utils.Mask = {}));
         })(Utils = Core.Utils || (Core.Utils = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -56758,6 +56850,12 @@ var LiteMol;
                         this.columns[this.columns.length] = { name: name, creator: creator };
                         return c;
                     };
+                    BuilderImpl.prototype.addRawColumn = function (name, creator, data) {
+                        var c = data;
+                        Object.defineProperty(this, name, { enumerable: true, configurable: false, writable: false, value: c });
+                        this.columns[this.columns.length] = { name: name, creator: creator };
+                        return c;
+                    };
                     BuilderImpl.prototype.getRawData = function () {
                         var _this = this;
                         return this.columns.map(function (c) { return _this[c.name]; });
@@ -56869,6 +56967,9 @@ var LiteMol;
                 ChunkedArray.add = add;
                 function compact(array) {
                     var ret = array.creator(array.elementSize * array.elementCount), offset = (array.parts.length - 1) * array.chunkSize, offsetInner = 0, part;
+                    if (array.parts.length === 1 && array.chunkSize === array.elementCount) {
+                        return array.parts[0];
+                    }
                     if (array.parts.length > 1) {
                         if (array.parts[0].buffer) {
                             for (var i = 0; i < array.parts.length - 1; i++) {
@@ -57009,6 +57110,20 @@ var LiteMol;
                 }
                 ArrayBuilder.create = create;
             })(ArrayBuilder = Utils.ArrayBuilder || (Utils.ArrayBuilder = {}));
+            function UniqueArray() {
+                return { _set: Utils.FastSet.create(), array: [] };
+            }
+            Utils.UniqueArray = UniqueArray;
+            (function (UniqueArray) {
+                function add(_a, e) {
+                    var _set = _a._set, array = _a.array;
+                    if (!_set.has(e)) {
+                        _set.add(e);
+                        array[array.length] = e;
+                    }
+                }
+                UniqueArray.add = add;
+            })(UniqueArray = Utils.UniqueArray || (Utils.UniqueArray = {}));
         })(Utils = Core.Utils || (Core.Utils = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -57298,8 +57413,8 @@ var LiteMol;
                     ];
                     function getAtomSiteColumns(category) {
                         var ret = Core.Utils.FastMap.create();
-                        for (var _i = 0, AtomSiteColumns_1 = AtomSiteColumns; _i < AtomSiteColumns_1.length; _i++) {
-                            var c = AtomSiteColumns_1[_i];
+                        for (var _a = 0, AtomSiteColumns_1 = AtomSiteColumns; _a < AtomSiteColumns_1.length; _a++) {
+                            var c = AtomSiteColumns_1[_a];
                             ret.set(c, category.getColumn(c));
                         }
                         return ret;
@@ -57548,8 +57663,8 @@ var LiteMol;
                     function splitNonconsecutiveSecondaryStructure(residues, elements) {
                         var ret = [];
                         var authSeqNumber = residues.authSeqNumber;
-                        for (var _i = 0, elements_1 = elements; _i < elements_1.length; _i++) {
-                            var s = elements_1[_i];
+                        for (var _a = 0, elements_1 = elements; _a < elements_1.length; _a++) {
+                            var s = elements_1[_a];
                             var partStart = s.startResidueIndex;
                             var end = s.endResidueIndex - 1;
                             for (var i = s.startResidueIndex; i < end; i++) {
@@ -57575,8 +57690,8 @@ var LiteMol;
                     }
                     function updateSSIndicesAndFilterEmpty(elements, structure) {
                         var residues = structure.residues, count = residues.count, asymId = residues.asymId, seqNumber = residues.seqNumber, insCode = residues.insCode, currentElement = void 0, key = '', starts = Core.Utils.FastMap.create(), ends = Core.Utils.FastMap.create();
-                        for (var _i = 0, elements_2 = elements; _i < elements_2.length; _i++) {
-                            var e = elements_2[_i];
+                        for (var _a = 0, elements_2 = elements; _a < elements_2.length; _a++) {
+                            var e = elements_2[_a];
                             key = e.startResidueId.asymId + ' ' + e.startResidueId.seqNumber;
                             if (e.startResidueId.insCode)
                                 key += ' ' + e.startResidueId.insCode;
@@ -57606,8 +57721,8 @@ var LiteMol;
                             currentElement.endResidueIndex = count;
                         }
                         var nonEmpty = [];
-                        for (var _a = 0, elements_3 = elements; _a < elements_3.length; _a++) {
-                            var e = elements_3[_a];
+                        for (var _b = 0, elements_3 = elements; _b < elements_3.length; _b++) {
+                            var e = elements_3[_b];
                             if (e.startResidueIndex < 0 || e.endResidueIndex < 0)
                                 continue;
                             if (e.type === 3 /* Sheet */ && e.length < 3)
@@ -57715,14 +57830,143 @@ var LiteMol;
                     function assignSecondaryStructureIndex(residues, ss) {
                         var ssIndex = residues.secondaryStructureIndex;
                         var index = 0;
-                        for (var _i = 0, ss_1 = ss; _i < ss_1.length; _i++) {
-                            var s = ss_1[_i];
+                        for (var _a = 0, ss_1 = ss; _a < ss_1.length; _a++) {
+                            var s = ss_1[_a];
                             for (var i = s.startResidueIndex; i < s.endResidueIndex; i++) {
                                 ssIndex[i] = index;
                             }
                             index++;
                         }
                         return ssIndex;
+                    }
+                    function findResidueIndexByLabel(structure, asymId, seqNumber, insCode) {
+                        var _a = structure.chains, _asymId = _a.asymId, residueStartIndex = _a.residueStartIndex, residueEndIndex = _a.residueEndIndex, cCount = _a.count;
+                        var _b = structure.residues, _seqNumber = _b.seqNumber, _insCode = _b.insCode;
+                        for (var cI = 0; cI < cCount; cI++) {
+                            if (_asymId[cI] !== asymId)
+                                continue;
+                            for (var rI = residueStartIndex[cI], _r = residueEndIndex[cI]; rI < _r; rI++) {
+                                if (_seqNumber[rI] === seqNumber && _insCode[rI] === insCode)
+                                    return rI;
+                            }
+                        }
+                        return -1;
+                    }
+                    function findAtomIndexByLabelName(atoms, structure, residueIndex, atomName, altLoc) {
+                        var _a = structure.residues, atomStartIndex = _a.atomStartIndex, atomEndIndex = _a.atomEndIndex;
+                        var _atomName = atoms.name, _altLoc = atoms.altLoc;
+                        for (var i = atomStartIndex[residueIndex], _i = atomEndIndex[residueIndex]; i <= _i; i++) {
+                            if (_atomName[i] === atomName && _altLoc[i] === altLoc)
+                                return i;
+                        }
+                        return -1;
+                    }
+                    function getModRes(data) {
+                        var cat = data.getCategory('_pdbx_struct_mod_residue');
+                        if (!cat)
+                            return void 0;
+                        var table = Core.Utils.DataTable.ofDefinition(Core.Structure.Tables.ModifiedResidues, cat.rowCount);
+                        var label_asym_id = cat.getColumn('label_asym_id');
+                        var label_seq_id = cat.getColumn('label_seq_id');
+                        var PDB_ins_code = cat.getColumn('PDB_ins_code');
+                        var parent_comp_id = cat.getColumn('parent_comp_id');
+                        var _details = cat.getColumn('details');
+                        var asymId = table.asymId, seqNumber = table.seqNumber, insCode = table.insCode, parent = table.parent, details = table.details;
+                        for (var i = 0, __i = cat.rowCount; i < __i; i++) {
+                            asymId[i] = label_asym_id.getString(i);
+                            seqNumber[i] = label_seq_id.getInteger(i);
+                            insCode[i] = PDB_ins_code.getString(i);
+                            parent[i] = parent_comp_id.getString(i);
+                            details[i] = _details.getString(i);
+                        }
+                        return table;
+                    }
+                    function getStructConn(data, atoms, structure) {
+                        var cat = data.getCategory('_struct_conn');
+                        if (!cat)
+                            return void 0;
+                        var _idCols = function (i) { return ({
+                            label_asym_id: cat.getColumn('ptnr' + i + '_label_asym_id'),
+                            label_seq_id: cat.getColumn('ptnr' + i + '_label_seq_id'),
+                            label_atom_id: cat.getColumn('ptnr' + i + '_label_atom_id'),
+                            label_alt_id: cat.getColumn('pdbx_ptnr' + i + '_label_alt_id'),
+                            ins_code: cat.getColumn('pdbx_ptnr' + i + '_PDB_ins_code'),
+                            symmetry: cat.getColumn('ptnr' + i + '_symmetry')
+                        }); };
+                        var conn_type_id = cat.getColumn('conn_type_id');
+                        var pdbx_dist_value = cat.getColumn('pdbx_dist_value');
+                        var pdbx_value_order = cat.getColumn('pdbx_value_order');
+                        var p1 = _idCols(1);
+                        var p2 = _idCols(2);
+                        var p3 = _idCols(3);
+                        var _p = function (row, ps) {
+                            if (ps.label_asym_id.getValuePresence(row) !== 0 /* Present */)
+                                return void 0;
+                            var residueIndex = findResidueIndexByLabel(structure, ps.label_asym_id.getString(row), ps.label_seq_id.getInteger(row), ps.ins_code.getString(row));
+                            if (residueIndex < 0)
+                                return void 0;
+                            var atomIndex = findAtomIndexByLabelName(atoms, structure, residueIndex, ps.label_atom_id.getString(row), ps.label_alt_id.getString(row));
+                            if (atomIndex < 0)
+                                return void 0;
+                            return { residueIndex: residueIndex, atomIndex: atomIndex, symmetry: ps.symmetry.getString(row) || '1_555' };
+                        };
+                        var _ps = function (row) {
+                            var ret = [];
+                            var p = _p(row, p1);
+                            if (p)
+                                ret.push(p);
+                            p = _p(row, p2);
+                            if (p)
+                                ret.push(p);
+                            p = _p(row, p3);
+                            if (p)
+                                ret.push(p);
+                            return ret;
+                        };
+                        var entries = [];
+                        for (var i = 0; i < cat.rowCount; i++) {
+                            var partners = _ps(i);
+                            if (partners.length < 2)
+                                continue;
+                            var type = conn_type_id.getString(i);
+                            var orderType = (pdbx_value_order.getString(i) || '').toLowerCase();
+                            var bondType = 0 /* Unknown */;
+                            switch (orderType) {
+                                case 'sing':
+                                    bondType = 1 /* Single */;
+                                    break;
+                                case 'doub':
+                                    bondType = 2 /* Double */;
+                                    break;
+                                case 'trip':
+                                    bondType = 3 /* Triple */;
+                                    break;
+                                case 'quad':
+                                    bondType = 4 /* Aromatic */;
+                                    break;
+                            }
+                            switch (type) {
+                                case 'disulf':
+                                    bondType = 5 /* DisulfideBridge */;
+                                    break;
+                                case 'hydrog':
+                                    bondType = 8 /* Hydrogen */;
+                                    break;
+                                case 'metalc':
+                                    bondType = 6 /* Metallic */;
+                                    break;
+                                //case 'mismat': bondType = Structure.BondType.Single; break; 
+                                case 'saltbr':
+                                    bondType = 7 /* Ion */;
+                                    break;
+                            }
+                            entries.push({
+                                bondType: bondType,
+                                distance: pdbx_dist_value.getFloat(i),
+                                partners: partners
+                            });
+                        }
+                        return new Core.Structure.StructConn(entries);
                     }
                     function parseOperatorList(value) {
                         // '(X0)(1-5)' becomes [['X0']['1', '2', '3', '4', '5']]
@@ -57871,8 +58115,10 @@ var LiteMol;
                                     chains: structure.chains,
                                     entities: structure.entities,
                                     bonds: {
+                                        structConn: getStructConn(data, atoms, structure),
                                         component: getComponentBonds(data.getCategory('_chem_comp_bond'))
                                     },
+                                    modifiedResidues: getModRes(data),
                                     secondaryStructure: ss,
                                     symmetryInfo: getSymmetryInfo(data),
                                     assemblyInfo: getAssemblyInfo(data),
@@ -58185,36 +58431,36 @@ var LiteMol;
                                 this.writeRange(modelToken, cifTokens);
                             }
                         };
+                        ModelData.COLUMNS = [
+                            "_atom_site.group_PDB",
+                            "_atom_site.id",
+                            "_atom_site.type_symbol",
+                            "_atom_site.label_atom_id",
+                            "_atom_site.label_alt_id",
+                            "_atom_site.label_comp_id",
+                            "_atom_site.label_asym_id",
+                            "_atom_site.label_entity_id",
+                            "_atom_site.label_seq_id",
+                            "_atom_site.pdbx_PDB_ins_code",
+                            "_atom_site.Cartn_x",
+                            "_atom_site.Cartn_y",
+                            "_atom_site.Cartn_z",
+                            "_atom_site.occupancy",
+                            "_atom_site.B_iso_or_equiv",
+                            "_atom_site.Cartn_x_esd",
+                            "_atom_site.Cartn_y_esd",
+                            "_atom_site.Cartn_z_esd",
+                            "_atom_site.occupancy_esd",
+                            "_atom_site.B_iso_or_equiv_esd",
+                            "_atom_site.pdbx_formal_charge",
+                            "_atom_site.auth_seq_id",
+                            "_atom_site.auth_comp_id",
+                            "_atom_site.auth_asym_id",
+                            "_atom_site.auth_atom_id",
+                            "_atom_site.pdbx_PDB_model_num"
+                        ];
                         return ModelData;
                     }());
-                    ModelData.COLUMNS = [
-                        "_atom_site.group_PDB",
-                        "_atom_site.id",
-                        "_atom_site.type_symbol",
-                        "_atom_site.label_atom_id",
-                        "_atom_site.label_alt_id",
-                        "_atom_site.label_comp_id",
-                        "_atom_site.label_asym_id",
-                        "_atom_site.label_entity_id",
-                        "_atom_site.label_seq_id",
-                        "_atom_site.pdbx_PDB_ins_code",
-                        "_atom_site.Cartn_x",
-                        "_atom_site.Cartn_y",
-                        "_atom_site.Cartn_z",
-                        "_atom_site.occupancy",
-                        "_atom_site.B_iso_or_equiv",
-                        "_atom_site.Cartn_x_esd",
-                        "_atom_site.Cartn_y_esd",
-                        "_atom_site.Cartn_z_esd",
-                        "_atom_site.occupancy_esd",
-                        "_atom_site.B_iso_or_equiv_esd",
-                        "_atom_site.pdbx_formal_charge",
-                        "_atom_site.auth_seq_id",
-                        "_atom_site.auth_comp_id",
-                        "_atom_site.auth_asym_id",
-                        "_atom_site.auth_atom_id",
-                        "_atom_site.pdbx_PDB_model_num"
-                    ];
                     PDB.ModelData = ModelData;
                     var ModelsData = (function () {
                         function ModelsData(models) {
@@ -58304,7 +58550,7 @@ var LiteMol;
                             var end = this.moveToEndOfLine();
                             var length = end - start;
                             // invalid atom record
-                            if (length < 66)
+                            if (length < 60)
                                 return false;
                             //COLUMNS        DATA TYPE       CONTENTS                            
                             //--------------------------------------------------------------------------------
@@ -58360,9 +58606,14 @@ var LiteMol;
                             this.trim(start, start + 6);
                             Formats.TokenIndexBuilder.addToken(tokens, this.trimmedToken.start, this.trimmedToken.end);
                             //61 - 66        Real(6.2)       Temperature factor (Default = 0.0).                   
-                            start = startPos + 60;
-                            this.trim(start, start + 6);
-                            Formats.TokenIndexBuilder.addToken(tokens, this.trimmedToken.start, this.trimmedToken.end);
+                            if (length >= 66) {
+                                start = startPos + 60;
+                                this.trim(start, start + 6);
+                                Formats.TokenIndexBuilder.addToken(tokens, this.trimmedToken.start, this.trimmedToken.end);
+                            }
+                            else {
+                                Formats.TokenIndexBuilder.addToken(tokens, 0, 0);
+                            }
                             //73 - 76        LString(4)      Segment identifier, left-justified.   
                             // ignored
                             //77 - 78        LString(2)      Element symbol, right-justified.   
@@ -58405,7 +58656,7 @@ var LiteMol;
                             while (tokenizer.position < length) {
                                 var cont = true;
                                 switch (data.charCodeAt(tokenizer.position)) {
-                                    case 65:
+                                    case 65:// A 
                                         if (tokenizer.startsWith(tokenizer.position, "ATOM")) {
                                             if (!modelAtomTokens) {
                                                 modelAtomTokens = Formats.TokenIndexBuilder.create(4096);
@@ -58416,14 +58667,14 @@ var LiteMol;
                                                 return err;
                                         }
                                         break;
-                                    case 67:
+                                    case 67:// C
                                         if (tokenizer.startsWith(tokenizer.position, "CRYST1")) {
                                             var start = tokenizer.position;
                                             var end = tokenizer.moveToEndOfLine();
                                             cryst = new PDB.CrystStructureInfo(data.substring(start, end));
                                         }
                                         break;
-                                    case 69:
+                                    case 69:// E 
                                         if (tokenizer.startsWith(tokenizer.position, "ENDMDL") && atomCount > 0) {
                                             if (models.length === 0) {
                                                 modelIdToken = { start: data.length + 3, end: data.length + 4 };
@@ -58443,7 +58694,7 @@ var LiteMol;
                                             }
                                         }
                                         break;
-                                    case 72:
+                                    case 72:// H 
                                         if (tokenizer.startsWith(tokenizer.position, "HETATM")) {
                                             if (!modelAtomTokens) {
                                                 modelAtomTokens = Formats.TokenIndexBuilder.create(4096);
@@ -58454,7 +58705,7 @@ var LiteMol;
                                                 return err;
                                         }
                                         break;
-                                    case 77:
+                                    case 77://M
                                         if (tokenizer.startsWith(tokenizer.position, "MODEL")) {
                                             if (atomCount > 0) {
                                                 if (models.length === 0) {
@@ -58647,7 +58898,7 @@ var LiteMol;
                                 chains: chains,
                                 entities: entities,
                                 bonds: {
-                                    covalent: state.bonds,
+                                    input: state.bonds,
                                 },
                                 secondaryStructure: ss,
                                 symmetryInfo: void 0,
@@ -59253,20 +59504,23 @@ var LiteMol;
                  * copies of the Software, and to permit persons to whom the Software is
                  * furnished to do so, subject to the following conditions:
                  */
-                var makeArray = (typeof Float64Array !== 'undefined')
-                    ? function (size) { return (new Float64Array(size)); }
-                    : function (size) { return []; };
+                function Matrix4() {
+                    return Matrix4.zero();
+                }
+                LinearAlgebra.Matrix4 = Matrix4;
                 /**
                  * Stores a 4x4 matrix in a column major (j * 4 + i indexing) format.
                  */
-                var Matrix4;
                 (function (Matrix4) {
-                    function empty() {
-                        return makeArray(16);
+                    function zero() {
+                        // force double backing array by 0.1.
+                        var ret = [0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        ret[0] = 0.0;
+                        return ret;
                     }
-                    Matrix4.empty = empty;
+                    Matrix4.zero = zero;
                     function identity() {
-                        var out = makeArray(16);
+                        var out = zero();
                         out[0] = 1;
                         out[1] = 0;
                         out[2] = 0;
@@ -59286,8 +59540,28 @@ var LiteMol;
                         return out;
                     }
                     Matrix4.identity = identity;
+                    function fromIdentity(mat) {
+                        mat[0] = 1;
+                        mat[1] = 0;
+                        mat[2] = 0;
+                        mat[3] = 0;
+                        mat[4] = 0;
+                        mat[5] = 1;
+                        mat[6] = 0;
+                        mat[7] = 0;
+                        mat[8] = 0;
+                        mat[9] = 0;
+                        mat[10] = 1;
+                        mat[11] = 0;
+                        mat[12] = 0;
+                        mat[13] = 0;
+                        mat[14] = 0;
+                        mat[15] = 1;
+                        return mat;
+                    }
+                    Matrix4.fromIdentity = fromIdentity;
                     function ofRows(rows) {
-                        var out = makeArray(16), i, j, r;
+                        var out = zero(), i, j, r;
                         for (i = 0; i < 4; i++) {
                             r = rows[i];
                             for (j = 0; j < 4; j++) {
@@ -59331,7 +59605,7 @@ var LiteMol;
                     }
                     Matrix4.copy = copy;
                     function clone(a) {
-                        return Matrix4.copy(Matrix4.empty(), a);
+                        return Matrix4.copy(Matrix4.zero(), a);
                     }
                     Matrix4.clone = clone;
                     function invert(out, a) {
@@ -59396,6 +59670,10 @@ var LiteMol;
                         return out;
                     }
                     Matrix4.mul = mul;
+                    function mul3(out, a, b, c) {
+                        return mul(out, mul(out, a, b), c);
+                    }
+                    Matrix4.mul3 = mul3;
                     function translate(out, a, v) {
                         var x = v[0], y = v[1], z = v[2], a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
                         if (a === out) {
@@ -59457,15 +59735,135 @@ var LiteMol;
                         return out;
                     }
                     Matrix4.fromTranslation = fromTranslation;
-                    function transformVector3(out, a, m) {
-                        var x = a.x, y = a.y, z = a.z;
-                        out.x = m[0] * x + m[4] * y + m[8] * z + m[12];
-                        out.y = m[1] * x + m[5] * y + m[9] * z + m[13];
-                        out.z = m[2] * x + m[6] * y + m[10] * z + m[14];
-                        //out[3] = m[3] * x + m[7] * y + m[11] * z + m[15] * w;
+                    function rotate(out, a, rad, axis) {
+                        var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
+                        if (Math.abs(len) < 0.000001 /* Value */) {
+                            return null;
+                        }
+                        len = 1 / len;
+                        x *= len;
+                        y *= len;
+                        z *= len;
+                        s = Math.sin(rad);
+                        c = Math.cos(rad);
+                        t = 1 - c;
+                        a00 = a[0];
+                        a01 = a[1];
+                        a02 = a[2];
+                        a03 = a[3];
+                        a10 = a[4];
+                        a11 = a[5];
+                        a12 = a[6];
+                        a13 = a[7];
+                        a20 = a[8];
+                        a21 = a[9];
+                        a22 = a[10];
+                        a23 = a[11];
+                        // Construct the elements of the rotation matrix
+                        b00 = x * x * t + c;
+                        b01 = y * x * t + z * s;
+                        b02 = z * x * t - y * s;
+                        b10 = x * y * t - z * s;
+                        b11 = y * y * t + c;
+                        b12 = z * y * t + x * s;
+                        b20 = x * z * t + y * s;
+                        b21 = y * z * t - x * s;
+                        b22 = z * z * t + c;
+                        // Perform rotation-specific matrix multiplication
+                        out[0] = a00 * b00 + a10 * b01 + a20 * b02;
+                        out[1] = a01 * b00 + a11 * b01 + a21 * b02;
+                        out[2] = a02 * b00 + a12 * b01 + a22 * b02;
+                        out[3] = a03 * b00 + a13 * b01 + a23 * b02;
+                        out[4] = a00 * b10 + a10 * b11 + a20 * b12;
+                        out[5] = a01 * b10 + a11 * b11 + a21 * b12;
+                        out[6] = a02 * b10 + a12 * b11 + a22 * b12;
+                        out[7] = a03 * b10 + a13 * b11 + a23 * b12;
+                        out[8] = a00 * b20 + a10 * b21 + a20 * b22;
+                        out[9] = a01 * b20 + a11 * b21 + a21 * b22;
+                        out[10] = a02 * b20 + a12 * b21 + a22 * b22;
+                        out[11] = a03 * b20 + a13 * b21 + a23 * b22;
+                        if (a !== out) {
+                            out[12] = a[12];
+                            out[13] = a[13];
+                            out[14] = a[14];
+                            out[15] = a[15];
+                        }
                         return out;
                     }
-                    Matrix4.transformVector3 = transformVector3;
+                    Matrix4.rotate = rotate;
+                    function fromRotation(out, rad, axis) {
+                        var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t;
+                        if (Math.abs(len) < 0.000001 /* Value */) {
+                            return fromIdentity(out);
+                        }
+                        len = 1 / len;
+                        x *= len;
+                        y *= len;
+                        z *= len;
+                        s = Math.sin(rad);
+                        c = Math.cos(rad);
+                        t = 1 - c;
+                        // Perform rotation-specific matrix multiplication
+                        out[0] = x * x * t + c;
+                        out[1] = y * x * t + z * s;
+                        out[2] = z * x * t - y * s;
+                        out[3] = 0;
+                        out[4] = x * y * t - z * s;
+                        out[5] = y * y * t + c;
+                        out[6] = z * y * t + x * s;
+                        out[7] = 0;
+                        out[8] = x * z * t + y * s;
+                        out[9] = y * z * t - x * s;
+                        out[10] = z * z * t + c;
+                        out[11] = 0;
+                        out[12] = 0;
+                        out[13] = 0;
+                        out[14] = 0;
+                        out[15] = 1;
+                        return out;
+                    }
+                    Matrix4.fromRotation = fromRotation;
+                    function scale(out, a, v) {
+                        var x = v[0], y = v[1], z = v[2];
+                        out[0] = a[0] * x;
+                        out[1] = a[1] * x;
+                        out[2] = a[2] * x;
+                        out[3] = a[3] * x;
+                        out[4] = a[4] * y;
+                        out[5] = a[5] * y;
+                        out[6] = a[6] * y;
+                        out[7] = a[7] * y;
+                        out[8] = a[8] * z;
+                        out[9] = a[9] * z;
+                        out[10] = a[10] * z;
+                        out[11] = a[11] * z;
+                        out[12] = a[12];
+                        out[13] = a[13];
+                        out[14] = a[14];
+                        out[15] = a[15];
+                        return out;
+                    }
+                    Matrix4.scale = scale;
+                    function fromScaling(out, v) {
+                        out[0] = v[0];
+                        out[1] = 0;
+                        out[2] = 0;
+                        out[3] = 0;
+                        out[4] = 0;
+                        out[5] = v[1];
+                        out[6] = 0;
+                        out[7] = 0;
+                        out[8] = 0;
+                        out[9] = 0;
+                        out[10] = v[2];
+                        out[11] = 0;
+                        out[12] = 0;
+                        out[13] = 0;
+                        out[14] = 0;
+                        out[15] = 1;
+                        return out;
+                    }
+                    Matrix4.fromScaling = fromScaling;
                     function makeTable(m) {
                         var ret = '';
                         for (var i = 0; i < 4; i++) {
@@ -59487,19 +59885,186 @@ var LiteMol;
                     }
                     Matrix4.determinant = determinant;
                 })(Matrix4 = LinearAlgebra.Matrix4 || (LinearAlgebra.Matrix4 = {}));
-                var Vector4;
-                (function (Vector4) {
-                    function create() {
-                        var out = makeArray(4);
+                function Vector3(x, y, z) {
+                    return Vector3.fromValues(x || 0, y || 0, z || 0);
+                }
+                LinearAlgebra.Vector3 = Vector3;
+                (function (Vector3) {
+                    function zero() {
+                        var out = [0.1, 0.0, 0.0];
                         out[0] = 0;
-                        out[1] = 0;
-                        out[2] = 0;
-                        out[3] = 0;
                         return out;
                     }
-                    Vector4.create = create;
+                    Vector3.zero = zero;
                     function clone(a) {
-                        var out = makeArray(4);
+                        var out = zero();
+                        out[0] = a[0];
+                        out[1] = a[1];
+                        out[2] = a[2];
+                        return out;
+                    }
+                    Vector3.clone = clone;
+                    function fromObj(v) {
+                        return fromValues(v.x, v.y, v.z);
+                    }
+                    Vector3.fromObj = fromObj;
+                    function toObj(v) {
+                        return { x: v[0], y: v[1], z: v[2] };
+                    }
+                    Vector3.toObj = toObj;
+                    function fromValues(x, y, z) {
+                        var out = zero();
+                        out[0] = x;
+                        out[1] = y;
+                        out[2] = z;
+                        return out;
+                    }
+                    Vector3.fromValues = fromValues;
+                    function set(out, x, y, z) {
+                        out[0] = x;
+                        out[1] = y;
+                        out[2] = z;
+                        return out;
+                    }
+                    Vector3.set = set;
+                    function copy(out, a) {
+                        out[0] = a[0];
+                        out[1] = a[1];
+                        out[2] = a[2];
+                        return out;
+                    }
+                    Vector3.copy = copy;
+                    function add(out, a, b) {
+                        out[0] = a[0] + b[0];
+                        out[1] = a[1] + b[1];
+                        out[2] = a[2] + b[2];
+                        return out;
+                    }
+                    Vector3.add = add;
+                    function sub(out, a, b) {
+                        out[0] = a[0] - b[0];
+                        out[1] = a[1] - b[1];
+                        out[2] = a[2] - b[2];
+                        return out;
+                    }
+                    Vector3.sub = sub;
+                    function scale(out, a, b) {
+                        out[0] = a[0] * b;
+                        out[1] = a[1] * b;
+                        out[2] = a[2] * b;
+                        return out;
+                    }
+                    Vector3.scale = scale;
+                    function scaleAndAdd(out, a, b, scale) {
+                        out[0] = a[0] + (b[0] * scale);
+                        out[1] = a[1] + (b[1] * scale);
+                        out[2] = a[2] + (b[2] * scale);
+                        return out;
+                    }
+                    Vector3.scaleAndAdd = scaleAndAdd;
+                    function distance(a, b) {
+                        var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2];
+                        return Math.sqrt(x * x + y * y + z * z);
+                    }
+                    Vector3.distance = distance;
+                    function squaredDistance(a, b) {
+                        var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2];
+                        return x * x + y * y + z * z;
+                    }
+                    Vector3.squaredDistance = squaredDistance;
+                    function magnitude(a) {
+                        var x = a[0], y = a[1], z = a[2];
+                        return Math.sqrt(x * x + y * y + z * z);
+                    }
+                    Vector3.magnitude = magnitude;
+                    function squaredMagnitude(a) {
+                        var x = a[0], y = a[1], z = a[2];
+                        return x * x + y * y + z * z;
+                    }
+                    Vector3.squaredMagnitude = squaredMagnitude;
+                    function normalize(out, a) {
+                        var x = a[0], y = a[1], z = a[2];
+                        var len = x * x + y * y + z * z;
+                        if (len > 0) {
+                            len = 1 / Math.sqrt(len);
+                            out[0] = a[0] * len;
+                            out[1] = a[1] * len;
+                            out[2] = a[2] * len;
+                        }
+                        return out;
+                    }
+                    Vector3.normalize = normalize;
+                    function dot(a, b) {
+                        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+                    }
+                    Vector3.dot = dot;
+                    function cross(out, a, b) {
+                        var ax = a[0], ay = a[1], az = a[2], bx = b[0], by = b[1], bz = b[2];
+                        out[0] = ay * bz - az * by;
+                        out[1] = az * bx - ax * bz;
+                        out[2] = ax * by - ay * bx;
+                        return out;
+                    }
+                    Vector3.cross = cross;
+                    function lerp(out, a, b, t) {
+                        var ax = a[0], ay = a[1], az = a[2];
+                        out[0] = ax + t * (b[0] - ax);
+                        out[1] = ay + t * (b[1] - ay);
+                        out[2] = az + t * (b[2] - az);
+                        return out;
+                    }
+                    Vector3.lerp = lerp;
+                    function transformMat4(out, a, m) {
+                        var x = a[0], y = a[1], z = a[2], w = m[3] * x + m[7] * y + m[11] * z + m[15];
+                        w = w || 1.0;
+                        out[0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) / w;
+                        out[1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) / w;
+                        out[2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) / w;
+                        return out;
+                    }
+                    Vector3.transformMat4 = transformMat4;
+                    var angleTempA = zero(), angleTempB = zero();
+                    function angle(a, b) {
+                        copy(angleTempA, a);
+                        copy(angleTempB, b);
+                        normalize(angleTempA, angleTempA);
+                        normalize(angleTempB, angleTempB);
+                        var cosine = dot(angleTempA, angleTempB);
+                        if (cosine > 1.0) {
+                            return 0;
+                        }
+                        else if (cosine < -1.0) {
+                            return Math.PI;
+                        }
+                        else {
+                            return Math.acos(cosine);
+                        }
+                    }
+                    Vector3.angle = angle;
+                    var rotTemp = zero();
+                    function makeRotation(mat, a, b) {
+                        var by = angle(a, b);
+                        if (Math.abs(by) < 0.0001)
+                            return Matrix4.fromIdentity(mat);
+                        var axis = cross(rotTemp, a, b);
+                        return Matrix4.fromRotation(mat, by, axis);
+                    }
+                    Vector3.makeRotation = makeRotation;
+                })(Vector3 = LinearAlgebra.Vector3 || (LinearAlgebra.Vector3 = {}));
+                function Vector4(x, y, z, w) {
+                    return Vector4.fromValues(x || 0, y || 0, z || 0, w || 0);
+                }
+                LinearAlgebra.Vector4 = Vector4;
+                (function (Vector4) {
+                    function zero() {
+                        // force double backing array by 0.1.
+                        var ret = [0.1, 0, 0, 0];
+                        ret[0] = 0.0;
+                        return ret;
+                    }
+                    Vector4.zero = zero;
+                    function clone(a) {
+                        var out = zero();
                         out[0] = a[0];
                         out[1] = a[1];
                         out[2] = a[2];
@@ -59508,7 +60073,7 @@ var LiteMol;
                     }
                     Vector4.clone = clone;
                     function fromValues(x, y, z, w) {
-                        var out = makeArray(4);
+                        var out = zero();
                         out[0] = x;
                         out[1] = y;
                         out[2] = z;
@@ -59555,291 +60120,6 @@ var LiteMol;
                     Vector4.transform = transform;
                 })(Vector4 = LinearAlgebra.Vector4 || (LinearAlgebra.Vector4 = {}));
             })(LinearAlgebra = Geometry.LinearAlgebra || (Geometry.LinearAlgebra = {}));
-        })(Geometry = Core.Geometry || (Core.Geometry = {}));
-    })(Core = LiteMol.Core || (LiteMol.Core = {}));
-})(LiteMol || (LiteMol = {}));
-/*
- * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
- */
-var LiteMol;
-(function (LiteMol) {
-    var Core;
-    (function (Core) {
-        var Geometry;
-        (function (Geometry) {
-            /**
-             * A buffer that only remembers the values.
-             */
-            var SubdivisionTree3DResultIndexBuffer;
-            (function (SubdivisionTree3DResultIndexBuffer) {
-                function ensureCapacity(buffer) {
-                    var newCapacity = buffer.capacity * 2 + 1, newIdx = new Int32Array(newCapacity), i;
-                    if (buffer.count < 32) {
-                        for (i = 0; i < buffer.count; i++) {
-                            newIdx[i] = buffer.indices[i];
-                        }
-                    }
-                    else {
-                        newIdx.set(buffer.indices);
-                    }
-                    buffer.indices = newIdx;
-                    buffer.capacity = newCapacity;
-                }
-                function add(distSq, index) {
-                    if (this.count + 1 >= this.capacity) {
-                        ensureCapacity(this);
-                    }
-                    this.indices[this.count++] = index;
-                }
-                function reset() {
-                    this.count = 0;
-                }
-                function create(initialCapacity) {
-                    if (initialCapacity < 1)
-                        initialCapacity = 1;
-                    return {
-                        indices: new Int32Array(initialCapacity),
-                        count: 0,
-                        capacity: initialCapacity,
-                        hasPriorities: false,
-                        priorities: void 0,
-                        add: add,
-                        reset: reset
-                    };
-                }
-                SubdivisionTree3DResultIndexBuffer.create = create;
-            })(SubdivisionTree3DResultIndexBuffer = Geometry.SubdivisionTree3DResultIndexBuffer || (Geometry.SubdivisionTree3DResultIndexBuffer = {}));
-            /**
-             * A buffer that remembers values and priorities.
-             */
-            var SubdivisionTree3DResultPriorityBuffer;
-            (function (SubdivisionTree3DResultPriorityBuffer) {
-                function ensureCapacity(buffer) {
-                    var newCapacity = buffer.capacity * 2 + 1, newIdx = new Int32Array(newCapacity), newPrio = new Float32Array(newCapacity), i;
-                    if (buffer.count < 32) {
-                        for (i = 0; i < buffer.count; i++) {
-                            newIdx[i] = buffer.indices[i];
-                            newPrio[i] = buffer.priorities[i];
-                        }
-                    }
-                    else {
-                        newIdx.set(buffer.indices);
-                        newPrio.set(buffer.priorities);
-                    }
-                    buffer.indices = newIdx;
-                    buffer.priorities = newPrio;
-                    buffer.capacity = newCapacity;
-                }
-                function add(distSq, index) {
-                    if (this.count + 1 >= this.capacity)
-                        ensureCapacity(this);
-                    this.priorities[this.count] = distSq;
-                    this.indices[this.count++] = index;
-                }
-                function reset() {
-                    this.count = 0;
-                }
-                function create(initialCapacity) {
-                    if (initialCapacity < 1)
-                        initialCapacity = 1;
-                    return {
-                        indices: new Int32Array(initialCapacity),
-                        count: 0,
-                        capacity: initialCapacity,
-                        hasPriorities: true,
-                        priorities: new Float32Array(initialCapacity),
-                        add: add,
-                        reset: reset
-                    };
-                }
-                SubdivisionTree3DResultPriorityBuffer.create = create;
-            })(SubdivisionTree3DResultPriorityBuffer = Geometry.SubdivisionTree3DResultPriorityBuffer || (Geometry.SubdivisionTree3DResultPriorityBuffer = {}));
-            var SubdivisionTree3DQueryContext;
-            (function (SubdivisionTree3DQueryContext) {
-                /**
-                 * Query the tree and store the result to this.buffer. Overwrites the old result.
-                 */
-                function nearest(x, y, z, radius) {
-                    this.pivot[0] = x;
-                    this.pivot[1] = y;
-                    this.pivot[2] = z;
-                    this.radius = radius;
-                    this.radiusSq = radius * radius;
-                    this.buffer.reset();
-                    SubdivisionTree3DNode.nearest(this.tree.root, this, 0);
-                }
-                function create(tree, buffer) {
-                    return {
-                        tree: tree,
-                        indices: tree.indices,
-                        positions: tree.positions,
-                        buffer: buffer,
-                        pivot: [0.1, 0.1, 0.1],
-                        radius: 1.1,
-                        radiusSq: 1.1 * 1.1,
-                        nearest: nearest
-                    };
-                }
-                SubdivisionTree3DQueryContext.create = create;
-            })(SubdivisionTree3DQueryContext = Geometry.SubdivisionTree3DQueryContext || (Geometry.SubdivisionTree3DQueryContext = {}));
-            var SubdivisionTree3D;
-            (function (SubdivisionTree3D) {
-                /**
-                 * Create a context used for querying the data.
-                 */
-                function createContextRadius(tree, radiusEstimate, includePriorities) {
-                    if (includePriorities === void 0) { includePriorities = false; }
-                    return SubdivisionTree3DQueryContext.create(tree, includePriorities
-                        ? SubdivisionTree3DResultPriorityBuffer.create(Math.max((radiusEstimate * radiusEstimate) | 0, 8))
-                        : SubdivisionTree3DResultIndexBuffer.create(Math.max((radiusEstimate * radiusEstimate) | 0, 8)));
-                }
-                SubdivisionTree3D.createContextRadius = createContextRadius;
-                /**
-                 * Takes data and a function that calls SubdivisionTree3DPositionBuilder.add(x, y, z) on each data element.
-                 */
-                function create(data, f, leafSize) {
-                    if (leafSize === void 0) { leafSize = 32; }
-                    var _a = SubdivisionTree3DBuilder.build(data, f, leafSize), root = _a.root, indices = _a.indices, positions = _a.positions;
-                    return { data: data, root: root, indices: indices, positions: positions };
-                }
-                SubdivisionTree3D.create = create;
-            })(SubdivisionTree3D = Geometry.SubdivisionTree3D || (Geometry.SubdivisionTree3D = {}));
-            var PositionBuilder;
-            (function (PositionBuilder) {
-                function add(builder, x, y, z) {
-                    builder.data[builder._count++] = x;
-                    builder.data[builder._count++] = y;
-                    builder.data[builder._count++] = z;
-                    builder.boundsMin[0] = Math.min(x, builder.boundsMin[0]);
-                    builder.boundsMin[1] = Math.min(y, builder.boundsMin[1]);
-                    builder.boundsMin[2] = Math.min(z, builder.boundsMin[2]);
-                    builder.boundsMax[0] = Math.max(x, builder.boundsMax[0]);
-                    builder.boundsMax[1] = Math.max(y, builder.boundsMax[1]);
-                    builder.boundsMax[2] = Math.max(z, builder.boundsMax[2]);
-                }
-                PositionBuilder.add = add;
-                function create(size) {
-                    var data = new Float32Array((size * 3) | 0);
-                    var bounds = Box3D.createInfinite();
-                    var boundsMin = bounds.min;
-                    var boundsMax = bounds.max;
-                    return { _count: 0, data: data, bounds: bounds, boundsMin: boundsMin, boundsMax: boundsMax };
-                }
-                PositionBuilder.create = create;
-            })(PositionBuilder || (PositionBuilder = {}));
-            var SubdivisionTree3DNode;
-            (function (SubdivisionTree3DNode) {
-                function nearestLeaf(node, ctx) {
-                    var pivot = ctx.pivot, indices = ctx.indices, positions = ctx.positions, rSq = ctx.radiusSq, dx, dy, dz, o, m, i;
-                    for (i = node.startIndex; i < node.endIndex; i++) {
-                        o = 3 * indices[i];
-                        dx = pivot[0] - positions[o];
-                        dy = pivot[1] - positions[o + 1];
-                        dz = pivot[2] - positions[o + 2];
-                        m = dx * dx + dy * dy + dz * dz;
-                        if (m <= rSq)
-                            ctx.buffer.add(m, indices[i]);
-                    }
-                }
-                function nearestNode(node, ctx, dim) {
-                    var pivot = ctx.pivot[dim], left = pivot < node.splitValue;
-                    if (left ? pivot + ctx.radius > node.splitValue : pivot - ctx.radius < node.splitValue) {
-                        nearest(node.left, ctx, (dim + 1) % 3);
-                        nearest(node.right, ctx, (dim + 1) % 3);
-                    }
-                    else if (left) {
-                        nearest(node.left, ctx, (dim + 1) % 3);
-                    }
-                    else {
-                        nearest(node.right, ctx, (dim + 1) % 3);
-                    }
-                }
-                function nearest(node, ctx, dim) {
-                    // check for empty.
-                    if (node.startIndex === node.endIndex)
-                        return;
-                    // is leaf?
-                    if (isNaN(node.splitValue))
-                        nearestLeaf(node, ctx);
-                    else
-                        nearestNode(node, ctx, dim);
-                }
-                SubdivisionTree3DNode.nearest = nearest;
-                function create(splitValue, startIndex, endIndex, left, right) {
-                    return { splitValue: splitValue, startIndex: startIndex, endIndex: endIndex, left: left, right: right };
-                }
-                SubdivisionTree3DNode.create = create;
-            })(SubdivisionTree3DNode = Geometry.SubdivisionTree3DNode || (Geometry.SubdivisionTree3DNode = {}));
-            var Box3D;
-            (function (Box3D) {
-                function createInfinite() {
-                    return {
-                        min: [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE],
-                        max: [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
-                    };
-                }
-                Box3D.createInfinite = createInfinite;
-            })(Box3D = Geometry.Box3D || (Geometry.Box3D = {}));
-            /**
-             * A helper to build the tree.
-             */
-            var SubdivisionTree3DBuilder;
-            (function (SubdivisionTree3DBuilder) {
-                function split(state, startIndex, endIndex, coord) {
-                    var delta = endIndex - startIndex + 1;
-                    if (delta <= 0) {
-                        return state.emptyNode;
-                    }
-                    else if (delta <= state.leafSize) {
-                        return SubdivisionTree3DNode.create(NaN, startIndex, endIndex + 1, state.emptyNode, state.emptyNode);
-                    }
-                    var min = state.bounds.min[coord], max = state.bounds.max[coord], median = 0.5 * (min + max), midIndex = 0, l = startIndex, r = endIndex, t, left, right;
-                    while (l < r) {
-                        t = state.indices[r];
-                        state.indices[r] = state.indices[l];
-                        state.indices[l] = t;
-                        while (l <= endIndex && state.positions[3 * state.indices[l] + coord] <= median)
-                            l++;
-                        while (r >= startIndex && state.positions[3 * state.indices[r] + coord] > median)
-                            r--;
-                    }
-                    midIndex = l - 1;
-                    state.bounds.max[coord] = median;
-                    left = split(state, startIndex, midIndex, (coord + 1) % 3);
-                    state.bounds.max[coord] = max;
-                    state.bounds.min[coord] = median;
-                    right = split(state, midIndex + 1, endIndex, (coord + 1) % 3);
-                    state.bounds.min[coord] = min;
-                    return SubdivisionTree3DNode.create(median, startIndex, endIndex + 1, left, right);
-                }
-                function createAdder(builder) {
-                    var add = PositionBuilder.add;
-                    return function (x, y, z) {
-                        add(builder, x, y, z);
-                    };
-                }
-                function build(data, f, leafSize) {
-                    var positions = PositionBuilder.create(data.length), indices = new Int32Array(data.length);
-                    var add = createAdder(positions);
-                    for (var i = 0; i < data.length; i++) {
-                        indices[i] = i;
-                        f(data[i], add);
-                    }
-                    // help gc
-                    add = void 0;
-                    var state = {
-                        bounds: positions.bounds,
-                        positions: positions.data,
-                        leafSize: leafSize,
-                        indices: indices,
-                        emptyNode: SubdivisionTree3DNode.create(NaN, -1, -1, void 0, void 0),
-                    };
-                    var root = split(state, 0, indices.length - 1, 0);
-                    state = void 0;
-                    return { root: root, indices: indices, positions: positions.data };
-                }
-                SubdivisionTree3DBuilder.build = build;
-            })(SubdivisionTree3DBuilder || (SubdivisionTree3DBuilder = {}));
         })(Geometry = Core.Geometry || (Core.Geometry = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -60028,7 +60308,7 @@ var LiteMol;
                                         r = Math.max(r, dx * dx + dy * dy + dz * dz);
                                     }
                                     surface.boundingSphere = {
-                                        center: { x: x, y: y, z: z },
+                                        center: Geometry.LinearAlgebra.Vector3.fromValues(x, y, z),
                                         radius: Math.sqrt(r)
                                     };
                                     return [2 /*return*/, surface];
@@ -60038,17 +60318,17 @@ var LiteMol;
                 }
                 Surface.computeBoundingSphere = computeBoundingSphere;
                 function transformImmediate(surface, t) {
-                    var p = { x: 0.1, y: 0.1, z: 0.1 };
-                    var m = Geometry.LinearAlgebra.Matrix4.transformVector3;
+                    var p = Geometry.LinearAlgebra.Vector3.zero();
+                    var m = Geometry.LinearAlgebra.Vector3.transformMat4;
                     var vertices = surface.vertices;
                     for (var i = 0, _c = surface.vertices.length; i < _c; i += 3) {
-                        p.x = vertices[i];
-                        p.y = vertices[i + 1];
-                        p.z = vertices[i + 2];
+                        p[0] = vertices[i];
+                        p[1] = vertices[i + 1];
+                        p[2] = vertices[i + 2];
                         m(p, p, t);
-                        vertices[i] = p.x;
-                        vertices[i + 1] = p.y;
-                        vertices[i + 2] = p.z;
+                        vertices[i] = p[0];
+                        vertices[i + 1] = p[1];
+                        vertices[i + 2] = p[2];
                     }
                     surface.normals = void 0;
                     surface.boundingSphere = void 0;
@@ -60066,6 +60346,360 @@ var LiteMol;
                 }
                 Surface.transform = transform;
             })(Surface = Geometry.Surface || (Geometry.Surface = {}));
+        })(Geometry = Core.Geometry || (Core.Geometry = {}));
+    })(Core = LiteMol.Core || (LiteMol.Core = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Core;
+    (function (Core) {
+        var Geometry;
+        (function (Geometry) {
+            var Query3D;
+            (function (Query3D) {
+                var Box3D;
+                (function (Box3D) {
+                    function createInfinite() {
+                        return {
+                            min: [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE],
+                            max: [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
+                        };
+                    }
+                    Box3D.createInfinite = createInfinite;
+                })(Box3D = Query3D.Box3D || (Query3D.Box3D = {}));
+                var QueryContext;
+                (function (QueryContext) {
+                    function add(ctx, distSq, index) {
+                        var buffer = ctx.buffer;
+                        buffer.squaredDistances[buffer.count] = distSq;
+                        buffer.elements[buffer.count++] = buffer.sourceElements[index];
+                    }
+                    QueryContext.add = add;
+                    function resetBuffer(buffer) { buffer.count = 0; }
+                    function createBuffer(sourceElements) {
+                        return {
+                            sourceElements: sourceElements,
+                            elements: [],
+                            count: 0,
+                            squaredDistances: []
+                        };
+                    }
+                    /**
+                     * Query the tree and store the result to this.buffer. Overwrites the old result.
+                     */
+                    function update(ctx, x, y, z, radius) {
+                        ctx.pivot[0] = x;
+                        ctx.pivot[1] = y;
+                        ctx.pivot[2] = z;
+                        ctx.radius = radius;
+                        ctx.radiusSq = radius * radius;
+                        resetBuffer(ctx.buffer);
+                    }
+                    QueryContext.update = update;
+                    function create(structure, sourceElements) {
+                        return {
+                            structure: structure,
+                            buffer: createBuffer(sourceElements),
+                            pivot: [0.1, 0.1, 0.1],
+                            radius: 1.1,
+                            radiusSq: 1.1 * 1.1
+                        };
+                    }
+                    QueryContext.create = create;
+                })(QueryContext = Query3D.QueryContext || (Query3D.QueryContext = {}));
+                var PositionBuilder;
+                (function (PositionBuilder) {
+                    function add(builder, x, y, z) {
+                        builder.data[builder._count++] = x;
+                        builder.data[builder._count++] = y;
+                        builder.data[builder._count++] = z;
+                        builder.boundsMin[0] = Math.min(x, builder.boundsMin[0]);
+                        builder.boundsMin[1] = Math.min(y, builder.boundsMin[1]);
+                        builder.boundsMin[2] = Math.min(z, builder.boundsMin[2]);
+                        builder.boundsMax[0] = Math.max(x, builder.boundsMax[0]);
+                        builder.boundsMax[1] = Math.max(y, builder.boundsMax[1]);
+                        builder.boundsMax[2] = Math.max(z, builder.boundsMax[2]);
+                    }
+                    PositionBuilder.add = add;
+                    function create(size) {
+                        var data = new Float32Array((size * 3) | 0);
+                        var bounds = Box3D.createInfinite();
+                        var boundsMin = bounds.min;
+                        var boundsMax = bounds.max;
+                        return { _count: 0, data: data, bounds: bounds, boundsMin: boundsMin, boundsMax: boundsMax };
+                    }
+                    PositionBuilder.create = create;
+                    function createAdder(builder) {
+                        var add = PositionBuilder.add;
+                        return function (x, y, z) {
+                            add(builder, x, y, z);
+                        };
+                    }
+                    PositionBuilder.createAdder = createAdder;
+                })(PositionBuilder || (PositionBuilder = {}));
+                function createInputData(elements, f) {
+                    var positions = PositionBuilder.create(elements.length);
+                    var indices = new Int32Array(elements.length);
+                    var add = PositionBuilder.createAdder(positions);
+                    for (var i = 0; i < elements.length; i++) {
+                        indices[i] = i;
+                        f(elements[i], add);
+                    }
+                    return { elements: elements, positions: positions.data, bounds: positions.bounds, indices: indices };
+                }
+                Query3D.createInputData = createInputData;
+            })(Query3D = Geometry.Query3D || (Geometry.Query3D = {}));
+        })(Geometry = Core.Geometry || (Core.Geometry = {}));
+    })(Core = LiteMol.Core || (LiteMol.Core = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Core;
+    (function (Core) {
+        var Geometry;
+        (function (Geometry) {
+            var Query3D;
+            (function (Query3D) {
+                var SubdivisionTree3DNode;
+                (function (SubdivisionTree3DNode) {
+                    function nearestLeaf(node, ctx) {
+                        var pivot = ctx.pivot, _a = ctx.structure, indices = _a.indices, positions = _a.positions, rSq = ctx.radiusSq, dx, dy, dz, o, m, i;
+                        for (i = node.startIndex; i < node.endIndex; i++) {
+                            o = 3 * indices[i];
+                            dx = pivot[0] - positions[o];
+                            dy = pivot[1] - positions[o + 1];
+                            dz = pivot[2] - positions[o + 2];
+                            m = dx * dx + dy * dy + dz * dz;
+                            if (m <= rSq)
+                                Query3D.QueryContext.add(ctx, m, indices[i]);
+                        }
+                    }
+                    function nearestNode(node, ctx, dim) {
+                        var pivot = ctx.pivot[dim], left = pivot < node.splitValue;
+                        if (left ? pivot + ctx.radius > node.splitValue : pivot - ctx.radius < node.splitValue) {
+                            nearest(node.left, ctx, (dim + 1) % 3);
+                            nearest(node.right, ctx, (dim + 1) % 3);
+                        }
+                        else if (left) {
+                            nearest(node.left, ctx, (dim + 1) % 3);
+                        }
+                        else {
+                            nearest(node.right, ctx, (dim + 1) % 3);
+                        }
+                    }
+                    function nearest(node, ctx, dim) {
+                        // check for empty.
+                        if (node.startIndex === node.endIndex)
+                            return;
+                        // is leaf?
+                        if (isNaN(node.splitValue))
+                            nearestLeaf(node, ctx);
+                        else
+                            nearestNode(node, ctx, dim);
+                    }
+                    SubdivisionTree3DNode.nearest = nearest;
+                    function create(splitValue, startIndex, endIndex, left, right) {
+                        return { splitValue: splitValue, startIndex: startIndex, endIndex: endIndex, left: left, right: right };
+                    }
+                    SubdivisionTree3DNode.create = create;
+                })(SubdivisionTree3DNode || (SubdivisionTree3DNode = {}));
+                /**
+                 * A helper to build the tree.
+                 */
+                var SubdivisionTree3DBuilder;
+                (function (SubdivisionTree3DBuilder) {
+                    function split(state, startIndex, endIndex, coord) {
+                        var delta = endIndex - startIndex + 1;
+                        if (delta <= 0) {
+                            return state.emptyNode;
+                        }
+                        else if (delta <= state.leafSize) {
+                            return SubdivisionTree3DNode.create(NaN, startIndex, endIndex + 1, state.emptyNode, state.emptyNode);
+                        }
+                        var min = state.bounds.min[coord], max = state.bounds.max[coord], median = 0.5 * (min + max), midIndex = 0, l = startIndex, r = endIndex, t, left, right;
+                        while (l < r) {
+                            t = state.indices[r];
+                            state.indices[r] = state.indices[l];
+                            state.indices[l] = t;
+                            while (l <= endIndex && state.positions[3 * state.indices[l] + coord] <= median)
+                                l++;
+                            while (r >= startIndex && state.positions[3 * state.indices[r] + coord] > median)
+                                r--;
+                        }
+                        midIndex = l - 1;
+                        state.bounds.max[coord] = median;
+                        left = split(state, startIndex, midIndex, (coord + 1) % 3);
+                        state.bounds.max[coord] = max;
+                        state.bounds.min[coord] = median;
+                        right = split(state, midIndex + 1, endIndex, (coord + 1) % 3);
+                        state.bounds.min[coord] = min;
+                        return SubdivisionTree3DNode.create(median, startIndex, endIndex + 1, left, right);
+                    }
+                    function build(_a, leafSize) {
+                        var elements = _a.elements, positions = _a.positions, bounds = _a.bounds, indices = _a.indices;
+                        var state = {
+                            bounds: bounds,
+                            positions: positions,
+                            leafSize: leafSize,
+                            indices: indices,
+                            emptyNode: SubdivisionTree3DNode.create(NaN, -1, -1, void 0, void 0),
+                        };
+                        var root = split(state, 0, indices.length - 1, 0);
+                        return { root: root, indices: indices, positions: positions };
+                    }
+                    SubdivisionTree3DBuilder.build = build;
+                })(SubdivisionTree3DBuilder || (SubdivisionTree3DBuilder = {}));
+                function createSubdivisionTree(data, leafSize) {
+                    if (leafSize === void 0) { leafSize = 32; }
+                    var tree = SubdivisionTree3DBuilder.build(data, leafSize);
+                    return function () {
+                        var ctx = Query3D.QueryContext.create(tree, data.elements);
+                        return function (x, y, z, radius) {
+                            Query3D.QueryContext.update(ctx, x, y, z, radius);
+                            SubdivisionTree3DNode.nearest(tree.root, ctx, 0);
+                            return ctx.buffer;
+                        };
+                    };
+                }
+                Query3D.createSubdivisionTree = createSubdivisionTree;
+            })(Query3D = Geometry.Query3D || (Geometry.Query3D = {}));
+        })(Geometry = Core.Geometry || (Core.Geometry = {}));
+    })(Core = LiteMol.Core || (LiteMol.Core = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Core;
+    (function (Core) {
+        var Geometry;
+        (function (Geometry) {
+            var Query3D;
+            (function (Query3D) {
+                /**
+                 * Adapted from https://github.com/arose/ngl
+                 * MIT License Copyright (C) 2014+ Alexander Rose
+                 */
+                function nearest(ctx) {
+                    var _a = ctx.structure, _b = _a.min, minX = _b[0], minY = _b[1], minZ = _b[2], _c = _a.size, sX = _c[0], sY = _c[1], sZ = _c[2], bucketOffset = _a.bucketOffset, bucketCounts = _a.bucketCounts, bucketArray = _a.bucketArray, grid = _a.grid, positions = _a.positions;
+                    var r = ctx.radius, rSq = ctx.radiusSq, _d = ctx.pivot, x = _d[0], y = _d[1], z = _d[2];
+                    var loX = Math.max(0, (x - r - minX) >> 3 /* Exp */);
+                    var loY = Math.max(0, (y - r - minY) >> 3 /* Exp */);
+                    var loZ = Math.max(0, (z - r - minZ) >> 3 /* Exp */);
+                    var hiX = Math.min(sX, (x + r - minX) >> 3 /* Exp */);
+                    var hiY = Math.min(sY, (y + r - minY) >> 3 /* Exp */);
+                    var hiZ = Math.min(sZ, (z + r - minZ) >> 3 /* Exp */);
+                    for (var ix = loX; ix <= hiX; ix++) {
+                        for (var iy = loY; iy <= hiY; iy++) {
+                            for (var iz = loZ; iz <= hiZ; iz++) {
+                                var idx = (((ix * sY) + iy) * sZ) + iz;
+                                var bucketIdx = grid[idx];
+                                if (bucketIdx > 0) {
+                                    var k = bucketIdx - 1;
+                                    var offset = bucketOffset[k];
+                                    var count = bucketCounts[k];
+                                    var end = offset + count;
+                                    for (var i = offset; i < end; i++) {
+                                        var idx_1 = bucketArray[i];
+                                        var dx = positions[3 * idx_1 + 0] - x;
+                                        var dy = positions[3 * idx_1 + 1] - y;
+                                        var dz = positions[3 * idx_1 + 2] - z;
+                                        var distSq = dx * dx + dy * dy + dz * dz;
+                                        if (distSq <= rSq) {
+                                            Query3D.QueryContext.add(ctx, distSq, idx_1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                function _build(state) {
+                    var bounds = state.bounds, _a = state.size, sX = _a[0], sY = _a[1], sZ = _a[2], positions = state.positions, indices = state.indices;
+                    var n = sX * sY * sZ;
+                    var count = indices.length;
+                    var _b = bounds.min, minX = _b[0], minY = _b[1], minZ = _b[2];
+                    var bucketCount = 0;
+                    var grid = new Uint32Array(n);
+                    var bucketIndex = new Int32Array(count);
+                    for (var i = 0; i < count; i++) {
+                        var x = (positions[3 * i + 0] - minX) >> 3 /* Exp */;
+                        var y = (positions[3 * i + 1] - minY) >> 3 /* Exp */;
+                        var z = (positions[3 * i + 2] - minZ) >> 3 /* Exp */;
+                        var idx = (((x * sY) + y) * sZ) + z;
+                        if ((grid[idx] += 1) === 1) {
+                            bucketCount += 1;
+                        }
+                        bucketIndex[i] = idx;
+                    }
+                    var bucketCounts = new Int32Array(bucketCount);
+                    for (var i = 0, j = 0; i < n; i++) {
+                        var c = grid[i];
+                        if (c > 0) {
+                            grid[i] = j + 1;
+                            bucketCounts[j] = c;
+                            j += 1;
+                        }
+                    }
+                    var bucketOffset = new Uint32Array(count);
+                    for (var i = 1; i < count; ++i) {
+                        bucketOffset[i] += bucketOffset[i - 1] + bucketCounts[i - 1];
+                    }
+                    var bucketFill = new Int32Array(bucketCount);
+                    var bucketArray = new Int32Array(count);
+                    for (var i = 0; i < count; i++) {
+                        var bucketIdx = grid[bucketIndex[i]];
+                        if (bucketIdx > 0) {
+                            var k = bucketIdx - 1;
+                            bucketArray[bucketOffset[k] + bucketFill[k]] = i;
+                            bucketFill[k] += 1;
+                        }
+                    }
+                    return {
+                        size: state.size,
+                        bucketArray: bucketArray,
+                        bucketCounts: bucketCounts,
+                        bucketOffset: bucketOffset,
+                        grid: grid,
+                        min: state.bounds.min,
+                        positions: positions
+                    };
+                }
+                function build(_a) {
+                    var elements = _a.elements, positions = _a.positions, bounds = _a.bounds, indices = _a.indices;
+                    var size = [
+                        ((bounds.max[0] - bounds.min[0]) >> 3 /* Exp */) + 1,
+                        ((bounds.max[1] - bounds.min[1]) >> 3 /* Exp */) + 1,
+                        ((bounds.max[2] - bounds.min[2]) >> 3 /* Exp */) + 1
+                    ];
+                    var state = {
+                        size: size,
+                        positions: positions,
+                        indices: indices,
+                        bounds: bounds
+                    };
+                    return _build(state);
+                }
+                function createSpatialHash(data) {
+                    var tree = build(data);
+                    return function () {
+                        var ctx = Query3D.QueryContext.create(tree, data.elements);
+                        return function (x, y, z, radius) {
+                            Query3D.QueryContext.update(ctx, x, y, z, radius);
+                            nearest(ctx);
+                            return ctx.buffer;
+                        };
+                    };
+                }
+                Query3D.createSpatialHash = createSpatialHash;
+            })(Query3D = Geometry.Query3D || (Geometry.Query3D = {}));
         })(Geometry = Core.Geometry || (Core.Geometry = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -60921,7 +61555,7 @@ var LiteMol;
                         });
                     };
                     MolecularIsoFieldComputation.prototype.finish = function () {
-                        var t = Geometry.LinearAlgebra.Matrix4.empty();
+                        var t = Geometry.LinearAlgebra.Matrix4.zero();
                         Geometry.LinearAlgebra.Matrix4.fromTranslation(t, [this.minX, this.minY, this.minZ]);
                         t[0] = this.dX;
                         t[5] = this.dY;
@@ -60932,8 +61566,8 @@ var LiteMol;
                                 annotationField: this.parameters.interactive ? new Core.Formats.Density.Field3DZYX(this.proximityMap, [this.nX, this.nY, this.nZ]) : void 0,
                                 isoLevel: 0.05
                             },
-                            bottomLeft: { x: this.minX, y: this.minY, z: this.minZ },
-                            topRight: { x: this.maxX, y: this.maxY, z: this.maxZ },
+                            bottomLeft: Geometry.LinearAlgebra.Vector3.fromValues(this.minX, this.minY, this.minZ),
+                            topRight: Geometry.LinearAlgebra.Vector3.fromValues(this.maxX, this.maxY, this.maxZ),
                             transform: t,
                             inputParameters: this.inputParameters,
                             parameters: this.parameters
@@ -61145,6 +61779,71 @@ var LiteMol;
             }());
             Structure.SymmetryInfo = SymmetryInfo;
             /**
+             * Wraps _struct_conn mmCIF category.
+             */
+            var StructConn = (function () {
+                function StructConn(entries) {
+                    this.entries = entries;
+                    this._residuePairIndex = void 0;
+                    this._atomIndex = void 0;
+                }
+                StructConn._resKey = function (rA, rB) {
+                    if (rA < rB)
+                        return rA + "-" + rB;
+                    return rB + "-" + rA;
+                };
+                StructConn.prototype.getResiduePairIndex = function () {
+                    if (this._residuePairIndex)
+                        return this._residuePairIndex;
+                    this._residuePairIndex = Core.Utils.FastMap.create();
+                    for (var _i = 0, _a = this.entries; _i < _a.length; _i++) {
+                        var e = _a[_i];
+                        var ps = e.partners;
+                        var l = ps.length;
+                        for (var i = 0; i < l - 1; i++) {
+                            for (var j = i + i; j < l; j++) {
+                                var key = StructConn._resKey(ps[i].residueIndex, ps[j].residueIndex);
+                                if (this._residuePairIndex.has(key)) {
+                                    this._residuePairIndex.get(key).push(e);
+                                }
+                                else {
+                                    this._residuePairIndex.set(key, [e]);
+                                }
+                            }
+                        }
+                    }
+                    return this._residuePairIndex;
+                };
+                StructConn.prototype.getAtomIndex = function () {
+                    if (this._atomIndex)
+                        return this._atomIndex;
+                    this._atomIndex = Core.Utils.FastMap.create();
+                    for (var _i = 0, _a = this.entries; _i < _a.length; _i++) {
+                        var e = _a[_i];
+                        for (var _c = 0, _d = e.partners; _c < _d.length; _c++) {
+                            var p = _d[_c];
+                            var key = p.atomIndex;
+                            if (this._atomIndex.has(key)) {
+                                this._atomIndex.get(key).push(e);
+                            }
+                            else {
+                                this._atomIndex.set(key, [e]);
+                            }
+                        }
+                    }
+                    return this._atomIndex;
+                };
+                StructConn.prototype.getResidueEntries = function (residueAIndex, residueBIndex) {
+                    return this.getResiduePairIndex().get(StructConn._resKey(residueAIndex, residueBIndex)) || StructConn._emptyEntry;
+                };
+                StructConn.prototype.getAtomEntries = function (atomIndex) {
+                    return this.getAtomIndex().get(atomIndex) || StructConn._emptyEntry;
+                };
+                StructConn._emptyEntry = [];
+                return StructConn;
+            }());
+            Structure.StructConn = StructConn;
+            /**
              * Wraps an assembly operator.
              */
             var AssemblyOperator = (function () {
@@ -61259,6 +61958,13 @@ var LiteMol;
                     atomBIndex: int32,
                     type: DataTable.typedColumn(Int8Array)
                 };
+                Tables.ModifiedResidues = {
+                    asymId: str,
+                    seqNumber: int32,
+                    insCode: nullStr,
+                    parent: str,
+                    details: nullStr
+                };
             })(Tables = Structure.Tables || (Structure.Tables = {}));
             var Operator = (function () {
                 function Operator(matrix, id, isIdentity) {
@@ -61267,19 +61973,19 @@ var LiteMol;
                     this.isIdentity = isIdentity;
                 }
                 Operator.prototype.apply = function (v) {
-                    Core.Geometry.LinearAlgebra.Matrix4.transformVector3(v, v, this.matrix);
+                    Core.Geometry.LinearAlgebra.Vector3.transformMat4(v, v, this.matrix);
                 };
                 Operator.applyToModelUnsafe = function (matrix, m) {
-                    var v = { x: 0.1, y: 0.1, z: 0.1 };
+                    var v = Core.Geometry.LinearAlgebra.Vector3.zero();
                     var _a = m.positions, x = _a.x, y = _a.y, z = _a.z;
                     for (var i = 0, _b = m.positions.count; i < _b; i++) {
-                        v.x = x[i];
-                        v.y = y[i];
-                        v.z = z[i];
-                        Core.Geometry.LinearAlgebra.Matrix4.transformVector3(v, v, matrix);
-                        x[i] = v.x;
-                        y[i] = v.y;
-                        z[i] = v.z;
+                        v[0] = x[i];
+                        v[1] = y[i];
+                        v[2] = z[i];
+                        Core.Geometry.LinearAlgebra.Vector3.transformMat4(v, v, matrix);
+                        x[i] = v[0];
+                        y[i] = v[1];
+                        z[i] = v[2];
                     }
                 };
                 return Operator;
@@ -61315,12 +62021,12 @@ var LiteMol;
                         var _a = model.positions, x = _a.x, y = _a.y, z = _a.z;
                         var tAtoms = model.positions.getBuilder(model.positions.count).seal();
                         var tX = tAtoms.x, tY = tAtoms.y, tZ = tAtoms.z;
-                        var t = { x: 0.0, y: 0.0, z: 0.0 };
+                        var t = Core.Geometry.LinearAlgebra.Vector3.zero();
                         for (var i = 0, _l = model.positions.count; i < _l; i++) {
                             transform(ctx, x[i], y[i], z[i], t);
-                            tX[i] = t.x;
-                            tY[i] = t.y;
-                            tZ[i] = t.z;
+                            tX[i] = t[0];
+                            tY[i] = t[1];
+                            tZ[i] = t[2];
                         }
                         return create({
                             id: model.id,
@@ -61339,6 +62045,238 @@ var LiteMol;
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
 /*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Core;
+    (function (Core) {
+        var Structure;
+        (function (Structure) {
+            'use strict';
+            function isBondTypeCovalent(t) {
+                return t >= 0 /* Unknown */ && t <= 5 /* DisulfideBridge */;
+            }
+            Structure.isBondTypeCovalent = isBondTypeCovalent;
+            // H,D,T are all mapped to H
+            var __ElementIndex = { 'H': 0, 'h': 0, 'D': 0, 'd': 0, 'T': 0, 't': 0, 'He': 2, 'HE': 2, 'he': 2, 'Li': 3, 'LI': 3, 'li': 3, 'Be': 4, 'BE': 4, 'be': 4, 'B': 5, 'b': 5, 'C': 6, 'c': 6, 'N': 7, 'n': 7, 'O': 8, 'o': 8, 'F': 9, 'f': 9, 'Ne': 10, 'NE': 10, 'ne': 10, 'Na': 11, 'NA': 11, 'na': 11, 'Mg': 12, 'MG': 12, 'mg': 12, 'Al': 13, 'AL': 13, 'al': 13, 'Si': 14, 'SI': 14, 'si': 14, 'P': 15, 'p': 15, 'S': 16, 's': 16, 'Cl': 17, 'CL': 17, 'cl': 17, 'Ar': 18, 'AR': 18, 'ar': 18, 'K': 19, 'k': 19, 'Ca': 20, 'CA': 20, 'ca': 20, 'Sc': 21, 'SC': 21, 'sc': 21, 'Ti': 22, 'TI': 22, 'ti': 22, 'V': 23, 'v': 23, 'Cr': 24, 'CR': 24, 'cr': 24, 'Mn': 25, 'MN': 25, 'mn': 25, 'Fe': 26, 'FE': 26, 'fe': 26, 'Co': 27, 'CO': 27, 'co': 27, 'Ni': 28, 'NI': 28, 'ni': 28, 'Cu': 29, 'CU': 29, 'cu': 29, 'Zn': 30, 'ZN': 30, 'zn': 30, 'Ga': 31, 'GA': 31, 'ga': 31, 'Ge': 32, 'GE': 32, 'ge': 32, 'As': 33, 'AS': 33, 'as': 33, 'Se': 34, 'SE': 34, 'se': 34, 'Br': 35, 'BR': 35, 'br': 35, 'Kr': 36, 'KR': 36, 'kr': 36, 'Rb': 37, 'RB': 37, 'rb': 37, 'Sr': 38, 'SR': 38, 'sr': 38, 'Y': 39, 'y': 39, 'Zr': 40, 'ZR': 40, 'zr': 40, 'Nb': 41, 'NB': 41, 'nb': 41, 'Mo': 42, 'MO': 42, 'mo': 42, 'Tc': 43, 'TC': 43, 'tc': 43, 'Ru': 44, 'RU': 44, 'ru': 44, 'Rh': 45, 'RH': 45, 'rh': 45, 'Pd': 46, 'PD': 46, 'pd': 46, 'Ag': 47, 'AG': 47, 'ag': 47, 'Cd': 48, 'CD': 48, 'cd': 48, 'In': 49, 'IN': 49, 'in': 49, 'Sn': 50, 'SN': 50, 'sn': 50, 'Sb': 51, 'SB': 51, 'sb': 51, 'Te': 52, 'TE': 52, 'te': 52, 'I': 53, 'i': 53, 'Xe': 54, 'XE': 54, 'xe': 54, 'Cs': 55, 'CS': 55, 'cs': 55, 'Ba': 56, 'BA': 56, 'ba': 56, 'La': 57, 'LA': 57, 'la': 57, 'Ce': 58, 'CE': 58, 'ce': 58, 'Pr': 59, 'PR': 59, 'pr': 59, 'Nd': 60, 'ND': 60, 'nd': 60, 'Pm': 61, 'PM': 61, 'pm': 61, 'Sm': 62, 'SM': 62, 'sm': 62, 'Eu': 63, 'EU': 63, 'eu': 63, 'Gd': 64, 'GD': 64, 'gd': 64, 'Tb': 65, 'TB': 65, 'tb': 65, 'Dy': 66, 'DY': 66, 'dy': 66, 'Ho': 67, 'HO': 67, 'ho': 67, 'Er': 68, 'ER': 68, 'er': 68, 'Tm': 69, 'TM': 69, 'tm': 69, 'Yb': 70, 'YB': 70, 'yb': 70, 'Lu': 71, 'LU': 71, 'lu': 71, 'Hf': 72, 'HF': 72, 'hf': 72, 'Ta': 73, 'TA': 73, 'ta': 73, 'W': 74, 'w': 74, 'Re': 75, 'RE': 75, 're': 75, 'Os': 76, 'OS': 76, 'os': 76, 'Ir': 77, 'IR': 77, 'ir': 77, 'Pt': 78, 'PT': 78, 'pt': 78, 'Au': 79, 'AU': 79, 'au': 79, 'Hg': 80, 'HG': 80, 'hg': 80, 'Tl': 81, 'TL': 81, 'tl': 81, 'Pb': 82, 'PB': 82, 'pb': 82, 'Bi': 83, 'BI': 83, 'bi': 83, 'Po': 84, 'PO': 84, 'po': 84, 'At': 85, 'AT': 85, 'at': 85, 'Rn': 86, 'RN': 86, 'rn': 86, 'Fr': 87, 'FR': 87, 'fr': 87, 'Ra': 88, 'RA': 88, 'ra': 88, 'Ac': 89, 'AC': 89, 'ac': 89, 'Th': 90, 'TH': 90, 'th': 90, 'Pa': 91, 'PA': 91, 'pa': 91, 'U': 92, 'u': 92, 'Np': 93, 'NP': 93, 'np': 93, 'Pu': 94, 'PU': 94, 'pu': 94, 'Am': 95, 'AM': 95, 'am': 95, 'Cm': 96, 'CM': 96, 'cm': 96, 'Bk': 97, 'BK': 97, 'bk': 97, 'Cf': 98, 'CF': 98, 'cf': 98, 'Es': 99, 'ES': 99, 'es': 99, 'Fm': 100, 'FM': 100, 'fm': 100, 'Md': 101, 'MD': 101, 'md': 101, 'No': 102, 'NO': 102, 'no': 102, 'Lr': 103, 'LR': 103, 'lr': 103, 'Rf': 104, 'RF': 104, 'rf': 104, 'Db': 105, 'DB': 105, 'db': 105, 'Sg': 106, 'SG': 106, 'sg': 106, 'Bh': 107, 'BH': 107, 'bh': 107, 'Hs': 108, 'HS': 108, 'hs': 108, 'Mt': 109, 'MT': 109, 'mt': 109 };
+            var __ElementBondThresholds = { 0: 1.42, 1: 1.42, 3: 2.7, 4: 2.7, 6: 1.75, 7: 1.6, 8: 1.52, 11: 2.7, 12: 2.7, 13: 2.7, 14: 1.9, 15: 1.9, 16: 1.9, 17: 1.8, 19: 2.7, 20: 2.7, 21: 2.7, 22: 2.7, 23: 2.7, 24: 2.7, 25: 2.7, 26: 2.7, 27: 2.7, 28: 2.7, 29: 2.7, 30: 2.7, 31: 2.7, 33: 2.68, 37: 2.7, 38: 2.7, 39: 2.7, 40: 2.7, 41: 2.7, 42: 2.7, 43: 2.7, 44: 2.7, 45: 2.7, 46: 2.7, 47: 2.7, 48: 2.7, 49: 2.7, 50: 2.7, 55: 2.7, 56: 2.7, 57: 2.7, 58: 2.7, 59: 2.7, 60: 2.7, 61: 2.7, 62: 2.7, 63: 2.7, 64: 2.7, 65: 2.7, 66: 2.7, 67: 2.7, 68: 2.7, 69: 2.7, 70: 2.7, 71: 2.7, 72: 2.7, 73: 2.7, 74: 2.7, 75: 2.7, 76: 2.7, 77: 2.7, 78: 2.7, 79: 2.7, 80: 2.7, 81: 2.7, 82: 2.7, 83: 2.7, 87: 2.7, 88: 2.7, 89: 2.7, 90: 2.7, 91: 2.7, 92: 2.7, 93: 2.7, 94: 2.7, 95: 2.7, 96: 2.7, 97: 2.7, 98: 2.7, 99: 2.7, 100: 2.7, 101: 2.7, 102: 2.7, 103: 2.7, 104: 2.7, 105: 2.7, 106: 2.7, 107: 2.7, 108: 2.7, 109: 2.88 };
+            var __ElementPairThresholds = { 0: 0.8, 20: 1.31, 27: 1.3, 35: 1.3, 44: 1.05, 54: 1, 60: 1.84, 72: 1.88, 84: 1.75, 85: 1.56, 86: 1.76, 98: 1.6, 99: 1.68, 100: 1.63, 112: 1.55, 113: 1.59, 114: 1.36, 129: 1.45, 144: 1.6, 170: 1.4, 180: 1.55, 202: 2.4, 222: 2.24, 224: 1.91, 225: 1.98, 243: 2.02, 269: 2, 293: 1.9, 480: 2.3, 512: 2.3, 544: 2.3, 612: 2.1, 629: 1.54, 665: 1, 813: 2.6, 854: 2.27, 894: 1.93, 896: 2.1, 937: 2.05, 938: 2.06, 981: 1.62, 1258: 2.68, 1309: 2.33, 1484: 1, 1763: 2.14, 1823: 2.48, 1882: 2.1, 1944: 1.72, 2380: 2.34, 3367: 2.44, 3733: 2.11, 3819: 2.6, 3821: 2.36, 4736: 2.75, 5724: 2.73, 5959: 2.63, 6519: 2.84, 6750: 2.87, 8991: 2.81 };
+            var DefaultBondingRadius = 2.001;
+            var MetalsSet = (function () {
+                var metals = ['LI', 'NA', 'K', 'RB', 'CS', 'FR', 'BE', 'MG', 'CA', 'SR', 'BA', 'RA', 'AL', 'GA', 'IN', 'SN', 'TL', 'PB', 'BI', 'SC', 'TI', 'V', 'CR', 'MN', 'FE', 'CO', 'NI', 'CU', 'ZN', 'Y', 'ZR', 'NB', 'MO', 'TC', 'RU', 'RH', 'PD', 'AG', 'CD', 'LA', 'HF', 'TA', 'W', 'RE', 'OS', 'IR', 'PT', 'AU', 'HG', 'AC', 'RF', 'DB', 'SG', 'BH', 'HS', 'MT', 'CE', 'PR', 'ND', 'PM', 'SM', 'EU', 'GD', 'TB', 'DY', 'HO', 'ER', 'TM', 'YB', 'LU', 'TH', 'PA', 'U', 'NP', 'PU', 'AM', 'CM', 'BK', 'CF', 'ES', 'FM', 'MD', 'NO', 'LR'];
+                var set = Core.Utils.FastSet.create();
+                for (var _i = 0, metals_1 = metals; _i < metals_1.length; _i++) {
+                    var m = metals_1[_i];
+                    set.add(__ElementIndex[m]);
+                }
+                return set;
+            })();
+            function pair(a, b) {
+                if (a < b)
+                    return (a + b) * (a + b + 1) / 2 + b;
+                else
+                    return (a + b) * (a + b + 1) / 2 + a;
+            }
+            function idx(e) {
+                var i = __ElementIndex[e];
+                if (i === void 0)
+                    return -1;
+                return i;
+            }
+            function pairThreshold(i, j) {
+                if (i < 0 || j < 0)
+                    return -1;
+                var r = __ElementPairThresholds[pair(i, j)];
+                if (r === void 0)
+                    return -1;
+                return r;
+            }
+            function threshold(i) {
+                if (i < 0)
+                    return DefaultBondingRadius;
+                var r = __ElementBondThresholds[i];
+                if (r === void 0)
+                    return DefaultBondingRadius;
+                return r;
+            }
+            var H_ID = __ElementIndex['H'];
+            function isHydrogen(i) {
+                return i === H_ID;
+            }
+            function isMetal(e) {
+                var i = __ElementIndex[e];
+                if (i === void 0)
+                    return false;
+                return MetalsSet.has(i);
+            }
+            function bondsFromInput(model, atomIndices) {
+                var bonds = model.data.bonds.input;
+                if (atomIndices.length === model.data.atoms.count)
+                    return bonds;
+                var mask = Core.Utils.Mask.ofIndices(model.data.atoms.count, atomIndices);
+                var a = bonds.atomAIndex, b = bonds.atomBIndex, t = bonds.type;
+                var count = 0;
+                for (var i = 0, __i = bonds.count; i < __i; i++) {
+                    if (!mask.has(a[i]) || !mask.has(b[i]))
+                        continue;
+                    count++;
+                }
+                var ret = Core.Utils.DataTable.ofDefinition(Structure.Tables.Bonds, count);
+                var atomAIndex = ret.atomAIndex, atomBIndex = ret.atomBIndex, type = ret.type;
+                var elementSymbol = model.data.atoms.elementSymbol;
+                var offset = 0;
+                for (var i = 0, __i = bonds.count; i < __i; i++) {
+                    var u = a[i], v = b[i];
+                    if (!mask.has(u) || !mask.has(v))
+                        continue;
+                    atomAIndex[offset] = u;
+                    atomBIndex[offset] = v;
+                    var metal = isMetal(elementSymbol[u]) || isMetal(elementSymbol[v]);
+                    type[offset] = metal ? 6 /* Metallic */ : t[i];
+                    offset++;
+                }
+                return ret;
+            }
+            var ChunkedAdd = Core.Utils.ChunkedArray.add;
+            function addComponentBonds(_a, rI) {
+                var model = _a.model, mask = _a.mask, atomA = _a.atomA, atomB = _a.atomB, type = _a.type;
+                var _b = model.data.residues, atomStartIndex = _b.atomStartIndex, atomEndIndex = _b.atomEndIndex, residueName = _b.name;
+                var _c = model.data.atoms, atomName = _c.name, altLoc = _c.altLoc, elementSymbol = _c.elementSymbol;
+                var map = model.data.bonds.component.entries.get(residueName[rI]).map;
+                var start = atomStartIndex[rI], end = atomEndIndex[rI];
+                for (var i = start; i < end - 1; i++) {
+                    if (!mask.has(i))
+                        continue;
+                    var pairs = map.get(atomName[i]);
+                    if (!pairs)
+                        continue;
+                    var altA = altLoc[i];
+                    var isMetalA = isMetal(elementSymbol[i]);
+                    for (var j = i + 1; j < end; j++) {
+                        if (!mask.has(j))
+                            continue;
+                        var altB = altLoc[j];
+                        if (altA && altB && altA !== altB)
+                            continue;
+                        var order = pairs.get(atomName[j]);
+                        if (order === void 0)
+                            continue;
+                        var metal = isMetalA || isMetal(elementSymbol[j]);
+                        ChunkedAdd(atomA, i);
+                        ChunkedAdd(atomB, j);
+                        ChunkedAdd(type, metal ? 6 /* Metallic */ : order);
+                    }
+                }
+            }
+            function _computeBonds(model, atomIndices, params) {
+                var MAX_RADIUS = 3;
+                var _a = model.data.bonds, structConn = _a.structConn, component = _a.component;
+                var _b = model.positions, x = _b.x, y = _b.y, z = _b.z;
+                var _c = model.data.atoms, elementSymbol = _c.elementSymbol, residueIndex = _c.residueIndex, altLoc = _c.altLoc;
+                var residueName = model.data.residues.name;
+                var query3d = model.queryContext.lookup3d();
+                var atomA = Core.Utils.ChunkedArray.create(function (size) { return new Int32Array(size); }, (atomIndices.length * 1.33) | 0, 1);
+                var atomB = Core.Utils.ChunkedArray.create(function (size) { return new Int32Array(size); }, (atomIndices.length * 1.33) | 0, 1);
+                var type = Core.Utils.ChunkedArray.create(function (size) { return new Uint8Array(size); }, (atomIndices.length * 1.33) | 0, 1);
+                var mask = Core.Utils.Mask.ofIndices(model.data.atoms.count, atomIndices);
+                var state = { model: model, mask: mask, atomA: atomA, atomB: atomB, type: type };
+                var lastResidue = -1;
+                var hasComponent = false;
+                for (var _i = 0, atomIndices_1 = atomIndices; _i < atomIndices_1.length; _i++) {
+                    var aI = atomIndices_1[_i];
+                    var raI = residueIndex[aI];
+                    if (!params.forceCompute && raI !== lastResidue) {
+                        hasComponent = !!component && component.entries.has(residueName[raI]);
+                        if (hasComponent) {
+                            addComponentBonds(state, raI);
+                        }
+                    }
+                    lastResidue = raI;
+                    var aeI = idx(elementSymbol[aI]);
+                    var _d = query3d(x[aI], y[aI], z[aI], MAX_RADIUS), elements = _d.elements, count = _d.count, squaredDistances = _d.squaredDistances;
+                    var isHa = isHydrogen(aeI);
+                    var thresholdA = threshold(aeI);
+                    var altA = altLoc[aI];
+                    var metalA = MetalsSet.has(aeI);
+                    var structConnEntries = params.forceCompute ? void 0 : structConn && structConn.getAtomEntries(aI);
+                    for (var ni = 0; ni < count; ni++) {
+                        var bI = elements[ni];
+                        if (bI <= aI || !mask.has(bI))
+                            continue;
+                        var altB = altLoc[bI];
+                        if (altA && altB && altA !== altB)
+                            continue;
+                        var rbI = residueIndex[bI];
+                        if (raI === rbI && hasComponent)
+                            continue;
+                        var beI = idx(elementSymbol[bI]);
+                        var isHb = isHydrogen(beI);
+                        if (isHa && isHb)
+                            continue;
+                        var dist = Math.sqrt(squaredDistances[ni]);
+                        if (dist === 0)
+                            continue;
+                        if (structConnEntries) {
+                            var added = false;
+                            for (var _e = 0, structConnEntries_1 = structConnEntries; _e < structConnEntries_1.length; _e++) {
+                                var se = structConnEntries_1[_e];
+                                for (var _f = 0, _g = se.partners; _f < _g.length; _f++) {
+                                    var p = _g[_f];
+                                    if (p.atomIndex === bI) {
+                                        ChunkedAdd(atomA, aI);
+                                        ChunkedAdd(atomB, bI);
+                                        ChunkedAdd(type, se.bondType);
+                                        added = true;
+                                        break;
+                                    }
+                                }
+                                if (added)
+                                    break;
+                            }
+                            if (added)
+                                continue;
+                        }
+                        if (isHa || isHb) {
+                            if (dist < params.maxHbondLength) {
+                                ChunkedAdd(atomA, aI);
+                                ChunkedAdd(atomB, bI);
+                                ChunkedAdd(type, 1 /* Single */);
+                            }
+                            continue;
+                        }
+                        var thresholdAB = pairThreshold(aeI, beI);
+                        var pairingThreshold = thresholdAB > 0
+                            ? thresholdAB
+                            : beI < 0 ? thresholdA : Math.max(thresholdA, threshold(beI));
+                        var metalB = MetalsSet.has(beI);
+                        if (dist <= pairingThreshold) {
+                            ChunkedAdd(atomA, aI);
+                            ChunkedAdd(atomB, bI);
+                            ChunkedAdd(type, metalA || metalB ? 6 /* Metallic */ : 1 /* Single */);
+                        }
+                    }
+                }
+                var ret = Core.Utils.DataTable.builder(atomA.elementCount);
+                ret.addRawColumn('atomAIndex', function (s) { return new Int32Array(s); }, Core.Utils.ChunkedArray.compact(atomA));
+                ret.addRawColumn('atomBIndex', function (s) { return new Int32Array(s); }, Core.Utils.ChunkedArray.compact(atomB));
+                ret.addRawColumn('type', function (s) { return new Uint8Array(s); }, Core.Utils.ChunkedArray.compact(type));
+                var dataTable = ret.seal();
+                return dataTable;
+            }
+            function computeBonds(model, atomIndices, params) {
+                if (model.data.bonds.input)
+                    return bondsFromInput(model, atomIndices);
+                return _computeBonds(model, atomIndices, {
+                    maxHbondLength: (params && params.maxHbondLength) || 1.15,
+                    forceCompute: !!(params && params.forceCompute),
+                });
+            }
+            Structure.computeBonds = computeBonds;
+        })(Structure = Core.Structure || (Core.Structure = {}));
+    })(Core = LiteMol.Core || (LiteMol.Core = {}));
+})(LiteMol || (LiteMol = {}));
+/*
  * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
@@ -61353,7 +62291,7 @@ var LiteMol;
             var Spacegroup = (function () {
                 function Spacegroup(info) {
                     this.info = info;
-                    this.temp = Mat4.empty();
+                    this.temp = Mat4.zero();
                     this.tempV = new Float64Array(4);
                     if (SpacegroupTables.Spacegroup[info.spacegroupName] === void 0) {
                         throw "'" + info.spacegroupName + "' is not a spacegroup recognized by the library.";
@@ -61375,18 +62313,16 @@ var LiteMol;
                     Mat4.fromTranslation(this.temp, this.tempV);
                     Mat4.mul(target, Mat4.mul(target, Mat4.mul(target, this.space.fromFrac, this.temp), this.operators[index]), this.space.toFrac);
                     return target;
-                    //this.temp.setPosition(this.tempV.set(i, j, k));
-                    //return target.copy(this.space.fromFrac).multiply(this.temp).multiply(this.operators[index]).multiply(this.space.toFrac);
                 };
                 Spacegroup.prototype.getSpace = function () {
-                    var toFrac = this.info.toFracTransform, fromFrac = Mat4.empty();
+                    var toFrac = this.info.toFracTransform, fromFrac = Mat4.zero();
                     Mat4.invert(fromFrac, toFrac);
                     return {
                         toFrac: toFrac,
                         fromFrac: fromFrac,
-                        baseX: Vec4.transform(Vec4.create(), Vec4.fromValues(1, 0, 0, 1), toFrac),
-                        baseY: Vec4.transform(Vec4.create(), Vec4.fromValues(0, 1, 0, 1), toFrac),
-                        baseZ: Vec4.transform(Vec4.create(), Vec4.fromValues(0, 0, 1, 1), toFrac)
+                        baseX: Vec4.transform(Vec4.zero(), Vec4.fromValues(1, 0, 0, 1), toFrac),
+                        baseY: Vec4.transform(Vec4.zero(), Vec4.fromValues(0, 1, 0, 1), toFrac),
+                        baseZ: Vec4.transform(Vec4.zero(), Vec4.fromValues(0, 0, 1, 1), toFrac)
                     };
                 };
                 Spacegroup.getOperator = function (ids) {
@@ -62745,37 +63681,35 @@ var LiteMol;
             var SymmetryHelpers;
             (function (SymmetryHelpers) {
                 var Mat4 = Core.Geometry.LinearAlgebra.Matrix4;
+                var Vec3 = Core.Geometry.LinearAlgebra.Vector3;
                 function getBoudingSphere(arrays, indices) {
                     var x = arrays.x, y = arrays.y, z = arrays.z;
-                    var center = { x: 0, y: 0, z: 0 };
-                    for (var _i = 0, indices_1 = indices; _i < indices_1.length; _i++) {
-                        var aI = indices_1[_i];
-                        center.x += x[aI];
-                        center.y += y[aI];
-                        center.z += z[aI];
+                    var center = Vec3.zero();
+                    for (var _i = 0, indices_3 = indices; _i < indices_3.length; _i++) {
+                        var aI = indices_3[_i];
+                        center[0] += x[aI];
+                        center[1] += y[aI];
+                        center[2] += z[aI];
                     }
                     var count = indices.length > 0 ? indices.length : 1;
-                    center.x /= count;
-                    center.y /= count;
-                    center.z /= count;
+                    center[0] /= count;
+                    center[1] /= count;
+                    center[2] /= count;
                     var r = 0;
-                    for (var _a = 0, indices_2 = indices; _a < indices_2.length; _a++) {
-                        var aI = indices_2[_a];
+                    for (var _a = 0, indices_4 = indices; _a < indices_4.length; _a++) {
+                        var aI = indices_4[_a];
                         r = Math.max(indexedVectorDistSq(aI, center, arrays), r);
                     }
                     return { center: center, radius: Math.sqrt(r) };
                 }
-                function newVec() { return { x: 0, y: 0, z: 0 }; }
-                ;
                 function getSphereDist(c, r, q) {
-                    var dx = c.x - q.center.x, dy = c.y - q.center.y, dz = c.z - q.center.z;
-                    return Math.sqrt(dx * dx + dy * dy + dz * dz) - (r + q.radius);
+                    return Vec3.distance(c, q.center) - (r + q.radius);
                 }
                 function isWithinRadius(bounds, i, data, t, r, v) {
-                    v.x = data.x[i];
-                    v.y = data.y[i];
-                    v.z = data.z[i];
-                    Mat4.transformVector3(v, v, t);
+                    v[0] = data.x[i];
+                    v[1] = data.y[i];
+                    v[2] = data.z[i];
+                    Vec3.transformMat4(v, v, t);
                     return getSphereDist(v, data.r[i], bounds) <= r;
                 }
                 function indexedDistSq(aI, cI, arrays) {
@@ -62783,7 +63717,7 @@ var LiteMol;
                     return dx * dx + dy * dy + dz * dz;
                 }
                 function indexedVectorDistSq(aI, v, arrays) {
-                    var dx = arrays.x[aI] - v.x, dy = arrays.y[aI] - v.y, dz = arrays.z[aI] - v.z;
+                    var dx = arrays.x[aI] - v[0], dy = arrays.y[aI] - v[1], dz = arrays.z[aI] - v[2];
                     return dx * dx + dy * dy + dz * dz;
                 }
                 function createSymmetryContext(model, boundingInfo, spacegroup, radius) {
@@ -62792,13 +63726,13 @@ var LiteMol;
                         boundingInfo: boundingInfo,
                         spacegroup: spacegroup,
                         radius: radius,
-                        transform: Mat4.empty(),
-                        transformed: { x: 0, y: 0, z: 0 },
+                        transform: Mat4.zero(),
+                        transformed: Vec3.zero(),
                         i: 0, j: 0, k: 0, op: 0
                     };
                 }
                 function symmetryContextMap(ctx, p) {
-                    return Mat4.transformVector3(ctx.transformed, p, ctx.transform);
+                    return Vec3.transformMat4(ctx.transformed, p, ctx.transform);
                 }
                 function symmetryContextGetTransform(ctx) {
                     return createSymmetryTransform(ctx.i, ctx.j, ctx.k, ctx.op, Mat4.clone(ctx.transform));
@@ -62838,61 +63772,49 @@ var LiteMol;
                 function getBoundingInfo(model, pivotIndices) {
                     var atoms = model.data.atoms, residues = model.data.residues, chains = model.data.chains, entities = model.data.entities, _a = model.positions, x = _a.x, y = _a.y, z = _a.z;
                     var entityTable = DataTable.builder(entities.count), eX = entityTable.addColumn('x', function (s) { return new Float64Array(s); }), eY = entityTable.addColumn('y', function (s) { return new Float64Array(s); }), eZ = entityTable.addColumn('z', function (s) { return new Float64Array(s); }), eR = entityTable.addColumn('r', function (s) { return new Float64Array(s); }), chainTable = DataTable.builder(chains.count), cX = chainTable.addColumn('x', function (s) { return new Float64Array(s); }), cY = chainTable.addColumn('y', function (s) { return new Float64Array(s); }), cZ = chainTable.addColumn('z', function (s) { return new Float64Array(s); }), cR = chainTable.addColumn('r', function (s) { return new Float64Array(s); }), residueTable = DataTable.builder(residues.count), rX = residueTable.addColumn('x', function (s) { return new Float64Array(s); }), rY = residueTable.addColumn('y', function (s) { return new Float64Array(s); }), rZ = residueTable.addColumn('z', function (s) { return new Float64Array(s); }), rR = residueTable.addColumn('r', function (s) { return new Float64Array(s); });
-                    var allCenter = newVec(), allRadius = 0, pivotCenter = newVec(), pivotRadius = 0, n = 0, eCenter = newVec(), eRadius = 0, cCenter = newVec(), cRadius = 0, rCenter = newVec(), rRadius = 0;
+                    var allCenter = Vec3.zero(), allRadius = 0, pivotCenter = Vec3.zero(), pivotRadius = 0, n = 0, eCenter = Vec3.zero(), eRadius = 0, cCenter = Vec3.zero(), cRadius = 0, rCenter = Vec3.zero(), rRadius = 0;
                     for (var eI = 0, _eC = entities.count; eI < _eC; eI++) {
-                        eCenter.x = 0;
-                        eCenter.y = 0;
-                        eCenter.z = 0;
+                        Vec3.set(eCenter, 0, 0, 0);
                         for (var cI = entities.chainStartIndex[eI], _cC = entities.chainEndIndex[eI]; cI < _cC; cI++) {
-                            cCenter.x = 0;
-                            cCenter.y = 0;
-                            cCenter.z = 0;
+                            Vec3.set(cCenter, 0, 0, 0);
                             for (var rI = chains.residueStartIndex[cI], _rC = chains.residueEndIndex[cI]; rI < _rC; rI++) {
-                                rCenter.x = 0;
-                                rCenter.y = 0;
-                                rCenter.z = 0;
+                                Vec3.set(rCenter, 0, 0, 0);
                                 for (var aI = residues.atomStartIndex[rI], _aC = residues.atomEndIndex[rI]; aI < _aC; aI++) {
-                                    rCenter.x += x[aI];
-                                    rCenter.y += y[aI];
-                                    rCenter.z += z[aI];
+                                    rCenter[0] += x[aI];
+                                    rCenter[1] += y[aI];
+                                    rCenter[2] += z[aI];
                                 }
-                                allCenter.x += rCenter.x;
-                                allCenter.y += rCenter.y;
-                                allCenter.z += rCenter.z;
+                                Vec3.add(allCenter, allCenter, rCenter);
                                 n = residues.atomEndIndex[rI] - residues.atomStartIndex[rI];
-                                cCenter.x += rCenter.x;
-                                cCenter.y += rCenter.y;
-                                cCenter.z += rCenter.z;
-                                rX[rI] = rCenter.x / n;
-                                rY[rI] = rCenter.y / n;
-                                rZ[rI] = rCenter.z / n;
+                                Vec3.add(cCenter, cCenter, rCenter);
+                                rX[rI] = rCenter[0] / n;
+                                rY[rI] = rCenter[1] / n;
+                                rZ[rI] = rCenter[2] / n;
                             }
-                            eCenter.x += cCenter.x;
-                            eCenter.y += cCenter.y;
-                            eCenter.z += cCenter.z;
+                            Vec3.add(eCenter, eCenter, cCenter);
                             n = chains.atomEndIndex[cI] - chains.atomStartIndex[cI];
-                            cX[cI] = cCenter.x / n;
-                            cY[cI] = cCenter.y / n;
-                            cZ[cI] = cCenter.z / n;
+                            cX[cI] = cCenter[0] / n;
+                            cY[cI] = cCenter[1] / n;
+                            cZ[cI] = cCenter[2] / n;
                         }
                         n = entities.atomEndIndex[eI] - entities.atomStartIndex[eI];
-                        eX[eI] = eCenter.x / n;
-                        eY[eI] = eCenter.y / n;
-                        eZ[eI] = eCenter.z / n;
+                        eX[eI] = eCenter[0] / n;
+                        eY[eI] = eCenter[1] / n;
+                        eZ[eI] = eCenter[2] / n;
                     }
-                    allCenter.x /= atoms.count;
-                    allCenter.y /= atoms.count;
-                    allCenter.z /= atoms.count;
+                    allCenter[0] /= atoms.count;
+                    allCenter[1] /= atoms.count;
+                    allCenter[2] /= atoms.count;
                     for (var _i = 0, pivotIndices_1 = pivotIndices; _i < pivotIndices_1.length; _i++) {
                         var aI = pivotIndices_1[_i];
-                        pivotCenter.x += x[aI];
-                        pivotCenter.y += y[aI];
-                        pivotCenter.z += z[aI];
+                        pivotCenter[0] += x[aI];
+                        pivotCenter[1] += y[aI];
+                        pivotCenter[2] += z[aI];
                     }
                     var pivotCount = pivotIndices.length > 0 ? pivotIndices.length : 1;
-                    pivotCenter.x /= pivotCount;
-                    pivotCenter.y /= pivotCount;
-                    pivotCenter.z /= pivotCount;
+                    pivotCenter[0] /= pivotCount;
+                    pivotCenter[1] /= pivotCount;
+                    pivotCenter[2] /= pivotCount;
                     var eDA = { x: x, y: y, z: z, cX: eX, cY: eY, cZ: eZ }, cDA = { x: x, y: y, z: z, cX: cX, cY: cY, cZ: cZ }, rDA = { x: x, y: y, z: z, cX: rX, cY: rY, cZ: rZ };
                     for (var eI = 0, _eC = entities.count; eI < _eC; eI++) {
                         eRadius = 0;
@@ -62938,7 +63860,6 @@ var LiteMol;
                         for (var j = -3; j <= 3; j++) {
                             for (var k = -3; k <= 3; k++) {
                                 for (var l = (i === 0 && j === 0 && k === 0 ? 1 : 0), lm = sg.operatorCount; l < lm; l++) {
-                                    //for (let l = 0, lm = sg.operatorCount; l < lm; l++) {                            
                                     sg.getOperatorMatrix(l, i, j, k, ctx.transform);
                                     ctx.i = i;
                                     ctx.k = k;
@@ -62958,10 +63879,9 @@ var LiteMol;
                     var bounds = ctx.boundingInfo, radius = ctx.radius, targetBounds = bounds.target;
                     var model = ctx.model, residues = model.data.residues, chains = model.data.chains, entities = model.data.entities;
                     var residueIndices = Core.Utils.ChunkedArray.create(function (s) { return new Int32Array(s); }, residues.count, 1), operatorIndices = Core.Utils.ChunkedArray.create(function (s) { return new Int32Array(s); }, residues.count, 1);
-                    var v = { x: 0, y: 0, z: 0 }, opIndex = 0;
+                    var v = Vec3.zero(), opIndex = 0;
                     var atomCount = 0, chainCount = 0, entityCount = 0;
                     for (var eI = 0, _eC = entities.count; eI < _eC; eI++) {
-                        //if (!isWithinRadius(hetBounds, eI, bounds.entities, t.transform, radius, v)) continue;
                         opIndex = 0;
                         var chainAdded = false;
                         for (var _i = 0, transforms_1 = transforms; _i < transforms_1.length; _i++) {
@@ -63027,7 +63947,7 @@ var LiteMol;
                             };
                         }
                     }
-                    var assemblyResidueParts = assemblyParts.residues, assemblyOpParts = assemblyParts.operators, temp = { x: 0, y: 0, z: 0 }, atomOffset = 0;
+                    var assemblyResidueParts = assemblyParts.residues, assemblyOpParts = assemblyParts.operators, temp = Core.Geometry.LinearAlgebra.Vector3.zero(), atomOffset = 0;
                     var rI = assemblyResidueParts[0], currentChain = residueChainIndex[rI], currentEntity = residueEntityIndex[rI], currentOp = assemblyOpParts[0], currentAsymId, currentAuthAsymId;
                     // setup entity table
                     cloneRow(srcEntityData, residueEntityIndex[rI], entityData, 0, srcEntityData.length);
@@ -63113,13 +64033,11 @@ var LiteMol;
                         residueAsymId[residueOffset] = currentAsymId;
                         residueAuthAsymId[residueOffset] = currentAuthAsymId;
                         for (var aI = residueAtomStartIndex[rI], _mAI = residueAtomEndIndex[rI]; aI < _mAI; aI++) {
-                            temp.x = x[aI];
-                            temp.y = y[aI];
-                            temp.z = z[aI];
-                            Mat4.transformVector3(temp, temp, transform.transform);
-                            atomX[atomOffset] = temp.x;
-                            atomY[atomOffset] = temp.y;
-                            atomZ[atomOffset] = temp.z;
+                            Vec3.set(temp, x[aI], y[aI], z[aI]);
+                            Vec3.transformMat4(temp, temp, transform.transform);
+                            atomX[atomOffset] = temp[0];
+                            atomY[atomOffset] = temp[1];
+                            atomZ[atomOffset] = temp[2];
                             atomId[atomOffset] = atomOffset + 1;
                             atomResidue[atomOffset] = residueOffset;
                             atomChain[atomOffset] = chainOffset;
@@ -63140,7 +64058,10 @@ var LiteMol;
                     chainResidueEnd[chainOffset] = assemblyResidueParts.length;
                     chainAtomEnd[chainOffset] = atomOffset;
                     var finalAtoms = atomTable.seal(), finalResidues = residueTableBuilder.seal(), finalChains = chainTableBuilder.seal(), finalEntities = entityTableBuilder.seal();
-                    var ss = buildSS(model, assemblyParts, finalResidues);
+                    var secondaryStructure = buildSS(model, assemblyParts, finalResidues);
+                    var structConn = model.data.bonds.structConn
+                        ? buildStructConn(model.data.bonds.structConn, transforms, assemblyParts.residues, assemblyParts.operators, model.data.residues, finalResidues)
+                        : void 0;
                     return Structure.Molecule.Model.create({
                         id: model.id,
                         modelId: model.modelId,
@@ -63150,15 +64071,108 @@ var LiteMol;
                             chains: finalChains,
                             entities: finalEntities,
                             bonds: {
+                                structConn: structConn,
                                 component: model.data.bonds.component
                             },
-                            secondaryStructure: ss,
+                            secondaryStructure: secondaryStructure
                         },
                         positions: positionTable,
                         parent: model,
                         source: Structure.Molecule.Model.Source.Computed,
                         operators: transforms.map(function (t) { return new Structure.Operator(t.transform, t.id, t.isIdentity); })
                     });
+                }
+                function buildStructConn(structConn, ops, residueParts, residueOpParts, oldResidues, newResidues) {
+                    var entries = structConn.entries;
+                    var opsMap = Core.Utils.FastMap.create();
+                    for (var i = 0, __i = ops.length; i < __i; i++) {
+                        opsMap.set(ops[i].id, i);
+                    }
+                    var transformMap = Core.Utils.FastMap.create();
+                    for (var _i = 0, entries_1 = entries; _i < entries_1.length; _i++) {
+                        var e = entries_1[_i];
+                        for (var _a = 0, _b = e.partners; _a < _b.length; _a++) {
+                            var p = _b[_a];
+                            if (!transformMap.has(p.residueIndex)) {
+                                transformMap.set(p.residueIndex, Core.Utils.FastMap.create());
+                            }
+                        }
+                    }
+                    for (var i = 0, __i = residueParts.length; i < __i; i++) {
+                        var r = residueParts[i];
+                        if (!transformMap.has(r))
+                            continue;
+                        transformMap.get(r).set(residueOpParts[i], i);
+                    }
+                    var oldStart = oldResidues.atomStartIndex;
+                    var newStart = newResidues.atomStartIndex;
+                    var ret = [];
+                    for (var _c = 0, entries_2 = entries; _c < entries_2.length; _c++) {
+                        var e = entries_2[_c];
+                        var allId = true;
+                        for (var _d = 0, _e = e.partners; _d < _e.length; _d++) {
+                            var p = _e[_d];
+                            if (p.symmetry !== '1_555') {
+                                allId = false;
+                                break;
+                            }
+                        }
+                        if (allId) {
+                            var _loop_1 = function (opIndex, __oi) {
+                                var allMapped = true;
+                                for (var _i = 0, _a = e.partners; _i < _a.length; _i++) {
+                                    var p = _a[_i];
+                                    if (!transformMap.get(p.residueIndex).has(opIndex)) {
+                                        allMapped = false;
+                                        break;
+                                    }
+                                }
+                                if (!allMapped)
+                                    return "continue";
+                                ret.push({
+                                    bondType: e.bondType,
+                                    distance: e.distance,
+                                    partners: e.partners.map(function (p) {
+                                        var rI = transformMap.get(p.residueIndex).get(opIndex);
+                                        return {
+                                            residueIndex: rI,
+                                            atomIndex: newStart[rI] + (p.atomIndex - oldStart[p.residueIndex]),
+                                            symmetry: p.symmetry
+                                        };
+                                    })
+                                });
+                            };
+                            for (var opIndex = 0, __oi = ops.length; opIndex < __oi; opIndex++) {
+                                _loop_1(opIndex, __oi);
+                            }
+                        }
+                        else {
+                            var partners = [];
+                            for (var _f = 0, _g = e.partners; _f < _g.length; _f++) {
+                                var p = _g[_f];
+                                if (!opsMap.has(p.symmetry))
+                                    break;
+                                var op = opsMap.get(p.symmetry);
+                                var m = transformMap.get(p.residueIndex);
+                                if (!m.has(op))
+                                    break;
+                                var rI = m.get(op);
+                                partners.push({
+                                    residueIndex: rI,
+                                    atomIndex: newStart[rI] + (p.atomIndex - oldStart[p.residueIndex]),
+                                    symmetry: p.symmetry
+                                });
+                            }
+                            if (partners.length === e.partners.length) {
+                                ret.push({
+                                    bondType: e.bondType,
+                                    distance: e.distance,
+                                    partners: partners
+                                });
+                            }
+                        }
+                    }
+                    return new Structure.StructConn(ret);
                 }
                 function buildSS(parent, assemblyParts, newResidues) {
                     var index = parent.data.residues.secondaryStructureIndex;
@@ -63204,18 +64218,18 @@ var LiteMol;
                 function findMates(model, radius) {
                     var bounds = getBoudingSphere(model.positions, model.positions.indices);
                     var spacegroup = new Structure.Spacegroup(model.data.symmetryInfo);
-                    var t = Mat4.empty();
-                    var v = { x: 0, y: 0, z: 0 };
+                    var t = Mat4.zero();
+                    var v = Vec3.zero();
                     var transforms = [];
                     for (var i = -3; i <= 3; i++) {
                         for (var j = -3; j <= 3; j++) {
                             for (var k = -3; k <= 3; k++) {
                                 for (var op = 0; op < spacegroup.operatorCount; op++) {
                                     spacegroup.getOperatorMatrix(op, i, j, k, t);
-                                    Mat4.transformVector3(v, bounds.center, t);
+                                    Vec3.transformMat4(v, bounds.center, t);
                                     if (getSphereDist(v, bounds.radius, bounds) > radius)
                                         continue;
-                                    var copy = Mat4.empty();
+                                    var copy = Mat4.zero();
                                     Mat4.copy(copy, t);
                                     transforms.push(createSymmetryTransform(i, j, k, op, copy));
                                 }
@@ -63404,8 +64418,8 @@ var LiteMol;
                  */
                 var Context = (function () {
                     function Context(structure, mask) {
-                        this.structure = structure;
                         this.mask = mask;
+                        this.structure = structure;
                     }
                     Object.defineProperty(Context.prototype, "atomCount", {
                         /**
@@ -63427,14 +64441,14 @@ var LiteMol;
                         enumerable: true,
                         configurable: true
                     });
-                    Object.defineProperty(Context.prototype, "tree", {
+                    Object.defineProperty(Context.prototype, "lookup3d", {
                         /**
-                         * Get a kd-tree for the atoms in the current context.
+                         * Get a 3d loopup structure for the atoms in the current context.
                          */
                         get: function () {
-                            if (!this.lazyTree)
-                                this.makeTree();
-                            return this.lazyTree;
+                            if (!this.lazyLoopup3d)
+                                this.makeLookup3d();
+                            return this.lazyLoopup3d;
                         },
                         enumerable: true,
                         configurable: true
@@ -63459,110 +64473,32 @@ var LiteMol;
                      * Create a new context based on the provide structure.
                      */
                     Context.ofStructure = function (structure) {
-                        return new Context(structure, Context.Mask.ofStructure(structure));
+                        return new Context(structure, Core.Utils.Mask.ofStructure(structure));
                     };
                     /**
                      * Create a new context from a sequence of fragments.
                      */
                     Context.ofFragments = function (seq) {
-                        return new Context(seq.context.structure, Context.Mask.ofFragments(seq));
+                        return new Context(seq.context.structure, Core.Utils.Mask.ofFragments(seq));
                     };
                     /**
                      * Create a new context from a sequence of fragments.
                      */
                     Context.ofAtomIndices = function (structure, atomIndices) {
-                        return new Context(structure, Context.Mask.ofIndices(structure, atomIndices));
+                        return new Context(structure, Core.Utils.Mask.ofIndices(structure.data.atoms.count, atomIndices));
                     };
-                    Context.prototype.makeTree = function () {
+                    Context.prototype.makeLookup3d = function () {
                         var data = new Int32Array(this.mask.size), dataCount = 0, _a = this.structure.positions, x = _a.x, y = _a.y, z = _a.z;
                         for (var i = 0, _b = this.structure.positions.count; i < _b; i++) {
                             if (this.mask.has(i))
                                 data[dataCount++] = i;
                         }
-                        this.lazyTree = Core.Geometry.SubdivisionTree3D.create(data, function (i, add) { return add(x[i], y[i], z[i]); });
+                        var inputData = Core.Geometry.Query3D.createInputData(data, function (i, add) { return add(x[i], y[i], z[i]); });
+                        this.lazyLoopup3d = Core.Geometry.Query3D.createSpatialHash(inputData);
                     };
                     return Context;
                 }());
                 Query.Context = Context;
-                (function (Context) {
-                    var Mask;
-                    (function (Mask) {
-                        var BitMask = (function () {
-                            function BitMask(mask, size) {
-                                this.mask = mask;
-                                this.size = size;
-                            }
-                            BitMask.prototype.has = function (i) { return this.mask[i]; };
-                            return BitMask;
-                        }());
-                        var AllMask = (function () {
-                            function AllMask(size) {
-                                this.size = size;
-                            }
-                            AllMask.prototype.has = function (i) { return true; };
-                            return AllMask;
-                        }());
-                        function ofStructure(structure) {
-                            return new AllMask(structure.data.atoms.count);
-                        }
-                        Mask.ofStructure = ofStructure;
-                        function ofIndices(structure, atomIndices) {
-                            var f = atomIndices.length / structure.data.atoms.count;
-                            if (f < 0.25) {
-                                var set = Core.Utils.FastSet.create();
-                                for (var _i = 0, atomIndices_1 = atomIndices; _i < atomIndices_1.length; _i++) {
-                                    var i = atomIndices_1[_i];
-                                    set.add(i);
-                                }
-                                return set;
-                            }
-                            var mask = new Int8Array(structure.data.atoms.count);
-                            for (var _a = 0, atomIndices_2 = atomIndices; _a < atomIndices_2.length; _a++) {
-                                var i = atomIndices_2[_a];
-                                mask[i] = 1;
-                            }
-                            return new BitMask(mask, atomIndices.length);
-                        }
-                        Mask.ofIndices = ofIndices;
-                        function ofFragments(seq) {
-                            var sizeEstimate = 0;
-                            for (var _i = 0, _a = seq.fragments; _i < _a.length; _i++) {
-                                var f = _a[_i];
-                                sizeEstimate += f.atomCount;
-                            }
-                            var count = seq.context.structure.data.atoms.count;
-                            if (sizeEstimate / count < 0.25) {
-                                // create set;
-                                var mask = Core.Utils.FastSet.create();
-                                for (var _c = 0, _d = seq.fragments; _c < _d.length; _c++) {
-                                    var f = _d[_c];
-                                    for (var _e = 0, _f = f.atomIndices; _e < _f.length; _e++) {
-                                        var i = _f[_e];
-                                        mask.add(i);
-                                    }
-                                }
-                                return mask;
-                            }
-                            else {
-                                var mask = new Int8Array(count);
-                                for (var _g = 0, _h = seq.fragments; _g < _h.length; _g++) {
-                                    var f = _h[_g];
-                                    for (var _j = 0, _k = f.atomIndices; _j < _k.length; _j++) {
-                                        var i = _k[_j];
-                                        mask[i] = 1;
-                                    }
-                                }
-                                var size = 0;
-                                for (var i = 0; i < count; i++) {
-                                    if (mask[i] !== 0)
-                                        size++;
-                                }
-                                return new BitMask(mask, size);
-                            }
-                        }
-                        Mask.ofFragments = ofFragments;
-                    })(Mask = Context.Mask || (Context.Mask = {}));
-                })(Context = Query.Context || (Query.Context = {}));
                 /**
                  * The basic element of the query language.
                  * Everything is represented as a fragment.
@@ -63950,6 +64886,8 @@ var LiteMol;
                     }
                     Builder.toQuery = toQuery;
                 })(Builder = Query.Builder || (Query.Builder = {}));
+                function allAtoms() { return Builder.build(function () { return Compiler.compileAllAtoms(); }); }
+                Query.allAtoms = allAtoms;
                 function atomsByElement() {
                     var elements = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
@@ -64067,6 +65005,9 @@ var LiteMol;
                 Builder.registerModifier('flatten', flatten);
                 function flatten(what, selector) { return Builder.build(function () { return Compiler.compileFlatten(what, selector); }); }
                 Query.flatten = flatten;
+                Builder.registerModifier('except', except);
+                function except(what, toRemove) { return Builder.build(function () { return Compiler.compileExcept(what, toRemove); }); }
+                Query.except = except;
                 /**
                  * Shortcuts
                  */
@@ -64136,6 +65077,17 @@ var LiteMol;
                         };
                     }
                     Compiler.compileEverything = compileEverything;
+                    function compileAllAtoms() {
+                        return function (ctx) {
+                            var fragments = new Query.FragmentSeqBuilder(ctx);
+                            for (var i = 0, _b = ctx.structure.data.atoms.count; i < _b; i++) {
+                                if (ctx.hasAtom(i))
+                                    fragments.add(Query.Fragment.ofIndex(ctx, i));
+                            }
+                            return fragments.getSeq();
+                        };
+                    }
+                    Compiler.compileAllAtoms = compileAllAtoms;
                     function compileAtoms(elements, sel) {
                         return function (ctx) {
                             var set = Core.Utils.FastSet.ofArray(elements), data = sel(ctx.structure), fragments = new Query.FragmentSeqBuilder(ctx);
@@ -64150,17 +65102,19 @@ var LiteMol;
                     function compileAtomIndices(indices) {
                         return function (ctx) {
                             var count = 0;
-                            for (var _i = 0, indices_3 = indices; _i < indices_3.length; _i++) {
-                                var aI = indices_3[_i];
+                            for (var _i = 0, indices_5 = indices; _i < indices_5.length; _i++) {
+                                var aI = indices_5[_i];
                                 if (ctx.hasAtom(aI))
                                     count++;
                             }
                             if (!count)
                                 return Query.FragmentSeq.empty(ctx);
+                            if (count === indices.length)
+                                return new Query.FragmentSeq(ctx, [Query.Fragment.ofArray(ctx, indices[0], indices)]);
                             var offset = 0;
                             var f = new Int32Array(count);
-                            for (var _a = 0, indices_4 = indices; _a < indices_4.length; _a++) {
-                                var aI = indices_4[_a];
+                            for (var _a = 0, indices_6 = indices; _a < indices_6.length; _a++) {
+                                var aI = indices_6[_a];
                                 if (ctx.hasAtom(aI))
                                     f[offset++] = aI;
                             }
@@ -64183,8 +65137,8 @@ var LiteMol;
                                 }
                             }
                             else {
-                                for (var _i = 0, indices_5 = indices; _i < indices_5.length; _i++) {
-                                    var i = indices_5[_i];
+                                for (var _i = 0, indices_7 = indices; _i < indices_7.length; _i++) {
+                                    var i = indices_7[_i];
                                     if (!ctx.hasRange(atomStartIndex[i], atomEndIndex[i]))
                                         continue;
                                     fragments.add(Query.Fragment.ofIndexRange(ctx, atomStartIndex[i], atomEndIndex[i]));
@@ -64351,7 +65305,7 @@ var LiteMol;
                         var _where = Builder.toQuery(where);
                         return function (ctx) {
                             var fs = _what(ctx);
-                            var map = Query.Context.Mask.ofFragments(_where(ctx));
+                            var map = Core.Utils.Mask.ofFragments(_where(ctx));
                             var ret = new Query.FragmentSeqBuilder(ctx);
                             for (var _i = 0, _a = fs.fragments; _i < _a.length; _i++) {
                                 var f = _a[_i];
@@ -64379,7 +65333,7 @@ var LiteMol;
                     function compileComplement(what) {
                         var _what = Builder.toQuery(what);
                         return function (ctx) {
-                            var mask = Query.Context.Mask.ofFragments(_what(ctx)), count = 0, offset = 0;
+                            var mask = Core.Utils.Mask.ofFragments(_what(ctx)), count = 0, offset = 0;
                             for (var i = 0, _b = ctx.structure.data.atoms.count; i < _b; i++) {
                                 if (ctx.hasAtom(i) && !mask.has(i))
                                     count++;
@@ -64461,16 +65415,16 @@ var LiteMol;
                     function compileAmbientResidues(where, radius) {
                         var _where = Builder.toQuery(where);
                         return function (ctx) {
-                            var src = _where(ctx), tree = ctx.tree, radiusCtx = Core.Geometry.SubdivisionTree3D.createContextRadius(tree, radius, false), buffer = radiusCtx.buffer, ret = new Query.HashFragmentSeqBuilder(ctx), _a = ctx.structure.positions, x = _a.x, y = _a.y, z = _a.z, residueIndex = ctx.structure.data.atoms.residueIndex, atomStart = ctx.structure.data.residues.atomStartIndex, atomEnd = ctx.structure.data.residues.atomEndIndex, treeData = tree.data;
+                            var src = _where(ctx), nearest = ctx.lookup3d(), ret = new Query.HashFragmentSeqBuilder(ctx), _a = ctx.structure.positions, x = _a.x, y = _a.y, z = _a.z, residueIndex = ctx.structure.data.atoms.residueIndex, atomStart = ctx.structure.data.residues.atomStartIndex, atomEnd = ctx.structure.data.residues.atomEndIndex;
                             for (var _i = 0, _c = src.fragments; _i < _c.length; _i++) {
                                 var f = _c[_i];
                                 var residues_1 = Core.Utils.FastSet.create();
                                 for (var _d = 0, _e = f.atomIndices; _d < _e.length; _d++) {
                                     var i = _e[_d];
                                     residues_1.add(residueIndex[i]);
-                                    radiusCtx.nearest(x[i], y[i], z[i], radius);
-                                    for (var j = 0, _l = buffer.count; j < _l; j++) {
-                                        residues_1.add(residueIndex[treeData[buffer.indices[j]]]);
+                                    var _f = nearest(x[i], y[i], z[i], radius), elements = _f.elements, count = _f.count;
+                                    for (var j = 0; j < count; j++) {
+                                        residues_1.add(residueIndex[elements[j]]);
                                     }
                                 }
                                 var atomCount = { count: 0, start: atomStart, end: atomEnd };
@@ -64531,6 +65485,36 @@ var LiteMol;
                         };
                     }
                     Compiler.compileFlatten = compileFlatten;
+                    function compileExcept(what, toRemove) {
+                        var _what = Builder.toQuery(what);
+                        var _toRemove = Builder.toQuery(toRemove);
+                        return function (ctx) {
+                            var fs = _what(ctx);
+                            var mask = Core.Utils.Mask.ofFragments(_toRemove(ctx));
+                            var ret = new Query.HashFragmentSeqBuilder(ctx);
+                            for (var _i = 0, _a = fs.fragments; _i < _a.length; _i++) {
+                                var f = _a[_i];
+                                var size = 0;
+                                for (var _c = 0, _d = f.atomIndices; _c < _d.length; _c++) {
+                                    var i = _d[_c];
+                                    if (!mask.has(i))
+                                        size++;
+                                }
+                                if (!size)
+                                    continue;
+                                var indices = new Int32Array(size);
+                                var offset = 0;
+                                for (var _e = 0, _f = f.atomIndices; _e < _f.length; _e++) {
+                                    var i = _f[_e];
+                                    if (!mask.has(i))
+                                        indices[offset++] = i;
+                                }
+                                ret.add(Query.Fragment.ofArray(ctx, indices[0], indices));
+                            }
+                            return ret.getSeq();
+                        };
+                    }
+                    Compiler.compileExcept = compileExcept;
                 })(Compiler = Query.Compiler || (Query.Compiler = {}));
             })(Query = Structure.Query || (Structure.Query = {}));
         })(Structure = Core.Structure || (Core.Structure = {}));
@@ -64611,7 +65595,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        Visualization.VERSION = { number: "1.6.6", date: "April 7 2017" };
+        Visualization.VERSION = { number: "1.7.2", date: "July 1 2017" };
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -64619,6 +65603,69 @@ var LiteMol;
     var Visualization;
     (function (Visualization) {
         Visualization.THREE = LiteMolTHREE;
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Utils;
+        (function (Utils) {
+            "use strict";
+            var Palette = (function () {
+                function Palette() {
+                }
+                Palette.getRandomColor = function (amountOfGrey) {
+                    if (amountOfGrey === void 0) { amountOfGrey = 0.0; }
+                    var counter = 0;
+                    while (true) {
+                        counter++;
+                        var c = Palette.randomMix({ r: 166 / 255, g: 0, b: 100 / 255 }, { r: 1, g: 1, b: 0 }, { r: 0, g: 100 / 255, b: 1 }, amountOfGrey);
+                        var d = Math.abs(Palette.previous.r - c.r) + Math.abs(Palette.previous.g - c.g) + Math.abs(Palette.previous.b - c.b);
+                        if (d > 100 || counter === 10) {
+                            Palette.previous = c;
+                            return c;
+                        }
+                    }
+                };
+                Palette.randomMix = function (color1, color2, color3, greyControl) {
+                    var randomIndex = Math.floor(Math.random() * 3) | 0;
+                    var mixRatio1 = (randomIndex === 0) ? Math.random() * greyControl : Math.random();
+                    var mixRatio2 = (randomIndex === 1) ? Math.random() * greyControl : Math.random();
+                    var mixRatio3 = (randomIndex === 2) ? Math.random() * greyControl : Math.random();
+                    var sum = mixRatio1 + mixRatio2 + mixRatio3;
+                    mixRatio1 /= sum;
+                    mixRatio2 /= sum;
+                    mixRatio3 /= sum;
+                    return {
+                        r: (mixRatio1 * color1.r + mixRatio2 * color2.r + mixRatio3 * color3.r),
+                        g: (mixRatio1 * color1.g + mixRatio2 * color2.g + mixRatio3 * color3.g),
+                        b: (mixRatio1 * color1.b + mixRatio2 * color2.b + mixRatio3 * color3.b)
+                    };
+                };
+                /**
+                 *
+                 * @example
+                 *   let min = Palette.getRandomColor(0.3);
+                 *   let max = Palette.getRandomColor(0.3);
+                 *   let color = Palette.interpolate(0.1, min, 0.6, max, 0.354);
+                 */
+                Palette.interpolate = function (min, minColor, max, maxColor, value, target) {
+                    var ret = target !== void 0 ? target : { r: 0.1, g: 0.1, b: 0.1 };
+                    var t = (value - min) / (max - min);
+                    ret.r = minColor.r + (maxColor.r - minColor.r) * t;
+                    ret.g = minColor.g + (maxColor.g - minColor.g) * t;
+                    ret.b = minColor.b + (maxColor.b - minColor.b) * t;
+                    return ret;
+                };
+                Palette.previous = Palette.randomMix({ r: 0.75, g: 0, b: 0.25 }, { r: 1, g: 0.5, b: 0 }, { r: 0, g: 0.35, b: 1 }, 0.5);
+                return Palette;
+            }());
+            Utils.Palette = Palette;
+        })(Utils = Visualization.Utils || (Visualization.Utils = {}));
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -64682,6 +65729,17 @@ var LiteMol;
                     triangleIndices: indexBuffer,
                     triangleCount: source.faces.length,
                     normals: normalBuffer
+                };
+            };
+            GeometryHelper.toRawGeometry = function (source) {
+                var _a = GeometryHelper.toSurface(source), vertices = _a.vertices, vertexCount = _a.vertexCount, indices = _a.triangleIndices, indexCount = _a.triangleCount, normals = _a.normals;
+                return {
+                    vertices: vertices,
+                    vertexCount: vertexCount,
+                    indices: indices,
+                    indexCount: indexCount,
+                    normals: normals,
+                    elementSize: 3
                 };
             };
             GeometryHelper.getIndexedBufferGeometry = function (source) {
@@ -64871,7 +65929,7 @@ var LiteMol;
             Theme.getColor = getColor;
             function createUniform(props) {
                 if (props === void 0) { props = {}; }
-                var colors = props.colors, _a = props.transparency, transparency = _a === void 0 ? Default.Transparency : _a, _b = props.interactive, interactive = _b === void 0 ? true : _b, _c = props.disableFog, disableFog = _c === void 0 ? false : _c, _d = props.isSticky, isSticky = _d === void 0 ? false : _d;
+                var colors = props.colors, _a = props.variables, variables = _a === void 0 ? LiteMol.Core.Utils.FastMap.create() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c, _d = props.disableFog, disableFog = _d === void 0 ? false : _d, _e = props.isSticky, isSticky = _e === void 0 ? false : _e;
                 var finalColors = LiteMol.Core.Utils.FastMap.create();
                 if (colors) {
                     colors.forEach(function (c, n) { return finalColors.set(n, c); });
@@ -64883,6 +65941,7 @@ var LiteMol;
                 }
                 return {
                     colors: finalColors,
+                    variables: variables,
                     transparency: transparency,
                     interactive: interactive,
                     disableFog: disableFog,
@@ -64895,9 +65954,10 @@ var LiteMol;
             Theme.createUniform = createUniform;
             function createMapping(mapping, props) {
                 if (props === void 0) { props = {}; }
-                var _a = props.colors, colors = _a === void 0 ? LiteMol.Core.Utils.FastMap.create() : _a, _b = props.transparency, transparency = _b === void 0 ? Default.Transparency : _b, _c = props.interactive, interactive = _c === void 0 ? true : _c, _d = props.disableFog, disableFog = _d === void 0 ? false : _d, _e = props.isSticky, isSticky = _e === void 0 ? false : _e;
+                var _a = props.colors, colors = _a === void 0 ? LiteMol.Core.Utils.FastMap.create() : _a, _b = props.variables, variables = _b === void 0 ? LiteMol.Core.Utils.FastMap.create() : _b, _c = props.transparency, transparency = _c === void 0 ? Default.Transparency : _c, _d = props.interactive, interactive = _d === void 0 ? true : _d, _e = props.disableFog, disableFog = _e === void 0 ? false : _e, _f = props.isSticky, isSticky = _f === void 0 ? false : _f;
                 return {
                     colors: colors,
+                    variables: variables,
                     transparency: transparency ? transparency : Default.Transparency,
                     interactive: interactive,
                     disableFog: disableFog,
@@ -64917,20 +65977,38 @@ var LiteMol;
             }
             Theme.createColorMapMapping = createColorMapMapping;
             function createPalleteMapping(getProperty, pallete) {
-                var mapper = new PaletterMapper(pallete);
+                var mapper = new PaletteMapper(pallete);
                 return {
                     getProperty: getProperty,
                     setColor: function (i, c) { return mapper.setColor(i, c); }
                 };
             }
             Theme.createPalleteMapping = createPalleteMapping;
-            var PaletterMapper = (function () {
-                function PaletterMapper(pallete) {
+            function createPalleteIndexMapping(getProperty, pallete) {
+                var mapper = new PaletteIndexMapper(pallete);
+                return {
+                    getProperty: getProperty,
+                    setColor: function (i, c) { return mapper.setColor(i, c); }
+                };
+            }
+            Theme.createPalleteIndexMapping = createPalleteIndexMapping;
+            var PaletteIndexMapper = (function () {
+                function PaletteIndexMapper(pallete) {
+                    this.pallete = pallete;
+                }
+                PaletteIndexMapper.prototype.setColor = function (i, target) {
+                    var color = this.pallete[i];
+                    Color.copy(color, target);
+                };
+                return PaletteIndexMapper;
+            }());
+            var PaletteMapper = (function () {
+                function PaletteMapper(pallete) {
                     this.pallete = pallete;
                     this.colorIndex = 0;
                     this.colorMap = LiteMol.Core.Utils.FastMap.create();
                 }
-                PaletterMapper.prototype.setColor = function (p, target) {
+                PaletteMapper.prototype.setColor = function (p, target) {
                     var color = this.colorMap.get(p);
                     if (!color) {
                         this.colorIndex = ((this.colorIndex + 1) % this.pallete.length) | 0;
@@ -64939,7 +66017,7 @@ var LiteMol;
                     }
                     Color.copy(color, target);
                 };
-                return PaletterMapper;
+                return PaletteMapper;
             }());
             var ColorMapMapper = (function () {
                 function ColorMapMapper(map, fallbackColor) {
@@ -65023,7 +66101,7 @@ var LiteMol;
                 if (object)
                     object.renderOrder = isTransparent ? 1 : 0;
                 var changed = false;
-                if (material instanceof Visualization.THREE.MeshPhongMaterial || material instanceof Visualization.THREE.ShaderMaterial) {
+                if (material instanceof Visualization.THREE.MeshPhongMaterial || material instanceof Visualization.THREE.MeshBasicMaterial || material instanceof Visualization.THREE.ShaderMaterial) {
                     if (material.transparent !== isTransparent) {
                         material.transparent = isTransparent;
                         changed = true;
@@ -65074,7 +66152,16 @@ var LiteMol;
             MaterialsHelper.getDefaultHighlightMaterial = function () {
                 return new Visualization.THREE.MeshPhongMaterial({ color: 0xFFFFFF, specular: 0xAAAAAA, /* ambient: 0xffffff,*/ shininess: 2, shading: Visualization.THREE.SmoothShading, side: Visualization.THREE.DoubleSide, metal: true });
             };
-            MaterialsHelper.applyColorToMap = function (map, indices, bufferAttribute, getter) {
+            MaterialsHelper.applyColorToBuffer = function (bufferAttribute, color) {
+                var buffer = bufferAttribute.array;
+                for (var i = 0, __i = buffer.length; i < __i; i += 3) {
+                    buffer[i] = color.r;
+                    buffer[i + 1] = color.g;
+                    buffer[i + 2] = color.b;
+                }
+                bufferAttribute.needsUpdate = true;
+            };
+            MaterialsHelper.applyColorToMap = function (map, bufferAttribute, getter) {
                 var buffer = bufferAttribute.array, color = { r: 0.45, g: 0.45, b: 0.45 }, vertexRanges = map.vertexRanges;
                 for (var _i = 0, _a = map.elementIndices; _i < _a.length; _i++) {
                     var elementIndex = _a[_i];
@@ -65094,130 +66181,130 @@ var LiteMol;
                 }
                 bufferAttribute.needsUpdate = true;
             };
+            MaterialsHelper.pickVertexShader = [
+                "attribute vec4 pColor;",
+                "varying vec4 pC;",
+                "void main() {",
+                "pC = pColor;",
+                "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+                "}"
+            ].join('\n');
+            MaterialsHelper.pickFragmentShader = [
+                "varying vec4 pC;",
+                "void main() {",
+                "gl_FragColor = pC;",
+                "}"
+            ].join('\n');
+            MaterialsHelper.shader = {
+                uniforms: Visualization.THREE.UniformsUtils.merge([
+                    Visualization.THREE.UniformsLib["common"],
+                    Visualization.THREE.UniformsLib["bump"],
+                    Visualization.THREE.UniformsLib["normalmap"],
+                    Visualization.THREE.UniformsLib["fog"],
+                    Visualization.THREE.UniformsLib["lights"],
+                    Visualization.THREE.UniformsLib["shadowmap"],
+                    {
+                        "emissive": { type: "c", value: new Visualization.THREE.Color(0x000000) },
+                        "specular": { type: "c", value: new Visualization.THREE.Color(0x111111) },
+                        "shininess": { type: "f", value: 2 },
+                        "wrapRGB": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 1) },
+                        "highlightColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 0) },
+                        "selectionColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 0, 0) },
+                    }
+                ]),
+                vertexShader: [
+                    "#define PHONG",
+                    "varying vec3 vViewPosition;",
+                    "#ifndef FLAT_SHADED",
+                    "	varying vec3 vNormal;",
+                    "#endif",
+                    Visualization.THREE.ShaderChunk["common"],
+                    Visualization.THREE.ShaderChunk["map_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["lightmap_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["envmap_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["lights_phong_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["color_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["morphtarget_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["skinning_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["shadowmap_pars_vertex"],
+                    Visualization.THREE.ShaderChunk["logdepthbuf_pars_vertex"],
+                    "attribute float vState;",
+                    "varying float vS;",
+                    "void main() {",
+                    "   vS = vState;",
+                    Visualization.THREE.ShaderChunk["map_vertex"],
+                    Visualization.THREE.ShaderChunk["lightmap_vertex"],
+                    Visualization.THREE.ShaderChunk["color_vertex"],
+                    Visualization.THREE.ShaderChunk["morphnormal_vertex"],
+                    Visualization.THREE.ShaderChunk["skinbase_vertex"],
+                    Visualization.THREE.ShaderChunk["skinnormal_vertex"],
+                    Visualization.THREE.ShaderChunk["defaultnormal_vertex"],
+                    "#ifndef FLAT_SHADED",
+                    "	vNormal = normalize( transformedNormal );",
+                    "#endif",
+                    Visualization.THREE.ShaderChunk["morphtarget_vertex"],
+                    Visualization.THREE.ShaderChunk["skinning_vertex"],
+                    Visualization.THREE.ShaderChunk["default_vertex"],
+                    Visualization.THREE.ShaderChunk["logdepthbuf_vertex"],
+                    "	vViewPosition = -mvPosition.xyz;",
+                    Visualization.THREE.ShaderChunk["worldpos_vertex"],
+                    Visualization.THREE.ShaderChunk["envmap_vertex"],
+                    Visualization.THREE.ShaderChunk["lights_phong_vertex"],
+                    Visualization.THREE.ShaderChunk["shadowmap_vertex"],
+                    "}"
+                ].join("\n"),
+                fragmentShader: [
+                    "#define PHONG",
+                    "uniform vec3 diffuse;",
+                    "uniform vec3 emissive;",
+                    "uniform vec3 specular;",
+                    "uniform float shininess;",
+                    "uniform float opacity;",
+                    "uniform vec3 highlightColor;",
+                    "uniform vec3 selectionColor;",
+                    Visualization.THREE.ShaderChunk["common"],
+                    Visualization.THREE.ShaderChunk["color_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["map_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["alphamap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["lightmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["envmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["fog_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["lights_phong_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["shadowmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["bumpmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["normalmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["specularmap_pars_fragment"],
+                    Visualization.THREE.ShaderChunk["logdepthbuf_pars_fragment"],
+                    "varying float vS;",
+                    "void main() {",
+                    "	vec3 outgoingLight = vec3( 0.0 );",
+                    "	vec4 diffuseColor;",
+                    "   if (vS < 0.33) { diffuseColor = vec4( vColor, opacity ); }",
+                    "   else if (vS - floor(vS + 0.1) > 0.33) { diffuseColor = vec4(highlightColor, opacity); }",
+                    "	else { diffuseColor = vec4(selectionColor, opacity); }",
+                    Visualization.THREE.ShaderChunk["logdepthbuf_fragment"],
+                    Visualization.THREE.ShaderChunk["map_fragment"],
+                    //THREE.ShaderChunk["color_fragment"], 
+                    Visualization.THREE.ShaderChunk["alphamap_fragment"],
+                    Visualization.THREE.ShaderChunk["alphatest_fragment"],
+                    Visualization.THREE.ShaderChunk["specularmap_fragment"],
+                    Visualization.THREE.ShaderChunk["lights_phong_fragment"],
+                    Visualization.THREE.ShaderChunk["lightmap_fragment"],
+                    Visualization.THREE.ShaderChunk["envmap_fragment"],
+                    Visualization.THREE.ShaderChunk["shadowmap_fragment"],
+                    Visualization.THREE.ShaderChunk["linear_to_gamma_fragment"],
+                    Visualization.THREE.ShaderChunk["fog_fragment"],
+                    "#ifdef USE_FOG",
+                    "   if (diffuseColor.a > 0.99) { gl_FragColor = vec4( outgoingLight, diffuseColor.a ); }",
+                    "   else { gl_FragColor = vec4( outgoingLight, (1.0 - fogFactor) * diffuseColor.a ); }",
+                    "#else",
+                    "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
+                    "#endif",
+                    "}"
+                ].join("\n")
+            };
             return MaterialsHelper;
         }());
-        MaterialsHelper.pickVertexShader = [
-            "attribute vec4 pColor;",
-            "varying vec4 pC;",
-            "void main() {",
-            "pC = pColor;",
-            "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-            "}"
-        ].join('\n');
-        MaterialsHelper.pickFragmentShader = [
-            "varying vec4 pC;",
-            "void main() {",
-            "gl_FragColor = pC;",
-            "}"
-        ].join('\n');
-        MaterialsHelper.shader = {
-            uniforms: Visualization.THREE.UniformsUtils.merge([
-                Visualization.THREE.UniformsLib["common"],
-                Visualization.THREE.UniformsLib["bump"],
-                Visualization.THREE.UniformsLib["normalmap"],
-                Visualization.THREE.UniformsLib["fog"],
-                Visualization.THREE.UniformsLib["lights"],
-                Visualization.THREE.UniformsLib["shadowmap"],
-                {
-                    "emissive": { type: "c", value: new Visualization.THREE.Color(0x000000) },
-                    "specular": { type: "c", value: new Visualization.THREE.Color(0x111111) },
-                    "shininess": { type: "f", value: 2 },
-                    "wrapRGB": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 1) },
-                    "highlightColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 1, 0) },
-                    "selectionColor": { type: "v3", value: new Visualization.THREE.Vector3(1, 0, 0) },
-                }
-            ]),
-            vertexShader: [
-                "#define PHONG",
-                "varying vec3 vViewPosition;",
-                "#ifndef FLAT_SHADED",
-                "	varying vec3 vNormal;",
-                "#endif",
-                Visualization.THREE.ShaderChunk["common"],
-                Visualization.THREE.ShaderChunk["map_pars_vertex"],
-                Visualization.THREE.ShaderChunk["lightmap_pars_vertex"],
-                Visualization.THREE.ShaderChunk["envmap_pars_vertex"],
-                Visualization.THREE.ShaderChunk["lights_phong_pars_vertex"],
-                Visualization.THREE.ShaderChunk["color_pars_vertex"],
-                Visualization.THREE.ShaderChunk["morphtarget_pars_vertex"],
-                Visualization.THREE.ShaderChunk["skinning_pars_vertex"],
-                Visualization.THREE.ShaderChunk["shadowmap_pars_vertex"],
-                Visualization.THREE.ShaderChunk["logdepthbuf_pars_vertex"],
-                "attribute float vState;",
-                "varying float vS;",
-                "void main() {",
-                "   vS = vState;",
-                Visualization.THREE.ShaderChunk["map_vertex"],
-                Visualization.THREE.ShaderChunk["lightmap_vertex"],
-                Visualization.THREE.ShaderChunk["color_vertex"],
-                Visualization.THREE.ShaderChunk["morphnormal_vertex"],
-                Visualization.THREE.ShaderChunk["skinbase_vertex"],
-                Visualization.THREE.ShaderChunk["skinnormal_vertex"],
-                Visualization.THREE.ShaderChunk["defaultnormal_vertex"],
-                "#ifndef FLAT_SHADED",
-                "	vNormal = normalize( transformedNormal );",
-                "#endif",
-                Visualization.THREE.ShaderChunk["morphtarget_vertex"],
-                Visualization.THREE.ShaderChunk["skinning_vertex"],
-                Visualization.THREE.ShaderChunk["default_vertex"],
-                Visualization.THREE.ShaderChunk["logdepthbuf_vertex"],
-                "	vViewPosition = -mvPosition.xyz;",
-                Visualization.THREE.ShaderChunk["worldpos_vertex"],
-                Visualization.THREE.ShaderChunk["envmap_vertex"],
-                Visualization.THREE.ShaderChunk["lights_phong_vertex"],
-                Visualization.THREE.ShaderChunk["shadowmap_vertex"],
-                "}"
-            ].join("\n"),
-            fragmentShader: [
-                "#define PHONG",
-                "uniform vec3 diffuse;",
-                "uniform vec3 emissive;",
-                "uniform vec3 specular;",
-                "uniform float shininess;",
-                "uniform float opacity;",
-                "uniform vec3 highlightColor;",
-                "uniform vec3 selectionColor;",
-                Visualization.THREE.ShaderChunk["common"],
-                Visualization.THREE.ShaderChunk["color_pars_fragment"],
-                Visualization.THREE.ShaderChunk["map_pars_fragment"],
-                Visualization.THREE.ShaderChunk["alphamap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["lightmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["envmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["fog_pars_fragment"],
-                Visualization.THREE.ShaderChunk["lights_phong_pars_fragment"],
-                Visualization.THREE.ShaderChunk["shadowmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["bumpmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["normalmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["specularmap_pars_fragment"],
-                Visualization.THREE.ShaderChunk["logdepthbuf_pars_fragment"],
-                "varying float vS;",
-                "void main() {",
-                "	vec3 outgoingLight = vec3( 0.0 );",
-                "	vec4 diffuseColor;",
-                "   if (vS < 0.33) { diffuseColor = vec4( vColor, opacity ); }",
-                "   else if (vS - floor(vS + 0.1) > 0.33) { diffuseColor = vec4(highlightColor, opacity); }",
-                "	else { diffuseColor = vec4(selectionColor, opacity); }",
-                Visualization.THREE.ShaderChunk["logdepthbuf_fragment"],
-                Visualization.THREE.ShaderChunk["map_fragment"],
-                //THREE.ShaderChunk["color_fragment"], 
-                Visualization.THREE.ShaderChunk["alphamap_fragment"],
-                Visualization.THREE.ShaderChunk["alphatest_fragment"],
-                Visualization.THREE.ShaderChunk["specularmap_fragment"],
-                Visualization.THREE.ShaderChunk["lights_phong_fragment"],
-                Visualization.THREE.ShaderChunk["lightmap_fragment"],
-                Visualization.THREE.ShaderChunk["envmap_fragment"],
-                Visualization.THREE.ShaderChunk["shadowmap_fragment"],
-                Visualization.THREE.ShaderChunk["linear_to_gamma_fragment"],
-                Visualization.THREE.ShaderChunk["fog_fragment"],
-                "#ifdef USE_FOG",
-                "   if (diffuseColor.a > 0.99) { gl_FragColor = vec4( outgoingLight, diffuseColor.a ); }",
-                "   else { gl_FragColor = vec4( outgoingLight, (1.0 - fogFactor) * diffuseColor.a ); }",
-                "#else",
-                "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
-                "#endif",
-                "}"
-            ].join("\n")
-        };
         Visualization.MaterialsHelper = MaterialsHelper;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
@@ -65438,6 +66525,7 @@ var LiteMol;
             CameraType[CameraType["Perspective"] = 0] = "Perspective";
             CameraType[CameraType["Orthographic"] = 1] = "Orthographic";
         })(CameraType = Visualization.CameraType || (Visualization.CameraType = {}));
+        var LA = LiteMol.Core.Geometry.LinearAlgebra;
         var SlabControls = (function () {
             function SlabControls(element) {
                 var _this = this;
@@ -65448,19 +66536,28 @@ var LiteMol;
                 this.slabWheelRate = 1 / 15;
                 this._planeDelta = new LiteMol.Core.Rx.Subject();
                 this.subs = [];
+                this.enableWheel = false;
+                this.mouseMoveDelta = 0;
+                this.lastMousePosition = void 0;
                 this.planeDelta = this._planeDelta;
                 var events = {
                     wheel: function (e) { return _this.handleMouseWheel(e); },
                     touchStart: function (e) { return _this.touchstart(e); },
                     touchEnd: function (e) { return _this.touchend(e); },
                     touchMove: function (e) { return _this.touchmove(e); },
+                    mouseMove: function (e) { return _this.mousemove(e); },
+                    mouseOut: function () { return _this.mouseOut(); }
                 };
                 element.addEventListener('mousewheel', events.wheel);
                 element.addEventListener('DOMMouseScroll', events.wheel); // firefox   
+                element.addEventListener('mousemove', events.mouseMove);
+                element.addEventListener('mouseout', events.mouseOut);
                 element.addEventListener('touchstart', events.touchStart, false);
                 element.addEventListener('touchend', events.touchEnd, false);
                 element.addEventListener('touchmove', events.touchMove, false);
                 this.subs.push(function () { return element.removeEventListener('mousewheel', events.wheel); });
+                this.subs.push(function () { return element.removeEventListener('mousemove', events.mouseMove); });
+                this.subs.push(function () { return element.removeEventListener('mouseout', events.mouseOut); });
                 this.subs.push(function () { return element.removeEventListener('DOMMouseScroll', events.wheel); });
                 this.subs.push(function () { return element.removeEventListener('touchstart', events.touchStart, false); });
                 this.subs.push(function () { return element.removeEventListener('touchend', events.touchEnd, false); });
@@ -65477,6 +66574,8 @@ var LiteMol;
                 this._planeDelta.onCompleted();
             };
             SlabControls.prototype.handleMouseWheel = function (event) {
+                if (!this.enableWheel)
+                    return;
                 //if (!this.options.enableFrontClip) return;
                 if (event.stopPropagation) {
                     event.stopPropagation();
@@ -65530,6 +66629,22 @@ var LiteMol;
                 this.touchStartPosition.x = this.touchPosition.x;
                 this.touchStartPosition.y = this.touchPosition.y;
                 this._planeDelta.onNext(delta);
+            };
+            SlabControls.prototype.mousemove = function (e) {
+                if (!this.lastMousePosition) {
+                    this.lastMousePosition = [e.clientX, e.clientY, 0];
+                    return;
+                }
+                var pos = [e.clientX, e.clientY, 0];
+                this.mouseMoveDelta += LA.Vector3.distance(pos, this.lastMousePosition);
+                this.lastMousePosition = pos;
+                if (this.mouseMoveDelta > 15)
+                    this.enableWheel = true;
+            };
+            SlabControls.prototype.mouseOut = function () {
+                this.mouseMoveDelta = 0;
+                this.lastMousePosition = void 0;
+                this.enableWheel = false;
             };
             return SlabControls;
         }());
@@ -65898,7 +67013,7 @@ var LiteMol;
                 this.lighting = new DefaultLighting();
                 this.lighting.setup(this.scene);
                 this.parentElement.appendChild(this.renderer.domElement);
-                var delayedResizeHandler = LiteMol.Core.Utils.debounce(function () { return _this.handleResize(); }, 100), resizeHandler = function () {
+                var delayedResizeHandler = LiteMol.Core.Utils.debounce(function () { return _this.handleResize(); }, 150), resizeHandler = function () {
                     _this.renderState.resizing = true;
                     delayedResizeHandler();
                 };
@@ -66178,10 +67293,10 @@ var LiteMol;
                 while (this.parentElement.lastChild)
                     this.parentElement.removeChild(this.parentElement.lastChild);
             };
+            Scene.hoverEvent = 'hover';
+            Scene.selectEvent = 'select';
             return Scene;
         }());
-        Scene.hoverEvent = 'hover';
-        Scene.selectEvent = 'select';
         Visualization.Scene = Scene;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
@@ -66814,6 +67929,195 @@ var LiteMol;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 /*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Geometry;
+        (function (Geometry) {
+            "use strict";
+            function toBufferGeometry(raw) {
+                var geometry = new Visualization.THREE.BufferGeometry();
+                geometry.addAttribute('position', new Visualization.THREE.BufferAttribute(raw.vertices, 3));
+                if (raw.normals) {
+                    geometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(raw.normals, 3));
+                }
+                geometry.addAttribute('index', new Visualization.THREE.BufferAttribute(raw.indices, 1));
+                return geometry;
+            }
+            Geometry.toBufferGeometry = toBufferGeometry;
+            function addAttribute(geom, name, a, elementSize) {
+                geom.addAttribute(name, new Visualization.THREE.BufferAttribute(a, elementSize));
+            }
+            Geometry.addAttribute = addAttribute;
+            var CoreUtils = LiteMol.Core.Utils;
+            var ChunkedArray = CoreUtils.ChunkedArray;
+            var ArrayBuilder = CoreUtils.ArrayBuilder;
+            var Builder;
+            (function (Builder) {
+                function createStatic(vertexCount, indexCount, elementSize) {
+                    if (elementSize === void 0) { elementSize = 3; }
+                    return {
+                        type: 'Static',
+                        vertices: ArrayBuilder.create(function (s) { return new Float32Array(s); }, vertexCount, 3),
+                        indices: ArrayBuilder.create(function (s) { return new Uint32Array(s); }, indexCount, elementSize),
+                        normals: elementSize === 3 ? ArrayBuilder.create(function (s) { return new Float32Array(s); }, vertexCount, 3) : void 0,
+                        elementSize: elementSize
+                    };
+                }
+                Builder.createStatic = createStatic;
+                function createDynamic(vertexChunkSize, indexChunkSize, elementSize) {
+                    if (elementSize === void 0) { elementSize = 3; }
+                    return {
+                        type: 'Dynamic',
+                        vertices: ChunkedArray.create(function (s) { return new Float32Array(s); }, vertexChunkSize, 3),
+                        indices: ChunkedArray.create(function (s) { return new Uint32Array(s); }, indexChunkSize, elementSize),
+                        normals: elementSize === 3 ? ChunkedArray.create(function (s) { return new Float32Array(s); }, vertexChunkSize, 3) : void 0,
+                        elementSize: elementSize
+                    };
+                }
+                Builder.createDynamic = createDynamic;
+                var add2d = ChunkedArray.add2;
+                var add3d = ChunkedArray.add3;
+                var add2s = ArrayBuilder.add2;
+                var add3s = ArrayBuilder.add3;
+                var Geom = LiteMol.Core.Geometry;
+                var Vec3 = Geom.LinearAlgebra.Vector3;
+                var Mat4 = Geom.LinearAlgebra.Matrix4;
+                // function copy3(src: ArrayLike<number>, tar: ChunkedArray<number> | ArrayBuilder<number>, add: (a: ChunkedArray<number> | ArrayBuilder<number>, x: number, y: number, z: number) => void) {
+                //     for (let i = 0, __i = src.length; i < __i; i += 3) {
+                //         add(tar, src[i], src[i + 1], src[i + 2]);
+                //     }
+                // }
+                function copy3o(offset, src, tar, add) {
+                    for (var i = 0, __i = src.length; i < __i; i += 3) {
+                        add(tar, src[i] + offset, src[i + 1] + offset, src[i + 2] + offset);
+                    }
+                }
+                var temp = Vec3.zero();
+                function copy3t(t, src, tar, add) {
+                    var v = temp;
+                    for (var i = 0, __i = src.length; i < __i; i += 3) {
+                        v[0] = src[i], v[1] = src[i + 1], v[2] = src[i + 2];
+                        Vec3.transformMat4(v, v, t);
+                        add(tar, v[0], v[1], v[2]);
+                    }
+                }
+                function copy2o(offset, src, tar, add) {
+                    for (var i = 0, __i = src.length; i < __i; i += 2) {
+                        add(tar, src[i] + offset, src[i + 1] + offset);
+                    }
+                }
+                function error(msg) {
+                    throw new Error(msg);
+                }
+                var scaleTransform = Mat4.zero(), translateTransform = Mat4.zero(), rotateTransform = Mat4.zero(), vTransform = Mat4.zero(), nTransform = Mat4.zero();
+                var defaulScale = Vec3.fromValues(1, 1, 1), defaultTranslation = Vec3.zero();
+                function addRawTransformed(builder, geom, scale, translation, rotation) {
+                    Mat4.fromScaling(scaleTransform, scale || defaulScale);
+                    Mat4.fromTranslation(translateTransform, translation || defaultTranslation);
+                    if (rotation)
+                        Mat4.copy(rotateTransform, rotation);
+                    else
+                        Mat4.fromIdentity(rotateTransform);
+                    Mat4.mul3(vTransform, translateTransform, rotateTransform, scaleTransform);
+                    var offset = builder.vertices.elementCount;
+                    var addV = builder.type === 'Static' ? add3s : add3d;
+                    copy3t(vTransform, geom.vertices, builder.vertices, addV);
+                    if (builder.normals) {
+                        if (!geom.normals)
+                            error('geom is missing normals.');
+                        Mat4.mul(nTransform, rotateTransform, scaleTransform);
+                        copy3t(nTransform, geom.normals, builder.normals, addV);
+                    }
+                    if (builder.elementSize === 2) {
+                        copy2o(offset, geom.indices, builder.indices, builder.type === 'Static' ? add2s : add2d);
+                    }
+                    else {
+                        copy3o(offset, geom.indices, builder.indices, builder.type === 'Static' ? add3s : add3d);
+                    }
+                }
+                Builder.addRawTransformed = addRawTransformed;
+                function addVertex3s(builder, x, y, z) {
+                    add3s(builder.vertices, x, y, z);
+                }
+                Builder.addVertex3s = addVertex3s;
+                function addNormal3s(builder, x, y, z) {
+                    add3s(builder.normals, x, y, z);
+                }
+                Builder.addNormal3s = addNormal3s;
+                function addIndex3s(builder, i, j, k) {
+                    add3s(builder.indices, i, j, k);
+                }
+                Builder.addIndex3s = addIndex3s;
+                function addVertex3d(builder, x, y, z) {
+                    add3d(builder.vertices, x, y, z);
+                }
+                Builder.addVertex3d = addVertex3d;
+                function addNormal3d(builder, x, y, z) {
+                    add3d(builder.normals, x, y, z);
+                }
+                Builder.addNormal3d = addNormal3d;
+                function addIndex3d(builder, i, j, k) {
+                    add3d(builder.indices, i, j, k);
+                }
+                Builder.addIndex3d = addIndex3d;
+                var dashTemplate = void 0;
+                function getDashTemplate() {
+                    if (dashTemplate)
+                        return dashTemplate;
+                    dashTemplate = Visualization.GeometryHelper.toRawGeometry(new Visualization.THREE.BoxGeometry(1, 1, 1));
+                    for (var i = 0; i < dashTemplate.vertices.length; i += 3) {
+                        dashTemplate.vertices[i] += 0.5;
+                    }
+                    return dashTemplate;
+                }
+                Builder.getDashTemplate = getDashTemplate;
+                var dashScale = Vec3.zero(), dashOffset = Vec3.zero(), dashDir = Vec3.zero(), dashUp = Vec3.fromValues(1, 0, 0), dashRotation = Mat4.zero();
+                function addDashedLine(builder, a, b, size, gap, r) {
+                    var dir = Vec3.sub(dashDir, b, a);
+                    var length = Vec3.magnitude(dir);
+                    var scale = Vec3.set(dashScale, size, r, r);
+                    var rotation = Vec3.makeRotation(dashRotation, dashUp, dir);
+                    var templ = getDashTemplate();
+                    var offset = dashOffset;
+                    Vec3.copy(offset, a);
+                    Vec3.normalize(dir, dir);
+                    var delta = size + gap;
+                    Vec3.scale(dir, dir, delta);
+                    for (var t = 0; t < length; t += delta) {
+                        if (t + size > length)
+                            scale[0] = length - t;
+                        addRawTransformed(builder, templ, scale, offset, rotation);
+                        Vec3.add(offset, offset, dir);
+                    }
+                }
+                Builder.addDashedLine = addDashedLine;
+                function compactS(tar) {
+                    return tar.array;
+                }
+                function compactD(tar) {
+                    return ChunkedArray.compact(tar);
+                }
+                function toBufferGeometry(builder) {
+                    var compact = builder.type === 'Static' ? compactS : compactD;
+                    return Geometry.toBufferGeometry({
+                        vertices: compact(builder.vertices),
+                        vertexCount: builder.vertices.elementCount,
+                        normals: builder.normals && compact(builder.normals),
+                        indices: compact(builder.indices),
+                        indexCount: builder.indices.elementCount,
+                        elementSize: builder.elementSize
+                    });
+                }
+                Builder.toBufferGeometry = toBufferGeometry;
+            })(Builder = Geometry.Builder || (Geometry.Builder = {}));
+        })(Geometry = Visualization.Geometry || (Visualization.Geometry = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
  * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var __extends = (this && this.__extends) || (function () {
@@ -67006,10 +68310,10 @@ var LiteMol;
                     }
                 }
             }
-            function createFullPickGeometry(ctx) {
+            function createFullPickGeometry(attr, ctx) {
                 var pickGeometry = new Visualization.THREE.BufferGeometry();
-                pickGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(ctx.data.vertices, 3));
-                pickGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(ctx.data.triangleIndices, 1));
+                pickGeometry.addAttribute('position', attr.position);
+                pickGeometry.addAttribute('index', attr.index);
                 pickGeometry.addAttribute('pColor', new Visualization.THREE.BufferAttribute(ctx.pickColorBuffer, 4));
                 ctx.geom.pickGeometry = pickGeometry;
                 pickGeometry = new Visualization.THREE.BufferGeometry();
@@ -67018,10 +68322,10 @@ var LiteMol;
                 pickGeometry.addAttribute('pColor', new Visualization.THREE.BufferAttribute(new Float32Array(0), 4));
                 ctx.geom.pickPlatesGeometry = pickGeometry;
             }
-            function createPickGeometry(ctx) {
+            function createPickGeometry(attr, ctx) {
                 var pickGeometry = new Visualization.THREE.BufferGeometry();
-                pickGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(ctx.data.vertices, 3));
-                pickGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(ChunkedArray.compact(ctx.pickTris), 1));
+                pickGeometry.addAttribute('position', attr.position);
+                pickGeometry.addAttribute('index', attr.index);
                 pickGeometry.addAttribute('pColor', new Visualization.THREE.BufferAttribute(ctx.pickColorBuffer, 4));
                 ctx.geom.pickGeometry = pickGeometry;
                 pickGeometry = new Visualization.THREE.BufferGeometry();
@@ -67053,22 +68357,28 @@ var LiteMol;
                 }
                 return new Visualization.THREE.BufferAttribute(ChunkedArray.compact(edges), 1);
             }
-            function createGeometry(isWireframe, ctx) {
+            function makeBasicAttributes(ctx) {
+                return {
+                    position: new Visualization.THREE.BufferAttribute(ctx.data.vertices, 3),
+                    index: new Visualization.THREE.BufferAttribute(ctx.data.triangleIndices, 1)
+                };
+            }
+            function createGeometry(attr, isWireframe, ctx) {
                 var geometry = new Visualization.THREE.BufferGeometry();
-                geometry.addAttribute('position', new Visualization.THREE.BufferAttribute(ctx.data.vertices, 3));
+                geometry.addAttribute('position', attr.position);
                 geometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(ctx.data.normals, 3));
-                geometry.addAttribute('color', new Visualization.THREE.BufferAttribute(new Float32Array(3 * ctx.data.vertices.length), 3));
+                geometry.addAttribute('color', new Visualization.THREE.BufferAttribute(new Float32Array(ctx.data.vertices.length), 3));
                 if (isWireframe) {
                     geometry.addAttribute('index', buildWireframeIndices(ctx));
                 }
                 else {
-                    geometry.addAttribute('index', new Visualization.THREE.BufferAttribute(ctx.data.triangleIndices, 1));
+                    geometry.addAttribute('index', attr.index);
                 }
                 ctx.geom.geometry = geometry;
                 ctx.geom.vertexStateBuffer = new Visualization.THREE.BufferAttribute(new Float32Array(ctx.data.vertices.length), 1);
                 geometry.addAttribute('vState', ctx.geom.vertexStateBuffer);
             }
-            function computePickGeometry(ctx) {
+            function computePickGeometry(attr, ctx) {
                 return __awaiter(this, void 0, void 0, function () {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
@@ -67077,7 +68387,7 @@ var LiteMol;
                                 _a.sent();
                                 ctx.pickColorBuffer = new Float32Array(ctx.vertexCount * 4);
                                 if (!!ctx.data.annotation) return [3 /*break*/, 2];
-                                createFullPickGeometry(ctx);
+                                createFullPickGeometry(attr, ctx);
                                 return [2 /*return*/];
                             case 2:
                                 assignPickColors(ctx);
@@ -67088,7 +68398,7 @@ var LiteMol;
                                 return [4 /*yield*/, computePickPlatesChunks(ctx)];
                             case 3:
                                 _a.sent();
-                                createPickGeometry(ctx);
+                                createPickGeometry(attr, ctx);
                                 _a.label = 4;
                             case 4: return [2 /*return*/];
                         }
@@ -67096,8 +68406,8 @@ var LiteMol;
                 });
             }
             function buildGeometry(data, computation, isWireframe) {
-                return __awaiter(this, void 0, LiteMol.Promise, function () {
-                    var ctx;
+                return __awaiter(this, void 0, void 0, function () {
+                    var ctx, attr;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -67117,13 +68427,14 @@ var LiteMol;
                                 return [4 /*yield*/, LiteMol.Core.Geometry.Surface.computeBoundingSphere(data).run(computation)];
                             case 3:
                                 _a.sent();
+                                attr = makeBasicAttributes(ctx);
                                 return [4 /*yield*/, computeVertexMap(ctx)];
                             case 4:
                                 _a.sent();
-                                return [4 /*yield*/, computePickGeometry(ctx)];
+                                return [4 /*yield*/, computePickGeometry(attr, ctx)];
                             case 5:
                                 _a.sent();
-                                createGeometry(isWireframe, ctx);
+                                createGeometry(attr, isWireframe, ctx);
                                 ctx.geom.vertexToElementMap = ctx.data.annotation;
                                 return [2 /*return*/, ctx.geom];
                         }
@@ -67141,8 +68452,6 @@ var LiteMol;
                     _this.pickGeometry = void 0;
                     _this.pickPlatesGeometry = void 0;
                     _this.vertexStateBuffer = void 0;
-                    _this.center = new Visualization.THREE.Vector3(0, 0, 0);
-                    _this.radius = 0;
                     return _this;
                 }
                 Geometry.prototype.dispose = function () {
@@ -67178,8 +68487,8 @@ var LiteMol;
                 }
                 Model.prototype.applySelectionInternal = function (indices, action) {
                     var buffer = this.geometry.vertexStateBuffer, array = buffer.array, map = this.geometry.elementToVertexMap, vertexRanges = map.vertexRanges, changed = false;
-                    for (var _i = 0, indices_6 = indices; _i < indices_6.length; _i++) {
-                        var index = indices_6[_i];
+                    for (var _i = 0, indices_8 = indices; _i < indices_8.length; _i++) {
+                        var index = indices_8[_i];
                         if (!map.elementMap.has(index))
                             continue;
                         var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
@@ -67196,7 +68505,12 @@ var LiteMol;
                     return true;
                 };
                 Model.prototype.highlightElement = function (pickId, highlight) {
-                    return this.applySelection(this.getPickElements(pickId), highlight ? 3 /* Highlight */ : 4 /* RemoveHighlight */);
+                    if (this.surface.annotation) {
+                        return this.applySelection(this.getPickElements(pickId), highlight ? 3 /* Highlight */ : 4 /* RemoveHighlight */);
+                    }
+                    else {
+                        return this.highlightInternal(highlight);
+                    }
                 };
                 Model.prototype.highlightInternal = function (isOn) {
                     return Visualization.Selection.applyActionToBuffer(this.geometry.vertexStateBuffer, isOn ? 3 /* Highlight */ : 4 /* RemoveHighlight */);
@@ -67208,12 +68522,12 @@ var LiteMol;
                 };
                 Model.prototype.getBoundingSphereOfSelection = function (indices) {
                     if (!this.geometry.vertexToElementMap)
-                        return { radius: this.radius, center: this.centroid };
+                        return { radius: this.radius, center: LiteMol.Core.Geometry.LinearAlgebra.Vector3.fromObj(this.centroid) };
                     var vs = this.geometry.geometry.attributes.position.array;
                     var center = new Visualization.THREE.Vector3(), count = 0;
                     var map = this.geometry.elementToVertexMap, vertexRanges = map.vertexRanges;
-                    for (var _i = 0, indices_7 = indices; _i < indices_7.length; _i++) {
-                        var index = indices_7[_i];
+                    for (var _i = 0, indices_9 = indices; _i < indices_9.length; _i++) {
+                        var index = indices_9[_i];
                         if (!map.elementMap.has(index))
                             continue;
                         var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
@@ -67236,8 +68550,8 @@ var LiteMol;
                     center.z = center.z / count;
                     var t = new Visualization.THREE.Vector3();
                     var radius = 0;
-                    for (var _a = 0, indices_8 = indices; _a < indices_8.length; _a++) {
-                        var index = indices_8[_a];
+                    for (var _a = 0, indices_10 = indices; _a < indices_10.length; _a++) {
+                        var index = indices_10[_a];
                         if (!map.elementMap.has(index))
                             continue;
                         var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
@@ -67256,7 +68570,7 @@ var LiteMol;
                     radius = Math.sqrt(radius);
                     return {
                         radius: radius,
-                        center: { x: center.x, y: center.y, z: center.z }
+                        center: LiteMol.Core.Geometry.LinearAlgebra.Vector3.fromObj(center)
                     };
                 };
                 Model.prototype.applyThemeInternal = function (theme) {
@@ -67318,7 +68632,7 @@ var LiteMol;
                     var _this = this;
                     var surface = _a.surface, theme = _a.theme, _c = _a.parameters, parameters = _c === void 0 ? Surface.DefaultSurfaceModelParameters : _c, props = _a.props;
                     return LiteMol.Core.computation(function (ctx) { return __awaiter(_this, void 0, void 0, function () {
-                        var geometry, ret, obj;
+                        var geometry, ret, center, obj;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, Surface.buildGeometry(surface, ctx, !!parameters.isWireframe)];
@@ -67330,7 +68644,8 @@ var LiteMol;
                                     ret.geometry = geometry;
                                     ret.pickMaterial = Visualization.MaterialsHelper.getPickMaterial();
                                     ret.entity = entity;
-                                    ret.centroid = new Visualization.THREE.Vector3().copy(surface.boundingSphere.center);
+                                    center = surface.boundingSphere.center;
+                                    ret.centroid = new Visualization.THREE.Vector3(center[0], center[1], center[2]);
                                     ret.radius = surface.boundingSphere.radius;
                                     if (props)
                                         ret.props = props;
@@ -67478,6 +68793,573 @@ var LiteMol;
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 /*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Labels;
+        (function (Labels) {
+            'use strict';
+            Labels.DefaultTextAtlasParams = {
+                font: ['sans-serif'],
+                size: 36,
+                style: 'normal',
+                variant: 'normal',
+                weight: 'normal',
+                outline: 0,
+                width: 2048,
+                height: 2048
+            };
+            var TextAtlasCache = LiteMol.Core.Utils.FastMap.create();
+            function getTextAtlas(params) {
+                var hash = JSON.stringify(params);
+                if (TextAtlasCache.has(hash))
+                    return TextAtlasCache.get(hash);
+                var atlas = new TextAtlas(params);
+                TextAtlasCache.set(hash, atlas);
+                return atlas;
+            }
+            Labels.getTextAtlas = getTextAtlas;
+            var TextAtlas = (function () {
+                function TextAtlas(params) {
+                    this.gamma = 1;
+                    this.mapped = LiteMol.Core.Utils.FastMap.create();
+                    this.state = { scratchW: 0, scratchH: 0, currentX: 0, currentY: 0 };
+                    this.lineHeight = 0;
+                    this.params = LiteMol.Core.Utils.extend({}, params, Labels.DefaultTextAtlasParams);
+                    if (typeof navigator !== 'undefined') {
+                        var ua = navigator.userAgent;
+                        if (ua.match(/Chrome/) && ua.match(/OS X/)) {
+                            this.gamma = 0.5;
+                        }
+                    }
+                    this.build();
+                    this.populate();
+                    this.texture = new Visualization.THREE.Texture(this.canvas.canvas2);
+                    this.texture.flipY = false;
+                    this.texture.needsUpdate = true;
+                    // no need to hold the reference.
+                    this.canvas = void 0;
+                }
+                TextAtlas.prototype.build = function () {
+                    var params = this.params;
+                    // Prepare line-height with room for outline and descenders/ascenders
+                    var lineHeight = params.size + 2 * params.outline + Math.round(params.size / 4);
+                    var maxWidth = params.width / 4;
+                    // Prepare scratch canvas
+                    var canvas = document.createElement("canvas");
+                    canvas.width = maxWidth;
+                    canvas.height = lineHeight;
+                    var ctx = canvas.getContext("2d");
+                    ctx.font = params.style + " " + params.variant + " " + params.weight + " " + params.size + "px " + params.font;
+                    ctx.fillStyle = "#FF0000";
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "bottom";
+                    ctx.lineJoin = "round";
+                    var colors = [];
+                    var dilate = params.outline * 3;
+                    for (var i = 0; i < dilate; ++i) {
+                        // 8 rgb levels = 1 step = .5 pixel increase
+                        var val = Math.max(0, -i * 8 + 128 - (+(!i)) * 8);
+                        var hex = ("00" + val.toString(16)).slice(-2);
+                        colors.push("#" + hex + hex + hex);
+                    }
+                    var scratch = new Uint8Array(maxWidth * lineHeight * 2);
+                    var data = new Uint8Array(params.width * params.height * 4);
+                    var canvas2 = document.createElement('canvas');
+                    canvas2.width = params.width;
+                    canvas2.height = params.height;
+                    var ctx2 = canvas2.getContext('2d');
+                    this.canvas = {
+                        canvas: canvas, ctx: ctx,
+                        canvas2: canvas2, ctx2: ctx2,
+                        maxWidth: maxWidth,
+                        colors: colors,
+                        scratch: scratch,
+                        data: data
+                    };
+                    this.lineHeight = lineHeight;
+                };
+                TextAtlas.prototype.map = function (text) {
+                    if (this.mapped.has(text))
+                        return this.mapped.get(text);
+                    this.draw(text);
+                    var state = this.state;
+                    if (state.currentX + state.scratchW > this.params.width) {
+                        state.currentX = 0;
+                        state.currentY += state.scratchH;
+                    }
+                    if (state.currentY + state.scratchH > this.params.height) {
+                        console.warn("TextAtlas canvas to small");
+                    }
+                    var metrics = {
+                        x: state.currentX,
+                        y: state.currentY,
+                        w: state.scratchW,
+                        h: state.scratchH
+                    };
+                    this.mapped.set(text, metrics);
+                    this.canvas.ctx2.drawImage(this.canvas.canvas, 0, 0, state.scratchW, state.scratchH, state.currentX, state.currentY, state.scratchW, state.scratchH);
+                    state.currentX += state.scratchW;
+                    return metrics;
+                };
+                TextAtlas.prototype.getTextMetrics = function (text) {
+                    return this.mapped.has(text) ? this.mapped.get(text) : this.placeholder;
+                };
+                TextAtlas.prototype.draw = function (text) {
+                    var _a = this, params = _a.params, canvas = _a.canvas;
+                    var h = this.lineHeight;
+                    var o = params.outline;
+                    var ctx = canvas.ctx;
+                    var dst = canvas.scratch;
+                    var max = canvas.maxWidth;
+                    var colors = canvas.colors;
+                    // Bottom aligned, take outline into account
+                    var x = o;
+                    var y = h - params.outline;
+                    // Measure text
+                    var m = ctx.measureText(text);
+                    var w = Math.min(max, Math.ceil(m.width + 2 * x + 1));
+                    // Clear scratch area
+                    ctx.clearRect(0, 0, w, h);
+                    var i, il, j, imageData, data;
+                    if (params.outline === 0) {
+                        ctx.fillText(text, x, y);
+                        imageData = ctx.getImageData(0, 0, w, h);
+                        data = imageData.data;
+                        j = 3; // Skip to alpha channel
+                        for (i = 0, il = data.length / 4; i < il; ++i) {
+                            dst[i] = data[j];
+                            j += 4;
+                        }
+                    }
+                    else {
+                        ctx.globalCompositeOperation = "source-over";
+                        // Draw strokes of decreasing width to create
+                        // nested outlines (absolute distance)
+                        for (i = o + 1; i > 0; --i) {
+                            // Eliminate odd strokes once past > 1px,
+                            // don't need the detail
+                            j = i > 1 ? i * 2 - 2 : i;
+                            ctx.strokeStyle = colors[j - 1];
+                            ctx.lineWidth = j;
+                            ctx.strokeText(text, x, y);
+                        }
+                        ctx.globalCompositeOperation = "multiply";
+                        ctx.fillStyle = "#FF00FF";
+                        ctx.fillText(text, x, y);
+                        imageData = ctx.getImageData(0, 0, w, h);
+                        data = imageData.data;
+                        j = 0;
+                        var gamma = this.gamma;
+                        for (i = 0, il = data.length / 4; i < il; ++i) {
+                            // Get value + mask
+                            var a = data[j];
+                            var mask = a ? data[j + 1] / a : 1;
+                            if (gamma === 0.5) {
+                                mask = Math.sqrt(mask);
+                            }
+                            mask = Math.min(1, Math.max(0, mask));
+                            // Blend between positive/outside and negative/inside
+                            var b = 256 - a;
+                            var c = b + (a - b) * mask;
+                            // Clamp (slight expansion to hide errors around the transition)
+                            dst[i] = Math.max(0, Math.min(255, c + 2));
+                            data[j + 3] = dst[i];
+                            j += 4;
+                        }
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    this.state.scratchW = w;
+                    this.state.scratchH = h;
+                };
+                TextAtlas.prototype.populate = function () {
+                    // Replacement Character
+                    this.placeholder = this.map(String.fromCharCode(0xFFFD));
+                    // Basic Latin
+                    for (var i = 0x0000; i < 0x007F; ++i) {
+                        this.map(String.fromCharCode(i));
+                    }
+                    // Latin-1 Supplement
+                    for (var i = 0x0080; i < 0x00FF; ++i) {
+                        this.map(String.fromCharCode(i));
+                    }
+                    // Greek and Coptic
+                    for (var i = 0x0370; i < 0x03FF; ++i) {
+                        this.map(String.fromCharCode(i));
+                    }
+                    // Cyrillic
+                    for (var i = 0x0400; i < 0x04FF; ++i) {
+                        this.map(String.fromCharCode(i));
+                    }
+                    // Angstrom Sign
+                    this.map(String.fromCharCode(0x212B));
+                };
+                return TextAtlas;
+            }());
+            Labels.TextAtlas = TextAtlas;
+        })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Labels;
+        (function (Labels) {
+            var Geometry;
+            (function (Geometry) {
+                'use strict';
+                /**
+                 * Adapted from https://github.com/arose/ngl
+                 * MIT License Copyright (C) 2014+ Alexander Rose
+                 */
+                function create(params) {
+                    var state = initState(params);
+                    calcVertices(state);
+                    makeMapping(state);
+                    var idx = makeIndexBuffer(state);
+                    var geometry = new Visualization.THREE.BufferGeometry();
+                    geometry.addAttribute('position', new Visualization.THREE.BufferAttribute(state.vertices, 3));
+                    geometry.addAttribute('index', new Visualization.THREE.BufferAttribute(idx, 1));
+                    geometry.addAttribute('color', new Visualization.THREE.BufferAttribute(new Float32Array(state.quadCount * 4 * 3), 3));
+                    geometry.addAttribute('mapping', new Visualization.THREE.BufferAttribute(state.mapping, 2));
+                    geometry.addAttribute('inputTexCoord', new Visualization.THREE.BufferAttribute(state.texCoords, 2));
+                    geometry.addAttribute('inputSize', new Visualization.THREE.BufferAttribute(state.size, 1));
+                    return { geometry: geometry, texture: state.textAtlas.texture, options: state.options };
+                }
+                Geometry.create = create;
+                function initState(params) {
+                    var options = LiteMol.Core.Utils.extend({}, params.options, Labels.DefaultLabelsOptions);
+                    var charCount = 0;
+                    for (var _i = 0, _a = params.labels; _i < _a.length; _i++) {
+                        var t = _a[_i];
+                        charCount += t.length;
+                    }
+                    var textAtlas = Labels.getTextAtlas({
+                        font: [options.fontFamily],
+                        style: options.fontStyle,
+                        weight: options.fontWeight,
+                        size: options.fontSize,
+                        outline: options.useSDF ? 5 : 0
+                    });
+                    var quadCount = charCount + params.labels.length /* bg */;
+                    return {
+                        positions: params.positions,
+                        inputSizes: params.sizes,
+                        labels: params.labels,
+                        options: options,
+                        textAtlas: textAtlas,
+                        charCount: charCount,
+                        quadCount: quadCount,
+                        vertices: new Float32Array(quadCount * 4 * 3),
+                        size: new Float32Array(quadCount * 4),
+                        texCoords: new Float32Array(quadCount * 4 * 2),
+                        mapping: new Float32Array(quadCount * 4 * 2)
+                    };
+                }
+                function calcVertices(state) {
+                    var text = state.labels;
+                    var _a = state.positions, x = _a.x, y = _a.y, z = _a.z;
+                    var vertices = state.vertices, size = state.size, inputSizes = state.inputSizes;
+                    var iCharAll = 0;
+                    for (var v = 0; v < text.length; ++v) {
+                        var txt = text[v];
+                        var nChar = txt.length + 1 /* bg */;
+                        for (var iChar = 0; iChar < nChar; ++iChar, ++iCharAll) {
+                            for (var m = 0; m < 4; m++) {
+                                var j = iCharAll * 4 * 3 + (3 * m);
+                                vertices[j] = x[v];
+                                vertices[j + 1] = y[v];
+                                vertices[j + 2] = z[v];
+                                size[iCharAll * 4 + m] = inputSizes[v];
+                            }
+                        }
+                    }
+                }
+                function makeMapping(state) {
+                    var ta = state.textAtlas;
+                    var text = state.labels;
+                    var attachment = state.options.attachment;
+                    var outline = ta.params.outline, lineHeight = ta.lineHeight;
+                    var margin = (ta.lineHeight * state.options.backgroundMargin * 0.1) - 10;
+                    var inputTexCoord = state.texCoords;
+                    var inputMapping = state.mapping;
+                    var iCharAll = 0;
+                    var c, i, txt, xadvance, iChar, nChar, xShift, yShift;
+                    for (var v = 0; v < text.length; ++v) {
+                        txt = text[v];
+                        xadvance = 0;
+                        nChar = txt.length;
+                        // calculate width
+                        for (iChar = 0; iChar < nChar; ++iChar) {
+                            c = ta.getTextMetrics(txt[iChar]);
+                            xadvance += c.w - 2 * outline;
+                        }
+                        // attachment
+                        if (attachment.indexOf("top") === 0) {
+                            yShift = ta.lineHeight / 1.25;
+                        }
+                        else if (attachment.indexOf("middle") === 0) {
+                            yShift = ta.lineHeight / 2.5;
+                        }
+                        else {
+                            yShift = 0; // "bottom"
+                        }
+                        if (attachment.indexOf("right") > 0) {
+                            xShift = xadvance;
+                        }
+                        else if (attachment.indexOf("center") > 0) {
+                            xShift = xadvance / 2;
+                        }
+                        else {
+                            xShift = 0; // "left"
+                        }
+                        xShift += outline;
+                        yShift += outline;
+                        // background            
+                        i = iCharAll * 2 * 4;
+                        inputMapping[i + 0] = -lineHeight / 6 - xShift - margin; // top left
+                        inputMapping[i + 1] = lineHeight - yShift + margin;
+                        inputMapping[i + 2] = -lineHeight / 6 - xShift - margin; // bottom left
+                        inputMapping[i + 3] = 0 - 1.2 * yShift - margin;
+                        inputMapping[i + 4] = xadvance + lineHeight / 6 - xShift + 2 * outline + margin; // top right
+                        inputMapping[i + 5] = lineHeight - yShift + margin;
+                        inputMapping[i + 6] = xadvance + lineHeight / 6 - xShift + 2 * outline + margin; // bottom right
+                        inputMapping[i + 7] = 0 - 1.2 * yShift - margin;
+                        inputTexCoord[i + 0] = 10;
+                        inputTexCoord[i + 2] = 10;
+                        inputTexCoord[i + 4] = 10;
+                        inputTexCoord[i + 6] = 10;
+                        iCharAll += 1;
+                        xadvance = 0;
+                        for (iChar = 0; iChar < nChar; ++iChar, ++iCharAll) {
+                            c = ta.getTextMetrics(txt[iChar]);
+                            i = iCharAll * 2 * 4;
+                            inputMapping[i + 0] = xadvance - xShift; // top left
+                            inputMapping[i + 1] = c.h - yShift;
+                            inputMapping[i + 2] = xadvance - xShift; // bottom left
+                            inputMapping[i + 3] = 0 - yShift;
+                            inputMapping[i + 4] = xadvance + c.w - xShift; // top right
+                            inputMapping[i + 5] = c.h - yShift;
+                            inputMapping[i + 6] = xadvance + c.w - xShift; // bottom right
+                            inputMapping[i + 7] = 0 - yShift;
+                            var texWidth = ta.params.width;
+                            var texHeight = ta.params.height;
+                            inputTexCoord[i + 0] = c.x / texWidth; // top left
+                            inputTexCoord[i + 1] = c.y / texHeight;
+                            inputTexCoord[i + 2] = c.x / texWidth; // bottom left
+                            inputTexCoord[i + 3] = (c.y + c.h) / texHeight;
+                            inputTexCoord[i + 4] = (c.x + c.w) / texWidth; // top right
+                            inputTexCoord[i + 5] = c.y / texHeight;
+                            inputTexCoord[i + 6] = (c.x + c.w) / texWidth; // bottom right
+                            inputTexCoord[i + 7] = (c.y + c.h) / texHeight;
+                            xadvance += c.w - 2 * outline;
+                        }
+                    }
+                }
+                function makeIndexBuffer(state) {
+                    var buffer = new Uint32Array(state.quadCount * 2 * 3);
+                    var o = 0;
+                    for (var i = 0; i < state.quadCount; i++) {
+                        buffer[o++] = 4 * i;
+                        buffer[o++] = 4 * i + 1;
+                        buffer[o++] = 4 * i + 2;
+                        buffer[o++] = 4 * i + 1;
+                        buffer[o++] = 4 * i + 3;
+                        buffer[o++] = 4 * i + 2;
+                    }
+                    return buffer;
+                }
+            })(Geometry = Labels.Geometry || (Labels.Geometry = {}));
+        })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Labels;
+        (function (Labels) {
+            var Material;
+            (function (Material) {
+                /**
+                 * Adapted from https://github.com/arose/ngl
+                 * MIT License Copyright (C) 2014+ Alexander Rose
+                 */
+                Material.VERTEX_SHADER = "\nuniform float xOffset;\nuniform float yOffset;\nuniform float zOffset;\nuniform float sizeFactor;\n\nvarying vec2 texCoord;\n\nattribute vec2 mapping;\nattribute vec2 inputTexCoord;\nattribute float inputSize;\n\n" + Visualization.THREE.ShaderChunk["color_pars_vertex"] + "\n" + Visualization.THREE.ShaderChunk["common"] + "\n\nfloat matrixScale( in mat4 m ){\n    vec4 r = m[ 0 ];\n    return sqrt( r[ 0 ] * r[ 0 ] + r[ 1 ] * r[ 1 ] + r[ 2 ] * r[ 2 ] );\n}\n\nvoid main(void){\n\n    " + Visualization.THREE.ShaderChunk["color_vertex"] + "\n\n    texCoord = inputTexCoord;\n\n    float scale = matrixScale( modelViewMatrix );\n\n    float _zOffset = zOffset * scale;\n    if( texCoord.x == 10.0 ){\n         _zOffset -= 0.001;\n    }\n\n    vec3 pos = position;\n    vec4 cameraPos = modelViewMatrix * vec4( pos, 1.0 );\n    vec4 cameraCornerPos = vec4( cameraPos.xyz, 1.0 );\n    cameraCornerPos.xy += mapping * inputSize * sizeFactor * 0.01 * scale;\n    cameraCornerPos.x += xOffset * scale;\n    cameraCornerPos.y += yOffset * scale;\n    cameraCornerPos.xyz += normalize( -cameraCornerPos.xyz ) * _zOffset;\n\n    gl_Position = projectionMatrix * cameraCornerPos;\n    //gl_Position.xyz = position.xyz;\n}\n";
+                Material.FRAGMENT_SHADER = "\n#extension GL_OES_standard_derivatives : enable\n\nuniform sampler2D fontTexture;\nuniform vec3 outlineColor;\nuniform float outlineWidth;\nuniform vec3 backgroundColor;\nuniform float backgroundOpacity;\n\nvarying vec2 texCoord;\n\n" + Visualization.THREE.ShaderChunk["common"] + "\n" + Visualization.THREE.ShaderChunk["color_pars_fragment"] + "\n" + Visualization.THREE.ShaderChunk["fog_pars_fragment"] + "\n\nconst float smoothness = 16.0;\nconst float gamma = 2.2;\n\nvoid main(){\n    vec4 finalColor;\n\n    if( texCoord.x > 1.0 ){\n        if (backgroundOpacity < 0.05) discard;\n        finalColor = vec4( backgroundColor, backgroundOpacity );\n    }else{\n        // retrieve signed distance\n        float sdf = texture2D( fontTexture, texCoord ).a + outlineWidth;\n\n        // perform adaptive anti-aliasing of the edges\n        float w = clamp(\n            smoothness * ( abs( dFdx( texCoord.x ) ) + abs( dFdy( texCoord.y ) ) ),\n            0.0,\n            0.5\n        );\n        float a = smoothstep( 0.5 - w, 0.5 + w, sdf );\n\n        // gamma correction for linear attenuation\n        a = pow( a, 1.0 / gamma );\n        if( a < 0.2 ) discard;\n        //a *= opacity;\n\n        vec3 outgoingLight = vColor;\n        if( outlineWidth > 0.0 && sdf < ( 0.5 + outlineWidth ) ){\n            outgoingLight = outlineColor;\n        }\n\n        finalColor = vec4( outgoingLight, a );    \n    }\n\n    //gl_FragColor = finalColor;\n    vec3 outgoingLight = finalColor.rgb;\n\n    " + Visualization.THREE.ShaderChunk["fog_fragment"] + "\n    \n    #ifdef USE_FOG\n       float alpha = (1.0 - fogFactor) * finalColor.a;\n       if (alpha < 0.05) discard;\n       gl_FragColor = vec4( outgoingLight.rgb, alpha );\n    #else\n      gl_FragColor = finalColor;\n    #endif\n}\n";
+            })(Material = Labels.Material || (Labels.Material = {}));
+        })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Labels;
+        (function (Labels) {
+            var Material;
+            (function (Material) {
+                'use strict';
+                function create(texture) {
+                    var uniforms = Visualization.THREE.UniformsUtils.merge([
+                        Visualization.THREE.UniformsLib["common"],
+                        Visualization.THREE.UniformsLib["fog"],
+                        {
+                            "fontTexture": { type: "t", value: texture },
+                            "xOffset": { type: "f", value: 0 },
+                            "yOffset": { type: "f", value: 0 },
+                            "zOffset": { type: "f", value: 0 },
+                            "sizeFactor": { type: "f", value: 1.0 },
+                            "outlineWidth": { type: "f", value: 0.0 },
+                            "outlineColor": { type: "v3", value: new Visualization.THREE.Vector3(0, 0, 0) },
+                            "backgroundColor": { type: "v3", value: new Visualization.THREE.Vector3(0, 0, 0) },
+                            "backgroundOpacity": { type: "f", value: 0.5 },
+                        }
+                    ]);
+                    uniforms.fontTexture.value = texture;
+                    var ret = new Visualization.THREE.ShaderMaterial({
+                        uniforms: uniforms,
+                        attributes: {
+                            "mapping": { type: 'v2', value: null },
+                            "inputTexCoord": { type: 'v2', value: null },
+                            "inputSize": { type: 'f', value: null }
+                        },
+                        lights: false,
+                        fog: true,
+                        vertexShader: Material.VERTEX_SHADER,
+                        fragmentShader: Material.FRAGMENT_SHADER,
+                        shading: Visualization.THREE.NoShading,
+                        side: Visualization.THREE.DoubleSide,
+                        vertexColors: Visualization.THREE.VertexColors,
+                        blending: Visualization.THREE.NormalBlending,
+                        transparent: false,
+                        wireframe: false,
+                        linewidth: 1
+                    });
+                    return ret;
+                }
+                Material.create = create;
+            })(Material = Labels.Material || (Labels.Material = {}));
+        })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Labels;
+        (function (Labels) {
+            'use strict';
+            Labels.DefaultLabelsOptions = {
+                fontFamily: 'sans-serif',
+                fontSize: 32,
+                fontStyle: 'normal',
+                fontWeight: 'normal',
+                useSDF: true,
+                attachment: 'middle-center',
+                backgroundMargin: 1.0
+            };
+            var Model = (function (_super) {
+                __extends(Model, _super);
+                function Model() {
+                    return _super !== null && _super.apply(this, arguments) || this;
+                }
+                Model.prototype.applySelectionInternal = function (indices, action) { return false; };
+                Model.prototype.getPickElements = function (pickId) { return []; };
+                ;
+                Model.prototype.highlightElement = function (pickId, highlight) { return false; };
+                Model.prototype.highlightInternal = function (isOn) { return false; };
+                Model.prototype.applyColoring = function (theme) {
+                    var color = this.geometry.attributes.color.array;
+                    var o = 0, t = { r: 0.1, g: 0.1, b: 0.1 };
+                    var i = 0;
+                    for (var _i = 0, _a = this.labels; _i < _a.length; _i++) {
+                        var l = _a[_i];
+                        var count = l.length * 4 + 4 /* background */;
+                        theme.setElementColor(i, t);
+                        for (var j = 0; j < count; j++) {
+                            color[o++] = t.r;
+                            color[o++] = t.g;
+                            color[o++] = t.b;
+                        }
+                        i++;
+                    }
+                    this.geometry.attributes.color.needsUpdate = true;
+                };
+                Model.prototype.applyThemeInternal = function (theme) {
+                    this.applyColoring(theme);
+                    var backgroundColor = theme.colors.get('Background') || Visualization.Color.fromHexString('#333333');
+                    var backgroundOpacity = theme.variables.get('backgroundOpacity') !== void 0 ? theme.variables.get('backgroundOpacity') : 0.5;
+                    var outlineColor = theme.colors.get('Outline') || Visualization.Color.fromHexString('#222222');
+                    var outlineWidth = theme.variables.get('outlineWidth') ? +theme.variables.get('outlineWidth') : 0.0;
+                    var sizeFactor = theme.variables.get('sizeFactor') ? +theme.variables.get('sizeFactor') : 1.0;
+                    var uniforms = this.material.uniforms;
+                    uniforms.xOffset.value = theme.variables.get('xOffset') || 0;
+                    uniforms.yOffset.value = theme.variables.get('yOffset') || 0;
+                    uniforms.zOffset.value = theme.variables.get('zOffset') || 0;
+                    uniforms.backgroundColor.value = new Visualization.THREE.Vector3(backgroundColor.r, backgroundColor.g, backgroundColor.b);
+                    uniforms.backgroundOpacity.value = backgroundOpacity;
+                    uniforms.outlineColor.value = new Visualization.THREE.Vector3(outlineColor.r, outlineColor.g, outlineColor.b);
+                    uniforms.outlineWidth.value = outlineWidth;
+                    uniforms.sizeFactor.value = sizeFactor;
+                    this.material.transparent = backgroundOpacity < 1.0,
+                        this.material.fog = !theme.disableFog;
+                    this.material.needsUpdate = true;
+                };
+                Model.create = function (entity, params) {
+                    var _this = this;
+                    return LiteMol.Core.computation(function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, geometry, texture, options, model;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0: return [4 /*yield*/, ctx.updateProgress('Creating labels geometry...')];
+                                case 1:
+                                    _b.sent();
+                                    _a = Labels.Geometry.create(params), geometry = _a.geometry, texture = _a.texture, options = _a.options;
+                                    return [4 /*yield*/, ctx.updateProgress('Creating labels model...')];
+                                case 2:
+                                    _b.sent();
+                                    model = new Model();
+                                    model.options = options;
+                                    model.labels = params.labels;
+                                    model.geometry = geometry;
+                                    model.material = Labels.Material.create(texture);
+                                    model.entity = entity;
+                                    model.object = new Visualization.THREE.Mesh(geometry, model.material);
+                                    model.object.renderOrder = 1;
+                                    geometry.computeBoundingSphere();
+                                    model.centroid = geometry.boundingSphere.center;
+                                    model.radius = geometry.boundingSphere.radius + 4;
+                                    model.applyTheme(params.theme);
+                                    model.disposeList = [geometry, model.material];
+                                    return [2 /*return*/, model];
+                            }
+                        });
+                    }); });
+                };
+                return Model;
+            }(Visualization.Model));
+            Labels.Model = Model;
+        })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
  * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
  */
 var LiteMol;
@@ -67493,6 +69375,7 @@ var LiteMol;
                     tessalation: 3,
                     atomRadius: function () { return 0.4; },
                     hideBonds: false,
+                    hideHydrogens: false,
                     bondRadius: 0.15,
                     customMaxBondLengths: void 0
                 };
@@ -67503,8 +69386,8 @@ var LiteMol;
                     }
                     Model.prototype.applySelectionInternal = function (indices, action) {
                         var buffer = this.ballsAndSticks.vertexStateBuffer, array = buffer.array, map = this.ballsAndSticks.atomVertexMap, vertexRanges = map.vertexRanges, changed = false;
-                        for (var _i = 0, indices_9 = indices; _i < indices_9.length; _i++) {
-                            var index = indices_9[_i];
+                        for (var _i = 0, indices_11 = indices; _i < indices_11.length; _i++) {
+                            var index = indices_11[_i];
                             if (!map.elementMap.has(index))
                                 continue;
                             var indexOffset = map.elementMap.get(index), rangeStart = map.elementRanges[2 * indexOffset], rangeEnd = map.elementRanges[2 * indexOffset + 1];
@@ -67532,10 +69415,10 @@ var LiteMol;
                     Model.prototype.applyThemeInternal = function (theme) {
                         var _this = this;
                         var map = this.ballsAndSticks.atomVertexMap;
-                        Visualization.MaterialsHelper.applyColorToMap(map, map.elementIndices, this.ballsAndSticks.atomsGeometry.attributes.color, function (i, c) { return _this.theme.setElementColor(i, c); });
-                        map = this.ballsAndSticks.bondVertexMap;
+                        Visualization.MaterialsHelper.applyColorToMap(map, this.ballsAndSticks.atomsGeometry.attributes.color, function (i, c) { return _this.theme.setElementColor(i, c); });
+                        //map = this.ballsAndSticks.bondVertexMap;
                         var bondColor = Visualization.Theme.getColor(theme, 'Bond', Molecule.Colors.DefaultBondColor);
-                        Visualization.MaterialsHelper.applyColorToMap(map, map.elementIndices, this.ballsAndSticks.bondsGeometry.attributes.color, function (i, c) { return Visualization.Color.copy(bondColor, c); });
+                        Visualization.MaterialsHelper.applyColorToBuffer(this.ballsAndSticks.bondsGeometry.attributes.color, bondColor);
                         Visualization.MaterialsHelper.updateMaterial(this.material, theme, this.object);
                         Visualization.MaterialsHelper.updateMaterial(this.bondsMaterial, theme, this.object);
                     };
@@ -67601,205 +69484,84 @@ var LiteMol;
             var BallsAndSticks;
             (function (BallsAndSticks) {
                 "use strict";
-                var BallsAndSticksHelper;
-                (function (BallsAndSticksHelper) {
-                    var ChunkedArray = LiteMol.Core.Utils.ChunkedArray;
-                    function addPrecomputedBonds(molecule, atomIndices, builder) {
-                        var mask = LiteMol.Core.Structure.Query.Context.Mask.ofIndices(molecule, atomIndices);
-                        var stickCount = 0;
-                        var _a = molecule.data.bonds.covalent, atomAIndex = _a.atomAIndex, atomBIndex = _a.atomBIndex, type = _a.type, count = _a.count;
-                        for (var i = 0; i < count; i++) {
-                            var a = atomAIndex[i], b = atomBIndex[i];
-                            if (!mask.has(a) || !mask.has(b))
-                                continue;
-                            var order = type[i];
-                            if (order < 1 || order > 4)
-                                order = 1;
-                            ChunkedArray.add3(builder, a, b, order);
-                            stickCount += order;
+                var Geom = LiteMol.Core.Geometry;
+                var Vec3 = Geom.LinearAlgebra.Vector3;
+                var Mat4 = Geom.LinearAlgebra.Matrix4;
+                var GB = Visualization.Geometry.Builder;
+                function isHydrogen(n) {
+                    return n === 'H' || n === 'D' || n === 'T';
+                }
+                function getAtomCount(model, atomIndices, params) {
+                    var es = model.data.atoms.elementSymbol;
+                    var hideHydrogens = params.hideHydrogens;
+                    var atomCount = 0;
+                    if (hideHydrogens) {
+                        for (var _i = 0, atomIndices_2 = atomIndices; _i < atomIndices_2.length; _i++) {
+                            var aI = atomIndices_2[_i];
+                            if (!isHydrogen(es[aI])) {
+                                atomCount++;
+                            }
                         }
-                        return stickCount;
                     }
-                    BallsAndSticksHelper.addPrecomputedBonds = addPrecomputedBonds;
-                    function analyze(molecule, atomIndices, params) {
-                        var indices, atomCount = 0;
-                        indices = atomIndices;
-                        atomCount = indices.length;
-                        var atoms = molecule.data.atoms, _a = molecule.positions, cX = _a.x, cY = _a.y, cZ = _a.z, elementSymbol = atoms.elementSymbol, atomName = atoms.name, altLoc = atoms.altLoc, atomResidueIndex = atoms.residueIndex, atomEntityIndex = atoms.entityIndex, entityType = molecule.data.entities.type, waterType = 'water', residueName = molecule.data.residues.name;
-                        var bondLength = 2;
-                        var compBonds = molecule.data.bonds.component, builder = ChunkedArray.create(function (size) { return new Int32Array(size); }, (indices.length * 1.33) | 0, 3), residueCount = 1, stickCount = 0, startAtomIndex = 0, endAtomIndex = 0;
-                        if (molecule.data.bonds.covalent) {
-                            stickCount = BallsAndSticksHelper.addPrecomputedBonds(molecule, atomIndices, builder);
-                            while (startAtomIndex < atomCount) {
-                                var rIndex = atomResidueIndex[indices[startAtomIndex]];
-                                endAtomIndex = startAtomIndex;
-                                while (endAtomIndex < atomCount && atomResidueIndex[indices[endAtomIndex]] == rIndex)
-                                    endAtomIndex++;
-                                residueCount++;
-                                startAtomIndex = endAtomIndex;
-                            }
-                            return {
-                                bonds: ChunkedArray.compact(builder),
-                                stickCount: stickCount,
-                                residueCount: residueCount
-                            };
-                        }
-                        var tree = LiteMol.Core.Geometry.SubdivisionTree3D.create(indices, function (i, add) { add(cX[i], cY[i], cZ[i]); }), ctx = LiteMol.Core.Geometry.SubdivisionTree3D.createContextRadius(tree, bondLength + 1, false), pA = new Visualization.THREE.Vector3(), pB = new Visualization.THREE.Vector3(), processed = LiteMol.Core.Utils.FastSet.create(), buffer = ctx.buffer;
-                        var maxHbondLength = params.customMaxBondLengths && params.customMaxBondLengths.has('H')
-                            ? params.customMaxBondLengths.get('H')
-                            : 1.15;
-                        while (startAtomIndex < atomCount) {
-                            var rIndex = atomResidueIndex[indices[startAtomIndex]];
-                            endAtomIndex = startAtomIndex;
-                            while (endAtomIndex < atomCount && atomResidueIndex[indices[endAtomIndex]] == rIndex)
-                                endAtomIndex++;
-                            var bondInfo = void 0;
-                            if (compBonds && (bondInfo = compBonds.entries.get(residueName[atomResidueIndex[indices[startAtomIndex]]]))) {
-                                for (var ii = startAtomIndex; ii < endAtomIndex - 1; ii++) {
-                                    var iA = indices[ii], nA = atomName[iA], altA = altLoc[iA], pairs = bondInfo.map.get(nA);
-                                    if (!pairs)
-                                        continue;
-                                    for (var jj = ii + 1; jj < endAtomIndex; jj++) {
-                                        var iB = indices[jj], altB = altLoc[iB];
-                                        if (!altA || !altB || altA === altB) {
-                                            var order = pairs.get(atomName[iB]);
-                                            if (order !== void 0) {
-                                                if (order < 1 || order > 4)
-                                                    order = 1;
-                                                ChunkedArray.add3(builder, iA, iB, order);
-                                                stickCount += order;
-                                            }
-                                        }
-                                        else {
-                                            continue;
-                                        }
-                                    }
-                                    processed.add(iA);
-                                }
-                                processed.add(indices[endAtomIndex - 1]);
-                            }
-                            for (var ii = startAtomIndex; ii < endAtomIndex; ii++) {
-                                var atom = indices[ii];
-                                buffer.reset();
-                                ctx.nearest(cX[atom], cY[atom], cZ[atom], bondLength);
-                                pA.set(cX[atom], cY[atom], cZ[atom]);
-                                var es = elementSymbol[atom], isHA = es === 'H' || es === 'D' || es === 'T', altA = altLoc[atom], isWater = entityType[atomEntityIndex[atom]] === waterType;
-                                var count = buffer.count;
-                                for (var i = 0; i < count; i++) {
-                                    var idx = indices[buffer.indices[i]];
-                                    if (idx !== atom && !processed.has(idx)) {
-                                        es = elementSymbol[idx];
-                                        var len = pB.set(cX[idx], cY[idx], cZ[idx]).sub(pA).length(), isHB = es === 'H' || es === 'D' || es === 'T';
-                                        if (isHA && isHB || (isWater && !isHB))
-                                            continue;
-                                        var altB = altLoc[idx];
-                                        if (isHA || isHB) {
-                                            if (len <= maxHbondLength && (!altA || !altB || altA === altB)) {
-                                                ChunkedArray.add3(builder, atom, idx, 1);
-                                                stickCount++;
-                                            }
-                                            continue;
-                                        }
-                                        if (len && (!altA || !altB || altA === altB)) {
-                                            ChunkedArray.add3(builder, atom, idx, 1);
-                                            stickCount++;
-                                        }
-                                    }
-                                }
-                                processed.add(atom);
-                            }
-                            residueCount++;
-                            startAtomIndex = endAtomIndex;
-                        }
-                        return {
-                            bonds: ChunkedArray.compact(builder),
-                            stickCount: stickCount,
-                            residueCount: residueCount
-                        };
+                    else {
+                        atomCount = atomIndices.length;
                     }
-                    BallsAndSticksHelper.analyze = analyze;
-                })(BallsAndSticksHelper || (BallsAndSticksHelper = {}));
+                    return atomCount;
+                }
+                function getBondsInfo(model, atomIndices, params) {
+                    var bonds = LiteMol.Core.Structure.computeBonds(model, atomIndices, {
+                        maxHbondLength: params.customMaxBondLengths && params.customMaxBondLengths.has('H') ? params.customMaxBondLengths.get('H') : 1.15
+                    });
+                    var metalDashFactor = 1 / (2 * 0.15 /* MetalDashSize */);
+                    var es = model.data.atoms.elementSymbol;
+                    var hideHydrogens = params.hideHydrogens;
+                    var covalentStickCount = 0, dashPartCount = 0;
+                    var type = bonds.type, count = bonds.count, atomAIndex = bonds.atomAIndex, atomBIndex = bonds.atomBIndex;
+                    var _a = model.positions, x = _a.x, y = _a.y, z = _a.z;
+                    for (var i = 0; i < count; i++) {
+                        var t = type[i];
+                        var a = atomAIndex[i], b = atomBIndex[i];
+                        if (hideHydrogens && (isHydrogen(es[a]) || isHydrogen(es[b]))) {
+                            continue;
+                        }
+                        if (t === 0 /* Unknown */ || t === 5 /* DisulfideBridge */)
+                            covalentStickCount += 1;
+                        else if (t >= 1 /* Single */ && t <= 4 /* Aromatic */)
+                            covalentStickCount += t;
+                        else if (t === 6 /* Metallic */ || t === 7 /* Ion */ || t === 8 /* Hydrogen */) {
+                            var dx = x[a] - x[b], dy = y[a] - y[b], dz = z[a] - z[b];
+                            var len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                            dashPartCount += Math.ceil(metalDashFactor * len);
+                        }
+                    }
+                    return {
+                        bonds: bonds,
+                        covalentStickCount: covalentStickCount,
+                        dashPartCount: dashPartCount
+                    };
+                }
                 var BondModelState = (function () {
-                    function BondModelState(template, templateVB, templateNB, templateIB, templateVertexCount, vertices, normals, indices) {
-                        this.template = template;
-                        this.templateVB = templateVB;
-                        this.templateNB = templateNB;
-                        this.templateIB = templateIB;
-                        this.templateVertexCount = templateVertexCount;
-                        this.vertices = vertices;
-                        this.normals = normals;
-                        this.indices = indices;
-                        this.atomsVector = new Visualization.THREE.Vector3();
-                        this.center = new Visualization.THREE.Vector3();
-                        this.rotationAxis = new Visualization.THREE.Vector3();
-                        this.upVector = new Visualization.THREE.Vector3(0, 1, 0);
-                        this.scaleMatrix = new Visualization.THREE.Matrix4();
-                        this.rotationMatrix = new Visualization.THREE.Matrix4();
-                        this.translationMatrix = new Visualization.THREE.Matrix4();
-                        this.offsetMatrix = new Visualization.THREE.Matrix4();
-                        this.finalMatrix = new Visualization.THREE.Matrix4();
-                        this.sticksDone = 0;
-                        this.radius = 0.15;
-                        this.offset = new Visualization.THREE.Vector3();
-                        this.a = new Visualization.THREE.Vector3();
-                        this.b = new Visualization.THREE.Vector3();
+                    function BondModelState(bondTemplate, builder) {
+                        this.bondTemplate = bondTemplate;
+                        this.builder = builder;
+                        this.rotationAxis = Vec3.zero();
+                        this.bondUpVector = Vec3.fromValues(1, 0, 0);
+                        this.dir = Vec3.zero();
+                        this.scale = Vec3.zero();
+                        this.translation = Vec3.zero();
+                        this.rotation = Mat4.zero();
+                        this.offset = Vec3.zero();
+                        this.a = Vec3.zero();
+                        this.b = Vec3.zero();
                     }
                     return BondModelState;
                 }());
-                var BuildState = (function () {
-                    function BuildState(model, atomIndices, params) {
-                        this.model = model;
-                        this.atomIndices = atomIndices;
-                        this.params = params;
-                        this.tessalation = this.params.tessalation;
-                        this.atomRadius = this.params.atomRadius;
-                        this.bondRadius = this.params.bondRadius;
-                        this.hideBonds = this.params.hideBonds;
-                        this.bondTemplate = BuildState.getBondTemplate(1.0, this.tessalation);
-                        this.atomTemplate = BuildState.getAtomTemplate(1.0, this.tessalation);
-                        this.bondTemplateVertexBuffer = this.bondTemplate.attributes.position.array;
-                        this.bondTemplateVertexBufferLength = this.bondTemplateVertexBuffer.length;
-                        this.bondTemplateVertexCount = (this.bondTemplateVertexBufferLength / 3) | 0;
-                        this.bondTemplateIndexBuffer = this.bondTemplate.attributes.index.array;
-                        this.bondTemplateIndexBufferLength = this.bondTemplateIndexBuffer.length;
-                        this.bondTemplateNormalBuffer = this.bondTemplate.attributes.normal.array;
-                        this.atomTemplateVertexBuffer = this.atomTemplate.attributes.position.array;
-                        this.atomTemplateVertexBufferLength = this.atomTemplateVertexBuffer.length;
-                        this.atomTemplateVertexCount = (this.atomTemplateVertexBufferLength / 3) | 0;
-                        this.atomTemplateIndexBuffer = this.atomTemplate.attributes.index.array;
-                        this.atomTemplateIndexBufferLength = this.atomTemplateIndexBuffer.length;
-                        this.atomTemplateNormalBuffer = this.atomTemplate.attributes.normal.array;
-                        this.atomBufferSize = this.atomTemplateVertexBufferLength * this.atomIndices.length;
-                        this.atomVertices = new Float32Array(this.atomBufferSize);
-                        this.atomNormals = new Float32Array(this.atomBufferSize);
-                        this.atomTriangleIndices = new Uint32Array(this.atomTemplateIndexBufferLength * this.atomIndices.length);
-                        this.atomColors = new Float32Array(this.atomBufferSize);
-                        this.atomPickColors = new Float32Array(this.atomTemplateVertexCount * 4 * this.atomIndices.length);
-                        this.atoms = this.model.data.atoms;
-                        this.positions = this.model.positions;
-                        this.cX = this.positions.x;
-                        this.cY = this.positions.y;
-                        this.cZ = this.positions.z;
-                        this.atomSymbols = this.atoms.elementSymbol;
-                        this.residueIndex = this.atoms.residueIndex;
-                        this.atomsDone = 0;
-                        this.offset = 0;
-                        this.bondsDone = 0;
-                        this.atomsVector = new Visualization.THREE.Vector3();
-                        this.center = new Visualization.THREE.Vector3();
-                        this.rotationAxis = new Visualization.THREE.Vector3();
-                        this.up = new Visualization.THREE.Vector3(0, 1, 0);
-                        this.scaleMatrix = new Visualization.THREE.Matrix4();
-                        this.rotationMatrix = new Visualization.THREE.Matrix4();
-                        this.translationMatrix = new Visualization.THREE.Matrix4();
-                        this.atom1Vec = new Visualization.THREE.Vector3();
-                        this.atom2Vec = new Visualization.THREE.Vector3();
-                        this.pickColor = { r: 0.1, g: 0.1, b: 0.1 };
-                        this.atomMapBuilder = new Visualization.Selection.VertexMapBuilder(this.atomIndices.length);
-                        this.tempVector = new Visualization.THREE.Vector3(0, 0, 0);
-                        this.bs = void 0;
-                    }
-                    BuildState.getBondTemplate = function (radius, tessalation) {
+                var Templates;
+                (function (Templates) {
+                    var bondCache = {};
+                    function getBond(tessalation) {
+                        if (bondCache[tessalation])
+                            return bondCache[tessalation];
                         var detail;
                         switch (tessalation) {
                             case 0:
@@ -67824,12 +69586,17 @@ var LiteMol;
                                 detail = 14;
                                 break;
                         }
-                        var template = Visualization.GeometryHelper.getIndexedBufferGeometry(new Visualization.THREE.LatheGeometry([new Visualization.THREE.Vector3(0, radius, -1 / 2), new Visualization.THREE.Vector3(0, radius, 1 / 2)], detail, Math.PI));
-                        template.applyMatrix(new Visualization.THREE.Matrix4().makeRotationAxis(new Visualization.THREE.Vector3(1, 0, 0), -Math.PI / 2));
-                        return template;
-                    };
-                    BuildState.getAtomTemplate = function (radius, tessalation) {
-                        var base;
+                        var geom = new Visualization.THREE.TubeGeometry(new Visualization.THREE.LineCurve3(new Visualization.THREE.Vector3(0, 0, 0), new Visualization.THREE.Vector3(1, 0, 0)), 2, 1.0, detail);
+                        var ret = Visualization.GeometryHelper.toRawGeometry(geom);
+                        bondCache[tessalation] = ret;
+                        return ret;
+                    }
+                    Templates.getBond = getBond;
+                    var atomCache = {};
+                    function getAtom(tessalation) {
+                        if (atomCache[tessalation])
+                            return atomCache[tessalation];
+                        var base, radius = 1;
                         switch (tessalation) {
                             case 0:
                                 base = new Visualization.THREE.OctahedronGeometry(radius, 0);
@@ -67853,29 +69620,55 @@ var LiteMol;
                                 base = new Visualization.THREE.IcosahedronGeometry(radius, 3);
                                 break;
                         }
-                        return Visualization.GeometryHelper.getIndexedBufferGeometry(base);
-                    };
+                        var ret = Visualization.GeometryHelper.toRawGeometry(base);
+                        atomCache[tessalation] = ret;
+                        return ret;
+                    }
+                    Templates.getAtom = getAtom;
+                })(Templates || (Templates = {}));
+                var BuildState = (function () {
+                    function BuildState(model, atomIndices, params) {
+                        this.model = model;
+                        this.atomIndices = atomIndices;
+                        this.params = params;
+                        this.tessalation = this.params.tessalation;
+                        this.atomRadius = this.params.atomRadius;
+                        this.bondRadius = this.params.bondRadius;
+                        this.hideBonds = this.params.hideBonds;
+                        this.bondTemplate = Templates.getBond(this.tessalation);
+                        this.atomTemplate = Templates.getAtom(this.tessalation);
+                        this.dashTemplate = GB.getDashTemplate();
+                        this.atomCount = getAtomCount(this.model, this.atomIndices, this.params);
+                        this.atomVertexCount = this.atomTemplate.vertexCount * this.atomCount;
+                        this.atomBuilder = GB.createStatic(this.atomVertexCount, this.atomTemplate.indexCount * this.atomCount);
+                        this.atomColors = new Float32Array(this.atomVertexCount * 3);
+                        this.atomPickColors = new Float32Array(this.atomVertexCount * 4);
+                        this.atoms = this.model.data.atoms;
+                        this.positions = this.model.positions;
+                        this.cX = this.positions.x;
+                        this.cY = this.positions.y;
+                        this.cZ = this.positions.z;
+                        this.atomSymbols = this.atoms.elementSymbol;
+                        this.residueIndex = this.atoms.residueIndex;
+                        this.scale = Vec3.zero();
+                        this.translation = Vec3.zero();
+                        this.pickColor = { r: 0.1, g: 0.1, b: 0.1 };
+                        this.pickOffset = 0;
+                        this.atomMapBuilder = new Visualization.Selection.VertexMapBuilder(this.atomIndices.length);
+                        this.bs = void 0;
+                    }
                     return BuildState;
                 }());
                 var BondsBuildState = (function () {
                     function BondsBuildState(state) {
                         this.state = state;
-                        this.model = this.state.model;
-                        this.atomIndices = this.state.atomIndices;
-                        this.info = BallsAndSticksHelper.analyze(this.state.model, this.state.atomIndices, this.state.params);
-                        this.bondMapBuilder = new Visualization.Selection.VertexMapBuilder(this.info.residueCount);
-                        this.bondBufferSize = this.state.bondTemplateVertexBufferLength * this.info.stickCount;
-                        this.bondVertices = new Float32Array(this.bondBufferSize);
-                        this.bondNormals = new Float32Array(this.bondBufferSize);
-                        this.bondColors = new Float32Array(this.bondBufferSize);
-                        this.bondIndices = new Uint32Array(this.state.bondTemplateIndexBufferLength * this.info.stickCount);
+                        this.info = getBondsInfo(this.state.model, this.state.atomIndices, this.state.params);
+                        this.bondVertexCount = this.state.bondTemplate.vertexCount * this.info.covalentStickCount + this.state.dashTemplate.vertexCount * this.info.dashPartCount;
+                        this.bondBuilder = GB.createStatic(this.bondVertexCount, this.state.bondTemplate.indexCount * this.info.covalentStickCount + this.state.dashTemplate.indexCount * this.info.dashPartCount);
+                        this.bondColors = new Float32Array(this.bondVertexCount * 3);
                         this.bondRadius = this.state.params.bondRadius;
-                        this.residueIndex = this.model.data.atoms.residueIndex;
-                        this.currentResidueIndex = this.residueIndex[this.info.bonds[0]];
-                        this.bondMapVertexOffsetStart = 0;
-                        this.bondMapVertexOffsetEnd = 0;
-                        this.bondState = new BondModelState(this.state.bondTemplate, this.state.bondTemplateVertexBuffer, this.state.bondTemplateNormalBuffer, this.state.bondTemplateIndexBuffer, this.state.bondTemplateVertexCount, this.bondVertices, this.bondNormals, this.bondIndices);
-                        this.bondCount = (this.info.bonds.length / 3) | 0;
+                        this.bondState = new BondModelState(this.state.bondTemplate, this.bondBuilder);
+                        this.bondCount = this.info.bonds.count;
                     }
                     return BondsBuildState;
                 }());
@@ -67890,114 +69683,75 @@ var LiteMol;
                     BallsAndSticksGeometryBuilder.addAtom = function (a, state) {
                         state.atomMapBuilder.startElement(a);
                         var r = state.atomRadius(a);
-                        state.scaleMatrix.makeScale(r, r, r);
-                        state.tempVector.set(state.cX[a], state.cY[a], state.cZ[a]);
-                        state.translationMatrix.makeTranslation(state.tempVector.x, state.tempVector.y, state.tempVector.z).multiply(state.scaleMatrix);
-                        state.atomTemplate.applyMatrix(state.translationMatrix);
-                        for (var i = 0; i < state.atomTemplateVertexBufferLength; i++) {
-                            state.offset = state.atomsDone * state.atomTemplateVertexBufferLength + i;
-                            state.atomVertices[state.offset] = state.atomTemplateVertexBuffer[i];
-                            state.atomNormals[state.offset] = state.atomTemplateNormalBuffer[i];
-                        }
-                        for (var i = 0; i < state.atomTemplateIndexBufferLength; i++) {
-                            state.offset = state.atomTemplateIndexBufferLength * state.atomsDone + i;
-                            state.atomTriangleIndices[state.offset] = state.atomTemplateIndexBuffer[i] + (state.atomTemplateVertexCount) * state.atomsDone;
-                        }
+                        Vec3.set(state.scale, r, r, r);
+                        Vec3.set(state.translation, state.cX[a], state.cY[a], state.cZ[a]);
+                        var startVertexOffset = state.atomBuilder.vertices.elementCount; //!!!.vertexOffset;
+                        GB.addRawTransformed(state.atomBuilder, state.atomTemplate, state.scale, state.translation, void 0);
                         Visualization.Selection.Picking.assignPickColor(a, state.pickColor);
-                        for (var i = 0; i < state.atomTemplateVertexCount; i++) {
-                            state.offset = state.atomsDone * state.atomTemplateVertexCount * 4 + 4 * i;
-                            state.atomPickColors[state.offset] = state.pickColor.r;
-                            state.atomPickColors[state.offset + 1] = state.pickColor.g;
-                            state.atomPickColors[state.offset + 2] = state.pickColor.b;
+                        for (var i = 0, _b = state.atomTemplate.vertexCount; i < _b; i++) {
+                            state.atomPickColors[state.pickOffset++] = state.pickColor.r;
+                            state.atomPickColors[state.pickOffset++] = state.pickColor.g;
+                            state.atomPickColors[state.pickOffset++] = state.pickColor.b;
+                            state.pickOffset++; // 4th component
                         }
-                        state.scaleMatrix.getInverse(state.translationMatrix);
-                        state.atomTemplate.applyMatrix(state.scaleMatrix);
-                        state.atomMapBuilder.addVertexRange(state.atomsDone * state.atomTemplateVertexCount, (state.atomsDone + 1) * state.atomTemplateVertexCount);
+                        state.atomMapBuilder.addVertexRange(startVertexOffset, state.atomBuilder.vertices.elementCount /*!!!.vertexOffset*/);
                         state.atomMapBuilder.endElement();
-                        state.atomsDone++;
                     };
                     BallsAndSticksGeometryBuilder.addBond = function (b, state, bs) {
-                        var aI = bs.info.bonds[3 * b], bI = bs.info.bonds[3 * b + 1], order = bs.info.bonds[3 * b + 2];
-                        if (bs.currentResidueIndex !== bs.residueIndex[aI]) {
-                            bs.bondMapBuilder.addVertexRange(bs.bondMapVertexOffsetStart, bs.bondMapVertexOffsetEnd);
-                            bs.bondMapVertexOffsetStart = bs.bondMapVertexOffsetEnd;
-                            bs.bondMapBuilder.endElement();
-                            bs.currentResidueIndex = bs.residueIndex[aI];
-                            bs.bondMapBuilder.startElement(bs.currentResidueIndex);
+                        var aI = bs.info.bonds.atomAIndex[b], bI = bs.info.bonds.atomBIndex[b], type = bs.info.bonds.type[b];
+                        if (state.params.hideHydrogens) {
+                            var es = state.model.data.atoms.elementSymbol;
+                            if (isHydrogen(es[aI]) || isHydrogen(es[bI])) {
+                                return;
+                            }
                         }
-                        state.tempVector.set(state.cX[aI], state.cY[aI], state.cZ[aI]);
-                        bs.bondState.a.set(state.tempVector.x, state.tempVector.y, state.tempVector.z);
-                        state.tempVector.set(state.cX[bI], state.cY[bI], state.cZ[bI]);
-                        bs.bondState.b.set(state.tempVector.x, state.tempVector.y, state.tempVector.z);
+                        Vec3.set(bs.bondState.a, state.cX[aI], state.cY[aI], state.cZ[aI]);
+                        Vec3.set(bs.bondState.b, state.cX[bI], state.cY[bI], state.cZ[bI]);
                         var r = +bs.bondRadius, o = 2 * r / 3, h = r / 2;
                         var bondState = bs.bondState;
-                        switch (order) {
-                            case 2:
-                                bondState.radius = h;
-                                bondState.offset.x = o;
-                                bondState.offset.y = o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = -o;
-                                bondState.offset.y = -o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
+                        switch (type) {
+                            case 0 /* Unknown */:
+                            case 1 /* Single */:
+                            case 5 /* DisulfideBridge */:
+                                BallsAndSticksGeometryBuilder.addBondPart(r, 0, 0, bondState);
                                 break;
-                            case 3:
-                                bondState.radius = h;
-                                bondState.offset.x = 0.0;
-                                bondState.offset.y = o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = -Math.cos(Math.PI / 3) * o;
-                                bondState.offset.y = -Math.sin(Math.PI / 3) * o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = -bondState.offset.x;
-                                //bondState.offset.y = -0.05;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
+                            case 2 /* Double */:
+                                BallsAndSticksGeometryBuilder.addBondPart(h, o, o, bondState);
+                                BallsAndSticksGeometryBuilder.addBondPart(h, -o, -o, bondState);
                                 break;
-                            case 4:
-                                bondState.radius = h / 2;
-                                bondState.offset.x = o;
-                                bondState.offset.y = o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = -o;
-                                bondState.offset.y = -o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = -o;
-                                bondState.offset.y = o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
-                                bondState.offset.x = o;
-                                bondState.offset.y = -o;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
+                            case 3 /* Triple */:
+                                BallsAndSticksGeometryBuilder.addBondPart(h, 0, o, bondState);
+                                var c = Math.cos(Math.PI / 3) * o, s = Math.sin(Math.PI / 3) * o;
+                                BallsAndSticksGeometryBuilder.addBondPart(h, -c, -s, bondState);
+                                BallsAndSticksGeometryBuilder.addBondPart(h, -c, s, bondState);
                                 break;
-                            default:
-                                bondState.radius = r;
-                                bondState.offset.x = 0.0;
-                                bondState.offset.y = 0.0;
-                                BallsAndSticksGeometryBuilder.addBondPart(bondState);
+                            case 4 /* Aromatic */:
+                                BallsAndSticksGeometryBuilder.addBondPart(h / 2, o, o, bondState);
+                                BallsAndSticksGeometryBuilder.addBondPart(h / 2, -o, -o, bondState);
+                                BallsAndSticksGeometryBuilder.addBondPart(h / 2, -o, o, bondState);
+                                BallsAndSticksGeometryBuilder.addBondPart(h / 2, o, -o, bondState);
+                                break;
+                            case 6 /* Metallic */:
+                            case 7 /* Ion */:
+                            case 8 /* Hydrogen */:
+                                BallsAndSticksGeometryBuilder.addDashedBond(h, bondState);
                                 break;
                         }
-                        bs.bondMapVertexOffsetEnd += order * bs.state.bondTemplateVertexBufferLength;
                     };
-                    BallsAndSticksGeometryBuilder.addBondPart = function (state) {
-                        state.atomsVector.subVectors(state.a, state.b);
-                        var length = state.atomsVector.length();
-                        state.center.addVectors(state.a, state.b).divideScalar(2);
-                        state.rotationAxis.crossVectors(state.atomsVector, state.upVector).normalize();
-                        var rotationAngle = state.atomsVector.angleTo(state.upVector);
-                        state.scaleMatrix.makeScale(state.radius, length, state.radius);
-                        state.offsetMatrix.makeTranslation(state.offset.x, state.offset.y, state.offset.z);
-                        state.rotationMatrix.makeRotationAxis(state.rotationAxis, -rotationAngle);
-                        state.translationMatrix.makeTranslation(state.center.x, state.center.y, state.center.z);
-                        state.finalMatrix = state.translationMatrix.multiply(state.rotationMatrix).multiply(state.offsetMatrix).multiply(state.scaleMatrix);
-                        state.template.applyMatrix(state.finalMatrix);
-                        state.vertices.set(state.templateVB, state.templateVB.length * state.sticksDone);
-                        state.normals.set(state.templateNB, state.templateVB.length * state.sticksDone);
-                        var tIB = state.templateIB, ib = state.indices, offsetIB = state.templateIB.length * state.sticksDone, offsetVB = state.templateVertexCount * state.sticksDone;
-                        for (var i = 0; i < tIB.length; i++) {
-                            ib[offsetIB++] = tIB[i] + offsetVB;
-                        }
-                        state.rotationMatrix.getInverse(state.finalMatrix);
-                        state.template.applyMatrix(state.rotationMatrix);
-                        state.sticksDone++;
+                    BallsAndSticksGeometryBuilder.addBondPart = function (r, oX, oY, state) {
+                        var dir = Vec3.sub(state.dir, state.b, state.a);
+                        var length = Vec3.magnitude(state.dir);
+                        Vec3.set(state.scale, length, r, r);
+                        Vec3.makeRotation(state.rotation, state.bondUpVector, dir);
+                        state.offset[0] = 0;
+                        state.offset[1] = oX;
+                        state.offset[2] = oY;
+                        Vec3.transformMat4(state.offset, state.offset, state.rotation);
+                        Vec3.add(state.offset, state.offset, state.a);
+                        GB.addRawTransformed(state.builder, state.bondTemplate, state.scale, state.offset, state.rotation);
+                    };
+                    BallsAndSticksGeometryBuilder.addDashedBond = function (r, state) {
+                        GB.addDashedLine(state.builder, state.a, state.b, 0.15 /* MetalDashSize */, 0.15 /* MetalDashSize */, r);
                     };
                     BallsAndSticksGeometryBuilder.getEmptyBondsGeometry = function () {
                         var bondsGeometry = new Visualization.THREE.BufferGeometry();
@@ -68005,29 +69759,22 @@ var LiteMol;
                         bondsGeometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(new Float32Array(0), 3));
                         bondsGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(new Uint32Array(0), 1));
                         bondsGeometry.addAttribute('color', new Visualization.THREE.BufferAttribute(new Float32Array(0), 3));
-                        var bondMapBuilder = new Visualization.Selection.VertexMapBuilder(1);
-                        return { bondsGeometry: bondsGeometry, bondVertexMap: bondMapBuilder.getMap() };
+                        return bondsGeometry;
                     };
                     BallsAndSticksGeometryBuilder.getBondsGeometry = function (state) {
-                        var bondsGeometry = new Visualization.THREE.BufferGeometry();
-                        bondsGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(state.bondVertices, 3));
-                        bondsGeometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(state.bondNormals, 3));
-                        bondsGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(state.bondIndices, 1));
-                        bondsGeometry.addAttribute('color', new Visualization.THREE.BufferAttribute(state.bondColors, 3));
-                        return { bondsGeometry: bondsGeometry, bondVertexMap: state.bondMapBuilder.getMap() };
+                        var geom = GB.toBufferGeometry(state.bondBuilder);
+                        Visualization.Geometry.addAttribute(geom, 'color', state.bondColors, 3);
+                        return geom;
                     };
                     BallsAndSticksGeometryBuilder.getAtomsGeometry = function (state) {
-                        var atomsGeometry = new Visualization.THREE.BufferGeometry();
-                        atomsGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(state.atomVertices, 3));
-                        atomsGeometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(state.atomNormals, 3));
-                        atomsGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(state.atomTriangleIndices, 1));
-                        atomsGeometry.addAttribute('color', new Visualization.THREE.BufferAttribute(state.atomColors, 3));
-                        var stateBuffer = new Float32Array(state.atomVertices.length);
+                        var atomsGeometry = GB.toBufferGeometry(state.atomBuilder);
+                        Visualization.Geometry.addAttribute(atomsGeometry, 'color', state.atomColors, 3);
+                        var stateBuffer = new Float32Array(state.atomVertexCount);
                         var vertexStateBuffer = new Visualization.THREE.BufferAttribute(stateBuffer, 1);
                         atomsGeometry.addAttribute('vState', vertexStateBuffer);
                         var atomsPickGeometry = new Visualization.THREE.BufferGeometry();
-                        atomsPickGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(state.atomVertices, 3));
-                        atomsPickGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(state.atomTriangleIndices, 1));
+                        atomsPickGeometry.addAttribute('position', atomsGeometry.getAttribute('position'));
+                        atomsPickGeometry.addAttribute('index', atomsGeometry.getAttribute('index'));
                         atomsPickGeometry.addAttribute('pColor', new Visualization.THREE.BufferAttribute(state.atomPickColors, 4));
                         return {
                             vertexStateBuffer: vertexStateBuffer,
@@ -68038,18 +69785,24 @@ var LiteMol;
                     };
                     BallsAndSticksGeometryBuilder.addAtoms = function (state, ctx) {
                         return __awaiter(this, void 0, void 0, function () {
-                            var chunkSize, started, start, _l, i, _b, t;
+                            var chunkSize, started, elementSymbol, hideHydrogens, start, _l, i, _b, aI, t;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        chunkSize = 1250;
+                                        chunkSize = 2500;
                                         started = LiteMol.Core.Utils.PerformanceMonitor.currentTime();
+                                        elementSymbol = state.model.data.atoms.elementSymbol;
+                                        hideHydrogens = state.params.hideHydrogens;
                                         start = 0, _l = state.atomIndices.length;
                                         _a.label = 1;
                                     case 1:
                                         if (!(start < _l)) return [3 /*break*/, 4];
                                         for (i = start, _b = Math.min(start + chunkSize, state.atomIndices.length); i < _b; i++) {
-                                            BallsAndSticksGeometryBuilder.addAtom(state.atomIndices[i], state);
+                                            aI = state.atomIndices[i];
+                                            if (hideHydrogens && isHydrogen(elementSymbol[aI])) {
+                                                continue;
+                                            }
+                                            BallsAndSticksGeometryBuilder.addAtom(aI, state);
                                         }
                                         t = LiteMol.Core.Utils.PerformanceMonitor.currentTime();
                                         if (!(t - started > LiteMol.Core.Computation.UpdateProgressDelta)) return [3 /*break*/, 3];
@@ -68072,7 +69825,7 @@ var LiteMol;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        chunkSize = 1250;
+                                        chunkSize = 2500;
                                         started = LiteMol.Core.Utils.PerformanceMonitor.currentTime();
                                         start = 0;
                                         _a.label = 1;
@@ -68110,13 +69863,9 @@ var LiteMol;
                                         _a.sent();
                                         bs = new BondsBuildState(state);
                                         state.bs = bs;
-                                        bs.currentResidueIndex = bs.residueIndex[bs.info.bonds[0]];
-                                        bs.bondMapBuilder.startElement(bs.currentResidueIndex);
                                         return [4 /*yield*/, BallsAndSticksGeometryBuilder.addBondsChunks(state, bs, ctx)];
                                     case 2:
                                         _a.sent();
-                                        bs.bondMapBuilder.addVertexRange(bs.bondMapVertexOffsetStart, bs.bondMapVertexOffsetEnd);
-                                        bs.bondMapBuilder.endElement();
                                         return [2 /*return*/];
                                 }
                             });
@@ -68124,7 +69873,7 @@ var LiteMol;
                     };
                     BallsAndSticksGeometryBuilder.build = function (model, parameters, atomIndices, ctx) {
                         return __awaiter(this, void 0, void 0, function () {
-                            var state, ret, geometry, geometry, atomGeometry;
+                            var state, ret, atomGeometry;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0: return [4 /*yield*/, ctx.updateProgress('Creating atoms...')];
@@ -68142,14 +69891,10 @@ var LiteMol;
                                         _a.sent();
                                         ret = new BallsAndSticksGeometry();
                                         if (state.bs) {
-                                            geometry = BallsAndSticksGeometryBuilder.getBondsGeometry(state.bs);
-                                            ret.bondsGeometry = geometry.bondsGeometry;
-                                            ret.bondVertexMap = geometry.bondVertexMap;
+                                            ret.bondsGeometry = BallsAndSticksGeometryBuilder.getBondsGeometry(state.bs);
                                         }
                                         else {
-                                            geometry = BallsAndSticksGeometryBuilder.getEmptyBondsGeometry();
-                                            ret.bondsGeometry = geometry.bondsGeometry;
-                                            ret.bondVertexMap = geometry.bondVertexMap;
+                                            ret.bondsGeometry = BallsAndSticksGeometryBuilder.getEmptyBondsGeometry();
                                         }
                                         atomGeometry = BallsAndSticksGeometryBuilder.getAtomsGeometry(state);
                                         ret.vertexStateBuffer = atomGeometry.vertexStateBuffer;
@@ -68175,7 +69920,6 @@ var LiteMol;
                         _this.bondsGeometry = void 0;
                         _this.pickGeometry = void 0;
                         _this.atomVertexMap = void 0;
-                        _this.bondVertexMap = void 0;
                         _this.vertexStateBuffer = void 0;
                         return _this;
                     }
@@ -68210,6 +69954,7 @@ var LiteMol;
                             var _this = _super !== null && _super.apply(this, arguments) || this;
                             _this.geometry = void 0;
                             _this.pickGeometry = void 0;
+                            _this.gapsGeometry = void 0;
                             _this.vertexMap = void 0;
                             _this.vertexStateBuffer = void 0;
                             return _this;
@@ -68217,12 +69962,15 @@ var LiteMol;
                         Data.prototype.dispose = function () {
                             this.geometry.dispose();
                             this.pickGeometry.dispose();
+                            if (this.gapsGeometry) {
+                                this.gapsGeometry.dispose();
+                            }
                         };
                         return Data;
                     }(Visualization.GeometryBase));
                     Geometry.Data = Data;
                     function create(model, atomIndices, linearSegments, parameters, isTrace, computation) {
-                        return __awaiter(this, void 0, LiteMol.Promise, function () {
+                        return __awaiter(this, void 0, void 0, function () {
                             var params, ctx, ret, _i, _a, k;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
@@ -68289,119 +70037,7 @@ var LiteMol;
             (function (Cartoons) {
                 var Geometry;
                 (function (Geometry) {
-                    var ChunkedArray = LiteMol.Core.Utils.ChunkedArray;
                     var ArrayBuilder = LiteMol.Core.Utils.ArrayBuilder;
-                    var CartoonAsymUnitState = (function () {
-                        function CartoonAsymUnitState(residueCount) {
-                            this.typeBuilder = ArrayBuilder.forArray(10000);
-                            this.residueType = [];
-                            this.uPositions = new Float32Array(0);
-                            this.vPositions = new Float32Array(0);
-                            this.pPositions = new Float32Array(0);
-                            this.dPositions = new Float32Array(0);
-                            this.uvLength = 0;
-                            this.residueCount = 0;
-                            this.typeBuilder = ArrayBuilder.forArray(residueCount + 4);
-                            this.uPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
-                            this.vPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
-                            this.pPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
-                            this.dPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
-                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
-                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
-                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
-                        }
-                        CartoonAsymUnitState.prototype.addResidue = function (rIndex, arrays, sType) {
-                            var start = arrays.atomStartIndex[rIndex], end = arrays.atomEndIndex[rIndex], aU = false, aV = false;
-                            var name = arrays.name;
-                            if (sType !== 5 /* Strand */) {
-                                for (var i = start; i < end; i++) {
-                                    if (!aU && name[i] === "CA") {
-                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
-                                        aU = true;
-                                    }
-                                    else if (!aV && name[i] === "O") {
-                                        ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
-                                        aV = true;
-                                    }
-                                    if (aU && aV)
-                                        break;
-                                }
-                            }
-                            else {
-                                if (end - start === 1) {
-                                    // has to be P atom
-                                    ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[start], arrays.y[start], arrays.z[start]);
-                                    aU = true;
-                                }
-                                else {
-                                    var pIndex = -1;
-                                    for (var i = start; i < end; i++) {
-                                        if (!aU && name[i] === "O5'") {
-                                            ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
-                                            aU = true;
-                                        }
-                                        else if (!aV && name[i] === "C3'") {
-                                            ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
-                                            aV = true;
-                                        }
-                                        if (name[i] === "P") {
-                                            pIndex = i;
-                                        }
-                                        if (aU && aV)
-                                            break;
-                                    }
-                                    if (!aU && !aV && pIndex >= 0) {
-                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[pIndex], arrays.y[pIndex], arrays.z[pIndex]);
-                                        aU = true;
-                                    }
-                                }
-                            }
-                            var backboneOnly = false;
-                            if (!aV) {
-                                var arr = this.uPositionsBuilder.array, len = arr.length;
-                                ArrayBuilder.add3(this.vPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
-                                backboneOnly = true;
-                            }
-                            else if (!aU) {
-                                var arr = this.vPositionsBuilder.array, len = arr.length;
-                                ArrayBuilder.add3(this.uPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
-                                backboneOnly = true;
-                            }
-                            ArrayBuilder.add(this.typeBuilder, sType);
-                            return backboneOnly;
-                        };
-                        CartoonAsymUnitState.prototype.finishResidues = function () {
-                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
-                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
-                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
-                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
-                            this.residueType = this.typeBuilder.array;
-                            this.uPositions = this.uPositionsBuilder.array;
-                            this.vPositions = this.vPositionsBuilder.array;
-                            this.typeBuilder = null;
-                            this.uPositionsBuilder = null;
-                            this.vPositionsBuilder = null;
-                            this.uvLength = this.residueType.length;
-                            this.residueCount = this.uvLength - 4;
-                        };
-                        CartoonAsymUnitState.prototype.addControlPoint = function (p, d) {
-                            ArrayBuilder.add3(this.pPositionsBuilder, p.x, p.y, p.z);
-                            ArrayBuilder.add3(this.dPositionsBuilder, d.x, d.y, d.z);
-                        };
-                        CartoonAsymUnitState.prototype.finishContols = function () {
-                            this.pPositions = this.pPositionsBuilder.array;
-                            this.dPositions = this.dPositionsBuilder.array;
-                            this.pPositionsBuilder = null;
-                            this.dPositionsBuilder = null;
-                        };
-                        return CartoonAsymUnitState;
-                    }());
-                    Geometry.CartoonAsymUnitState = CartoonAsymUnitState;
                     var CartoonAsymUnit = (function () {
                         function CartoonAsymUnit(model, elements, linearSegmentCount) {
                             this.model = model;
@@ -68419,260 +70055,24 @@ var LiteMol;
                             this.residueType = [];
                             this.residueIndex = new Int32Array(0);
                             this.backboneOnly = false;
+                            this.startResidueIndex = -1;
+                            this.endResidueIndex = -1;
                             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                                 var e = _a[_i];
                                 this.residueCount += e.endResidueIndex - e.startResidueIndex;
                             }
-                            var state = new CartoonAsymUnitState(this.residueCount);
+                            this.startResidueIndex = this.elements[0].startResidueIndex;
+                            this.endResidueIndex = this.elements[this.elements.length - 1].endResidueIndex - 1;
+                            var builder = new ContolPointsBuilder(this.residueCount);
                             this.controlPointsBuilder = ArrayBuilder.forVertex3D(this.residueCount * this.linearSegmentCount + 1);
                             this.torsionVectorsBuilder = ArrayBuilder.forVertex3D(this.residueCount * this.linearSegmentCount + 1);
                             this.normalVectorsBuilder = ArrayBuilder.forVertex3D(this.residueCount * this.linearSegmentCount + 1);
-                            this.createControlPoints(state);
+                            this.createControlPoints(builder);
                         }
-                        CartoonAsymUnit.maskSplit = function (element, mask, target) {
-                            var current = element, start = element.startResidueIndex, end = element.endResidueIndex;
-                            for (var i = start; i < end; i++) {
-                                if (!mask[i])
-                                    continue;
-                                if (current.startResidueIndex !== i) {
-                                    current = new LiteMol.Core.Structure.SecondaryStructureElement(element.type, element.startResidueId, element.endResidueId);
-                                    current.startResidueIndex = i;
-                                }
-                                while (i < end && mask[i]) {
-                                    i++;
-                                }
-                                current.endResidueIndex = i;
-                                target[target.length] = current;
-                            }
-                        };
-                        CartoonAsymUnit.isCartoonLike = function (atomIndices, start, end, name, a, b, isAmk) {
-                            var aU = false, aV = false, hasP = false;
-                            for (var i = start; i < end; i++) {
-                                var n = name[atomIndices[i]];
-                                if (!aU && n === a) {
-                                    aU = true;
-                                }
-                                else if (!aV && n === b) {
-                                    aV = true;
-                                }
-                                if (aU && aV)
-                                    return true;
-                                if (n === 'P') {
-                                    hasP = true;
-                                }
-                            }
-                            if (isAmk)
-                                return aU;
-                            return hasP;
-                        };
-                        CartoonAsymUnit.createMask = function (model, atomIndices) {
-                            var ret = new Uint8Array(model.data.residues.count);
-                            var _a = model.data.atoms, residueIndex = _a.residueIndex, name = _a.name;
-                            var ssIndex = model.data.residues.secondaryStructureIndex;
-                            var ss = model.data.secondaryStructure;
-                            for (var i = 0, _b = atomIndices.length - 1; i < _b; i++) {
-                                var aI = atomIndices[i];
-                                var rStart = i;
-                                var residue = residueIndex[aI];
-                                i++;
-                                while (residue === residueIndex[atomIndices[i]])
-                                    i++;
-                                var s = ss[ssIndex[residue]].type;
-                                if (s === 0 /* None */)
-                                    continue;
-                                if (s === 5 /* Strand */) {
-                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "O5'", "C3'", false);
-                                }
-                                else {
-                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "CA", "O", true);
-                                }
-                                i--;
-                            }
-                            return ret;
-                        };
-                        CartoonAsymUnit.isUnknownSecondaryStructure = function (model) {
-                            var hasSeq = false;
-                            for (var _i = 0, _a = model.data.secondaryStructure; _i < _a.length; _i++) {
-                                var e = _a[_i];
-                                if (e.type === 1 /* Helix */
-                                    || e.type === 3 /* Sheet */
-                                    || e.type === 2 /* Turn */) {
-                                    return false;
-                                }
-                                if (e.type === 4 /* AminoSeq */) {
-                                    hasSeq = true;
-                                }
-                            }
-                            return hasSeq;
-                        };
-                        CartoonAsymUnit.approximateSecondaryStructure = function (model, parent) {
-                            if (parent.type !== 4 /* AminoSeq */)
-                                return [parent];
-                            var elements = [];
-                            var name = model.data.atoms.name;
-                            var _a = model.data.residues, atomStartIndex = _a.atomStartIndex, atomEndIndex = _a.atomEndIndex;
-                            var trace = new Int32Array(parent.endResidueIndex - parent.startResidueIndex), offset = 0;
-                            var isOk = true;
-                            for (var i = parent.startResidueIndex, _b = parent.endResidueIndex; i < _b; i++) {
-                                var foundCA = false, foundO = false;
-                                for (var j = atomStartIndex[i], _c = atomEndIndex[i]; j < _c; j++) {
-                                    if (name[j] === 'CA') {
-                                        if (!foundCA)
-                                            trace[offset++] = j;
-                                        foundCA = true;
-                                    }
-                                    else if (name[j] === 'O') {
-                                        foundO = true;
-                                    }
-                                    if (foundO && foundCA)
-                                        break;
-                                }
-                                if (!foundCA || !foundO) {
-                                    isOk = false;
-                                    break;
-                                }
-                            }
-                            if (!isOk)
-                                return [parent];
-                            CartoonAsymUnit.zhangSkolnickSStrace(model, trace, parent, elements);
-                            return elements;
-                        };
-                        CartoonAsymUnit.zhangSkolnickSStrace = function (model, trace, parent, elements) {
-                            var mask = new Int32Array(trace.length);
-                            var hasSS = false;
-                            var residueIndex = model.data.atoms.residueIndex;
-                            for (var i = 0, _l = trace.length; i < _l; i++) {
-                                if (CartoonAsymUnit.zhangSkolnickSSresidue(model, trace, i, CartoonAsymUnit.ZhangHelixDistance, CartoonAsymUnit.ZhangHelixDelta)) {
-                                    mask[i] = 1 /* Helix */;
-                                    hasSS = true;
-                                }
-                                else if (CartoonAsymUnit.zhangSkolnickSSresidue(model, trace, i, CartoonAsymUnit.ZhangSheetDistance, CartoonAsymUnit.ZhangSheetDelta)) {
-                                    mask[i] = 3 /* Sheet */;
-                                    hasSS = true;
-                                }
-                                else {
-                                    mask[i] = parent.type;
-                                }
-                            }
-                            if (!hasSS) {
-                                elements.push(parent);
-                                return;
-                            }
-                            // filter 1-length elements
-                            for (var i = 0, _l = mask.length; i < _l; i++) {
-                                var m = mask[i];
-                                if (m === parent.type)
-                                    continue;
-                                var j = i + 1;
-                                while (j < _l && m === mask[j]) {
-                                    j++;
-                                }
-                                if (j - i > 1) {
-                                    i = j - 1;
-                                    continue;
-                                }
-                                for (var k = i; k < j; k++)
-                                    mask[k] = parent.type;
-                                i = j - 1;
-                            }
-                            for (var i = 0, _l = mask.length; i < _l; i++) {
-                                var m = mask[i];
-                                var j = i + 1;
-                                while (j < _l && m === mask[j]) {
-                                    j++;
-                                }
-                                var e = new LiteMol.Core.Structure.SecondaryStructureElement(m, new LiteMol.Core.Structure.PolyResidueIdentifier('', i, null), new LiteMol.Core.Structure.PolyResidueIdentifier('', j, null));
-                                e.startResidueIndex = residueIndex[trace[i]];
-                                e.endResidueIndex = residueIndex[trace[j - 1]] + 1;
-                                elements.push(e);
-                                i = j - 1;
-                            }
-                        };
-                        CartoonAsymUnit.zhangSkolnickSSresidue = function (model, trace, i, distances, delta) {
-                            var len = trace.length;
-                            var _a = model.positions, x = _a.x, y = _a.y, z = _a.z;
-                            var u = CartoonAsymUnit.ZhangP1, v = CartoonAsymUnit.ZhangP2;
-                            for (var j = Math.max(0, i - 2); j <= i; j++) {
-                                for (var k = 2; k < 5; k++) {
-                                    if (j + k >= len) {
-                                        continue;
-                                    }
-                                    var a = trace[j], b = trace[j + k];
-                                    u.set(x[a], y[a], z[a]);
-                                    v.set(x[b], y[b], z[b]);
-                                    if (Math.abs(u.distanceTo(v) - distances[k - 2]) > delta) {
-                                        return false;
-                                    }
-                                }
-                            }
-                            return true;
-                        };
-                        CartoonAsymUnit.throwIfEmpty = function (ss) {
-                            if (ss.length === 0) {
-                                throw "Cartoons cannot be constructred from this model/selection.";
-                            }
-                        };
-                        CartoonAsymUnit.buildUnits = function (model, atomIndices, linearSegmentCount) {
-                            var mask = CartoonAsymUnit.createMask(model, atomIndices);
-                            var ss = [];
-                            var isUnknownSS = CartoonAsymUnit.isUnknownSecondaryStructure(model);
-                            for (var _i = 0, _a = model.data.secondaryStructure; _i < _a.length; _i++) {
-                                var e = _a[_i];
-                                if (isUnknownSS) {
-                                    var approx = CartoonAsymUnit.approximateSecondaryStructure(model, e);
-                                    for (var _d = 0, approx_1 = approx; _d < approx_1.length; _d++) {
-                                        var f = approx_1[_d];
-                                        CartoonAsymUnit.maskSplit(f, mask, ss);
-                                    }
-                                }
-                                else {
-                                    CartoonAsymUnit.maskSplit(e, mask, ss);
-                                }
-                            }
-                            CartoonAsymUnit.throwIfEmpty(ss);
-                            var previous = ss[0], asymId = model.data.residues.asymId, authSeqNumber = model.data.residues.authSeqNumber, currentElements = [], units = [], none = 0 /* None */;
-                            if (previous.type === none) {
-                                previous = null;
-                            }
-                            for (var _e = 0, ss_2 = ss; _e < ss_2.length; _e++) {
-                                var e = ss_2[_e];
-                                if (e.type === none) {
-                                    if (currentElements.length > 0) {
-                                        units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
-                                    }
-                                    previous = null;
-                                    currentElements = [];
-                                }
-                                else {
-                                    if (previous === null)
-                                        previous = e;
-                                    if (asymId[previous.endResidueIndex - 1] !== asymId[e.startResidueIndex]
-                                        || (previous !== e && authSeqNumber[e.startResidueIndex] - authSeqNumber[previous.endResidueIndex - 1] > 1)
-                                        || (previous.startResidueIndex !== e.startResidueIndex && (e.startResidueIndex - previous.endResidueIndex > 0))) {
-                                        if (currentElements.length > 0) {
-                                            units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
-                                        }
-                                        else if (previous !== null) {
-                                            units.push(new CartoonAsymUnit(model, [previous], linearSegmentCount));
-                                        }
-                                        previous = null;
-                                        currentElements = [e];
-                                    }
-                                    else {
-                                        currentElements[currentElements.length] = e;
-                                    }
-                                }
-                                previous = e;
-                            }
-                            if (currentElements.length > 0) {
-                                units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
-                            }
-                            return units; // [units[units.length - 1]];
-                        };
-                        CartoonAsymUnit.prototype.createControlPoints = function (state) {
-                            this.initPositions(state);
-                            this.initControlsPoints(state);
-                            this.computeSplines(state);
+                        CartoonAsymUnit.prototype.createControlPoints = function (builder) {
+                            this.initPositions(builder);
+                            this.initControlsPoints(builder);
+                            this.computeSplines(builder);
                             this.controlPoints = this.controlPointsBuilder.array;
                             this.torsionVectors = this.torsionVectorsBuilder.array;
                             this.normalVectors = this.normalVectorsBuilder.array;
@@ -68680,14 +70080,14 @@ var LiteMol;
                             this.torsionVectorsBuilder = null;
                             this.normalVectorsBuilder = null;
                         };
-                        CartoonAsymUnit.prototype.initPositions = function (state) {
+                        CartoonAsymUnit.prototype.initPositions = function (builder) {
                             var residues = this.model.data.residues, atoms = this.model.data.atoms, positions = this.model.positions, arrays = { atomStartIndex: residues.atomStartIndex, atomEndIndex: residues.atomEndIndex, name: atoms.name, x: positions.x, y: positions.y, z: positions.z }, residueType = [], offset = 0, i = 0;
                             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                                 var e = _a[_i];
                                 this.structureStarts.add(e.startResidueIndex);
                                 this.structureEnds.add(e.endResidueIndex - 1);
                                 for (i = e.startResidueIndex; i < e.endResidueIndex; i++) {
-                                    this.backboneOnly = state.addResidue(i, arrays, e.type);
+                                    this.backboneOnly = builder.addResidue(i, arrays, e.type);
                                     residueType[residueType.length] = e.type;
                                 }
                             }
@@ -68699,60 +70099,60 @@ var LiteMol;
                                 }
                             }
                             this.residueType = residueType;
-                            state.finishResidues();
+                            builder.finishResidues();
                             var len = this.residueCount;
-                            state.residueType[0] = state.residueType[2];
-                            state.residueType[1] = state.residueType[3];
-                            state.residueType[state.residueType.length - 2] = state.residueType[state.residueType.length - 4];
-                            state.residueType[state.residueType.length - 1] = state.residueType[state.residueType.length - 3];
+                            builder.residueType[0] = builder.residueType[2];
+                            builder.residueType[1] = builder.residueType[3];
+                            builder.residueType[builder.residueType.length - 2] = builder.residueType[builder.residueType.length - 4];
+                            builder.residueType[builder.residueType.length - 1] = builder.residueType[builder.residueType.length - 3];
                             if (len > 2) {
                                 var a = 2, b = 3, c = 4;
-                                if (state.residueType[0] !== 5 /* Strand */) {
-                                    this.reflectPositions(state.uPositions, 0, 1, a, b, b, c, 0.4, 0.6);
-                                    this.reflectPositions(state.vPositions, 0, 1, a, b, b, c, 0.4, 0.6);
+                                if (builder.residueType[0] !== 5 /* Strand */) {
+                                    this.reflectPositions(builder.uPositions, 0, 1, a, b, b, c, 0.4, 0.6);
+                                    this.reflectPositions(builder.vPositions, 0, 1, a, b, b, c, 0.4, 0.6);
                                 }
                                 else {
-                                    this.reflectPositions(state.uPositions, 1, 0, a, b, b, c, 0.5, 0.5);
-                                    this.reflectPositions(state.vPositions, 1, 0, a, b, b, c, 0.5, 0.5);
+                                    this.reflectPositions(builder.uPositions, 1, 0, a, b, b, c, 0.5, 0.5);
+                                    this.reflectPositions(builder.vPositions, 1, 0, a, b, b, c, 0.5, 0.5);
                                 }
                                 a = len + 1;
                                 b = len;
                                 c = len - 1;
-                                if (state.residueType[len - 1] !== 5 /* Strand */) {
-                                    this.reflectPositions(state.uPositions, len + 2, len + 3, a, b, b, c, 0.4, 0.6);
-                                    this.reflectPositions(state.vPositions, len + 2, len + 3, a, b, b, c, 0.4, 0.6);
+                                if (builder.residueType[len - 1] !== 5 /* Strand */) {
+                                    this.reflectPositions(builder.uPositions, len + 2, len + 3, a, b, b, c, 0.4, 0.6);
+                                    this.reflectPositions(builder.vPositions, len + 2, len + 3, a, b, b, c, 0.4, 0.6);
                                 }
                                 else {
-                                    this.reflectPositions(state.uPositions, len + 2, len + 3, a, b, b, c, 0.5, 0.5);
-                                    this.reflectPositions(state.vPositions, len + 2, len + 3, a, b, b, c, 0.5, 0.5);
+                                    this.reflectPositions(builder.uPositions, len + 2, len + 3, a, b, b, c, 0.5, 0.5);
+                                    this.reflectPositions(builder.vPositions, len + 2, len + 3, a, b, b, c, 0.5, 0.5);
                                 }
                             }
                             else if (len === 2) {
                                 for (i = 0; i < 2; i++) {
-                                    state.uPositions[3 * i] = state.uPositions[6];
-                                    state.uPositions[3 * i + 1] = state.uPositions[7];
-                                    state.uPositions[3 * i + 2] = state.uPositions[8];
-                                    state.vPositions[3 * i] = state.vPositions[6];
-                                    state.vPositions[3 * i + 1] = state.vPositions[7];
-                                    state.vPositions[3 * i + 2] = state.vPositions[8];
-                                    state.uPositions[(len + 2) * 3 + 3 * i] = state.uPositions[(len + 1) * 3];
-                                    state.uPositions[(len + 2) * 3 + 3 * i + 1] = state.uPositions[(len + 1) * 3 + 1];
-                                    state.uPositions[(len + 2) * 3 + 3 * i + 2] = state.uPositions[(len + 1) * 3 + 2];
-                                    state.vPositions[(len + 2) * 3 + 3 * i] = state.vPositions[(len + 1) * 3];
-                                    state.vPositions[(len + 2) * 3 + 3 * i + 1] = state.vPositions[(len + 1) * 3 + 1];
-                                    state.vPositions[(len + 2) * 3 + 3 * i + 2] = state.vPositions[(len + 1) * 3 + 2];
+                                    builder.uPositions[3 * i] = builder.uPositions[6];
+                                    builder.uPositions[3 * i + 1] = builder.uPositions[7];
+                                    builder.uPositions[3 * i + 2] = builder.uPositions[8];
+                                    builder.vPositions[3 * i] = builder.vPositions[6];
+                                    builder.vPositions[3 * i + 1] = builder.vPositions[7];
+                                    builder.vPositions[3 * i + 2] = builder.vPositions[8];
+                                    builder.uPositions[(len + 2) * 3 + 3 * i] = builder.uPositions[(len + 1) * 3];
+                                    builder.uPositions[(len + 2) * 3 + 3 * i + 1] = builder.uPositions[(len + 1) * 3 + 1];
+                                    builder.uPositions[(len + 2) * 3 + 3 * i + 2] = builder.uPositions[(len + 1) * 3 + 2];
+                                    builder.vPositions[(len + 2) * 3 + 3 * i] = builder.vPositions[(len + 1) * 3];
+                                    builder.vPositions[(len + 2) * 3 + 3 * i + 1] = builder.vPositions[(len + 1) * 3 + 1];
+                                    builder.vPositions[(len + 2) * 3 + 3 * i + 2] = builder.vPositions[(len + 1) * 3 + 2];
                                 }
                             }
                             else {
-                                var d = [state.uPositions[6] - state.vPositions[6],
-                                    state.uPositions[7] - state.vPositions[7],
-                                    state.uPositions[8] - state.vPositions[8]];
+                                var d = [builder.uPositions[6] - builder.vPositions[6],
+                                    builder.uPositions[7] - builder.vPositions[7],
+                                    builder.uPositions[8] - builder.vPositions[8]];
                                 for (var i_3 = 0; i_3 < 2; i_3++) {
                                     for (var j = 0; j < 3; j++) {
-                                        state.uPositions[3 * i_3 + j] = state.uPositions[6 + j] - 0.5 * (i_3 + 1) * d[j];
-                                        state.uPositions[9 + 3 * i_3 + j] = state.uPositions[6 + j] + 0.5 * (i_3 + 1) * d[j];
-                                        state.vPositions[3 * i_3 + j] = state.vPositions[6 + j] + 0.5 * (i_3 + 1) * d[j];
-                                        state.vPositions[9 + 3 * i_3 + j] = state.vPositions[6 + j] - 0.5 * (i_3 + 1) * d[j];
+                                        builder.uPositions[3 * i_3 + j] = builder.uPositions[6 + j] - 0.5 * (i_3 + 1) * d[j];
+                                        builder.uPositions[9 + 3 * i_3 + j] = builder.uPositions[6 + j] + 0.5 * (i_3 + 1) * d[j];
+                                        builder.vPositions[3 * i_3 + j] = builder.vPositions[6 + j] + 0.5 * (i_3 + 1) * d[j];
+                                        builder.vPositions[9 + 3 * i_3 + j] = builder.vPositions[6 + j] - 0.5 * (i_3 + 1) * d[j];
                                     }
                                 }
                                 //state.uPositions[0] = state.uPositions[6] - dx;
@@ -68760,13 +70160,13 @@ var LiteMol;
                                 //console.log(state.uPositions, state.vPositions);
                             }
                         };
-                        CartoonAsymUnit.prototype.initControlsPoints = function (state) {
-                            var previousD = new Visualization.THREE.Vector3(), len = state.uvLength - 1, a = new Visualization.THREE.Vector3(), b = new Visualization.THREE.Vector3(), c = new Visualization.THREE.Vector3(), d = new Visualization.THREE.Vector3(), ca1 = new Visualization.THREE.Vector3(), o1 = new Visualization.THREE.Vector3(), ca2 = new Visualization.THREE.Vector3(), p = new Visualization.THREE.Vector3(), helixType = 1 /* Helix */;
+                        CartoonAsymUnit.prototype.initControlsPoints = function (builder) {
+                            var previousD = new Visualization.THREE.Vector3(), len = builder.uvLength - 1, a = new Visualization.THREE.Vector3(), b = new Visualization.THREE.Vector3(), c = new Visualization.THREE.Vector3(), d = new Visualization.THREE.Vector3(), ca1 = new Visualization.THREE.Vector3(), o1 = new Visualization.THREE.Vector3(), ca2 = new Visualization.THREE.Vector3(), p = new Visualization.THREE.Vector3(), helixType = 1 /* Helix */;
                             for (var i = 0; i < len; i++) {
-                                ca1.set(state.uPositions[3 * i], state.uPositions[3 * i + 1], state.uPositions[3 * i + 2]);
-                                o1.set(state.vPositions[3 * i], state.vPositions[3 * i + 1], state.vPositions[3 * i + 2]);
+                                ca1.set(builder.uPositions[3 * i], builder.uPositions[3 * i + 1], builder.uPositions[3 * i + 2]);
+                                o1.set(builder.vPositions[3 * i], builder.vPositions[3 * i + 1], builder.vPositions[3 * i + 2]);
                                 i++;
-                                ca2.set(state.uPositions[3 * i], state.uPositions[3 * i + 1], state.uPositions[3 * i + 2]);
+                                ca2.set(builder.uPositions[3 * i], builder.uPositions[3 * i + 1], builder.uPositions[3 * i + 2]);
                                 i--;
                                 p.set((ca1.x + ca2.x) / 2, (ca1.y + ca2.y) / 2, (ca1.z + ca2.z) / 2);
                                 a.subVectors(ca2, ca1);
@@ -68775,7 +70175,7 @@ var LiteMol;
                                 d.crossVectors(c, a);
                                 c.normalize();
                                 d.normalize();
-                                if (state.residueType[i] === helixType && state.residueType[i + 1] === helixType) {
+                                if (builder.residueType[i] === helixType && builder.residueType[i + 1] === helixType) {
                                     p.set(p.x + 1.5 * c.x, p.y + 1.5 * c.y, p.z + 1.5 * c.z);
                                 }
                                 if (i > 0 && d.angleTo(previousD) > Math.PI / 2) {
@@ -68783,12 +70183,12 @@ var LiteMol;
                                 }
                                 previousD.copy(d);
                                 a.addVectors(p, d);
-                                state.addControlPoint(p, a);
+                                builder.addControlPoint(p, a);
                             }
-                            state.finishContols();
+                            builder.finishContols();
                         };
-                        CartoonAsymUnit.prototype.computeSplines = function (state) {
-                            var previousControlPoint = new Visualization.THREE.Vector3(), controlPoint = new Visualization.THREE.Vector3(), torsionPoint = new Visualization.THREE.Vector3(), len = state.residueCount, pPositions = state.pPositions, dPositions = state.dPositions, p1 = new Visualization.THREE.Vector3(), p2 = new Visualization.THREE.Vector3(), p3 = new Visualization.THREE.Vector3(), p4 = new Visualization.THREE.Vector3(), d1 = new Visualization.THREE.Vector3(), d2 = new Visualization.THREE.Vector3(), d3 = new Visualization.THREE.Vector3(), d4 = new Visualization.THREE.Vector3(), previousTorsionPoint = new Visualization.THREE.Vector3(), extrapolatedControlPoint = new Visualization.THREE.Vector3();
+                        CartoonAsymUnit.prototype.computeSplines = function (builder) {
+                            var previousControlPoint = new Visualization.THREE.Vector3(), controlPoint = new Visualization.THREE.Vector3(), torsionPoint = new Visualization.THREE.Vector3(), len = builder.residueCount, pPositions = builder.pPositions, dPositions = builder.dPositions, p1 = new Visualization.THREE.Vector3(), p2 = new Visualization.THREE.Vector3(), p3 = new Visualization.THREE.Vector3(), p4 = new Visualization.THREE.Vector3(), d1 = new Visualization.THREE.Vector3(), d2 = new Visualization.THREE.Vector3(), d3 = new Visualization.THREE.Vector3(), d4 = new Visualization.THREE.Vector3(), previousTorsionPoint = new Visualization.THREE.Vector3(), extrapolatedControlPoint = new Visualization.THREE.Vector3();
                             for (var i = 0; i < len; i++) {
                                 p1.set(pPositions[3 * i], pPositions[3 * i + 1], pPositions[3 * i + 2]);
                                 i++;
@@ -68851,10 +70251,15 @@ var LiteMol;
                             xs[3 * v + 1] = this.tempC.y;
                             xs[3 * v + 2] = this.tempC.z;
                         };
-                        CartoonAsymUnit.reflect = function (target, p1, p2, amount) {
+                        return CartoonAsymUnit;
+                    }());
+                    Geometry.CartoonAsymUnit = CartoonAsymUnit;
+                    (function (CartoonAsymUnit) {
+                        function reflect(target, p1, p2, amount) {
                             target.set(p1.x - amount * (p2.x - p1.x), p1.y - amount * (p2.y - p1.y), p1.z - amount * (p2.z - p1.z));
-                        };
-                        CartoonAsymUnit.spline = function (target, p1, p2, p3, t) {
+                        }
+                        CartoonAsymUnit.reflect = reflect;
+                        function spline(target, p1, p2, p3, t) {
                             var a = Math.pow(1 - t, 2) / 2;
                             var c = Math.pow(t, 2) / 2;
                             var b = 1 - a - c;
@@ -68862,16 +70267,387 @@ var LiteMol;
                             var y = a * p1.y + b * p2.y + c * p3.y;
                             var z = a * p1.z + b * p2.z + c * p3.z;
                             target.set(x, y, z);
+                        }
+                        CartoonAsymUnit.spline = spline;
+                        function maskSplit(element, mask, target) {
+                            var current = element, start = element.startResidueIndex, end = element.endResidueIndex;
+                            for (var i = start; i < end; i++) {
+                                if (!mask[i])
+                                    continue;
+                                if (current.startResidueIndex !== i) {
+                                    current = new LiteMol.Core.Structure.SecondaryStructureElement(element.type, element.startResidueId, element.endResidueId);
+                                    current.startResidueIndex = i;
+                                }
+                                while (i < end && mask[i]) {
+                                    i++;
+                                }
+                                current.endResidueIndex = i;
+                                target[target.length] = current;
+                            }
+                        }
+                        CartoonAsymUnit.maskSplit = maskSplit;
+                        function isCartoonLike(atomIndices, start, end, name, a, b, isAmk) {
+                            var aU = false, aV = false, hasP = false;
+                            for (var i = start; i < end; i++) {
+                                var n = name[atomIndices[i]];
+                                if (!aU && n === a) {
+                                    aU = true;
+                                }
+                                else if (!aV && n === b) {
+                                    aV = true;
+                                }
+                                if (aU && aV)
+                                    return true;
+                                if (n === 'P') {
+                                    hasP = true;
+                                }
+                            }
+                            if (isAmk)
+                                return aU;
+                            return hasP;
+                        }
+                        CartoonAsymUnit.isCartoonLike = isCartoonLike;
+                        function createMask(model, atomIndices) {
+                            var ret = new Uint8Array(model.data.residues.count);
+                            var _a = model.data.atoms, residueIndex = _a.residueIndex, name = _a.name;
+                            var ssIndex = model.data.residues.secondaryStructureIndex;
+                            var ss = model.data.secondaryStructure;
+                            for (var i = 0, _b = atomIndices.length - 1; i < _b; i++) {
+                                var aI = atomIndices[i];
+                                var rStart = i;
+                                var residue = residueIndex[aI];
+                                i++;
+                                while (residue === residueIndex[atomIndices[i]])
+                                    i++;
+                                var s = ss[ssIndex[residue]].type;
+                                if (s === 0 /* None */)
+                                    continue;
+                                if (s === 5 /* Strand */) {
+                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "O5'", "C3'", false);
+                                }
+                                else {
+                                    ret[residue] = +CartoonAsymUnit.isCartoonLike(atomIndices, rStart, i, name, "CA", "O", true);
+                                }
+                                i--;
+                            }
+                            return ret;
+                        }
+                        CartoonAsymUnit.createMask = createMask;
+                        function isUnknownSecondaryStructure(model) {
+                            var hasSeq = false;
+                            for (var _i = 0, _a = model.data.secondaryStructure; _i < _a.length; _i++) {
+                                var e = _a[_i];
+                                if (e.type === 1 /* Helix */
+                                    || e.type === 3 /* Sheet */
+                                    || e.type === 2 /* Turn */) {
+                                    return false;
+                                }
+                                if (e.type === 4 /* AminoSeq */) {
+                                    hasSeq = true;
+                                }
+                            }
+                            return hasSeq;
+                        }
+                        function approximateSecondaryStructure(model, parent) {
+                            if (parent.type !== 4 /* AminoSeq */)
+                                return [parent];
+                            var elements = [];
+                            var name = model.data.atoms.name;
+                            var _a = model.data.residues, atomStartIndex = _a.atomStartIndex, atomEndIndex = _a.atomEndIndex;
+                            var trace = new Int32Array(parent.endResidueIndex - parent.startResidueIndex), offset = 0;
+                            var isOk = true;
+                            for (var i = parent.startResidueIndex, _b = parent.endResidueIndex; i < _b; i++) {
+                                var foundCA = false, foundO = false;
+                                for (var j = atomStartIndex[i], _c = atomEndIndex[i]; j < _c; j++) {
+                                    if (name[j] === 'CA') {
+                                        if (!foundCA)
+                                            trace[offset++] = j;
+                                        foundCA = true;
+                                    }
+                                    else if (name[j] === 'O') {
+                                        foundO = true;
+                                    }
+                                    if (foundO && foundCA)
+                                        break;
+                                }
+                                if (!foundCA || !foundO) {
+                                    isOk = false;
+                                    break;
+                                }
+                            }
+                            if (!isOk)
+                                return [parent];
+                            zhangSkolnickSStrace(model, trace, parent, elements);
+                            return elements;
+                        }
+                        var ZhangHelixDistance = [5.45, 5.18, 6.37];
+                        var ZhangHelixDelta = 2.1;
+                        var ZhangSheetDistance = [6.1, 10.4, 13.0];
+                        var ZhangSheetDelta = 1.42;
+                        var ZhangP1 = new Visualization.THREE.Vector3(0, 0, 0);
+                        var ZhangP2 = new Visualization.THREE.Vector3(0, 0, 0);
+                        function zhangSkolnickSStrace(model, trace, parent, elements) {
+                            var mask = new Int32Array(trace.length);
+                            var hasSS = false;
+                            var residueIndex = model.data.atoms.residueIndex;
+                            for (var i = 0, _l = trace.length; i < _l; i++) {
+                                if (zhangSkolnickSSresidue(model, trace, i, ZhangHelixDistance, ZhangHelixDelta)) {
+                                    mask[i] = 1 /* Helix */;
+                                    hasSS = true;
+                                }
+                                else if (zhangSkolnickSSresidue(model, trace, i, ZhangSheetDistance, ZhangSheetDelta)) {
+                                    mask[i] = 3 /* Sheet */;
+                                    hasSS = true;
+                                }
+                                else {
+                                    mask[i] = parent.type;
+                                }
+                            }
+                            if (!hasSS) {
+                                elements.push(parent);
+                                return;
+                            }
+                            // filter 1-length elements
+                            for (var i = 0, _l = mask.length; i < _l; i++) {
+                                var m = mask[i];
+                                if (m === parent.type)
+                                    continue;
+                                var j = i + 1;
+                                while (j < _l && m === mask[j]) {
+                                    j++;
+                                }
+                                if (j - i > 1) {
+                                    i = j - 1;
+                                    continue;
+                                }
+                                for (var k = i; k < j; k++)
+                                    mask[k] = parent.type;
+                                i = j - 1;
+                            }
+                            for (var i = 0, _l = mask.length; i < _l; i++) {
+                                var m = mask[i];
+                                var j = i + 1;
+                                while (j < _l && m === mask[j]) {
+                                    j++;
+                                }
+                                var e = new LiteMol.Core.Structure.SecondaryStructureElement(m, new LiteMol.Core.Structure.PolyResidueIdentifier('', i, null), new LiteMol.Core.Structure.PolyResidueIdentifier('', j, null));
+                                e.startResidueIndex = residueIndex[trace[i]];
+                                e.endResidueIndex = residueIndex[trace[j - 1]] + 1;
+                                elements.push(e);
+                                i = j - 1;
+                            }
+                        }
+                        function zhangSkolnickSSresidue(model, trace, i, distances, delta) {
+                            var len = trace.length;
+                            var _a = model.positions, x = _a.x, y = _a.y, z = _a.z;
+                            var u = ZhangP1, v = ZhangP2;
+                            for (var j = Math.max(0, i - 2); j <= i; j++) {
+                                for (var k = 2; k < 5; k++) {
+                                    if (j + k >= len) {
+                                        continue;
+                                    }
+                                    var a = trace[j], b = trace[j + k];
+                                    u.set(x[a], y[a], z[a]);
+                                    v.set(x[b], y[b], z[b]);
+                                    if (Math.abs(u.distanceTo(v) - distances[k - 2]) > delta) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        }
+                        function throwIfEmpty(ss) {
+                            if (ss.length === 0) {
+                                throw "Cartoons cannot be constructred from this model/selection.";
+                            }
+                        }
+                        function buildUnits(model, atomIndices, linearSegmentCount) {
+                            var mask = createMask(model, atomIndices);
+                            var ss = [];
+                            var isUnknownSS = isUnknownSecondaryStructure(model);
+                            for (var _i = 0, _a = model.data.secondaryStructure; _i < _a.length; _i++) {
+                                var e = _a[_i];
+                                if (isUnknownSS) {
+                                    var approx = approximateSecondaryStructure(model, e);
+                                    for (var _d = 0, approx_1 = approx; _d < approx_1.length; _d++) {
+                                        var f = approx_1[_d];
+                                        CartoonAsymUnit.maskSplit(f, mask, ss);
+                                    }
+                                }
+                                else {
+                                    CartoonAsymUnit.maskSplit(e, mask, ss);
+                                }
+                            }
+                            throwIfEmpty(ss);
+                            var previous = ss[0], asymId = model.data.residues.asymId, authSeqNumber = model.data.residues.authSeqNumber, currentElements = [], units = [], none = 0 /* None */;
+                            if (previous.type === none) {
+                                previous = null;
+                            }
+                            for (var _e = 0, ss_2 = ss; _e < ss_2.length; _e++) {
+                                var e = ss_2[_e];
+                                if (e.type === none) {
+                                    if (currentElements.length > 0) {
+                                        units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
+                                    }
+                                    previous = null;
+                                    currentElements = [];
+                                }
+                                else {
+                                    if (previous === null)
+                                        previous = e;
+                                    if (asymId[previous.endResidueIndex - 1] !== asymId[e.startResidueIndex]
+                                        || (previous !== e && authSeqNumber[e.startResidueIndex] - authSeqNumber[previous.endResidueIndex - 1] > 1)
+                                        || (previous.startResidueIndex !== e.startResidueIndex && (e.startResidueIndex - previous.endResidueIndex > 0))) {
+                                        if (currentElements.length > 0) {
+                                            units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
+                                        }
+                                        else if (previous !== null) {
+                                            units.push(new CartoonAsymUnit(model, [previous], linearSegmentCount));
+                                        }
+                                        previous = null;
+                                        currentElements = [e];
+                                    }
+                                    else {
+                                        currentElements[currentElements.length] = e;
+                                    }
+                                }
+                                previous = e;
+                            }
+                            if (currentElements.length > 0) {
+                                units.push(new CartoonAsymUnit(model, currentElements, linearSegmentCount));
+                            }
+                            return units; // [units[units.length - 1]];
+                        }
+                        CartoonAsymUnit.buildUnits = buildUnits;
+                    })(CartoonAsymUnit = Geometry.CartoonAsymUnit || (Geometry.CartoonAsymUnit = {}));
+                    var ContolPointsBuilder = (function () {
+                        function ContolPointsBuilder(residueCount) {
+                            this.typeBuilder = ArrayBuilder.forArray(10000);
+                            this.residueType = [];
+                            this.uPositions = new Float32Array(0);
+                            this.vPositions = new Float32Array(0);
+                            this.pPositions = new Float32Array(0);
+                            this.dPositions = new Float32Array(0);
+                            this.uvLength = 0;
+                            this.residueCount = 0;
+                            this.typeBuilder = ArrayBuilder.forArray(residueCount + 4);
+                            this.uPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
+                            this.vPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
+                            this.pPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
+                            this.dPositionsBuilder = ArrayBuilder.forVertex3D(residueCount + 4);
+                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
+                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
+                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
+                        }
+                        ContolPointsBuilder.prototype.addResidue = function (rIndex, arrays, sType) {
+                            var start = arrays.atomStartIndex[rIndex], end = arrays.atomEndIndex[rIndex], aU = false, aV = false;
+                            var name = arrays.name;
+                            if (sType !== 5 /* Strand */) {
+                                for (var i = start; i < end; i++) {
+                                    if (!aU && name[i] === "CA") {
+                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                        aU = true;
+                                    }
+                                    else if (!aV && name[i] === "O") {
+                                        ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                        aV = true;
+                                    }
+                                    if (aU && aV)
+                                        break;
+                                }
+                            }
+                            else {
+                                if (end - start === 1) {
+                                    // has to be P atom
+                                    ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[start], arrays.y[start], arrays.z[start]);
+                                    aU = true;
+                                }
+                                else {
+                                    var pIndex = -1;
+                                    for (var i = start; i < end; i++) {
+                                        if (!aU && name[i] === "O5'") {
+                                            ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                            aU = true;
+                                        }
+                                        else if (!aV && name[i] === "C3'") {
+                                            ArrayBuilder.add3(this.vPositionsBuilder, arrays.x[i], arrays.y[i], arrays.z[i]);
+                                            aV = true;
+                                        }
+                                        if (name[i] === "P") {
+                                            pIndex = i;
+                                        }
+                                        if (aU && aV)
+                                            break;
+                                    }
+                                    if (!aU && !aV && pIndex >= 0) {
+                                        ArrayBuilder.add3(this.uPositionsBuilder, arrays.x[pIndex], arrays.y[pIndex], arrays.z[pIndex]);
+                                        aU = true;
+                                    }
+                                }
+                            }
+                            var backboneOnly = false;
+                            if (!aV) {
+                                var arr = this.uPositionsBuilder.array, len = arr.length;
+                                ArrayBuilder.add3(this.vPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
+                                backboneOnly = true;
+                            }
+                            else if (!aU) {
+                                var arr = this.vPositionsBuilder.array, len = arr.length;
+                                ArrayBuilder.add3(this.uPositionsBuilder, arr[len - 3], arr[len - 2], arr[len - 1]);
+                                backboneOnly = true;
+                            }
+                            ArrayBuilder.add(this.typeBuilder, sType);
+                            return backboneOnly;
                         };
-                        return CartoonAsymUnit;
+                        ContolPointsBuilder.prototype.finishResidues = function () {
+                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
+                            ArrayBuilder.add(this.typeBuilder, 0 /* None */);
+                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.uPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
+                            ArrayBuilder.add3(this.vPositionsBuilder, 0, 0, 0);
+                            this.residueType = this.typeBuilder.array;
+                            this.uPositions = this.uPositionsBuilder.array;
+                            this.vPositions = this.vPositionsBuilder.array;
+                            this.typeBuilder = null;
+                            this.uPositionsBuilder = null;
+                            this.vPositionsBuilder = null;
+                            this.uvLength = this.residueType.length;
+                            this.residueCount = this.uvLength - 4;
+                        };
+                        ContolPointsBuilder.prototype.addControlPoint = function (p, d) {
+                            ArrayBuilder.add3(this.pPositionsBuilder, p.x, p.y, p.z);
+                            ArrayBuilder.add3(this.dPositionsBuilder, d.x, d.y, d.z);
+                        };
+                        ContolPointsBuilder.prototype.finishContols = function () {
+                            this.pPositions = this.pPositionsBuilder.array;
+                            this.dPositions = this.dPositionsBuilder.array;
+                            this.pPositionsBuilder = null;
+                            this.dPositionsBuilder = null;
+                        };
+                        return ContolPointsBuilder;
                     }());
-                    CartoonAsymUnit.ZhangHelixDistance = [5.45, 5.18, 6.37];
-                    CartoonAsymUnit.ZhangHelixDelta = 2.1;
-                    CartoonAsymUnit.ZhangSheetDistance = [6.1, 10.4, 13.0];
-                    CartoonAsymUnit.ZhangSheetDelta = 1.42;
-                    CartoonAsymUnit.ZhangP1 = new Visualization.THREE.Vector3(0, 0, 0);
-                    CartoonAsymUnit.ZhangP2 = new Visualization.THREE.Vector3(0, 0, 0);
-                    Geometry.CartoonAsymUnit = CartoonAsymUnit;
+                })(Geometry = Cartoons.Geometry || (Cartoons.Geometry = {}));
+            })(Cartoons = Molecule.Cartoons || (Molecule.Cartoons = {}));
+        })(Molecule = Visualization.Molecule || (Visualization.Molecule = {}));
+    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Visualization;
+    (function (Visualization) {
+        var Molecule;
+        (function (Molecule) {
+            var Cartoons;
+            (function (Cartoons) {
+                var Geometry;
+                (function (Geometry) {
                     var CartoonsGeometryParams = (function () {
                         function CartoonsGeometryParams() {
                             this.radialSegmentCount = 10;
@@ -68885,38 +70661,50 @@ var LiteMol;
                             this.arrowWidth = 1.7;
                             this.tessalation = 2;
                         }
+                        CartoonsGeometryParams.Default = new CartoonsGeometryParams();
                         return CartoonsGeometryParams;
                     }());
-                    CartoonsGeometryParams.Default = new CartoonsGeometryParams();
                     Geometry.CartoonsGeometryParams = CartoonsGeometryParams;
+                    var GB = Visualization.Geometry.Builder;
                     var CartoonsGeometryState = (function () {
                         function CartoonsGeometryState(params, residueCount) {
                             this.params = params;
+                            this.residueCount = residueCount;
                             this.residueIndex = 0;
-                            this.verticesDone = 0;
-                            this.trianglesDone = 0;
-                            this.vertexBuffer = ChunkedArray.forVertex3D();
-                            this.normalBuffer = ChunkedArray.forVertex3D();
-                            this.indexBuffer = ChunkedArray.forIndexBuffer();
+                            this.builder = GB.createDynamic(this.residueCount * 8, this.residueCount * 16);
+                            this.vs = this.builder.vertices;
+                            this.is = this.builder.indices;
+                            this.gapsBuilder = GB.createDynamic(256, 512);
                             this.translationMatrix = new Visualization.THREE.Matrix4();
                             this.scaleMatrix = new Visualization.THREE.Matrix4();
                             this.rotationMatrix = new Visualization.THREE.Matrix4();
                             this.invMatrix = new Visualization.THREE.Matrix4();
                             this.vertexMap = new Visualization.Selection.VertexMapBuilder(residueCount);
                         }
+                        Object.defineProperty(CartoonsGeometryState.prototype, "verticesDone", {
+                            get: function () {
+                                return this.vs.elementCount;
+                            },
+                            enumerable: true,
+                            configurable: true
+                        });
+                        Object.defineProperty(CartoonsGeometryState.prototype, "trianglesDone", {
+                            get: function () {
+                                return this.is.elementCount;
+                            },
+                            enumerable: true,
+                            configurable: true
+                        });
                         CartoonsGeometryState.prototype.addVertex = function (v, n) {
-                            ChunkedArray.add3(this.vertexBuffer, v.x, v.y, v.z);
-                            ChunkedArray.add3(this.normalBuffer, n.x, n.y, n.z);
-                            this.verticesDone++;
+                            GB.addVertex3d(this.builder, v.x, v.y, v.z);
+                            GB.addNormal3d(this.builder, n.x, n.y, n.z);
                         };
                         CartoonsGeometryState.prototype.addTriangle = function (i, j, k) {
-                            ChunkedArray.add3(this.indexBuffer, i, j, k);
-                            this.trianglesDone++;
+                            GB.addIndex3d(this.builder, i, j, k);
                         };
                         CartoonsGeometryState.prototype.addTriangles = function (i, j, k, u, v, w) {
-                            ChunkedArray.add3(this.indexBuffer, i, j, k);
-                            ChunkedArray.add3(this.indexBuffer, u, v, w);
-                            this.trianglesDone += 2;
+                            GB.addIndex3d(this.builder, i, j, k);
+                            GB.addIndex3d(this.builder, u, v, w);
                         };
                         return CartoonsGeometryState;
                     }());
@@ -69045,9 +70833,21 @@ var LiteMol;
                         }
                     }
                     Geometry.buildUnit = buildUnit;
+                    function isGap(ctx, a, b) {
+                        var chainIndex = ctx.model.data.residues.chainIndex;
+                        return chainIndex[a.endResidueIndex] === chainIndex[b.endResidueIndex];
+                    }
+                    var Vec3 = LiteMol.Core.Geometry.LinearAlgebra.Vector3;
+                    function renderGap(ctx, unitA, unitB) {
+                        var aL = unitA.controlPoints.length;
+                        var cpA = unitA.controlPoints, cpB = unitB.controlPoints;
+                        var a = Vec3.fromValues(cpA[aL - 3], cpA[aL - 2], cpA[aL - 1]), b = Vec3.fromValues(cpB[0], cpB[1], cpB[2]);
+                        var r = ctx.state.params.turnWidth / 2;
+                        GB.addDashedLine(ctx.state.gapsBuilder, a, b, 0.5, 0.5, r);
+                    }
                     function buildUnitsAsync(ctx) {
-                        return __awaiter(this, void 0, LiteMol.Promise, function () {
-                            var chunkSize, started, unitIndex, residuesDone, t;
+                        return __awaiter(this, void 0, void 0, function () {
+                            var chunkSize, started, unitIndex, residuesDone, t, i;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
@@ -69071,7 +70871,13 @@ var LiteMol;
                                         _a.sent();
                                         _a.label = 3;
                                     case 3: return [3 /*break*/, 1];
-                                    case 4: return [2 /*return*/];
+                                    case 4:
+                                        for (i = 0; i < ctx.units.length - 1; i++) {
+                                            if (isGap(ctx, ctx.units[i], ctx.units[i + 1])) {
+                                                renderGap(ctx, ctx.units[i], ctx.units[i + 1]);
+                                            }
+                                        }
+                                        return [2 /*return*/];
                                 }
                             });
                         });
@@ -69079,15 +70885,15 @@ var LiteMol;
                     Geometry.buildUnitsAsync = buildUnitsAsync;
                     function createGeometry(ctx) {
                         var state = ctx.state;
-                        var vertexBuffer = new Float32Array(ChunkedArray.compact(state.vertexBuffer)), normalBuffer = new Float32Array(ChunkedArray.compact(state.normalBuffer)), colorBuffer = new Float32Array(state.verticesDone * 3), pickColorBuffer = new Float32Array(state.verticesDone * 4), indexBuffer = new Uint32Array(ChunkedArray.compact(state.indexBuffer)), stateBuffer = new Float32Array(state.verticesDone);
-                        var geometry = new Visualization.THREE.BufferGeometry();
-                        geometry.addAttribute('position', new Visualization.THREE.BufferAttribute(vertexBuffer, 3));
-                        geometry.addAttribute('normal', new Visualization.THREE.BufferAttribute(normalBuffer, 3));
-                        geometry.addAttribute('index', new Visualization.THREE.BufferAttribute(indexBuffer, 1));
+                        var colorBuffer = new Float32Array(state.verticesDone * 3), pickColorBuffer = new Float32Array(state.verticesDone * 4), stateBuffer = new Float32Array(state.verticesDone);
+                        var geometry = GB.toBufferGeometry(state.builder);
                         geometry.addAttribute('color', new Visualization.THREE.BufferAttribute(colorBuffer, 3));
                         ctx.geom.vertexStateBuffer = new Visualization.THREE.BufferAttribute(stateBuffer, 1);
                         geometry.addAttribute('vState', ctx.geom.vertexStateBuffer);
                         ctx.geom.geometry = geometry;
+                        if (state.gapsBuilder.vertices.elementCount) {
+                            ctx.geom.gapsGeometry = GB.toBufferGeometry(state.gapsBuilder);
+                        }
                         var map = ctx.geom.vertexMap, color = { r: 0.45, g: 0.45, b: 0.45 }, vertexRanges = map.vertexRanges;
                         for (var _i = 0, _a = map.elementIndices; _i < _a.length; _i++) {
                             var elementIndex = _a[_i];
@@ -69106,8 +70912,8 @@ var LiteMol;
                             }
                         }
                         var pickGeometry = new Visualization.THREE.BufferGeometry();
-                        pickGeometry.addAttribute('position', new Visualization.THREE.BufferAttribute(vertexBuffer, 3));
-                        pickGeometry.addAttribute('index', new Visualization.THREE.BufferAttribute(indexBuffer, 1));
+                        pickGeometry.addAttribute('position', geometry.getAttribute('position'));
+                        pickGeometry.addAttribute('index', geometry.getAttribute('index'));
                         pickGeometry.addAttribute('pColor', new Visualization.THREE.BufferAttribute(pickColorBuffer, 4));
                         ctx.geom.pickGeometry = pickGeometry;
                     }
@@ -69398,14 +71204,30 @@ var LiteMol;
                             }
                         }
                         bufferAttribute.needsUpdate = true;
+                        // const gapColor = Theme.getColor(theme, 'Gap', Colors.DefaultBondColor);
+                        // const gc = this.gapMaterial.color;
+                        // if (gapColor.r !== gc.r || gapColor.g !== gc.g || gapColor.b !== gc.b) {
+                        //     this.gapMaterial.color = new THREE.Color(gapColor.r, gapColor.g, gapColor.b);
+                        //     this.gapMaterial.needsUpdate = true;
+                        // }
                     };
                     Model.prototype.applyThemeInternal = function (theme) {
                         this.applyColoring(theme);
                         Visualization.MaterialsHelper.updateMaterial(this.material, theme, this.object);
+                        Visualization.MaterialsHelper.updateMaterial(this.gapMaterial, theme, this.object);
                     };
                     Model.prototype.createObjects = function () {
+                        var main;
+                        if (this.cartoons.gapsGeometry) {
+                            main = new Visualization.THREE.Object3D();
+                            main.add(new Visualization.THREE.Mesh(this.cartoons.geometry, this.material));
+                            main.add(new Visualization.THREE.Mesh(this.cartoons.gapsGeometry, this.gapMaterial));
+                        }
+                        else {
+                            main = new Visualization.THREE.Mesh(this.cartoons.geometry, this.material);
+                        }
                         return {
-                            main: new Visualization.THREE.Mesh(this.cartoons.geometry, this.material),
+                            main: main,
                             pick: new Visualization.THREE.Mesh(this.cartoons.pickGeometry, this.pickMaterial)
                         };
                     };
@@ -69462,6 +71284,7 @@ var LiteMol;
                                         ret.cartoons = cartoons;
                                         ret.queryContext = queryContext;
                                         ret.material = Visualization.MaterialsHelper.getMeshMaterial();
+                                        ret.gapMaterial = new Visualization.THREE.MeshPhongMaterial({ color: 0x777777, shading: Visualization.THREE.FlatShading });
                                         ret.pickMaterial = Visualization.MaterialsHelper.getPickMaterial();
                                         if (props)
                                             ret.props = props;
@@ -69475,7 +71298,7 @@ var LiteMol;
                                         ret.pickBufferAttributes = [ret.cartoons.pickGeometry.attributes.pColor];
                                         ret.model = model;
                                         ret.applyTheme(theme);
-                                        ret.disposeList.push(ret.cartoons, ret.material, ret.pickMaterial);
+                                        ret.disposeList.push(ret.cartoons, ret.material, ret.pickMaterial, ret.gapMaterial);
                                         return [2 /*return*/, ret];
                                 }
                             });
@@ -69530,15 +71353,87 @@ var LiteMol;
         (function (Primitive) {
             "use strict";
             var LA = LiteMol.Core.Geometry.LinearAlgebra;
-            function createSphereSurface(center, radius, tessalation) {
-                var geom = new Visualization.THREE.IcosahedronGeometry(radius, tessalation);
-                var surface = Visualization.GeometryHelper.toSurface(geom);
-                if (center.x !== 0 || center.y !== 0 || center.z !== 0) {
-                    LiteMol.Core.Geometry.Surface.transformImmediate(surface, LA.Matrix4.fromTranslation(LA.Matrix4.empty(), [center.x, center.y, center.z]));
-                }
-                return surface;
+            function createSphereSurface(sphere) {
+                var _a = sphere.tessalation, tessalation = _a === void 0 ? 0 : _a;
+                var geom = new Visualization.THREE.IcosahedronGeometry(1.0, tessalation);
+                var surf = Visualization.GeometryHelper.toSurface(geom);
+                geom.dispose();
+                return surf;
             }
             Primitive.createSphereSurface = createSphereSurface;
+            function createTubeSurface(tube) {
+                var a = tube.a, b = tube.b, _a = tube.slices, slices = _a === void 0 ? 12 : _a;
+                var geom = new Visualization.THREE.TubeGeometry(new Visualization.THREE.LineCurve3(new Visualization.THREE.Vector3(a[0], a[1], a[2]), new Visualization.THREE.Vector3(b[0], b[1], b[2])), 2, tube.radius, slices);
+                var surf = Visualization.GeometryHelper.toSurface(geom);
+                geom.dispose();
+                return surf;
+            }
+            Primitive.createTubeSurface = createTubeSurface;
+            var coneAxis = [0, 1, 0], coneTransformRotation = LA.Matrix4.zero(), coneTransformTranslation = LA.Matrix4.zero(), coneTransformTranslation1 = LA.Matrix4.zero();
+            function createCone(cone) {
+                var a = cone.a, b = cone.b, radius = cone.radius, _a = cone.slices, slices = _a === void 0 ? 12 : _a;
+                var height = LA.Vector3.distance(a, b);
+                var geom = new Visualization.THREE.CylinderGeometry(0, radius, height, slices, 1);
+                var surf = Visualization.GeometryHelper.toSurface(geom);
+                geom.dispose();
+                var dir = LA.Vector3.sub(b, b, a);
+                LA.Vector3.makeRotation(coneTransformRotation, coneAxis, dir);
+                LA.Matrix4.fromTranslation(coneTransformTranslation1, [0, height / 2, 0]);
+                LA.Matrix4.fromTranslation(coneTransformTranslation, a);
+                LiteMol.Core.Geometry.Surface.transformImmediate(surf, LA.Matrix4.mul3(coneTransformTranslation, coneTransformTranslation, coneTransformRotation, coneTransformTranslation1));
+                LiteMol.Core.Geometry.Surface.computeNormalsImmediate(surf);
+                return surf;
+            }
+            Primitive.createCone = createCone;
+            function createArrow(arrow) {
+                var id = arrow.id, a = arrow.a, b = arrow.b, radius = arrow.radius, _a = arrow.slices, slices = _a === void 0 ? 12 : _a, coneHeight = arrow.coneHeight, coneRadius = arrow.coneRadius;
+                var len = LA.Vector3.distance(a, b);
+                var t = len - coneHeight;
+                var dir = LA.Vector3.normalize(b, LA.Vector3.sub(b, b, a));
+                var pivot = [a[0] + t * dir[0], a[1] + t * dir[1], a[2] + t * dir[2]];
+                return [
+                    { type: 'Cone', a: pivot, b: b, id: id, radius: coneRadius, slices: slices },
+                    { type: 'Tube', a: a, b: pivot, id: id, radius: radius, slices: slices }
+                ];
+            }
+            Primitive.createArrow = createArrow;
+            var dashSurface = (function () {
+                var dash = Visualization.GeometryHelper.toSurface(new Visualization.THREE.BoxGeometry(1, 1, 1));
+                for (var i = 0; i < dash.vertices.length; i += 3) {
+                    dash.vertices[i + 2] += 0.5;
+                }
+                return dash;
+            })();
+            function createDashes(line) {
+                var id = line.id, a = line.a, b = line.b, width = line.width, dashSize = line.dashSize, spaceSize = line.spaceSize;
+                var length = LA.Vector3.distance(a, b);
+                if (length === 0)
+                    return [];
+                var delta = dashSize + (spaceSize !== void 0 ? spaceSize : dashSize);
+                var dir = LA.Vector3.sub(LA.Vector3(), b, a);
+                LA.Vector3.normalize(dir, dir);
+                var scale = LA.Vector3.fromValues(width, width, dashSize);
+                var up = LA.Vector3.fromValues(0, 0, 1);
+                var rotation = LA.Vector3.makeRotation(LA.Matrix4(), up, dir);
+                var surfaces = [];
+                LA.Vector3.scale(dir, dir, delta);
+                var axis = LA.Vector3.copy(LA.Vector3(), a);
+                for (var t = 0; t < length; t += delta) {
+                    if (t + dashSize > length)
+                        scale = LA.Vector3.fromValues(width, width, length - t);
+                    surfaces.push({
+                        type: 'Surface',
+                        id: id,
+                        surface: dashSurface,
+                        rotation: rotation,
+                        scale: scale,
+                        translation: LA.Vector3.clone(axis)
+                    });
+                    LA.Vector3.add(axis, axis, dir);
+                }
+                return surfaces;
+            }
+            Primitive.createDashes = createDashes;
         })(Primitive = Visualization.Primitive || (Visualization.Primitive = {}));
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
@@ -69552,74 +71447,136 @@ var LiteMol;
         var Primitive;
         (function (Primitive) {
             'use strict';
+            var LA = LiteMol.Core.Geometry.LinearAlgebra;
             var Surface = LiteMol.Core.Geometry.Surface;
             function buildSurface(shapes) {
                 var _this = this;
                 return LiteMol.Core.computation(function (ctx) { return __awaiter(_this, void 0, void 0, function () {
-                    var uniqueSpheres, _i, shapes_1, s, size, _a, shapes_2, s, sphere, vertices, normals, triangles, annotation, vOffset, nOffset, tOffset, aOffset, v, transform, vs, _c, shapes_3, s, surface, startVOffset, i, _b, i, _b, i, _b, ts, i, _b, i, _b, ret;
+                    var uniqueSpheres, shapeSurfaces, _i, shapes_1, s, sphere, tube, size, _a, shapeSurfaces_1, s, vertices, normals, triangles, annotation, vOffset, nOffset, tOffset, aOffset, v, scaleTransform, translateTransform, rotateTransform, transform, vs, shapeIndex, _c, shapes_2, s, surface, startVOffset, i, _b, ns, i, _b, i, _b, ns, i, _b, i, _b, ns, i, _b, i, _b, ns, i, _b, ts, i, _b, i, _b, ret;
                     return __generator(this, function (_d) {
                         switch (_d.label) {
                             case 0: return [4 /*yield*/, ctx.updateProgress('Building surface...')];
                             case 1:
                                 _d.sent();
                                 uniqueSpheres = LiteMol.Core.Utils.FastMap.create();
+                                shapeSurfaces = [];
                                 for (_i = 0, shapes_1 = shapes; _i < shapes_1.length; _i++) {
                                     s = shapes_1[_i];
-                                    if (s.type !== 'Sphere' || uniqueSpheres.has(s.tessalation || 0))
-                                        continue;
-                                    uniqueSpheres.set(s.tessalation || 0, Primitive.createSphereSurface({ x: 0, y: 0, z: 0 }, 1, s.tessalation || 0));
-                                }
-                                size = { vertexCount: 0, triangleCount: 0 };
-                                for (_a = 0, shapes_2 = shapes; _a < shapes_2.length; _a++) {
-                                    s = shapes_2[_a];
                                     switch (s.type) {
                                         case 'Sphere':
-                                            sphere = uniqueSpheres.get(s.tessalation || 0);
-                                            size.vertexCount += sphere.vertexCount;
-                                            size.triangleCount += sphere.triangleCount;
+                                            if (uniqueSpheres.has(s.tessalation || 0))
+                                                shapeSurfaces.push(uniqueSpheres.get(s.tessalation || 0));
+                                            else {
+                                                sphere = Primitive.createSphereSurface(s);
+                                                uniqueSpheres.set(s.tessalation || 0, sphere);
+                                                shapeSurfaces.push(sphere);
+                                            }
                                             break;
-                                        case 'Surface':
-                                            size.vertexCount += s.surface.vertexCount;
-                                            size.triangleCount += s.surface.triangleCount;
+                                        case 'Tube': {
+                                            tube = Primitive.createTubeSurface(s);
+                                            shapeSurfaces.push(tube);
                                             break;
+                                        }
+                                        case 'Cone': {
+                                            shapeSurfaces.push(Primitive.createCone(s));
+                                            break;
+                                        }
+                                        case 'Surface': {
+                                            shapeSurfaces.push(s.surface);
+                                            break;
+                                        }
                                     }
+                                }
+                                size = { vertexCount: 0, triangleCount: 0 };
+                                for (_a = 0, shapeSurfaces_1 = shapeSurfaces; _a < shapeSurfaces_1.length; _a++) {
+                                    s = shapeSurfaces_1[_a];
+                                    size.vertexCount += s.vertexCount;
+                                    size.triangleCount += s.triangleCount;
                                 }
                                 vertices = new Float32Array(size.vertexCount * 3);
                                 normals = new Float32Array(size.vertexCount * 3);
                                 triangles = new Uint32Array(size.triangleCount * 3);
                                 annotation = new Int32Array(size.vertexCount);
                                 vOffset = 0, nOffset = 0, tOffset = 0, aOffset = 0;
-                                v = new Visualization.THREE.Vector3();
-                                transform = new Visualization.THREE.Matrix4();
-                                for (_c = 0, shapes_3 = shapes; _c < shapes_3.length; _c++) {
-                                    s = shapes_3[_c];
-                                    surface = void 0;
+                                v = LA.Vector3.zero();
+                                scaleTransform = LA.Matrix4.zero(), translateTransform = LA.Matrix4.zero(), rotateTransform = LA.Matrix4.zero(), transform = LA.Matrix4.zero();
+                                shapeIndex = 0;
+                                for (_c = 0, shapes_2 = shapes; _c < shapes_2.length; _c++) {
+                                    s = shapes_2[_c];
+                                    surface = shapeSurfaces[shapeIndex++];
                                     startVOffset = (vOffset / 3) | 0;
                                     switch (s.type) {
-                                        case 'Sphere':
-                                            surface = uniqueSpheres.get(s.tessalation || 0);
+                                        case 'Sphere': {
                                             vs = surface.vertices;
+                                            LA.Matrix4.fromScaling(scaleTransform, [s.radius, s.radius, s.radius]);
+                                            LA.Matrix4.fromTranslation(translateTransform, s.center);
+                                            LA.Matrix4.mul(transform, translateTransform, scaleTransform);
                                             for (i = 0, _b = surface.vertexCount * 3; i < _b; i += 3) {
-                                                v.x = vs[i], v.y = vs[i + 1], v.z = vs[i + 2];
-                                                v.applyMatrix4(transform.makeScale(s.radius, s.radius, s.radius));
-                                                v.applyMatrix4(transform.makeTranslation(s.center.x, s.center.y, s.center.z));
-                                                vertices[vOffset++] = v.x;
-                                                vertices[vOffset++] = v.y;
-                                                vertices[vOffset++] = v.z;
+                                                v[0] = vs[i], v[1] = vs[i + 1], v[2] = vs[i + 2];
+                                                LA.Vector3.transformMat4(v, v, transform);
+                                                vertices[vOffset++] = v[0];
+                                                vertices[vOffset++] = v[1];
+                                                vertices[vOffset++] = v[2];
+                                            }
+                                            ns = surface.normals;
+                                            for (i = 0, _b = ns.length; i < _b; i++) {
+                                                normals[nOffset++] = ns[i];
                                             }
                                             break;
-                                        case 'Surface':
-                                            surface = s.surface;
-                                            Surface.computeNormalsImmediate(surface);
+                                        }
+                                        case 'Tube':
+                                        case 'Cone': {
                                             vs = surface.vertices;
                                             for (i = 0, _b = vs.length; i < _b; i++) {
                                                 vertices[vOffset++] = vs[i];
                                             }
+                                            ns = surface.normals;
+                                            for (i = 0, _b = ns.length; i < _b; i++) {
+                                                normals[nOffset++] = ns[i];
+                                            }
                                             break;
-                                    }
-                                    vs = surface.normals;
-                                    for (i = 0, _b = vs.length; i < _b; i++) {
-                                        normals[nOffset++] = vs[i];
+                                        }
+                                        case 'Surface': {
+                                            if (!surface.normals)
+                                                Surface.computeNormalsImmediate(surface);
+                                            vs = surface.vertices;
+                                            if (s.rotation || s.scale || s.translation) {
+                                                LA.Matrix4.fromScaling(scaleTransform, s.scale || [1, 1, 1]);
+                                                LA.Matrix4.fromTranslation(translateTransform, s.translation || [0, 0, 0]);
+                                                if (s.rotation)
+                                                    LA.Matrix4.copy(rotateTransform, s.rotation);
+                                                else
+                                                    LA.Matrix4.fromIdentity(rotateTransform);
+                                                LA.Matrix4.mul3(transform, translateTransform, rotateTransform, scaleTransform);
+                                                for (i = 0, _b = vs.length; i < _b; i += 3) {
+                                                    v[0] = vs[i], v[1] = vs[i + 1], v[2] = vs[i + 2];
+                                                    LA.Vector3.transformMat4(v, v, transform);
+                                                    vertices[vOffset++] = v[0];
+                                                    vertices[vOffset++] = v[1];
+                                                    vertices[vOffset++] = v[2];
+                                                }
+                                                LA.Matrix4.mul(transform, rotateTransform, scaleTransform);
+                                                ns = surface.normals;
+                                                for (i = 0, _b = ns.length; i < _b; i += 3) {
+                                                    v[0] = ns[i], v[1] = ns[i + 1], v[2] = ns[i + 2];
+                                                    LA.Vector3.transformMat4(v, v, transform);
+                                                    LA.Vector3.normalize(v, v);
+                                                    normals[nOffset++] = v[0];
+                                                    normals[nOffset++] = v[1];
+                                                    normals[nOffset++] = v[2];
+                                                }
+                                            }
+                                            else {
+                                                for (i = 0, _b = vs.length; i < _b; i++) {
+                                                    vertices[vOffset++] = vs[i];
+                                                }
+                                                ns = surface.normals;
+                                                for (i = 0, _b = ns.length; i < _b; i++) {
+                                                    normals[nOffset++] = ns[i];
+                                                }
+                                            }
+                                            break;
+                                        }
                                     }
                                     ts = surface.triangleIndices;
                                     for (i = 0, _b = ts.length; i < _b; i++) {
@@ -69651,6 +71608,36 @@ var LiteMol;
                     return this;
                 };
                 Builder.prototype.buildSurface = function () {
+                    var normalize = false;
+                    for (var _i = 0, _a = this.shapes; _i < _a.length; _i++) {
+                        var s = _a[_i];
+                        if (s.type === 'DashedLine' || s.type === 'Arrow') {
+                            normalize = true;
+                            break;
+                        }
+                    }
+                    if (normalize) {
+                        var normalized = [];
+                        for (var _c = 0, _d = this.shapes; _c < _d.length; _c++) {
+                            var s = _d[_c];
+                            if (s.type === 'DashedLine') {
+                                for (var _e = 0, _f = Primitive.createDashes(s); _e < _f.length; _e++) {
+                                    var d = _f[_e];
+                                    normalized[normalized.length] = d;
+                                }
+                            }
+                            else if (s.type === 'Arrow') {
+                                for (var _g = 0, _h = Primitive.createArrow(s); _g < _h.length; _g++) {
+                                    var a = _h[_g];
+                                    normalized[normalized.length] = a;
+                                }
+                            }
+                            else {
+                                normalized[normalized.length] = s;
+                            }
+                        }
+                        return buildSurface(normalized);
+                    }
                     return buildSurface(this.shapes);
                 };
                 Builder.create = function () {
@@ -69667,72 +71654,9 @@ var LiteMol;
  */
 var LiteMol;
 (function (LiteMol) {
-    var Visualization;
-    (function (Visualization) {
-        var Utils;
-        (function (Utils) {
-            "use strict";
-            var Palette = (function () {
-                function Palette() {
-                }
-                Palette.getRandomColor = function (amountOfGrey) {
-                    if (amountOfGrey === void 0) { amountOfGrey = 0.0; }
-                    var counter = 0;
-                    while (true) {
-                        counter++;
-                        var c = Palette.randomMix({ r: 166 / 255, g: 0, b: 100 / 255 }, { r: 1, g: 1, b: 0 }, { r: 0, g: 100 / 255, b: 1 }, amountOfGrey);
-                        var d = Math.abs(Palette.previous.r - c.r) + Math.abs(Palette.previous.g - c.g) + Math.abs(Palette.previous.b - c.b);
-                        if (d > 100 || counter === 10) {
-                            Palette.previous = c;
-                            return c;
-                        }
-                    }
-                };
-                Palette.randomMix = function (color1, color2, color3, greyControl) {
-                    var randomIndex = Math.floor(Math.random() * 3) | 0;
-                    var mixRatio1 = (randomIndex === 0) ? Math.random() * greyControl : Math.random();
-                    var mixRatio2 = (randomIndex === 1) ? Math.random() * greyControl : Math.random();
-                    var mixRatio3 = (randomIndex === 2) ? Math.random() * greyControl : Math.random();
-                    var sum = mixRatio1 + mixRatio2 + mixRatio3;
-                    mixRatio1 /= sum;
-                    mixRatio2 /= sum;
-                    mixRatio3 /= sum;
-                    return {
-                        r: (mixRatio1 * color1.r + mixRatio2 * color2.r + mixRatio3 * color3.r),
-                        g: (mixRatio1 * color1.g + mixRatio2 * color2.g + mixRatio3 * color3.g),
-                        b: (mixRatio1 * color1.b + mixRatio2 * color2.b + mixRatio3 * color3.b)
-                    };
-                };
-                /**
-                 *
-                 * @example
-                 *   let min = Palette.getRandomColor(0.3);
-                 *   let max = Palette.getRandomColor(0.3);
-                 *   let color = Palette.interpolate(0.1, min, 0.6, max, 0.354);
-                 */
-                Palette.interpolate = function (min, minColor, max, maxColor, value, target) {
-                    var ret = target !== void 0 ? target : { r: 0.1, g: 0.1, b: 0.1 };
-                    var t = (value - min) / (max - min);
-                    ret.r = minColor.r + (maxColor.r - minColor.r) * t;
-                    ret.g = minColor.g + (maxColor.g - minColor.g) * t;
-                    ret.b = minColor.b + (maxColor.b - minColor.b) * t;
-                    return ret;
-                };
-                return Palette;
-            }());
-            Palette.previous = Palette.randomMix({ r: 0.75, g: 0, b: 0.25 }, { r: 1, g: 0.5, b: 0 }, { r: 0, g: 0.35, b: 1 }, 0.5);
-            Utils.Palette = Palette;
-        })(Utils = Visualization.Utils || (Visualization.Utils = {}));
-    })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
-})(LiteMol || (LiteMol = {}));
-/*
- * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
- */
-var LiteMol;
-(function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        Bootstrap.VERSION = { number: "1.3.6", date: "April 13 2017" };
+        Bootstrap.VERSION = { number: "1.4.1", date: "June 22 2017" };
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -69913,8 +71837,9 @@ var LiteMol;
                 function RequestPool() {
                 }
                 RequestPool.get = function () {
-                    if (this.pool.length)
+                    if (this.pool.length) {
                         return this.pool.pop();
+                    }
                     return new XMLHttpRequest();
                 };
                 RequestPool.emptyFunc = function () { };
@@ -69924,13 +71849,13 @@ var LiteMol;
                         req.onerror = RequestPool.emptyFunc;
                         req.onload = RequestPool.emptyFunc;
                         req.onprogress = RequestPool.emptyFunc;
-                        this.pool.push();
+                        this.pool.push(req);
                     }
                 };
+                RequestPool.pool = [];
+                RequestPool.poolSize = 15;
                 return RequestPool;
             }());
-            RequestPool.pool = [];
-            RequestPool.poolSize = 15;
             function processAjax(ctx, asArrayBuffer, decompressGzip, e) {
                 return __awaiter(this, void 0, void 0, function () {
                     var req, buff, gzip, data, text, status_1;
@@ -71543,25 +73468,20 @@ var LiteMol;
                     };
                     TransformImpl.prototype.apply = function (context, a) {
                         var _this = this;
-                        return LiteMol.Core.computation(function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        return LiteMol.Core.computation(function (ctx) { return new LiteMol.Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
                             var _this = this;
                             return __generator(this, function (_a) {
-                                return [2 /*return*/, new LiteMol.Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
-                                        var _this = this;
-                                        return __generator(this, function (_a) {
-                                            Bootstrap.Event.Tree.TransformStarted.dispatch(context, this);
-                                            this.transformer.apply(context, a, this).run(context).then(function (b) {
-                                                res(_this.resolveAdd(a, b));
-                                                Bootstrap.Event.Tree.TransformFinished.dispatch(context, { transform: _this });
-                                            }).catch(function (e) {
-                                                rej(e);
-                                                Bootstrap.Event.Tree.TransformFinished.dispatch(context, { transform: _this, error: e });
-                                            });
-                                            return [2 /*return*/];
-                                        });
-                                    }); })];
+                                Bootstrap.Event.Tree.TransformStarted.dispatch(context, this);
+                                this.transformer.apply(context, a, this).run(context).then(function (b) {
+                                    res(_this.resolveAdd(a, b));
+                                    Bootstrap.Event.Tree.TransformFinished.dispatch(context, { transform: _this });
+                                }).catch(function (e) {
+                                    rej(e);
+                                    Bootstrap.Event.Tree.TransformFinished.dispatch(context, { transform: _this, error: e });
+                                });
+                                return [2 /*return*/];
                             });
-                        }); });
+                        }); }); });
                     };
                     TransformImpl.prototype.update = function (context, b) {
                         var _this = this;
@@ -71928,7 +73848,7 @@ var LiteMol;
                     if (!info || !info.atoms.length)
                         return "";
                     if (info.atoms.length === 1) {
-                        return "<span><b>" + formatAtomShort(info.atoms[0]) + "<b> " + formatMolecule(info) + "</span>";
+                        return "<span><b>" + formatAtomShort(info.atoms[0]) + "</b> " + formatMolecule(info) + "</span>";
                     }
                     else if (info.residues.length === 1) {
                         return "<span><b>" + formatResidue(info.residues[0]) + "</b> " + formatMolecule(info) + "</span>";
@@ -71940,6 +73860,8 @@ var LiteMol;
                 Molecule.formatInfoShort = formatInfoShort;
                 function isMoleculeModelInteractivity(info) {
                     if (Interactivity.isEmpty(info))
+                        return false;
+                    if (info.source.type.info.typeClass === Bootstrap.Entity.VisualClass && info.source.type !== Bootstrap.Entity.Molecule.Visual)
                         return false;
                     var modelOrSelection = Bootstrap.Utils.Molecule.findModelOrSelection(info.source);
                     if (!modelOrSelection)
@@ -72178,17 +74100,17 @@ var LiteMol;
                         console.warn('Focus: Molecule model for selection not found, ignoring...');
                         return;
                     }
-                    var center = { x: 0.1, y: 0.1, z: 0.1 };
+                    var center = LiteMol.Core.Geometry.LinearAlgebra.Vector3.zero();
                     var r = Bootstrap.Utils.Molecule.getCentroidAndRadius(model.props.model, sel.props.indices, center);
-                    this.scene.camera.focusOnPoint(center, r);
+                    this.scene.camera.focusOnPoint(LiteMol.Core.Geometry.LinearAlgebra.Vector3.toObj(center), r);
                 };
                 SceneWrapper.prototype.focusMoleculeModelOnQuery = function (what) {
                     var q = Bootstrap.Utils.Molecule.getModelAndIndicesFromQuery(what.model, what.query);
                     if (!q || !q.indices.length)
                         return;
-                    var center = { x: 0.1, y: 0.1, z: 0.1 };
+                    var center = LiteMol.Core.Geometry.LinearAlgebra.Vector3.zero();
                     var r = Bootstrap.Utils.Molecule.getCentroidAndRadius(q.model.props.model, q.indices, center);
-                    this.scene.camera.focusOnPoint(center, r);
+                    this.scene.camera.focusOnPoint(LiteMol.Core.Geometry.LinearAlgebra.Vector3.toObj(center), r);
                 };
                 return SceneWrapper;
             }());
@@ -72219,29 +74141,16 @@ var LiteMol;
             })(Style = Visualization.Style || (Visualization.Style = {}));
             var Theme;
             (function (Theme) {
-                function mergeProps(theme, props) {
-                    var colors = theme.colors || Bootstrap.Immutable.Map();
-                    if (props.colors) {
-                        for (var _i = 0, _a = Object.keys(props.colors); _i < _a.length; _i++) {
-                            var c = _a[_i];
-                            colors.set(c, props.colors[c]);
-                        }
-                    }
-                    var ret = Bootstrap.Utils.shallowClone(theme);
-                    ret.colors = colors;
-                    if (props.transparency)
-                        ret.transparency = props.transparency;
-                    if (props.interactive !== void 0)
-                        ret.interactive = props.interactive;
-                    return ret;
-                }
-                Theme.mergeProps = mergeProps;
                 function getProps(theme) {
                     var colors = LiteMol.Core.Utils.FastMap.create();
                     if (theme.colors)
                         theme.colors.forEach(function (c, n) { return colors.set(n, c); });
+                    var variables = LiteMol.Core.Utils.FastMap.create();
+                    if (theme.variables)
+                        theme.variables.forEach(function (c, n) { return variables.set(n, c); });
                     return {
                         colors: colors,
+                        variables: variables,
                         transparency: theme.transparency,
                         interactive: theme.interactive,
                         disableFog: theme.disableFog,
@@ -72288,6 +74197,25 @@ var LiteMol;
                     };
                 }
                 Molecule.createPaletteThemeProvider = createPaletteThemeProvider;
+                function createCachedPaletteThemeProvider(name, provider, pallete) {
+                    return function (e, props) {
+                        var modelE = Bootstrap.Utils.Molecule.findModel(e);
+                        var ctx = modelE.tree && modelE.tree.context;
+                        if (ctx) {
+                            var mapping_1 = ctx.entityCache.get(modelE, 'theme-mapping-' + name);
+                            if (mapping_1) {
+                                return Vis.Theme.createMapping(mapping_1, props);
+                            }
+                        }
+                        var model = modelE.props.model;
+                        var map = provider(model);
+                        var mapping = Vis.Theme.createPalleteMapping(mappingClosure(map.index, map.property), pallete);
+                        if (ctx)
+                            ctx.entityCache.set(e, 'theme-mapping-' + name, mapping);
+                        return Vis.Theme.createMapping(mapping, props);
+                    };
+                }
+                Molecule.createCachedPaletteThemeProvider = createCachedPaletteThemeProvider;
                 function uniformThemeProvider(e, props) {
                     if (props && props.colors) {
                         if (!props.colors.get('Bond') && props.colors.get('Uniform')) {
@@ -72304,13 +74232,33 @@ var LiteMol;
                 Molecule.uniformThemeProvider = uniformThemeProvider;
                 function createColorMapThemeProvider(provider, colorMap, fallbackColor) {
                     return function (e, props) {
-                        var model = Bootstrap.Utils.Molecule.findModel(e).props.model;
+                        var modelE = Bootstrap.Utils.Molecule.findModel(e);
+                        var model = modelE.props.model;
                         var map = provider(model);
                         var mapping = Vis.Theme.createColorMapMapping(mappingClosure(map.index, map.property), colorMap, fallbackColor);
                         return Vis.Theme.createMapping(mapping, props);
                     };
                 }
                 Molecule.createColorMapThemeProvider = createColorMapThemeProvider;
+                function createCachedColorMapThemeProvider(name, provider, colorMap, fallbackColor) {
+                    return function (e, props) {
+                        var modelE = Bootstrap.Utils.Molecule.findModel(e);
+                        var ctx = modelE.tree && modelE.tree.context;
+                        if (ctx) {
+                            var mapping_2 = ctx.entityCache.get(modelE, 'theme-mapping-map-' + name);
+                            if (mapping_2) {
+                                return Vis.Theme.createMapping(mapping_2, props);
+                            }
+                        }
+                        var model = modelE.props.model;
+                        var map = provider(model);
+                        var mapping = Vis.Theme.createColorMapMapping(mappingClosure(map.index, map.property), colorMap, fallbackColor);
+                        if (ctx)
+                            ctx.entityCache.set(e, 'theme-mapping-map-' + name, mapping);
+                        return Vis.Theme.createMapping(mapping, props);
+                    };
+                }
+                Molecule.createCachedColorMapThemeProvider = createCachedColorMapThemeProvider;
                 var RainbowMapping = (function () {
                     function RainbowMapping(model, _a) {
                         var r = _a.r, g = _a.g, b = _a.b;
@@ -72327,7 +74275,7 @@ var LiteMol;
                     };
                     return RainbowMapping;
                 }());
-                var rainbowPalette = [
+                Molecule.RainbowPalette = [
                     Vis.Color.fromHex(0xCC2200),
                     Vis.Color.fromHex(0xCC7700),
                     Vis.Color.fromHex(0xCCAA00),
@@ -72347,7 +74295,7 @@ var LiteMol;
                     var _a = { r: new Float32Array(rC), g: new Float32Array(rC), b: new Float32Array(rC) }, r = _a.r, g = _a.g, b = _a.b;
                     var groups = groupsSource(model);
                     var count = groups.count, residueStartIndex = groups.residueStartIndex, residueEndIndex = groups.residueEndIndex;
-                    var cC = rainbowPalette.length - 1;
+                    var cC = Molecule.RainbowPalette.length - 1;
                     var color = Vis.Color.fromHex(0);
                     var strips = LiteMol.Core.Utils.FastMap.create();
                     for (var cI = 0; cI < count; cI++) {
@@ -72368,7 +74316,7 @@ var LiteMol;
                         for (var i = 0; i < l; i++) {
                             var t = cC * strip.index / max;
                             var low = Math.floor(t), high = Math.ceil(t);
-                            Vis.Color.interpolate(rainbowPalette[low], rainbowPalette[high], t - low, color);
+                            Vis.Color.interpolate(Molecule.RainbowPalette[low], Molecule.RainbowPalette[high], t - low, color);
                             r[s + i] = color.r;
                             g[s + i] = color.g;
                             b[s + i] = color.b;
@@ -72392,7 +74340,7 @@ var LiteMol;
                             name: 'Chain ID',
                             description: 'Color the surface by Chain ID.',
                             colors: Molecule.ModelVisualBaseColors,
-                            provider: createPaletteThemeProvider(function (m) { return ({ index: m.data.atoms.residueIndex, property: m.data.residues.asymId }); }, Vis.Molecule.Colors.DefaultPallete)
+                            provider: createCachedPaletteThemeProvider('chain-id', function (m) { return ({ index: m.data.atoms.residueIndex, property: m.data.residues.asymId }); }, Vis.Molecule.Colors.DefaultPallete)
                         }, {
                             name: 'Entity ID',
                             description: 'Color the surface by Entity ID.',
@@ -72469,11 +74417,12 @@ var LiteMol;
                         vdwScaling: 0.22,
                         atomRadius: 0.35,
                         bondRadius: 0.09,
+                        hideHydrogens: false,
                         customMaxBondLengths: void 0,
                         detail: 'Automatic'
                     };
                     Default.SurfaceParams = {
-                        probeRadius: 1.4,
+                        probeRadius: 0.4,
                         automaticDensity: true,
                         density: 1.1,
                         smoothing: 10,
@@ -72531,16 +74480,16 @@ var LiteMol;
                     var d = Molecule.DetailTypes.indexOf(type) - 1;
                     return Math.max(d, 0);
                 }
-                function getSurfaceDensity(params, count) {
+                function getSurfaceDensity(params, model, indices) {
                     if (!!params.automaticDensity) {
-                        if (count < 1000)
+                        var _a = Bootstrap.Utils.Molecule.getBox(model, indices, 0), bottomLeft = _a.bottomLeft, topRight = _a.topRight;
+                        var box = LiteMol.Core.Geometry.LinearAlgebra.Vector3.sub(topRight, topRight, bottomLeft);
+                        var density = Math.pow(((Math.pow(99, 3)) / (box[0] * box[1] * box[2])), (1 / 3));
+                        if (density > 1.2)
                             return 1.2;
-                        if (count < 2500000) {
-                            // scale from 1000 to 2.5m so that f(1000)=1.2, f(100k)=0.75, f(2.5m) = 0.1
-                            var a = -0.18610, b = 0.025298, c = 1.3608;
-                            return a * Math.pow(count / 1000, 1 / 3) + b * Math.sqrt(count / 1000) + c;
-                        }
-                        return 0.1;
+                        if (density < 0.1)
+                            return 0.1;
+                        return density;
                     }
                     if (params.density !== void 0)
                         return +params.density;
@@ -72582,6 +74531,7 @@ var LiteMol;
                         tessalation: tessalation,
                         bondRadius: parameters.bondRadius,
                         hideBonds: false,
+                        hideHydrogens: !!parameters.hideHydrogens,
                         atomRadius: makeRadiusFunc(model, parameters),
                         customMaxBondLengths: customMaxBondLengths
                     };
@@ -72652,7 +74602,7 @@ var LiteMol;
                                             atomIndices: atomIndices,
                                             parameters: {
                                                 atomRadius: Bootstrap.Utils.vdwRadiusFromElementSymbol(model),
-                                                density: getSurfaceDensity(params, atomIndices.length),
+                                                density: getSurfaceDensity(params, model, atomIndices),
                                                 probeRadius: params.probeRadius,
                                                 smoothingIterations: params.smoothing,
                                                 interactive: true
@@ -72680,6 +74630,157 @@ var LiteMol;
                 }
                 Molecule.create = create;
             })(Molecule = Visualization.Molecule || (Visualization.Molecule = {}));
+        })(Visualization = Bootstrap.Visualization || (Bootstrap.Visualization = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Visualization;
+        (function (Visualization) {
+            var Labels;
+            (function (Labels) {
+                "use strict";
+                function createMoleculeLabels(parent, transform, style) {
+                    var _this = this;
+                    return Bootstrap.Task.create('Labels', 'Background', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        var params, theme, labelsParams, model;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    params = style.params;
+                                    theme = style.theme.template.provider(parent, Visualization.Theme.getProps(style.theme));
+                                    labelsParams = Bootstrap.Utils.Molecule.create3DLabelsParams(parent, params, theme);
+                                    return [4 /*yield*/, ctx.updateProgress('Creating labels...')];
+                                case 1:
+                                    _a.sent();
+                                    return [4 /*yield*/, LiteMol.Visualization.Labels.Model.create(parent, labelsParams).run(ctx)];
+                                case 2:
+                                    model = _a.sent();
+                                    return [2 /*return*/, Bootstrap.Entity.Visual.Labels.create(transform, { label: 'Labels', model: model, style: style, isSelectable: false })];
+                            }
+                        });
+                    }); });
+                }
+                Labels.createMoleculeLabels = createMoleculeLabels;
+                function createGenericLabels(parent, transform, params) {
+                    var _this = this;
+                    return Bootstrap.Task.create('Labels', 'Background', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                        var theme, labelsParams, model;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, ctx.updateProgress('Creating labels...')];
+                                case 1:
+                                    _a.sent();
+                                    theme = params.style.theme.template.provider(parent, Visualization.Theme.getProps(params.style.theme));
+                                    labelsParams = {
+                                        positions: params.positions,
+                                        sizes: params.sizes,
+                                        labels: params.labels,
+                                        options: params.options,
+                                        theme: theme
+                                    };
+                                    return [4 /*yield*/, LiteMol.Visualization.Labels.Model.create(parent, labelsParams).run(ctx)];
+                                case 2:
+                                    model = _a.sent();
+                                    return [2 /*return*/, Bootstrap.Entity.Visual.Labels.create(transform, { label: 'Labels', model: model, style: params.style, isSelectable: false })];
+                            }
+                        });
+                    }); });
+                }
+                Labels.createGenericLabels = createGenericLabels;
+            })(Labels = Visualization.Labels || (Visualization.Labels = {}));
+        })(Visualization = Bootstrap.Visualization || (Bootstrap.Visualization = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Visualization;
+        (function (Visualization) {
+            var Labels;
+            (function (Labels) {
+                "use strict";
+                var Style;
+                (function (Style) {
+                    function moleculeHasOnlyThemeChanged(oldS, newS) {
+                        return Bootstrap.Utils.deepEqual(oldS.params, newS.params);
+                    }
+                    Style.moleculeHasOnlyThemeChanged = moleculeHasOnlyThemeChanged;
+                    function createMoleculeStyle(params) {
+                        return {
+                            type: 'Labels',
+                            params: {
+                                kind: params.kind,
+                                labelsOptions: params.labelsOptions ? params.labelsOptions : Default.MoleculeLabels.params.labelsOptions
+                            },
+                            theme: params.theme ? params.theme : Default.MoleculeLabels.theme,
+                        };
+                    }
+                    Style.createMoleculeStyle = createMoleculeStyle;
+                })(Style = Labels.Style || (Labels.Style = {}));
+                var Default;
+                (function (Default) {
+                    var Vis = LiteMol.Visualization;
+                    var uniformColors = Bootstrap.Immutable.Map({
+                        'Uniform': Vis.Color.fromHexString('#eaeaea'),
+                        'Background': Vis.Color.fromHexString('#777777'),
+                        'Outline': Vis.Color.fromHexString('#333333')
+                    });
+                    var uniformVariables = Bootstrap.Immutable.Map({
+                        'xOffset': 0.0,
+                        'yOffset': 0.0,
+                        'zOffset': 0.6,
+                        'sizeFactor': 1.5,
+                        'backgroundOpacity': 0.0,
+                        'outlineWidth': 0.1
+                    });
+                    function uniformThemeProvider(e, props) {
+                        return Vis.Theme.createUniform(props);
+                    }
+                    var Themes = [{
+                            name: 'Uniform Color',
+                            description: 'Same color everywhere.',
+                            colors: uniformColors,
+                            variables: uniformVariables,
+                            provider: uniformThemeProvider
+                        }
+                    ];
+                    var Transparency = { alpha: 1.0, writeDepth: false };
+                    Default.Theme = Themes[0];
+                    Default.MoleculeLabels = {
+                        type: 'Labels',
+                        params: {
+                            kind: 'Residue-Full-Id',
+                            labelsOptions: Vis.Labels.DefaultLabelsOptions
+                        },
+                        theme: {
+                            template: Default.Theme,
+                            colors: Default.Theme.colors,
+                            variables: Default.Theme.variables,
+                            transparency: Transparency, interactive: false, disableFog: false
+                        }
+                    };
+                    Default.GenericLabels = {
+                        type: 'Labels',
+                        params: Vis.Labels.DefaultLabelsOptions,
+                        theme: {
+                            template: Default.Theme,
+                            colors: Default.Theme.colors,
+                            variables: Default.Theme.variables,
+                            transparency: Transparency, interactive: false, disableFog: false
+                        }
+                    };
+                })(Default = Labels.Default || (Labels.Default = {}));
+            })(Labels = Visualization.Labels || (Visualization.Labels = {}));
         })(Visualization = Bootstrap.Visualization || (Bootstrap.Visualization = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
@@ -72827,7 +74928,7 @@ var LiteMol;
                     function create(params) {
                         var colors = Default.Theme.colors.set('Uniform', params.color);
                         return {
-                            type: {},
+                            type: 'Density',
                             taskType: params.taskType,
                             params: { isoValue: params.isoValue, isoValueType: params.isoValueType, smoothing: 1, isWireframe: !!params.isWireframe },
                             theme: { template: Default.Theme, colors: colors, transparency: params.transparency ? params.transparency : Default.Transparency, interactive: false, disableFog: !!params.disableFog }
@@ -73075,6 +75176,7 @@ var LiteMol;
             var Visual;
             (function (Visual) {
                 Visual.Surface = Entity.create({ name: 'Surface Visual', typeClass: 'Visual', shortName: 'V_S', description: 'A surface visual.' }, { isFocusable: true });
+                Visual.Labels = Entity.create({ name: 'Labels Visual', typeClass: 'Visual', shortName: 'V_L', description: '3D labels.' }, { isFocusable: false });
             })(Visual = Entity.Visual || (Entity.Visual = {}));
             /* Molecule */
             var Molecule;
@@ -73157,6 +75259,7 @@ var LiteMol;
                 var Basic;
                 (function (Basic) {
                     "use strict";
+                    var _this = this;
                     var Transformer = Bootstrap.Tree.Transformer;
                     Basic.Root = Transformer.create({
                         id: 'root',
@@ -73207,6 +75310,41 @@ var LiteMol;
                     }, function (ctx, a, t) {
                         return Bootstrap.Task.create('Delay', 'Silent', function (ctx) { return new LiteMol.Promise(function (res) {
                             setTimeout(function () { return res(Bootstrap.Tree.Node.Null); }, t.params.timeoutMs);
+                        }); });
+                    });
+                    Basic.CreateSurfaceVisual = Bootstrap.Tree.Transformer.create({
+                        id: 'basic-create-surface-visual',
+                        name: 'Create Surface Visual',
+                        description: 'Create generic surface visual.',
+                        from: [],
+                        to: [Bootstrap.Entity.Visual.Surface],
+                        defaultParams: function () { return void 0; },
+                        isUpdatable: false
+                    }, function (context, a, t) {
+                        var theme = t.params.theme;
+                        var style = {
+                            type: 'Surface',
+                            taskType: t.params.taskType || 'Silent',
+                            isNotSelectable: !!t.params.isNotInteractive,
+                            params: {},
+                            theme: void 0
+                        };
+                        return Bootstrap.Task.create("Create Surface Visual", t.params.taskType || 'Silent', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                            var model;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, LiteMol.Visualization.Surface.Model.create(a, { surface: t.params.surface, theme: theme, parameters: { isWireframe: t.params.isWireframe } }).run(ctx)];
+                                    case 1:
+                                        model = _a.sent();
+                                        return [2 /*return*/, Bootstrap.Entity.Visual.Surface.create(t, {
+                                                label: t.params.label || 'Surface',
+                                                model: model,
+                                                style: style,
+                                                isSelectable: !t.params.isNotInteractive,
+                                                tag: t.params.tag
+                                            })];
+                                }
+                            });
                         }); });
                     });
                 })(Basic = Transformer_1.Basic || (Transformer_1.Basic = {}));
@@ -73382,7 +75520,7 @@ var LiteMol;
                         id: 'molecule-create-selection',
                         name: 'Selection',
                         description: 'Create an atom selection.',
-                        from: [Entity.Molecule.Model, Entity.Molecule.Visual],
+                        from: [Entity.Molecule.Selection, Entity.Molecule.Model, Entity.Molecule.Visual],
                         to: [Entity.Molecule.Selection],
                         defaultParams: function (ctx) { return void 0; },
                     }, function (ctx, a, t) {
@@ -73504,13 +75642,11 @@ var LiteMol;
                                     case 1:
                                         _a.sent();
                                         m = a.props.model;
-                                        tCtx = { t: t.params.transform, v: { x: 0, y: 0, z: 0 } };
+                                        tCtx = { t: t.params.transform, v: LiteMol.Core.Geometry.LinearAlgebra.Vector3.zero() };
                                         transformed = LiteMol.Core.Structure.Molecule.Model.withTransformedXYZ(m, tCtx, function (ctx, x, y, z, out) {
                                             var v = ctx.v;
-                                            v.x = x;
-                                            v.y = y;
-                                            v.z = z;
-                                            LiteMol.Core.Geometry.LinearAlgebra.Matrix4.transformVector3(out, v, ctx.t);
+                                            LiteMol.Core.Geometry.LinearAlgebra.Vector3.set(v, x, y, z);
+                                            LiteMol.Core.Geometry.LinearAlgebra.Vector3.transformMat4(out, v, ctx.t);
                                         });
                                         return [2 /*return*/, Entity.Molecule.Model.create(t, {
                                                 label: a.props.label,
@@ -73555,19 +75691,19 @@ var LiteMol;
                         id: 'molecule-create-macromolecule-visual',
                         name: 'Macromolecule Visual',
                         description: 'Create a visual of a molecule that is split into polymer, HET, and water parts.',
-                        from: [Entity.Molecule.Model],
+                        from: [Entity.Molecule.Selection, Entity.Molecule.Model],
                         to: [Entity.Action],
                         validateParams: function (p) { return !p.polymer && !p.het && !p.water ? ['Select at least one component'] : void 0; },
                         defaultParams: function (ctx) { return ({ polymer: true, het: true, water: true }); },
                     }, function (context, a, t) {
                         var g = Bootstrap.Tree.Transform.build().add(a, Transformer.Basic.CreateGroup, { label: 'Group', description: 'Macromolecule' }, { ref: t.params.groupRef });
                         if (t.params.polymer) {
-                            var polymer = g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.nonHetPolymer(), name: 'Polymer', silent: true }, { isBinding: true });
-                            polymer.then(Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('Cartoons') }, { ref: t.params.polymerRef });
+                            g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.nonHetPolymer(), name: 'Polymer', silent: true }, { isBinding: true })
+                                .then(Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('Cartoons') }, { ref: t.params.polymerRef });
                         }
                         if (t.params.het) {
-                            var het = g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true });
-                            het.then(Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: t.params.hetRef });
+                            g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true })
+                                .then(Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: t.params.hetRef });
                         }
                         if (t.params.water) {
                             var style = {
@@ -73575,12 +75711,86 @@ var LiteMol;
                                 params: { useVDW: false, atomRadius: 0.23, bondRadius: 0.09, detail: 'Automatic' },
                                 theme: { template: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate, colors: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate.colors, transparency: { alpha: 0.25 } }
                             };
-                            var water = g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true });
-                            water.then(Molecule.CreateVisual, { style: style }, { ref: t.params.waterRef });
+                            g.then(Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true })
+                                .then(Molecule.CreateVisual, { style: style }, { ref: t.params.waterRef });
                         }
                         return g;
                     });
+                    Molecule.CreateLabels = Bootstrap.Tree.Transformer.create({
+                        id: 'molecule-create-labels',
+                        name: 'Labels',
+                        description: 'Create a labels for a molecule or a selection.',
+                        from: [Entity.Molecule.Model, Entity.Molecule.Selection, Entity.Molecule.Visual],
+                        to: [Entity.Visual.Labels],
+                        isUpdatable: true,
+                        defaultParams: function (ctx) { return ({ style: Bootstrap.Visualization.Labels.Default.MoleculeLabels }); },
+                        validateParams: function (p) { return !p.style ? ['Specify Style'] : void 0; },
+                        customController: function (ctx, t, e) { return new Bootstrap.Components.Transform.MoleculeLabels(ctx, t, e); }
+                    }, function (ctx, a, t) {
+                        var params = t.params;
+                        return Bootstrap.Visualization.Labels.createMoleculeLabels(a, t, params.style).setReportTime(false);
+                    }, function (ctx, b, t) {
+                        var oldParams = b.transform.params;
+                        var newParams = t.params;
+                        if (!Bootstrap.Visualization.Labels.Style.moleculeHasOnlyThemeChanged(oldParams.style, newParams.style))
+                            return void 0;
+                        var model = b.props.model;
+                        var a = Bootstrap.Tree.Node.findClosestNodeOfType(b, [Entity.Molecule.Model, Entity.Molecule.Selection, Entity.Molecule.Visual]);
+                        if (!a)
+                            return void 0;
+                        var theme = newParams.style.theme.template.provider(a, Bootstrap.Visualization.Theme.getProps(newParams.style.theme));
+                        model.applyTheme(theme);
+                        Entity.nodeUpdated(b);
+                        return Bootstrap.Task.resolve(t.transformer.info.name, 'Background', Bootstrap.Tree.Node.Null);
+                    });
                 })(Molecule = Transformer.Molecule || (Transformer.Molecule = {}));
+            })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
+        })(Entity = Bootstrap.Entity || (Bootstrap.Entity = {}));
+    })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Bootstrap;
+    (function (Bootstrap) {
+        var Entity;
+        (function (Entity) {
+            var Transformer;
+            (function (Transformer) {
+                var Labels;
+                (function (Labels) {
+                    Labels.Create = Bootstrap.Tree.Transformer.create({
+                        id: 'labels-create',
+                        name: 'Labels',
+                        description: 'Create a labels for a molecule or a selection.',
+                        from: [],
+                        to: [Entity.Visual.Labels],
+                        isUpdatable: false,
+                        defaultParams: function (ctx) { return ({}); },
+                        customController: function (ctx, t, e) { return new Bootstrap.Components.Transform.MoleculeLabels(ctx, t, e); }
+                    }, function (ctx, a, t) {
+                        return Bootstrap.Visualization.Labels.createGenericLabels(a, t, t.params).setReportTime(false);
+                    }, function (ctx, b, t) {
+                        var oldParams = b.transform.params;
+                        var newParams = t.params;
+                        if (oldParams.positions !== newParams.positions
+                            || oldParams.sizes !== newParams.sizes
+                            || oldParams.labels !== newParams.labels
+                            || oldParams.options !== newParams.options) {
+                            return void 0;
+                        }
+                        var model = b.props.model;
+                        var a = Bootstrap.Tree.Node.findClosestNodeOfType(b, [Entity.Root]);
+                        if (!a)
+                            return void 0;
+                        var theme = newParams.style.theme.template.provider(a, Bootstrap.Visualization.Theme.getProps(newParams.style.theme));
+                        model.applyTheme(theme);
+                        Entity.nodeUpdated(b);
+                        return Bootstrap.Task.resolve(t.transformer.info.name, 'Background', Bootstrap.Tree.Node.Null);
+                    });
+                })(Labels = Transformer.Labels || (Transformer.Labels = {}));
             })(Transformer = Entity.Transformer || (Entity.Transformer = {}));
         })(Entity = Bootstrap.Entity || (Bootstrap.Entity = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
@@ -73960,7 +76170,7 @@ var LiteMol;
                                 return __generator(this, function (_a) {
                                     cif = LiteMol.Core.Formats.CIF.Binary.parse(t.params.data);
                                     if (cif.isError)
-                                        return [2 /*return*/];
+                                        throw new Error('Invalid CIF.');
                                     model = LiteMol.Core.Formats.Molecule.mmCIF.ofDataBlock(cif.result.dataBlocks[0]).models[0];
                                     if (t.params.transform)
                                         LiteMol.Core.Structure.Operator.applyToModelUnsafe(t.params.transform, model);
@@ -74002,6 +76212,8 @@ var LiteMol;
             var Molecule;
             (function (Molecule) {
                 "use strict";
+                var Geometry = LiteMol.Core.Geometry;
+                var LA = Geometry.LinearAlgebra;
                 var __model = [Bootstrap.Entity.Molecule.Model];
                 function findModel(entity) {
                     return Bootstrap.Tree.Node.findClosestNodeOfType(entity, __model);
@@ -74137,29 +76349,86 @@ var LiteMol;
                 }());
                 Molecule.CentroidHelper = CentroidHelper;
                 function getCentroidAndRadius(m, indices, into) {
-                    into.x = 0;
-                    into.y = 0;
-                    into.z = 0;
+                    LA.Vector3.set(into, 0, 0, 0);
                     var _a = m.positions, x = _a.x, y = _a.y, z = _a.z;
-                    for (var _i = 0, indices_10 = indices; _i < indices_10.length; _i++) {
-                        var i = indices_10[_i];
-                        into.x += x[i];
-                        into.y += y[i];
-                        into.z += z[i];
+                    if (indices.length === 0)
+                        return 0;
+                    if (indices.length === 1) {
+                        LA.Vector3.set(into, x[indices[0]], y[indices[0]], z[indices[0]]);
+                        return 0;
+                    }
+                    for (var _i = 0, indices_12 = indices; _i < indices_12.length; _i++) {
+                        var i = indices_12[_i];
+                        into[0] += x[i];
+                        into[1] += y[i];
+                        into[2] += z[i];
                     }
                     var c = indices.length;
-                    into.x /= c;
-                    into.y /= c;
-                    into.z /= c;
+                    into[0] /= c;
+                    into[1] /= c;
+                    into[2] /= c;
                     var radius = 0;
-                    for (var _c = 0, indices_11 = indices; _c < indices_11.length; _c++) {
-                        var i = indices_11[_c];
-                        var dx = into.x - x[i], dy = into.y - y[i], dz = into.z - z[i];
+                    for (var _c = 0, indices_13 = indices; _c < indices_13.length; _c++) {
+                        var i = indices_13[_c];
+                        var dx = into[0] - x[i], dy = into[1] - y[i], dz = into[2] - z[i];
                         radius = Math.max(radius, dx * dx + dy * dy + dz * dz);
                     }
                     return Math.sqrt(radius);
                 }
                 Molecule.getCentroidAndRadius = getCentroidAndRadius;
+                Molecule.Labels3DKinds = ['Residue-Name', 'Residue-Full-Id', 'Atom-Name', 'Atom-Element'];
+                Molecule.Labels3DKindLabels = {
+                    'Residue-Name': 'Residue Name',
+                    'Residue-Full-Id': 'Residue Full Id',
+                    'Atom-Name': 'Atom Name',
+                    'Atom-Element': 'Atom Element'
+                };
+                function labelProvider(options, model) {
+                    var _a = model.data.atoms, residueIndex = _a.residueIndex, chainIndex = _a.chainIndex, name = _a.name, elementSymbol = _a.elementSymbol;
+                    var _c = model.data.residues, residueName = _c.name, seqNumber = _c.seqNumber;
+                    var authAsymId = model.data.chains.authAsymId;
+                    switch (options.kind) {
+                        case 'Residue-Name': return function (i) { return residueName[residueIndex[i]]; };
+                        case 'Residue-Full-Id': return function (i) {
+                            var r = residueIndex[i], c = chainIndex[i];
+                            return residueName[r] + " " + authAsymId[c] + " " + seqNumber[r];
+                        };
+                        case 'Atom-Name': return function (i) { return name[i]; };
+                        case 'Atom-Element': return function (i) { return elementSymbol[i]; };
+                        default: return function (i) { return "" + i; };
+                    }
+                }
+                function create3DLabelsParams(entity, options, theme) {
+                    var ctx = findQueryContext(entity);
+                    var query = options.kind.indexOf('Residue') >= 0 ? LiteMol.Core.Structure.Query.residues() : LiteMol.Core.Structure.Query.allAtoms();
+                    var fs = query.compile()(ctx);
+                    var label = labelProvider(options, ctx.structure);
+                    var positions = LiteMol.Core.Utils.DataTable.ofDefinition(LiteMol.Core.Structure.Tables.Positions, fs.length);
+                    var x = positions.x, y = positions.y, z = positions.z;
+                    var labels = [];
+                    var sizes = new Float32Array(fs.length);
+                    var center = LA.Vector3.zero();
+                    var i = 0;
+                    for (var _i = 0, _a = fs.fragments; _i < _a.length; _i++) {
+                        var f = _a[_i];
+                        var l = label(f.atomIndices[0]);
+                        getCentroidAndRadius(ctx.structure, f.atomIndices, center);
+                        x[i] = center[0];
+                        y[i] = center[1];
+                        z[i] = center[2];
+                        labels[labels.length] = l;
+                        sizes[i] = 1.0;
+                        i++;
+                    }
+                    return {
+                        labels: labels,
+                        options: options.labelsOptions,
+                        positions: positions,
+                        sizes: sizes,
+                        theme: theme
+                    };
+                }
+                Molecule.create3DLabelsParams = create3DLabelsParams;
             })(Molecule = Utils.Molecule || (Utils.Molecule = {}));
         })(Utils = Bootstrap.Utils || (Bootstrap.Utils = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
@@ -74296,7 +76565,7 @@ var LiteMol;
                 });
             }
             Behaviour.UnselectElementOnRepeatedClick = UnselectElementOnRepeatedClick;
-            var center = { x: 0, y: 0, z: 0 };
+            var center = LiteMol.Core.Geometry.LinearAlgebra.Vector3.zero();
             function updateCameraModel(context, info) {
                 var model = Bootstrap.Utils.Molecule.findModel(info.source).props.model;
                 if (!model)
@@ -74308,11 +76577,11 @@ var LiteMol;
                 var radius = Bootstrap.Utils.Molecule.getCentroidAndRadius(model, elems, center);
                 if (info.elements.length === 1) {
                     var a = info.elements[0];
-                    center.x = model.positions.x[a];
-                    center.y = model.positions.y[a];
-                    center.z = model.positions.z[a];
+                    center[0] = model.positions.x[a];
+                    center[1] = model.positions.y[a];
+                    center[2] = model.positions.z[a];
                 }
-                context.scene.camera.focusOnPoint(center, Math.max(radius, 7));
+                context.scene.camera.focusOnPoint(LiteMol.Core.Geometry.LinearAlgebra.Vector3.toObj(center), Math.max(radius, 7));
             }
             function updateCameraVisual(context, info) {
                 if (Bootstrap.Interactivity.isEmpty(info) || info.source.type.info.typeClass !== 'Visual')
@@ -74323,7 +76592,7 @@ var LiteMol;
                     return;
                 var bs = m.getBoundingSphereOfSelection(info.elements);
                 if (bs) {
-                    context.scene.camera.focusOnPoint(bs.center, Math.max(bs.radius, 7));
+                    context.scene.camera.focusOnPoint(LiteMol.Core.Geometry.LinearAlgebra.Vector3.toObj(bs.center), Math.max(bs.radius, 7));
                 }
                 else {
                     context.scene.camera.focusOnModel(m);
@@ -75201,12 +77470,12 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var MoleculeVisual = (function (_super) {
-                    __extends(MoleculeVisual, _super);
-                    function MoleculeVisual() {
+                var VisualStyle = (function (_super) {
+                    __extends(VisualStyle, _super);
+                    function VisualStyle() {
                         return _super !== null && _super.apply(this, arguments) || this;
                     }
-                    MoleculeVisual.prototype.updateTemplate = function (key, all) {
+                    VisualStyle.prototype.updateTemplate = function (key, all) {
                         var s = all.get(key);
                         var latestTheme = this.latestState && this.latestState.params.style.theme;
                         var params = s.params;
@@ -75214,17 +77483,17 @@ var LiteMol;
                         var style = { type: s.type, params: params, theme: theme };
                         this.autoUpdateParams({ style: style });
                     };
-                    MoleculeVisual.prototype.updateStyleParams = function (params) {
+                    VisualStyle.prototype.updateStyleParams = function (params) {
                         var s = Bootstrap.Utils.shallowClone(this.latestState.params.style);
                         s.params = Bootstrap.Utils.merge(s.params, params);
                         this.autoUpdateParams({ style: s });
                     };
-                    MoleculeVisual.prototype.updateStyleTheme = function (theme) {
+                    VisualStyle.prototype.updateStyleTheme = function (theme) {
                         var s = Bootstrap.Utils.shallowClone(this.latestState.params.style);
                         s.theme = Bootstrap.Utils.merge(s.theme, theme);
                         this.autoUpdateParams({ style: s });
                     };
-                    MoleculeVisual.prototype.updateThemeColor = function (name, value) {
+                    VisualStyle.prototype.updateThemeColor = function (name, value) {
                         var oldTheme = this.latestState.params.style.theme;
                         if (!oldTheme)
                             return;
@@ -75234,13 +77503,23 @@ var LiteMol;
                         colors = colors.set(name, value);
                         this.updateStyleTheme({ colors: colors });
                     };
-                    MoleculeVisual.prototype.updateThemeTransparency = function (transparency) {
+                    VisualStyle.prototype.updateThemeVariable = function (name, value) {
+                        var oldTheme = this.latestState.params.style.theme;
+                        if (!oldTheme)
+                            return;
+                        var variables = oldTheme.variables;
+                        if (!variables)
+                            variables = Bootstrap.Immutable.Map();
+                        variables = variables.set(name, value);
+                        this.updateStyleTheme({ variables: variables });
+                    };
+                    VisualStyle.prototype.updateThemeTransparency = function (transparency) {
                         var oldTheme = this.latestState.params.style.theme;
                         if (!oldTheme)
                             return;
                         this.updateStyleTheme({ transparency: transparency });
                     };
-                    MoleculeVisual.prototype.getThemeInstance = function (template) {
+                    VisualStyle.prototype.getThemeInstance = function (template) {
                         var oldTheme = this.latestState.params.style.theme;
                         var defaultTransparency = Bootstrap.Visualization.Molecule.Default.ForType.get(this.latestState.params.style.type).theme.transparency;
                         if (!oldTheme)
@@ -75254,15 +77533,48 @@ var LiteMol;
                                 });
                             });
                         }
+                        var variables = template.variables;
+                        if (oldTheme.variables && variables) {
+                            variables = variables.withMutations(function (map) {
+                                oldTheme.variables.forEach(function (c, n) {
+                                    if (map.has(n))
+                                        map.set(n, c);
+                                });
+                            });
+                        }
                         var transparency = oldTheme.transparency ? oldTheme.transparency : defaultTransparency;
-                        return { template: template, colors: colors, transparency: transparency };
+                        return { template: template, colors: colors, variables: variables, transparency: transparency };
                     };
-                    MoleculeVisual.prototype.updateThemeDefinition = function (definition) {
+                    VisualStyle.prototype.updateThemeDefinition = function (definition) {
                         this.updateStyleTheme(this.getThemeInstance(definition));
                     };
-                    return MoleculeVisual;
+                    return VisualStyle;
                 }(Transform.Controller));
+                Transform.VisualStyle = VisualStyle;
+                var MoleculeVisual = (function (_super) {
+                    __extends(MoleculeVisual, _super);
+                    function MoleculeVisual() {
+                        return _super !== null && _super.apply(this, arguments) || this;
+                    }
+                    return MoleculeVisual;
+                }(VisualStyle));
                 Transform.MoleculeVisual = MoleculeVisual;
+                var MoleculeLabels = (function (_super) {
+                    __extends(MoleculeLabels, _super);
+                    function MoleculeLabels() {
+                        return _super !== null && _super.apply(this, arguments) || this;
+                    }
+                    return MoleculeLabels;
+                }(VisualStyle));
+                Transform.MoleculeLabels = MoleculeLabels;
+                var GenericLabels = (function (_super) {
+                    __extends(GenericLabels, _super);
+                    function GenericLabels() {
+                        return _super !== null && _super.apply(this, arguments) || this;
+                    }
+                    return GenericLabels;
+                }(VisualStyle));
+                Transform.GenericLabels = GenericLabels;
                 var DensityVisual = (function (_super) {
                     __extends(DensityVisual, _super);
                     function DensityVisual() {
@@ -75938,7 +78250,7 @@ var LiteMol;
 (function (LiteMol) {
     var Plugin;
     (function (Plugin) {
-        Plugin.VERSION = { number: "1.3.2", date: "March 6 2017" };
+        Plugin.VERSION = { number: "1.3.3", date: "June 18 2017" };
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -75950,6 +78262,7 @@ var LiteMol;
     (function (Plugin) {
         "use strict";
         Plugin.React = __LiteMolReact;
+        //declare var __LiteMolReactDOM: typeof __LiteMolReact.__DOM;
         Plugin.ReactDOM = __LiteMolReactDOM;
         var Controls;
         (function (Controls) {
@@ -76096,7 +78409,7 @@ var LiteMol;
                             _this.current = _this.get(+e.target.value);
                             _this.props.onChange(_this.current);
                         } }, this.props.options.map(function (o, i) {
-                        return Plugin.React.createElement("option", { key: i, value: "" + i, selected: i === idx }, cap(o));
+                        return Plugin.React.createElement("option", { key: i, value: "" + i }, cap(o));
                     }));
                 };
                 return OptionsBox;
@@ -76748,28 +79061,28 @@ var LiteMol;
                         children));
                     var _c;
                 };
+                SliderBase.defaultProps = {
+                    prefixCls: 'lm-slider-base',
+                    className: '',
+                    min: 0,
+                    max: 100,
+                    step: 1,
+                    marks: {},
+                    handle: Plugin.React.createElement(Handle, { className: '', vertical: false, offset: 0, tipFormatter: function (v) { return v; }, value: 0, index: 0 }),
+                    onBeforeChange: noop,
+                    onChange: noop,
+                    onAfterChange: noop,
+                    tipFormatter: function (value, index) { return value; },
+                    included: true,
+                    disabled: false,
+                    dots: false,
+                    range: false,
+                    vertical: false,
+                    allowCross: true,
+                    pushable: false,
+                };
                 return SliderBase;
             }(Plugin.React.Component));
-            SliderBase.defaultProps = {
-                prefixCls: 'lm-slider-base',
-                className: '',
-                min: 0,
-                max: 100,
-                step: 1,
-                marks: {},
-                handle: Plugin.React.createElement(Handle, { className: '', vertical: false, offset: 0, tipFormatter: function (v) { return v; }, value: 0, index: 0 }),
-                onBeforeChange: noop,
-                onChange: noop,
-                onAfterChange: noop,
-                tipFormatter: function (value, index) { return value; },
-                included: true,
-                disabled: false,
-                dots: false,
-                range: false,
-                vertical: false,
-                allowCross: true,
-                pushable: false,
-            };
             Controls.SliderBase = SliderBase;
             var Marks = function (_a) {
                 var className = _a.className, vertical = _a.vertical, marks = _a.marks, included = _a.included, upperBound = _a.upperBound, lowerBound = _a.lowerBound, max = _a.max, min = _a.min;
@@ -77062,17 +79375,17 @@ var LiteMol;
                 function Layout() {
                     return _super !== null && _super.apply(this, arguments) || this;
                 }
-                Layout.prototype.renderTarget = function (target) {
+                Layout.prototype.renderTarget = function (name, target) {
                     var statics = [];
                     var scrollable = [];
                     for (var _i = 0, _a = target.components; _i < _a.length; _i++) {
                         var c = _a[_i];
                         if (c.isStatic)
-                            statics.push(Plugin.React.createElement(c.view, { controller: c.controller }));
+                            statics.push(Plugin.React.createElement(c.view, { key: c.key, controller: c.controller }));
                         else
-                            scrollable.push(Plugin.React.createElement(c.view, { controller: c.controller }));
+                            scrollable.push(Plugin.React.createElement(c.view, { key: c.key, controller: c.controller }));
                     }
-                    return Plugin.React.createElement("div", { className: 'lm-layout-region lm-layout-' + target.cssClass },
+                    return Plugin.React.createElement("div", { key: "layout-target-" + name, className: 'lm-layout-region lm-layout-' + target.cssClass },
                         statics.length ? Plugin.React.createElement("div", { className: 'lm-layout-static' }, statics) : void 0,
                         scrollable.length ? Plugin.React.createElement("div", { className: 'lm-layout-scrollable' }, scrollable) : void 0);
                 };
@@ -77091,7 +79404,7 @@ var LiteMol;
                         show = region.components.length > 0;
                     }
                     if (show) {
-                        layout.regions.push(this.renderTarget(region));
+                        layout.regions.push(this.renderTarget(name, region));
                     }
                     else {
                         layout.layoutClass += ' lm-layout-hide-' + name;
@@ -77122,14 +79435,14 @@ var LiteMol;
                         }
                     }
                     var targets = this.controller.targets;
-                    var regions = [this.renderTarget(targets[LayoutRegion.Main])];
+                    var regions = [this.renderTarget('main', targets[LayoutRegion.Main])];
                     var layout = { regions: regions, layoutClass: layoutClass };
                     this.updateTarget('top', LayoutRegion.Top, layout);
                     this.updateTarget('right', LayoutRegion.Right, layout);
                     this.updateTarget('bottom', LayoutRegion.Bottom, layout);
                     this.updateTarget('left', LayoutRegion.Left, layout);
                     layoutClass = layout.layoutClass;
-                    var root = targets[LayoutRegion.Root].components.map(function (c) { return Plugin.React.createElement(c.view, { controller: c.controller }); });
+                    var root = targets[LayoutRegion.Root].components.map(function (c) { return Plugin.React.createElement(c.view, { key: c.key, controller: c.controller }); });
                     return Plugin.React.createElement("div", { className: 'lm-plugin' },
                         Plugin.React.createElement("div", { className: 'lm-plugin-content ' + layoutType },
                             Plugin.React.createElement("div", { className: layoutClass },
@@ -77600,30 +79913,33 @@ var LiteMol;
                             var _this = this;
                             var p = this.params.style.params;
                             var controls = [];
+                            var key = 0;
                             controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, { title: 'Scale atoms using their VDW radius.', onChange: function (v) { return _this.controller.updateStyleParams({ useVDW: v }); }, value: p.useVDW, label: 'VDW' }));
                             if (p.useVDW) {
-                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Scale', onChange: function (v) { return _this.controller.updateStyleParams({ vdwScaling: v }); }, min: 0.1, max: 1, step: 0.01, value: p.vdwScaling, title: 'VDW scale factor.' }));
+                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Scale', onChange: function (v) { return _this.controller.updateStyleParams({ vdwScaling: v }); }, min: 0.1, max: 1, step: 0.01, value: p.vdwScaling, title: 'VDW scale factor.' }));
                             }
                             else {
-                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Atom Rds', onChange: function (v) { return _this.controller.updateStyleParams({ atomRadius: v }); }, min: 0.05, max: 2, step: 0.01, value: p.atomRadius, title: 'Atom Radius' }));
+                                controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Atom Rds', onChange: function (v) { return _this.controller.updateStyleParams({ atomRadius: v }); }, min: 0.05, max: 2, step: 0.01, value: p.atomRadius, title: 'Atom Radius' }));
                             }
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Bond Rds', onChange: function (v) { return _this.controller.updateStyleParams({ bondRadius: v }); }, min: 0.05, max: 1, step: 0.01, value: p.bondRadius, title: 'Bond Radius' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Bond Rds', onChange: function (v) { return _this.controller.updateStyleParams({ bondRadius: v }); }, min: 0.05, max: 1, step: 0.01, value: p.bondRadius, title: 'Bond Radius' }));
                             var maxHbondLength = p.customMaxBondLengths && p.customMaxBondLengths['H'] ? p.customMaxBondLengths['H'] : 1.15;
-                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { label: 'H Bond Len', onChange: function (v) { return _this.controller.updateStyleParams({ customMaxBondLengths: __assign({}, p.customMaxBondLengths, { 'H': v }) }); }, min: 0.9, max: 1.5, step: 0.01, value: maxHbondLength, title: 'Maximum H bond length' }));
-                            controls.push(Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'H Bond Len', onChange: function (v) { return _this.controller.updateStyleParams({ customMaxBondLengths: __assign({}, p.customMaxBondLengths, { 'H': v }) }); }, min: 0.9, max: 1.5, step: 0.01, value: maxHbondLength, title: 'Maximum H bond length' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.Toggle, { key: key++, onChange: function (v) { return _this.controller.updateStyleParams({ hideHydrogens: v }); }, value: p.hideHydrogens, label: 'Hide H' }));
+                            controls.push(Plugin.React.createElement(Plugin.Controls.OptionsGroup, { key: key++, options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' }));
                             return controls;
                         };
                         CreateVisual.prototype.surface = function () {
                             var _this = this;
                             var params = this.params.style.params;
+                            var key = 0;
                             return [
-                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Probe Radius', onChange: function (v) { return _this.controller.updateStyleParams({ probeRadius: v }); }, min: 0, max: 6, step: 0.1, value: params.probeRadius }),
-                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 20, step: 1, value: params.smoothing, title: 'Number of laplacian smoothing itrations.' }),
-                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateStyleParams({ automaticDensity: v }); }, value: params.automaticDensity, label: 'Auto Detail' }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Probe Radius', onChange: function (v) { return _this.controller.updateStyleParams({ probeRadius: v }); }, min: 0, max: 6, step: 0.1, value: params.probeRadius }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Smoothing', onChange: function (v) { return _this.controller.updateStyleParams({ smoothing: v }); }, min: 0, max: 20, step: 1, value: params.smoothing, title: 'Number of laplacian smoothing itrations.' }),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { key: key++, onChange: function (v) { return _this.controller.updateStyleParams({ automaticDensity: v }); }, value: params.automaticDensity, label: 'Auto Detail' }),
                                 (params.automaticDensity
                                     ? void 0
-                                    : Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Detail', onChange: function (v) { return _this.controller.updateStyleParams({ density: v }); }, min: 0.1, max: 3, step: 0.1, value: params.density, title: 'Determines the size of a grid cell (size = 1/detail).' })),
-                                Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe' })
+                                    : Plugin.React.createElement(Plugin.Controls.Slider, { key: key++, label: 'Detail', onChange: function (v) { return _this.controller.updateStyleParams({ density: v }); }, min: 0.1, max: 3, step: 0.1, value: params.density, title: 'Determines the size of a grid cell (size = 1/detail).' })),
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { key: key++, onChange: function (v) { return _this.controller.updateStyleParams({ isWireframe: v }); }, value: params.isWireframe, label: 'Wireframe' })
                             ];
                         };
                         CreateVisual.prototype.createColors = function () {
@@ -77663,6 +79979,22 @@ var LiteMol;
                         return CreateVisual;
                     }(Transform.ControllerBase));
                     Molecule.CreateVisual = CreateVisual;
+                    var CreateLabels = (function (_super) {
+                        __extends(CreateLabels, _super);
+                        function CreateLabels() {
+                            return _super !== null && _super.apply(this, arguments) || this;
+                        }
+                        CreateLabels.prototype.renderControls = function () {
+                            var _this = this;
+                            var style = this.controller.latestState.params.style;
+                            var select = Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Utils.Molecule.Labels3DKinds, caption: function (k) { return LiteMol.Bootstrap.Utils.Molecule.Labels3DKindLabels[k]; }, current: style.params.kind, onChange: function (o) { return _this.controller.updateStyleParams({ kind: o }); }, label: 'Kind' });
+                            var showOptions = this.getPersistentState('showOptions', false);
+                            return Plugin.React.createElement("div", null,
+                                Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: select, expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: showOptions, onChange: function (e) { return _this.setPersistentState('showOptions', e); } }), options: Transform.Labels.optionsControls(this.controller), isExpanded: showOptions }));
+                        };
+                        return CreateLabels;
+                    }(Transform.ControllerBase));
+                    Molecule.CreateLabels = CreateLabels;
                 })(Molecule = Transform.Molecule || (Transform.Molecule = {}));
             })(Transform = Views.Transform || (Views.Transform = {}));
         })(Views = Plugin.Views || (Plugin.Views = {}));
@@ -77836,6 +80168,37 @@ var LiteMol;
                     }(Transform.ControllerBase));
                     Density.CreateVisualBehaviour = CreateVisualBehaviour;
                 })(Density = Transform.Density || (Transform.Density = {}));
+            })(Transform = Views.Transform || (Views.Transform = {}));
+        })(Views = Plugin.Views || (Plugin.Views = {}));
+    })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Plugin;
+    (function (Plugin) {
+        var Views;
+        (function (Views) {
+            var Transform;
+            (function (Transform) {
+                var Labels;
+                (function (Labels) {
+                    "use strict";
+                    function optionsControls(controller) {
+                        var style = controller.latestState.params.style;
+                        var colors = style.theme.colors
+                            .map(function (c, n) { return Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { key: n, label: n === 'Uniform' ? 'Font' : n, color: c, onChange: function (c) { return controller.updateThemeColor(n, c); } }); }).toArray();
+                        return [
+                            Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Size', onChange: function (v) { return controller.updateThemeVariable('sizeFactor', v); }, min: 0.1, max: 10, step: 0.1, value: (style.theme.variables && style.theme.variables.get('sizeFactor')) || 1.0, title: 'Font size.' }),
+                            Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Outline', onChange: function (v) { return controller.updateThemeVariable('outlineWidth', v); }, min: 0.0, max: 0.3, step: 0.001, value: (style.theme.variables && style.theme.variables.get('outlineWidth')) || 0.0, title: 'Font outline.' }),
+                            Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Offset', onChange: function (v) { return controller.updateThemeVariable('zOffset', v); }, min: 0.0, max: 5.0, step: 0.1, value: (style.theme.variables && style.theme.variables.get('zOffset')) || 0.0, title: 'Label offset.' }),
+                            Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Bg. Opacity', onChange: function (v) { return controller.updateThemeVariable('backgroundOpacity', v); }, min: 0.0, max: 1.0, step: 0.01, value: (style.theme.variables && style.theme.variables.get('backgroundOpacity')) || 0.0, title: 'Background opacity.' })
+                        ].concat(colors);
+                    }
+                    Labels.optionsControls = optionsControls;
+                })(Labels = Transform.Labels || (Transform.Labels = {}));
             })(Transform = Views.Transform || (Views.Transform = {}));
         })(Views = Plugin.Views || (Plugin.Views = {}));
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
@@ -78313,38 +80676,22 @@ var LiteMol;
                     Badge.prototype.shouldComponentUpdate = function (nextProps, nextState, nextContext) {
                         return this.props.type !== nextProps.type;
                     };
-                    Badge.prototype.part = function (name, i, t, ret) {
-                        switch (t) {
-                            case 0:
-                                ret.push(Plugin.React.createElement("span", null, name.substr(0, i)));
-                                return ret;
-                            case 1:
-                                ret.push(Plugin.React.createElement("sub", null, name.substr(0, i)));
-                                return ret;
-                            default:
-                                ret.push(Plugin.React.createElement("sup", null, name.substr(0, i)));
-                                return ret;
-                        }
-                    };
-                    Badge.prototype.split = function (name, type, ret) {
+                    Badge.prototype.createBadge = function (name) {
                         if (!name.length)
                             return;
                         for (var i = 0; i < name.length; i++) {
                             if (name[i] === '_') {
-                                this.split(name.substr(i + 1), 1, this.part(name, i, type, ret));
-                                return;
+                                return Plugin.React.createElement("span", null,
+                                    name.substr(0, i),
+                                    Plugin.React.createElement("sub", null, this.createBadge(name.substr(i + 1))));
                             }
                             else if (name[i] === '^') {
-                                this.split(name.substr(i + 1), 2, this.part(name, i, type, ret));
-                                return;
+                                return Plugin.React.createElement("span", null,
+                                    name.substr(0, i),
+                                    Plugin.React.createElement("sup", null, this.createBadge(name.substr(i + 1))));
                             }
                         }
-                        this.part(name, name.length, type, ret);
-                    };
-                    Badge.prototype.createBadge = function (name) {
-                        var b = [];
-                        this.split(name, 0, b);
-                        return b;
+                        return name;
                     };
                     Badge.prototype.render = function () {
                         var type = this.props.type;
@@ -78529,6 +80876,7 @@ var LiteMol;
                     function Viewport() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
                         _this.host3d = void 0;
+                        _this.defaultBg = { r: 0, g: 0, b: 0 };
                         _this.state = { noWebGl: false, showLogo: true };
                         return _this;
                     }
@@ -78578,7 +80926,8 @@ var LiteMol;
                         var _this = this;
                         if (this.state.noWebGl)
                             return this.renderMissing();
-                        return Plugin.React.createElement("div", { className: 'lm-viewport' },
+                        var color = this.controller.latestState.clearColor || this.defaultBg;
+                        return Plugin.React.createElement("div", { className: 'lm-viewport', style: { backgroundColor: "rgb(" + 255 * color.r + ", " + 255 * color.g + ", " + 255 * color.b + ")" } },
                             Plugin.React.createElement("div", { ref: function (host) { return _this.host3d = host; }, className: 'lm-viewport-host3d' }),
                             this.state.showLogo ? Plugin.React.createElement(Visualization.Logo, null) : void 0,
                             Plugin.React.createElement(ViewportControls, { controller: this.controller }));
@@ -78950,10 +81299,12 @@ var LiteMol;
                 var data = source.data
                     ? action.add(this.root, Entity.Transformer.Data.FromData, { data: source.data, id: source.id })
                     : action.add(this.root, Transformer.Data.Download, { url: source.url, type: format.isBinary ? 'Binary' : 'String', id: source.id, title: 'Molecule' });
-                data
+                var model = data
                     .then(Transformer.Molecule.CreateFromData, { format: format, customId: source.id }, { isBinding: true, ref: source.moleculeRef })
-                    .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false, ref: source.modelRef })
-                    .then(Transformer.Molecule.CreateMacromoleculeVisual, { polymer: true, het: true, water: true });
+                    .then(Transformer.Molecule.CreateModel, { modelIndex: 0 }, { isBinding: false, ref: source.modelRef });
+                if (!source.doNotCreateVisual) {
+                    model.then(Transformer.Molecule.CreateMacromoleculeVisual, { polymer: true, het: true, water: true });
+                }
                 return this.applyTransform(data);
             };
             /**
