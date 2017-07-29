@@ -102,7 +102,7 @@ var Protael = (function () {
             mainSeqHeight: 55,
             featureHeight: 15, // height of the feature track
             graphHeight: 50,
-            graphSpacing: 20,
+            graphSpacing: 30,
             space: 20
         },
         /**
@@ -424,15 +424,13 @@ var Protael = (function () {
         this.currShift = 0;
         this.showCursorTooltips = true;
         this.paper = new Paper(container, svg.width(), svg.height(), this);
-        this.H = Utils.calcHeight(this.protein);
         this.W = this.protein.sequence.length;
-        this.paper.setSize(this.W, this.H);
-//        this.paper.axis(this.W, 10).toBack();
-//         newDiv.resizable({
-//             stop: function (ev, ui) {
-//                 self.zoomToFit();
-//             }
-//         });
+        this.paper.setSize(this.W, 10);
+        //newDiv.resizable({
+        //    stop: function (ev, ui) {
+        //        self.zoomToFit();
+        //    }
+        //});
     }
     ;
 
@@ -526,8 +524,19 @@ var Protael = (function () {
                 x: w - 1, // - vbl.width-5,
                 y: h //- vbl.height-5
             });
+            Snap.selectAll(".pl-grid-major").attr({"y2": h});
+            Snap.selectAll(".pl-grid-minor").attr({"y2": h});
+            Snap.selectAll("#selector").attr({"height": h});
+            Snap.selectAll("#blanket").attr({"height": h});
+            Snap.selectAll("#pointer").attr({"height": h});
             return this;
         };
+
+        paperproto.updateSize = function () {
+            var bb = this.paper.getBBox();
+            this.setSize(bb.w, bb.h + 10);
+        };
+
         /**
          * Gets current paper width.
          * @returns {number}
@@ -562,7 +571,7 @@ var Protael = (function () {
                             x1: x1 * ds,
                             x2: x2 * ds
                         });
-                    } else if (t.type === "path") {
+                    } else if (t.type === "path" || t.type === "polygon" || t.type === "polyline") {
                         t.transform("s" + zoom + " 1 0 0");
                     } else {
                     }
@@ -633,7 +642,7 @@ var Protael = (function () {
         paperproto.axis = function (w, dx) {
             var i, maxI = w / dx + 1,
                 l, t,
-                H = this.protael.H,
+                H = this.paper.getBBox().h,
                 p = this.paper,
                 axesLabels = p.g().attr({
                 id: "gridLbls",
@@ -1033,7 +1042,7 @@ var Protael = (function () {
                 }
             }
             if (!isOverlay) {
-                var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
+                var label = paper.text(.1, -4, ftrack.label).attr({"class": "pl-ftrack-label"});
                 g.append(label);
 //                this.addOutsideLabel(label);
             }
@@ -1057,7 +1066,7 @@ var Protael = (function () {
             }
 
             if (color) {
-                shape.attr({fill: color});
+                shape.attr({fill: color, stroke: color});
             }
             if (allowOverlaps) {
                 shape.attr({opacity: .6});
@@ -1068,7 +1077,7 @@ var Protael = (function () {
             }
             shapeGr = paper.g().attr({
                 id: feature.id || '',
-                title: feature.label,
+                title: feature.label || '',
                 fill: color,
                 'class': clazz
             });
@@ -1153,18 +1162,87 @@ var Protael = (function () {
             return {p1: p1, p2: p2};
         }
 
+        function prepareQTValues(data, qtrack) {
+            var vv = data;
+            var noZeros = qtrack.forceNonZero;
+            var min = Math.min.apply(null, vv);
+
+            if (qtrack.transform) {
+
+                if (qtrack.transform === "log") {
+                    vv.forEach(function (e, i, a) {
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {  //no log for negative values! shift
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
+                        }
+                    });
+                } else if (qtrack.transform === "log2") {
+                    vv.forEach(function (e, i, a) {
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
+                        }
+                    });
+                } else if (qtrack.transform === "log10") {
+                    vv.forEach(function (e, i, a) {
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
+                        }
+                    });
+                } else if (qtrack.transform === "exp") {
+                    vv.forEach(function (e, i, a) {
+                        if (min < 0) {
+                            e += min;
+                        }
+                        a[i] = Math.exp(e);
+                    });
+                }
+            }
+
+            // limit values to user-defined displayMax and Min
+            if (qtrack.displayMax) {
+                vv.forEach(function (e, i, a) {
+                    a[i] = Math.min(e, qtrack.displayMax);
+                });
+            }
+            if (qtrack.displayMin) {
+                vv.forEach(function (e, i, a) {
+                    a[i] = Math.max(e, min);
+                });
+            }
+
+            return vv;
+        }
+
         paperproto.quantTrack = function (qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = Array.isArray(qtrack.values) ?
+            // data will be used for
+            var data = Array.isArray(qtrack.values) ?
                 qtrack.values : Utils.splitData(qtrack.values),
+                vv = prepareQTValues(data.slice(), qtrack),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
-                max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(Math, vv),
-                min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(Math, vv),
-                zero = (-min) / (max - min) * 100,
+                // this might seem redundant, since vv was trimmed to fit into boundaries,
+                // but is displayMax/Min are outside of values range we still need to scale the chart
+                max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(null, vv),
+                min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(null, vv),
+                zero = (max === min) ? 0 : (-min) / (max - min) * 100, // for gradient
+                ky = (max === min) ? 0 : height / (max - min), // for coords
                 path = '',
-                ky = (max === min) ? 0 : height / (max - min),
                 // different chart types
                 spline = "spline",
                 column = "column",
@@ -1244,62 +1322,40 @@ var Protael = (function () {
                         "stroke-width": ".1px"});
                 }
             } else if (qtrack.type === column) {
-                // column chart
-                var rects = paper.g().attr({
-                    stroke: fill,
-                    "fill": "orange",
-                    "class": "pl-chart-area",
-                    opacity: 1.0
-                });
                 var y0 = height + min * ky;
+                var points = [];
+                points.push(0, y0);
                 for (j = 0; j < W; j++) {
                     X = j;
-                    var dh = 0;
-                    if (vv[j] >= 0) {
-                        Y = (max - vv[j]) * ky;
-                        dh = vv[j] * ky;
-                    } else {
-                        Y = y0;
-                        dh = -vv[j] * ky;
-                    }
-
-                    var r = paper.rect(X, Y, 1, dh);
-                    this.viewSet.push(r);
-                    rects.add(r);
+                    Y = height - (vv[j] - min) * ky;
+                    points.push(X, Y, X + 1, Y);
                 }
+                points.push(W, y0);
+                chart2 = paper.polygon(points).attr({
+                    stroke: "none", // important!!!
+                    fill: fill,
+                    "class": "pl-chart-area"
+                });
 
-                if (parent.isSafari) {
-                    console.log("Safari browser does not support chart type COLUMN with GRADIENT filling. Switching to single color");
-                    var fillsingle = Array.isArray(c) ? c[0] : c;
-                    chart2 = paper.rect(0, 0, W, height).attr({
-                        stroke: fillsingle,
-                        fill: fillsingle,
-                        mask: rects
-                    });
-                } else {
-                    chart2 = paper.rect(0, 0, W, height).attr({
-                        stroke: fill,
-                        fill: fill,
-                        mask: rects
-                    });
-                }
+                this.viewSet.push(chart2);
             } else {
                 console.log("Unknown chart type :" + type);
             }
 
             var lTop, lBottom;
             if (qtrack.displayScale) {
-                lTop = paper.text(.1, 8, max).attr({"class": "pl-chart-scalelbl"});
-                lBottom = paper.text(.1, height, "" + min).attr({"class": "pl-chart-scalelbl"});
+                lTop = paper.text(.1, 8, max.toFixed(2)).attr({"class": "pl-chart-scalelbl"});
+                lBottom = paper.text(.1, height, min.toFixed(2)).attr({"class": "pl-chart-scalelbl"});
             }
 
             var bgrect = paper.rect(0, 0, W, height).attr({"opacity": .0}),
                 tooltip = paper.text(.1, 0, max).attr({"class": "pl-chart-tooltip"}).hide(),
-                label = paper.text(.1, 0, qtrack.label).attr({"class": "pl-chart-label"}),
+                label = paper.text(.1, -.1, qtrack.label).attr({"class": "pl-chart-label"}),
                 topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label, tooltip, bgrect).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
+                g = paper.g(chart2, topLine, bottomLine, cLine, label, tooltip, bgrect)
+                .attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
 
             if (qtrack.displayScale) {
                 g.add(lTop, lBottom);
@@ -1314,13 +1370,18 @@ var Protael = (function () {
             g.mousemove(function (e) {
                 var x = $("#" + parent.container + ' #pointer').first().attr("x"),
                     ox = parent.toOriginalX(x),
-                    bb = tooltip.getBBox();
+                    bb = tooltip.getBBox(),
+                    txt = typeof data[ox - 1] !== "undefined" ? data[ox - 1] : "N/A";
+//                if (qtrack.transform) {
+//                    txt += ", " + qtrack.transform + "=";
+//                    txt += typeof data[ox - 1] !== "undefined" ? vv[ox - 1].valueOf().toFixed(2) : "N/A";
+//                }
                 if (bb.x2 > bgrect.getBBox().width / 2) {
                     tooltip.attr({"text-anchor": "end"});
                 } else {
                     tooltip.attr({"text-anchor": "start"});
                 }
-                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + vv[ox]});
+                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + txt});
             });
             g.mouseout(function (e) {
                 tooltip.hide();
@@ -1356,7 +1417,7 @@ var Protael = (function () {
                     "font-size": "10px",
                     "font-family": "Arial",
                     "text-anchor": "middle"
-                }, r, g;
+                };
             for (i = markers.length; i--; ) {
                 m = markers[i];
                 if (!m.x || m.x === "") {
@@ -1519,22 +1580,22 @@ var Protael = (function () {
             counterMax = protein.ftracks ? protein.ftracks.length : 0;
             for (i = 0; i < counterMax; i++) {
                 allowOver = protein.ftracks[i].allowOverlap || false;
+                topY = this.paper.getBBox().h + uiOptions.space;
                 delta = this.featureTrack(protein.ftracks[i], topY, uiOptions.featureHeight,
                     allowOver, true);
-                topY += uiOptions.featureHeight * delta + uiOptions.space;
             }
 
             counterMax = protein.qtracks ? protein.qtracks.length : 0;
             for (i = 0; i < counterMax; i++) {
                 if (protein.qtracks[i].values && protein.qtracks[i].values.length) {
+                    topY = this.paper.getBBox().h + uiOptions.graphSpacing;
                     this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
                     protein.qtracks[i].topY = topY;
-                    topY += uiOptions.graphHeight + uiOptions.space;
                 } else {
                     console.log("No values found for QTRACK [" + i + "]. Skipping.");
                 }
             }
-
+            topY = this.paper.getBBox().h + uiOptions.graphSpacing;
             this.aliTop = topY;
             var show = protein.alidisplay ? true : false; // show MAS letters?
 
@@ -1551,7 +1612,7 @@ var Protael = (function () {
                     }
                 }
             }
-            this.protael.H = topY + 5;
+            var H = this.paper.getBBox().h + 5;
             this.axis(this.protael.W, 10).toBack();
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
@@ -1561,12 +1622,12 @@ var Protael = (function () {
             this.seqLines.toBack();
             this.gAxes.toBack();
 
-            this.paper.attr({'height': this.protael.H});
+            this.paper.attr({'height': H});
             this.pLink.attr({
-                y: this.protael.H
+                y: H
             });
             // rect to show current position
-            this.selector = paper.rect(-1, 0, 0, this.protael.H).attr({
+            this.selector = paper.rect(-1, 0, 0, H).attr({
                 fill: '#DDD',
                 stroke: "#666",
                 "stroke-width": "2px",
@@ -1575,7 +1636,7 @@ var Protael = (function () {
             }).hide();
             // rect to show selection
 
-            this.pointer = paper.rect(0, 0, 1, this.protael.H).attr({
+            this.pointer = paper.rect(0, 0, 1, H).attr({
                 fill: 'green',
                 stroke: 'green',
                 "stroke-width": "1px",
@@ -1598,7 +1659,7 @@ var Protael = (function () {
             var self = this,
                 parent = this.protael,
                 // and we need a rect for catching mouse event for the whole chart area
-                r = paper.rect(0, 0, parent.W, parent.H).toBack().attr({
+                r = paper.rect(0, 0, parent.W, H).toBack().attr({
                 stroke: "#fff",
                 opacity: 0,
                 id: "blanket"
@@ -1626,7 +1687,7 @@ var Protael = (function () {
             var onMouseMove = function (e) {
                 //adding 2 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': parent.mouseToSvgXY(e).x +2
+                    'x': parent.mouseToSvgXY(e).x + 2
                 });
             };
             self.pointer.mousemove(function (e) {
@@ -1635,6 +1696,10 @@ var Protael = (function () {
             paper.mousemove(function (e) {
                 onMouseMove(e);
                 self.protael.userMouseMove(e);
+            });
+
+            paper.click(function (e) {
+                self.protael.userMouseClick(e);
             });
 
             this.viewSet.push(r);
@@ -1665,22 +1730,7 @@ var Protael = (function () {
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
-    Protael.prototype.Utils.calcHeight = function (protein) {
-        var h = uiOptions.mainSeqHeight, // main sequence
-            y = 0;
-        if (protein.ftracks && protein.ftracks.length) {
-            h += uiOptions.featureHeight * (protein.ftracks.length + 2);
-        }
-        if (protein.qtracks) {
-            h += (uiOptions.graphHeight + uiOptions.space) * (protein.qtracks.length);
-        }
 
-        if (protein.alignments) {
-            y = protein.alidisplay ? 15 : 10;
-            h += (y * protein.alignments.length);
-        }
-        return h + 20;
-    };
     /**
      * Splits string data using ',' or into individual residues
      * @param {type} data
@@ -1716,6 +1766,7 @@ var Protael = (function () {
             this.initTooltips();
             this.initClicks();
             this.onMouseOver(null);
+            this.onClick(null);
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
@@ -1869,10 +1920,18 @@ var Protael = (function () {
         };
 
         protaelproto.onMouseOver = function (callback) {
-            if (callback && typeof (callback) == "function") {
+            if (callback && typeof (callback) === "function") {
                 this.userMouseMove = callback;
             } else {
                 this.userMouseMove = function () {};
+            }
+        };
+
+        protaelproto.onClick = function (callback) {
+            if (callback && typeof (callback) === "function") {
+                this.userMouseClick = callback;
+            } else {
+                this.userMouseClick = function () {};
             }
         };
 
@@ -1890,6 +1949,43 @@ var Protael = (function () {
             pt.y = event.clientY;
 
             return pt.matrixTransform(t.getScreenCTM().inverse());
+        };
+
+        protaelproto.addQTrack = function (track) {
+            var oldZoom = this.currentScale();
+            this.setZoom(1);
+
+            if (!this.protein.qtracks)
+                this.protein.qtracks = [];
+
+            this.protein.qtracks.push(track);
+            var bb = this.paper.paper.getBBox();
+            var topY = bb.h + uiOptions.graphSpacing;
+            var i = this.protein.qtracks.length - 1;
+            this.protein.qtracks[i].topY = topY;
+            this.paper.quantTrack(this.protein.qtracks[i], topY, this.W, uiOptions.graphHeight);
+
+            this.paper.updateSize();
+            this.setZoom(oldZoom);
+        };
+
+        protaelproto.addFTrack = function (track) {
+            var oldZoom = this.currentScale();
+            this.setZoom(1);
+
+            if (!this.protein.ftracks)
+                this.protein.ftracks = [];
+
+            this.protein.ftracks.push(track);
+            var bb = this.paper.paper.getBBox();
+
+            var topY = bb.h + uiOptions.space;
+            var i = this.protein.ftracks.length - 1;
+            this.protein.ftracks[i].topY = topY;
+            this.paper.featureTrack(this.protein.ftracks[i], topY, uiOptions.featureHeight, this.protein.ftracks[i].allowOverlap || false, true);
+
+            this.paper.updateSize();
+            this.setZoom(oldZoom);
         };
 
         /**
