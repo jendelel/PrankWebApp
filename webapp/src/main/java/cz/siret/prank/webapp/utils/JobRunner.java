@@ -185,6 +185,7 @@ public enum JobRunner {
                         outDir, ConservationFncToItemContext(conservationPathForChain));
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
             } catch (Exception e) {
+                logger.error("Failed to run P2Rrank", e);
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                         "ERROR: Failed to run prediction.".concat(e.toString()));
             }
@@ -230,6 +231,7 @@ public enum JobRunner {
                     ConservationFncToItemContext(conservationPathForChain));
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
         } catch (Exception e) {
+            logger.error("Failed to run P2Rrank", e);
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                     "ERROR: Failed to run prediction.".concat(e.toString()));
         }
