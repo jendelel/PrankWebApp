@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import cz.siret.prank.domain.Dataset;
 import cz.siret.prank.features.api.ProcessedItemContext;
 import cz.siret.prank.lib.ConservationScore;
 import cz.siret.prank.lib.ExternalTools;
@@ -135,27 +136,20 @@ public enum JobRunner {
         return result;
     }
 
-    private static ProcessedItemContext ConservationFncToItemContext(Function<String, File>
-                                                                      conservationFnc) {
-        ProcessedItemContext itemContext = new ProcessedItemContext(null);
-        Map<String, Object> auxData = new HashMap<>();
-        auxData.put(cz.siret.prank.features.implementation.conservation.ConservationScore
-                .conservationScoreKey, conservationFnc);
-        itemContext.setAuxData(auxData);
-        return itemContext;
-    }
-
     public void runPrediction(File fileToAnalyze, Path outDir,
                               String pdbId, boolean runConservation) {
         workQueue.execute(() -> {
             try {
                 Map<String, Tuple2<File, File>> msaAndConservationForChain = null;
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Job started.");
+                String conservationPattern = "";
                 if (runConservation) {
                     try {
                         PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                                 "Getting conservation.");
                         String baseName = BioUtils.INSTANCE.removePdbExtension(fileToAnalyze.getName()).getItem1();
+                        conservationPattern = BioUtils.CONSERVATION_FILENAME_PATTERN.replaceFirst
+                                ("%baseDir", baseName).replaceFirst("%ext", "hom.gz");
 
                         msaAndConservationForChain = BioUtils.INSTANCE.copyAndGzipConservationAndMSAsToDir(
                                 getConservationAndMSAs(BioUtils.INSTANCE.loadPdbFile
@@ -166,14 +160,13 @@ public enum JobRunner {
                     }
                 }
 
-                Function<String, File> conservationPathForChain = null;
+                ProcessedItemContext itemContext = null;
                 if (msaAndConservationForChain != null && msaAndConservationForChain.size() > 0) {
                     logger.info(msaAndConservationForChain.toString());
-                    Map<String, Tuple2<File, File>> finalMsaAndConservationForChain =
-                            msaAndConservationForChain;
-                    conservationPathForChain = (chainId) ->
-                            finalMsaAndConservationForChain.getOrDefault(chainId,
-                                    Tuple.create(null, null)).getItem2();
+                    Map<String, String> colValues = new HashMap<>();
+                    colValues.put(Dataset.getCOLUMN_CONSERVATION_FILES_PATTERN(),
+                            conservationPattern);
+                    itemContext = new ProcessedItemContext(colValues);
                     setupP2Rank(true);
                 } else {
                     setupP2Rank(false);
@@ -182,7 +175,7 @@ public enum JobRunner {
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Running P2Rank for pocket " +
                         "detection.");
                 prankPredictor.runPrediction(fileToAnalyze.toPath(),
-                        outDir, ConservationFncToItemContext(conservationPathForChain));
+                        outDir, itemContext);
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
             } catch (Exception e) {
                 logger.error("Failed to run P2Rrank", e);
@@ -214,12 +207,14 @@ public enum JobRunner {
                     BioUtils.INSTANCE.copyAndGzipConservationAndMSAsToDir(
                             msaAndConservationForChain, baseName,
                             outDir);
+            String conservationPattern = BioUtils.CONSERVATION_FILENAME_PATTERN.replaceFirst
+                    ("%baseDir", baseName).replaceFirst("%ext", "hom.gz");
 
-            Function<String, File> conservationPathForChain = null;
+            ProcessedItemContext itemContext = null;
             if (conservationAndMsas != null && conservationAndMsas.size() > 0) {
-                conservationPathForChain = (String chainId) ->
-                        conservationAndMsas.getOrDefault(chainId,
-                                Tuple.create(null, null)).getItem2();
+                Map<String, String> colValues = new HashMap<>();
+                colValues.put(Dataset.getCOLUMN_CONSERVATION_FILES_PATTERN(), conservationPattern);
+                itemContext = new ProcessedItemContext(colValues);
                 setupP2Rank(true);
             } else {
                 setupP2Rank(false);
@@ -227,8 +222,7 @@ public enum JobRunner {
 
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                     "Running P2Rank for pocket detection.");
-            prankPredictor.runPrediction(fileToAnalyze.toPath(), outDir,
-                    ConservationFncToItemContext(conservationPathForChain));
+            prankPredictor.runPrediction(fileToAnalyze.toPath(), outDir, itemContext);
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
         } catch (Exception e) {
             logger.error("Failed to run P2Rrank", e);
