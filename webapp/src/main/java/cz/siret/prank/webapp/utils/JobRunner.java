@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import cz.siret.prank.features.api.ProcessedItemContext;
 import cz.siret.prank.lib.ConservationScore;
 import cz.siret.prank.lib.ExternalTools;
 import cz.siret.prank.lib.utils.BioUtils;
@@ -135,6 +135,15 @@ public enum JobRunner {
         return result;
     }
 
+    private static ProcessedItemContext ConservationFncToItemContext(Function<String, File>
+                                                                      conservationFnc) {
+        ProcessedItemContext itemContext = new ProcessedItemContext(null);
+        Map<String, Object> auxData = new HashMap<>();
+        auxData.put(cz.siret.prank.features.implementation.conservation.ConservationScore
+                .conservationScoreKey, conservationFnc);
+        itemContext.setAuxData(auxData);
+        return itemContext;
+    }
 
     public void runPrediction(File fileToAnalyze, Path outDir,
                               String pdbId, boolean runConservation) {
@@ -172,8 +181,8 @@ public enum JobRunner {
 
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Running P2Rank for pocket " +
                         "detection.");
-                prankPredictor.runPrediction(fileToAnalyze.toPath(), conservationPathForChain,
-                        outDir);
+                prankPredictor.runPrediction(fileToAnalyze.toPath(),
+                        outDir, ConservationFncToItemContext(conservationPathForChain));
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
             } catch (Exception e) {
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
@@ -217,7 +226,8 @@ public enum JobRunner {
 
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                     "Running P2Rank for pocket detection.");
-            prankPredictor.runPrediction(fileToAnalyze.toPath(), conservationPathForChain, outDir);
+            prankPredictor.runPrediction(fileToAnalyze.toPath(), outDir,
+                    ConservationFncToItemContext(conservationPathForChain));
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
         } catch (Exception e) {
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
