@@ -88,6 +88,11 @@ public class DataGetter {
         return csvFile().getParent().resolve(fileName);
     }
 
+    public Path summaryFile() {
+        String fileName = pdbFile().toFile().getName().concat(".summary");
+        return csvFile().getParent().resolve(fileName);
+    }
+
     public Path visualizationZip() {
         Path predictionDir;
         if (inputType.equals("id")) {

@@ -34,7 +34,7 @@ import cz.siret.prank.webapp.utils.PrankUtils;
 @javax.ws.rs.Path("/{type}/")
 public class RestAPI extends Application {
 
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
+        private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     @GET
     @javax.ws.rs.Path("pdb/{id}")

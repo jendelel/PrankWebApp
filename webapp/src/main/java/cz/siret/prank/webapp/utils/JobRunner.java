@@ -30,6 +30,7 @@ import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.program.api.PrankFacade;
 import cz.siret.prank.program.api.PrankPredictor;
 import cz.siret.prank.program.params.Params;
+import cz.siret.prank.webapp.Summary;
 
 public enum JobRunner {
     INSTANCE;
@@ -139,6 +140,7 @@ public enum JobRunner {
     public void runPrediction(File fileToAnalyze, Path outDir,
                               String pdbId, boolean runConservation) {
         workQueue.execute(() -> {
+            Summary summary = new Summary();
             try {
                 Map<String, Tuple2<File, File>> msaAndConservationForChain = null;
                 PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Job started.");
@@ -189,6 +191,8 @@ public enum JobRunner {
             IOException,
             InterruptedException {
         try {
+            Summary summary = new Summary();
+            summary.setConservationOrigin("userMSA");
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Job started.");
             String baseName = BioUtils.INSTANCE.removePdbExtension(fileToAnalyze.getName()).getItem1();
 
@@ -223,6 +227,7 @@ public enum JobRunner {
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir,
                     "Running P2Rank for pocket detection.");
             prankPredictor.runPrediction(fileToAnalyze.toPath(), outDir, itemContext);
+            PrankUtils.INSTANCE.saveSummary(summary, fileToAnalyze, outDir);
             PrankUtils.INSTANCE.updateStatus(fileToAnalyze, outDir, "Finished.");
         } catch (Exception e) {
             logger.error("Failed to run P2Rrank", e);
