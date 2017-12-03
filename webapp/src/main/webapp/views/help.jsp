@@ -45,26 +45,44 @@
                 highly conserved areas as well as actual ligand binding sites. All one needs to use
                 PrankWeb is a device with a web-browser that supports WebGL.</p>
             <h2 id="specify-what-protein-to-analyze">Specify what protein to analyze</h2>
-            <p>To analyze a protein from PDB database, one has to know its identification code. Go
-                to a
-                website, where PrankWeb server is running<a href="#fn2" class="footnoteRef"
-                                                            id="fnref2"><sup>1</sup></a>
-                and enter the identification code of the protein. For analysis of custom PDB file,
+            <p>There are two options to analyze a protein. A protein PDB file can be uploaded
+                from user's computer, or PrankWeb can download it automatically from PDB database
+                provided the protein identification code.</p>
+            <img src="/images/input_form.png" class="img-responsive center-block"/>
+            <ol>
+                <li>To analyze a protein from PDB database,
+                    one has to know its identification code and enter it on the PrankWeb
+                    homepage.</li>
+
+                <li>For analysis of custom PDB file,
                 upload it by clicking the browse button. Please note that it might take a while
-                before
-                PrankWeb analyzes the custom file. For description of PDB format, please see its
+                before PrankWeb analyzes the custom file. For description of PDB format, please see its
                 official documentation.<a href="#fn3" class="footnoteRef"
-                                          id="fnref3"><sup>2</sup></a>
-            </p>
-            <p>Besides selecting what protein to analyze, one can also specify if evolutionary
-                conservation should be included in the prediction model. PrankWeb contains two
-                pretrained models for pocket prediction. Note that calculating conservation score
-                for
-                user-defined protein file can significantly increase the time of analysis unless you
-                specify its PDB identification code or upload multiple sequence alignments for
-                homology
-                calculation.</p>
+                                          id="fnref3"><sup>2</sup></a></li>
+            </ol>
+            <h3>Homology</h3>
+            <p>Besides selecting what protein to analyze, one can also specify whether evolutionary
+                conservation should be included in the prediction model by checking the "Run
+                conservation analysis" checkbox. PrankWeb contains <b>two
+                pretrained models</b> for pocket prediction. Note that calculating
+                conservation score for user-defined protein file can significantly increase the time
+                of analysis unless you specify its PDB identification code or upload multiple
+                sequence alignments for homology calculation.</p>
+            <p>There are three ways how to calculate the conservation score for the protein.</p>
+            <ol>
+                <li>You can specify custom alignment file, using which PrankWeb will
+                    calculate the conservation score for your protein.</li>
+                <li>If you know the PDB code of you protein, you can specify in the the
+                    textbox and PrankWeb will calculate the homology from the alignment in
+                    <a href="http://swift.cmbi.ru.nl/gv/hssp/">HSSP</a> database.</li>
+                <li>Fallback method: If any of the previous methods fails or neither pdb
+                    code nor the alignment file is specified, PrankWeb will calculate the
+                    conservation score automatically using alignment of similar proteins.
+                    For details see the
+                    <a href="/other/thesis.pdf" target="_blank">original thesis.</a></li>
+            </ol>
             <h2 id="visualization">Visualization</h2>
+            <img src="/images/vis.png" class="img-responsive center-block"/>
             <p>Once the protein visualization is loaded, three main panels appear: sequence
                 visualization, structural visualization and the control panel.</p>
             <h3 id="structural-visualization-1">Structural visualization</h3>
@@ -110,6 +128,10 @@
                                                                                   class="footnoteRef"
                                                                                   id="fnref4"><sup>3</sup></a>
             </p>
+            <img src="/images/vis_advanced.png" class="img-responsive center-block"/>
+            <p>LiteMol visualization possibilities are very powerful. The visualization from
+                figure above was achived by hiding the default protein surface and creating a
+                small surface for the individual pockets.</p>
             <h3 id="sequence-visualization-1">Sequence visualization</h3>
             <p>The panel above protein 3D visualization displays protein sequence. All chains are
                 concatenated and visualized at once. Chains can be identified by regions marked on
@@ -164,7 +186,7 @@
                 visibility
                 in both structural and sequence visualizations.</p>
             <h2 id="more-details">More details</h2>
-            <p id="thesis">For more details about this project, please see
+            <p id="thesis">For more technical details of this project, please see
                 <a href="/other/thesis.pdf">the original thesis document.</a></p>
             <div class="footnotes">
                 <hr/>
