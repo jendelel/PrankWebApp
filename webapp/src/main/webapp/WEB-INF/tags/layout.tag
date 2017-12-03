@@ -60,8 +60,7 @@
                 <button type="submit" class="btn btn-default">Submit</button>
             </form>--%>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">Download
-                    P2rank</a></li>
+                <li><a href="/views/download.jsp">Download</a></li>
                 <li><a href="/views/about.jsp">About</a></li>
                 <li><a href="/views/help.jsp">Help</a></li>
             </ul>
@@ -72,7 +71,7 @@
 <jsp:doBody/>
 
 <footer>
-    <p class="text-center">Copyright &copy; Lukas Jendele, Siret group, Charles University 2017</p>
+    <p class="text-center">PrankWeb, Siret group, Charles University 2017</p>
 </footer>
 </body>
 </html>

@@ -26,7 +26,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label>PDB file:</label>
+                    <label>PDB file
+                        <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                                      title="Protein file to analyze.">
+                        <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                        </a>
+                        :</label>
                     <label for="upload-pdb" class="btn btn-default btn-file">
                         <input id="upload-pdb" name="pdbFile" accept=".pdb" type="file"/>
                     </label>
@@ -35,18 +40,29 @@
                 <div class="checkbox">
                     <label> <input id="conservation-checkbox" name="doConservation"
                                    type="checkbox" onclick="doConservationClicked()"
-                                   value="1" style="margin-right: 4px;">Run conservation
-                        analysis </label>
+                                   value="1" style="margin-right: 4px;">Run conservation analysis
+                        <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                           title="If checked, a model that exploits conservation will be used to classify protein binding sites. If neither MSA nor PDB code is provided, PrankWeb will calculate conservation from MSA of similar proteins.">
+                            <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                        </a>
+                    </label>
                 </div>
                     <%--<br>--%>
                 <div class="form-group">
-                    <label id="pdbId_opt_lbl" for="pdbId_opt">PDB code (optional):</label>
-                    <input type="text" id="pdbId_opt"/> <br>
-                    <label id="msa_opt_lbl">MSA files
-                        <a class='msa-hint' data-toggle="tooltip" data-placement="top"
-                               title="Alignments in FASTA and CLUSTAL formats are supported.">
+                    <label id="pdbId_opt_lbl" for="pdbId_opt">PDB code (optional)
+                        <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                           title="If PDB code of the uploaded protein is provided, MSA alignment from HSSP database for this protein will be used to calculate the conservation score.">
                             <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
-                        </a>(optional):
+                        </a>
+                        :</label>
+                    <input type="text" id="pdbId_opt"/> <br>
+                    <label id="msa_opt_lbl">MSA files (optional)
+                        <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                               title="Provide your custom MSA file and PrankWeb will calculate the conservation scores from that MSA file.
+                               Alignments in FASTA and CLUSTAL formats are supported.">
+                            <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                        </a>
+                        :
                     </label>
                     <label for="upload-msas" class="btn btn-default btn-file">
                         <input id="upload-msas" name="msaFiles" type="file"
@@ -63,7 +79,12 @@
             <p class="text-center">OR</p>
 
             <div class="form-group form-inline text-center" style="margin: 0 auto; width: 350px;">
-                <label for="pdbId">PDB code:</label>
+                <label for="pdbId">PDB code
+                    <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                       title="PrankWeb will download the protein file from PDB and calculate conservation using HSSP database (if possible) or from MSA of similar proteins.">
+                        <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                    </a>
+                :</label>
                 <input type="text" id="pdbId" placeholder="2SRC" class="form-control"/>
                 <button id="pdbIdSumbit" type="submit" class="btn btn-default"
                         onclick="submitPdbId()">Submit

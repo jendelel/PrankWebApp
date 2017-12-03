@@ -110,5 +110,5 @@ function submitPdbId() {
 
 $(document).ready(function () {
    doConservationClicked();
-    $("a.msa-hint").tooltip();
+    $(".tooltip-hint").tooltip();
 });

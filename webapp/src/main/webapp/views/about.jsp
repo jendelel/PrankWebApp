@@ -42,25 +42,41 @@
                 between proteins and small molecules (so called ligands) because most of the currently used drugs are small molecules.
                 While there are several tools that can predict these interactions, they are almost none for their visualization. Thus, we built a new visualization website by combining several protein visualizers together. Since evolutionary homology correlates with binding sites, our web interface also displays homology for comparison. We developed several ways how to calculate homology, and used it to improve detection of protein-ligand binding sites.
                 Here we present PrankWeb, a modern web application for structure and sequence visualization of a protein and its protein-ligand binding sites as well as evolutionary homology. We hope that it will provide a quick and convenient way for scientists to analyze proteins.</p>
-            <p>The source code of this project can be found at
-                <a href="http://github.com/jendelel/PrankWebApp" target="_blank">GitHub</a></p>
             <h2 id="authors">Authors</h2>
-            <p>This project was created as bachelor thesis by Lukáš Jendele under supervision of
-                RNDr. David Hoksza Ph.D. at Charles University. </p>
-            <h2 id="visualization">Used projects</h2>
-            <p> PrankWeb utilizes P2Rank for
-                pocket detection and LiteMol together with Protael for its visualization.
-            </p>
-            <ul>
-                <li><p><a href="http://siret.ms.mff.cuni.cz/p2rank">P2Rank</a></p></li>
-                <li><p><a href="http://webchemdev.ncbr.muni.cz/Litemol/">LiteMol</a> </p></li>
-                <li><p><a href="http://proteins.burnham.org:8080/Protael/">Protael</a></p></li>
-                <li><p><a href="http://compbio.cs.princeton.edu/conservation/">Jensen-Shannon Diverge method for calculating
-                    conservation scores</a></p></li>
-                <li><p><a href="http://www.drive5.com/muscle/muscle.html">MUSCLE</a></p></li>
-                <li><p><a href="http://weizhong-lab.ucsd.edu/cd-hit/download.php">CD-HIT</a></p></li>
-                <li><p><a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download">PSI-BLAST</a></p></li>
-            </ul>
+            <div class="row pt-md">
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                    <div class="img-box">
+                        <img src="/images/jendelel.jpg">
+                    </div>
+                    <h3>Bc. Lukas Jendele</h3>
+                    <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p><span class="glyphicon glyphicon-envelope"></span> lukas.jendele (at)
+                        gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                    <div class="img-box">
+                        <img src="/images/hokszad.jpg">
+                    </div>
+                    <h3>RNDr. David Hoksza, PhD</h3>
+                    <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p><span class="glyphicon glyphicon-envelope"></span> david.hoksza (at)
+                        mff.cuni.cz </p>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                    <div class="img-box">
+                        <img src="/images/krivakr.jpg">
+                    </div>
+                    <h3>Mgr. Radoslav Krivák</h3>
+                    <p>Faculty of Mathematics and Physics, Charles University</p>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                    <div class="img-box">
+                        <img src="/images/novotnym.jpg">
+                    </div>
+                    <h3>Mgr. Marian Novotný, Ph.D.</h3>
+                    <p>Faculty of Science, Charles University</p>
+                </div>
+            </div>
         </div>
     </jsp:body>
 </t:layout>
