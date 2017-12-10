@@ -14,7 +14,7 @@ var LiteMol;
     (function (PrankWeb) {
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
-        var ControlButtons = (function (_super) {
+        var ControlButtons = /** @class */ (function (_super) {
             __extends(ControlButtons, _super);
             function ControlButtons() {
                 return _super !== null && _super.apply(this, arguments) || this;
@@ -224,14 +224,14 @@ var LiteMol;
         var Views = Plugin.Views;
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
-        var CacheItem = (function () {
+        var CacheItem = /** @class */ (function () {
             function CacheItem(query, selectionInfo) {
                 this.query = query;
                 this.selectionInfo = selectionInfo;
             }
             return CacheItem;
         }());
-        var ProtaelFeature = (function () {
+        var ProtaelFeature = /** @class */ (function () {
             function ProtaelFeature(regionType, color, start, end, label, properties) {
                 this.regionType = regionType;
                 this.color = color;
@@ -242,7 +242,7 @@ var LiteMol;
             }
             return ProtaelFeature;
         }());
-        var ProtaelRegion = (function () {
+        var ProtaelRegion = /** @class */ (function () {
             function ProtaelRegion(label, start, end) {
                 this.color = "#DDD";
                 this.regionType = "Chain";
@@ -252,7 +252,7 @@ var LiteMol;
             }
             return ProtaelRegion;
         }());
-        var ProtaelContent = (function () {
+        var ProtaelContent = /** @class */ (function () {
             function ProtaelContent(seq, pocketFeatures, chains, conservationScores, bindingSites) {
                 this.qtracks = [];
                 this.sequence = seq;
@@ -267,7 +267,7 @@ var LiteMol;
             }
             return ProtaelContent;
         }());
-        var SequenceView = (function (_super) {
+        var SequenceView = /** @class */ (function (_super) {
             __extends(SequenceView, _super);
             function SequenceView() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -607,7 +607,7 @@ var LiteMol;
             return SequenceView;
         }(Views.View));
         PrankWeb.SequenceView = SequenceView;
-        var SequenceController = (function (_super) {
+        var SequenceController = /** @class */ (function (_super) {
             __extends(SequenceController, _super);
             function SequenceController(context) {
                 var _this = _super.call(this, context, { seq: { indices: [], seq: [], scores: [], bindingSites: [], regions: [] }, pockets: [], pocketVisibility: [], version: 0 }) || this;
@@ -660,14 +660,14 @@ var LiteMol;
         var Query = LiteMol.Core.Structure.Query;
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
-        var CacheItem = (function () {
+        var CacheItem = /** @class */ (function () {
             function CacheItem(query, selectionInfo) {
                 this.query = query;
                 this.selectionInfo = selectionInfo;
             }
             return CacheItem;
         }());
-        var PocketList = (function (_super) {
+        var PocketList = /** @class */ (function (_super) {
             __extends(PocketList, _super);
             function PocketList() {
                 return _super !== null && _super.apply(this, arguments) || this;
@@ -702,7 +702,7 @@ var LiteMol;
             return PocketList;
         }(React.Component));
         PrankWeb.PocketList = PocketList;
-        var Pocket = (function (_super) {
+        var Pocket = /** @class */ (function (_super) {
             __extends(Pocket, _super);
             function Pocket() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -1067,7 +1067,7 @@ var LiteMol;
                 LiteMol.Plugin.ReactDOM.render(React.createElement(App, { plugin: plugin, inputType: inputType, inputId: inputId }), target);
             }
             App_1.render = render;
-            var App = (function (_super) {
+            var App = /** @class */ (function (_super) {
                 __extends(App, _super);
                 function App() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -1173,7 +1173,7 @@ var LiteMol;
             ],
             viewport: {
                 view: Views.Visualization.Viewport,
-                controlsView: Views.Visualization.ViewportControls,
+                controlsView: Views.Visualization.ViewportControls
             },
             layoutView: Views.Layout,
             tree: { region: LayoutRegion.Left, view: Views.Entity.Tree }
@@ -1198,11 +1198,7 @@ var LiteMol;
                 customSpecification: PrankWeb.PrankWebSpec
             });
             plugin.context.logger.message("LiteMol " + Plugin.VERSION.number);
-            plugin.command(Bootstrap.Command.Layout.SetState, {
-                regionStates: (_a = {}, _a[Bootstrap.Components.LayoutRegion.Top] = 'Sticky', _a)
-            });
             return plugin;
-            var _a;
         }
         PrankWeb.create = create;
         // Div that LiteMol mounts into.

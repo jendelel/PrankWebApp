@@ -11159,6 +11159,7 @@ var CIFTools;
         Binary.Writer = Writer;
     })(Binary = CIFTools.Binary || (CIFTools.Binary = {}));
 })(CIFTools || (CIFTools = {}));
+var LiteMolCIFTools = CIFTools;
 // File:src/Three.js
 
 var LiteMolTHREE = (function () {
@@ -56176,7 +56177,7 @@ var LiteMol;
         Core.Promise = LiteMol.Promise;
         var Formats;
         (function (Formats) {
-            Formats.CIF = CIFTools;
+            Formats.CIF = LiteMolCIFTools;
         })(Formats = Core.Formats || (Core.Formats = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
@@ -56187,7 +56188,211 @@ var LiteMol;
 (function (LiteMol) {
     var Core;
     (function (Core) {
-        Core.VERSION = { number: "3.2.1", date: "July 5 2017" };
+        Core.VERSION = { number: "3.2.2", date: "Nov 14 2017" };
+    })(Core = LiteMol.Core || (LiteMol.Core = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var LiteMol;
+(function (LiteMol) {
+    var Core;
+    (function (Core) {
+        var Scheduler;
+        (function (Scheduler) {
+            "use strict";
+            function createImmediateActions() {
+                var tasksByHandle = {};
+                var doc = typeof document !== 'undefined' ? document : void 0;
+                var currentlyRunningATask = false;
+                var nextHandle = 1; // Spec says greater than zero
+                var registerImmediate;
+                function setImmediate(callback) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    // Callback can either be a function or a string
+                    if (typeof callback !== 'function') {
+                        callback = new Function('' + callback);
+                    }
+                    // Store and register the task
+                    var task = { callback: callback, args: args };
+                    tasksByHandle[nextHandle] = task;
+                    registerImmediate(nextHandle);
+                    return nextHandle++;
+                }
+                function clearImmediate(handle) {
+                    delete tasksByHandle[handle];
+                }
+                function run(task) {
+                    var callback = task.callback;
+                    var args = task.args;
+                    switch (args.length) {
+                        case 0:
+                            callback();
+                            break;
+                        case 1:
+                            callback(args[0]);
+                            break;
+                        case 2:
+                            callback(args[0], args[1]);
+                            break;
+                        case 3:
+                            callback(args[0], args[1], args[2]);
+                            break;
+                        default:
+                            callback.apply(undefined, args);
+                            break;
+                    }
+                }
+                function runIfPresent(handle) {
+                    // From the spec: 'Wait until any invocations of this algorithm started before this one have completed.'
+                    // So if we're currently running a task, we'll need to delay this invocation.
+                    if (currentlyRunningATask) {
+                        // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
+                        // 'too much recursion' error.
+                        setTimeout(runIfPresent, 0, handle);
+                    }
+                    else {
+                        var task = tasksByHandle[handle];
+                        if (task) {
+                            currentlyRunningATask = true;
+                            try {
+                                run(task);
+                            }
+                            finally {
+                                clearImmediate(handle);
+                                currentlyRunningATask = false;
+                            }
+                        }
+                    }
+                }
+                function installNextTickImplementation() {
+                    registerImmediate = function (handle) {
+                        process.nextTick(function () { runIfPresent(handle); });
+                    };
+                }
+                function canUsePostMessage() {
+                    // The test against `importScripts` prevents this implementation from being installed inside a web worker,
+                    // where `global.postMessage` means something completely different and can't be used for this purpose.
+                    var global = window;
+                    if (global && global.postMessage && !global.importScripts) {
+                        var postMessageIsAsynchronous_1 = true;
+                        var oldOnMessage = global.onmessage;
+                        global.onmessage = function () {
+                            postMessageIsAsynchronous_1 = false;
+                        };
+                        global.postMessage('', '*');
+                        global.onmessage = oldOnMessage;
+                        return postMessageIsAsynchronous_1;
+                    }
+                    return void 0;
+                }
+                function installPostMessageImplementation() {
+                    // Installs an event handler on `global` for the `message` event: see
+                    // * https://developer.mozilla.org/en/DOM/window.postMessage
+                    // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+                    var global = window;
+                    var messagePrefix = 'setImmediate$' + Math.random() + '$';
+                    var onGlobalMessage = function (event) {
+                        if (event.source === global &&
+                            typeof event.data === 'string' &&
+                            event.data.indexOf(messagePrefix) === 0) {
+                            runIfPresent(+event.data.slice(messagePrefix.length));
+                        }
+                    };
+                    if (window.addEventListener) {
+                        window.addEventListener('message', onGlobalMessage, false);
+                    }
+                    else {
+                        window.attachEvent('onmessage', onGlobalMessage);
+                    }
+                    registerImmediate = function (handle) {
+                        window.postMessage(messagePrefix + handle, '*');
+                    };
+                }
+                function installMessageChannelImplementation() {
+                    var channel = new MessageChannel();
+                    channel.port1.onmessage = function (event) {
+                        var handle = event.data;
+                        runIfPresent(handle);
+                    };
+                    registerImmediate = function (handle) {
+                        channel.port2.postMessage(handle);
+                    };
+                }
+                function installReadyStateChangeImplementation() {
+                    var html = doc.documentElement;
+                    registerImmediate = function (handle) {
+                        // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
+                        // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
+                        var script = doc.createElement('script');
+                        script.onreadystatechange = function () {
+                            runIfPresent(handle);
+                            script.onreadystatechange = null;
+                            html.removeChild(script);
+                            script = null;
+                        };
+                        html.appendChild(script);
+                    };
+                }
+                function installSetTimeoutImplementation() {
+                    registerImmediate = function (handle) {
+                        setTimeout(runIfPresent, 0, handle);
+                    };
+                }
+                // Don't get fooled by e.g. browserify environments.
+                if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+                    // For Node.js before 0.9
+                    installNextTickImplementation();
+                }
+                else if (canUsePostMessage()) {
+                    // For non-IE10 modern browsers
+                    installPostMessageImplementation();
+                }
+                else if (typeof MessageChannel !== 'undefined') {
+                    // For web workers, where supported
+                    installMessageChannelImplementation();
+                }
+                else if (doc && 'onreadystatechange' in doc.createElement('script')) {
+                    // For IE 6–8
+                    installReadyStateChangeImplementation();
+                }
+                else {
+                    // For older browsers
+                    installSetTimeoutImplementation();
+                }
+                return {
+                    setImmediate: setImmediate,
+                    clearImmediate: clearImmediate
+                };
+            }
+            var immediateActions = (function () {
+                if (typeof setImmediate !== 'undefined') {
+                    if (typeof window !== 'undefined') {
+                        // this is because of IE
+                        return { setImmediate: function (handler) {
+                                var args = [];
+                                for (var _i = 1; _i < arguments.length; _i++) {
+                                    args[_i - 1] = arguments[_i];
+                                }
+                                return window.setImmediate.apply(window, [handler].concat(args));
+                            }, clearImmediate: function (handle) { return window.clearImmediate(handle); } };
+                    }
+                    else
+                        return { setImmediate: setImmediate, clearImmediate: Scheduler.clearImmediate };
+                }
+                return createImmediateActions();
+            }());
+            function resolveImmediate(res) {
+                immediateActions.setImmediate(res);
+            }
+            Scheduler.immediate = immediateActions.setImmediate;
+            Scheduler.clearImmediate = immediateActions.clearImmediate;
+            function immediatePromise() { return new Core.Promise(resolveImmediate); }
+            Scheduler.immediatePromise = immediatePromise;
+        })(Scheduler = Core.Scheduler || (Core.Scheduler = {}));
     })(Core = LiteMol.Core || (LiteMol.Core = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -56237,7 +56442,7 @@ var LiteMol;
             return new Computation(c);
         }
         Core.computation = computation;
-        var Computation = (function () {
+        var Computation = /** @class */ (function () {
             function Computation(computation) {
                 this.computation = computation;
             }
@@ -56296,7 +56501,7 @@ var LiteMol;
             Computation.Aborted = 'Aborted';
             Computation.UpdateProgressDelta = 100;
         })(Computation = Core.Computation || (Core.Computation = {}));
-        var ContextImpl = (function () {
+        var ContextImpl = /** @class */ (function () {
             function ContextImpl() {
                 var _this = this;
                 this._abortRequested = false;
@@ -56361,7 +56566,8 @@ var LiteMol;
                     this._progress.max = max;
                 }
                 this.progressTick.onNext(this._progress);
-                return new Core.Promise(function (res) { return setTimeout(res, 0); });
+                return Core.Scheduler.immediatePromise();
+                //return new Promise<void>(res => setTimeout(res, 0));
             };
             ContextImpl.prototype.started = function () {
                 this.startEndCounter++;
@@ -56535,14 +56741,14 @@ var LiteMol;
             })(FastSet = Utils.FastSet || (Utils.FastSet = {}));
             var Mask;
             (function (Mask) {
-                var EmptyMask = (function () {
+                var EmptyMask = /** @class */ (function () {
                     function EmptyMask(size) {
                         this.size = size;
                     }
                     EmptyMask.prototype.has = function (i) { return false; };
                     return EmptyMask;
                 }());
-                var SingletonMask = (function () {
+                var SingletonMask = /** @class */ (function () {
                     function SingletonMask(idx, size) {
                         this.idx = idx;
                         this.size = size;
@@ -56550,7 +56756,7 @@ var LiteMol;
                     SingletonMask.prototype.has = function (i) { return i === this.idx; };
                     return SingletonMask;
                 }());
-                var BitMask = (function () {
+                var BitMask = /** @class */ (function () {
                     function BitMask(mask, size) {
                         this.mask = mask;
                         this.size = size;
@@ -56558,7 +56764,7 @@ var LiteMol;
                     BitMask.prototype.has = function (i) { return this.mask[i]; };
                     return BitMask;
                 }());
-                var AllMask = (function () {
+                var AllMask = /** @class */ (function () {
                     function AllMask(size) {
                         this.size = size;
                     }
@@ -56801,7 +57007,7 @@ var LiteMol;
                     }
                     return row;
                 }
-                var TableImpl = (function () {
+                var TableImpl = /** @class */ (function () {
                     function TableImpl(count, srcColumns, srcData) {
                         this.__rowIndexer = { index: 0 };
                         this.count = count;
@@ -56839,7 +57045,7 @@ var LiteMol;
                     };
                     return TableImpl;
                 }());
-                var BuilderImpl = (function () {
+                var BuilderImpl = /** @class */ (function () {
                     function BuilderImpl(count) {
                         this.columns = [];
                         this.count = count;
@@ -57154,7 +57360,7 @@ var LiteMol;
                     }
                 })();
             })(PerformanceHelper || (PerformanceHelper = {}));
-            var PerformanceMonitor = (function () {
+            var PerformanceMonitor = /** @class */ (function () {
                 function PerformanceMonitor() {
                     this.starts = Utils.FastMap.create();
                     this.ends = Utils.FastMap.create();
@@ -57278,7 +57484,7 @@ var LiteMol;
                 }
                 ParserResult.success = success;
             })(ParserResult = Formats.ParserResult || (Formats.ParserResult = {}));
-            var ParserError = (function () {
+            var ParserError = /** @class */ (function () {
                 function ParserError(message, line) {
                     this.message = message;
                     this.line = line;
@@ -57293,7 +57499,7 @@ var LiteMol;
                 return ParserError;
             }());
             Formats.ParserError = ParserError;
-            var ParserSuccess = (function () {
+            var ParserSuccess = /** @class */ (function () {
                 function ParserSuccess(result, warnings) {
                     this.result = result;
                     this.warnings = warnings;
@@ -57369,10 +57575,9 @@ var LiteMol;
                         Defaults.ModelId = '1';
                     })(Defaults || (Defaults = {}));
                     function getTransform(category, matrixField, translationField, row) {
-                        var ret = Core.Geometry.LinearAlgebra.Matrix4.identity(), i, j, c;
+                        var ret = Core.Geometry.LinearAlgebra.Matrix4.identity(), i, j;
                         for (i = 1; i <= 3; i++) {
                             for (j = 1; j <= 3; j++) {
-                                c = matrixField + "[" + i + "][" + j + "]";
                                 Core.Geometry.LinearAlgebra.Matrix4.setValue(ret, i - 1, j - 1, category.getColumn(matrixField + "[" + i + "][" + j + "]").getFloat(row));
                             }
                             Core.Geometry.LinearAlgebra.Matrix4.setValue(ret, i - 1, 3, category.getColumn(translationField + "[" + i + "]").getFloat(row));
@@ -57797,11 +58002,12 @@ var LiteMol;
                             var pdbx_end_PDB_ins_code = _struct_sheet_range.getColumn('pdbx_end_PDB_ins_code');
                             var symmetry = _struct_sheet_range.getColumn('symmetry');
                             var sheet_id = _struct_sheet_range.getColumn('sheet_id');
+                            var id = _struct_sheet_range.getColumn('id');
                             for (i = 0; i < _struct_sheet_range.rowCount; i++) {
                                 input[input.length] = new Core.Structure.SecondaryStructureElement(3 /* Sheet */, residueIdfromColumns(i, beg_label_asym_id, beg_label_seq_id, pdbx_beg_PDB_ins_code), residueIdfromColumns(i, end_label_asym_id, end_label_seq_id, pdbx_end_PDB_ins_code), {
                                     symmetry: symmetry.getString(i),
                                     sheetId: sheet_id.getString(i),
-                                    id: sheet_id.getString(i)
+                                    id: id.getString(i)
                                 });
                             }
                         }
@@ -58171,7 +58377,7 @@ var LiteMol;
                 var PDB;
                 (function (PDB) {
                     "use strict";
-                    var MoleculeData = (function () {
+                    var MoleculeData = /** @class */ (function () {
                         function MoleculeData(header, crystInfo, models, data) {
                             this.header = header;
                             this.crystInfo = crystInfo;
@@ -58224,14 +58430,14 @@ var LiteMol;
                         return MoleculeData;
                     }());
                     PDB.MoleculeData = MoleculeData;
-                    var Header = (function () {
+                    var Header = /** @class */ (function () {
                         function Header(id) {
                             this.id = id;
                         }
                         return Header;
                     }());
                     PDB.Header = Header;
-                    var CrystStructureInfo = (function () {
+                    var CrystStructureInfo = /** @class */ (function () {
                         function CrystStructureInfo(record) {
                             this.record = record;
                         }
@@ -58282,7 +58488,7 @@ var LiteMol;
                         return CrystStructureInfo;
                     }());
                     PDB.CrystStructureInfo = CrystStructureInfo;
-                    var SecondaryStructure = (function () {
+                    var SecondaryStructure = /** @class */ (function () {
                         function SecondaryStructure(helixTokens, sheetTokens) {
                             this.helixTokens = helixTokens;
                             this.sheetTokens = sheetTokens;
@@ -58293,7 +58499,7 @@ var LiteMol;
                         return SecondaryStructure;
                     }());
                     PDB.SecondaryStructure = SecondaryStructure;
-                    var ModelData = (function () {
+                    var ModelData = /** @class */ (function () {
                         function ModelData(idToken, atomTokens, atomCount) {
                             this.idToken = idToken;
                             this.atomTokens = atomTokens;
@@ -58462,7 +58668,7 @@ var LiteMol;
                         return ModelData;
                     }());
                     PDB.ModelData = ModelData;
-                    var ModelsData = (function () {
+                    var ModelsData = /** @class */ (function () {
                         function ModelsData(models) {
                             this.models = models;
                         }
@@ -58502,7 +58708,7 @@ var LiteMol;
                 var PDB;
                 (function (PDB) {
                     "use strict";
-                    var Tokenizer = (function () {
+                    var Tokenizer = /** @class */ (function () {
                         function Tokenizer(data) {
                             this.data = data;
                             this.trimmedToken = { start: 0, end: 0 };
@@ -58636,7 +58842,7 @@ var LiteMol;
                         };
                         return Tokenizer;
                     }());
-                    var Parser = (function () {
+                    var Parser = /** @class */ (function () {
                         function Parser() {
                         }
                         Parser.tokenizeAtom = function (tokens, tokenizer) {
@@ -59037,7 +59243,7 @@ var LiteMol;
                 /**
                  * A field with the Z axis being the slowest and the X being the fastest.
                  */
-                var Field3DZYX = (function () {
+                var Field3DZYX = /** @class */ (function () {
                     function Field3DZYX(data, dimensions) {
                         this.data = data;
                         this.dimensions = dimensions;
@@ -60730,7 +60936,7 @@ var LiteMol;
                     }); });
                 }
                 MarchingCubes.compute = compute;
-                var MarchingCubesComputation = (function () {
+                var MarchingCubesComputation = /** @class */ (function () {
                     function MarchingCubesComputation(parameters, ctx) {
                         this.ctx = ctx;
                         this.minX = 0;
@@ -60825,7 +61031,7 @@ var LiteMol;
                     };
                     return MarchingCubesComputation;
                 }());
-                var MarchingCubesState = (function () {
+                var MarchingCubesState = /** @class */ (function () {
                     function MarchingCubesState(params) {
                         this.vertList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                         this.i = 0;
@@ -60950,7 +61156,7 @@ var LiteMol;
         (function (Geometry) {
             var MarchingCubes;
             (function (MarchingCubes) {
-                var Index = (function () {
+                var Index = /** @class */ (function () {
                     function Index(i, j, k) {
                         this.i = i | 0;
                         this.j = j | 0;
@@ -60959,7 +61165,7 @@ var LiteMol;
                     return Index;
                 }());
                 MarchingCubes.Index = Index;
-                var IndexPair = (function () {
+                var IndexPair = /** @class */ (function () {
                     function IndexPair(a, b) {
                         this.a = a;
                         this.b = b;
@@ -61382,7 +61588,7 @@ var LiteMol;
             var MolecularSurface;
             (function (MolecularSurface) {
                 "use strict";
-                var MolecularIsoSurfaceParametersWrapper = (function () {
+                var MolecularIsoSurfaceParametersWrapper = /** @class */ (function () {
                     function MolecularIsoSurfaceParametersWrapper(params) {
                         Core.Utils.extend(this, params, {
                             exactBoundary: false,
@@ -61400,7 +61606,7 @@ var LiteMol;
                     }
                     return MolecularIsoSurfaceParametersWrapper;
                 }());
-                var MolecularIsoFieldComputation = (function () {
+                var MolecularIsoFieldComputation = /** @class */ (function () {
                     function MolecularIsoFieldComputation(inputParameters, ctx) {
                         this.inputParameters = inputParameters;
                         this.ctx = ctx;
@@ -61663,7 +61869,7 @@ var LiteMol;
         (function (Structure) {
             "use strict";
             var DataTable = Core.Utils.DataTable;
-            var ComponentBondInfoEntry = (function () {
+            var ComponentBondInfoEntry = /** @class */ (function () {
                 function ComponentBondInfoEntry(id) {
                     this.id = id;
                     this.map = Core.Utils.FastMap.create();
@@ -61688,7 +61894,7 @@ var LiteMol;
                 return ComponentBondInfoEntry;
             }());
             Structure.ComponentBondInfoEntry = ComponentBondInfoEntry;
-            var ComponentBondInfo = (function () {
+            var ComponentBondInfo = /** @class */ (function () {
                 function ComponentBondInfo() {
                     this.entries = Core.Utils.FastMap.create();
                 }
@@ -61703,7 +61909,7 @@ var LiteMol;
             /**
              * Identifier for a reside that is a part of the polymer.
              */
-            var PolyResidueIdentifier = (function () {
+            var PolyResidueIdentifier = /** @class */ (function () {
                 function PolyResidueIdentifier(asymId, seqNumber, insCode) {
                     this.asymId = asymId;
                     this.seqNumber = seqNumber;
@@ -61747,7 +61953,7 @@ var LiteMol;
                 return PolyResidueIdentifier;
             }());
             Structure.PolyResidueIdentifier = PolyResidueIdentifier;
-            var SecondaryStructureElement = (function () {
+            var SecondaryStructureElement = /** @class */ (function () {
                 function SecondaryStructureElement(type, startResidueId, endResidueId, info) {
                     if (info === void 0) { info = {}; }
                     this.type = type;
@@ -61767,7 +61973,7 @@ var LiteMol;
                 return SecondaryStructureElement;
             }());
             Structure.SecondaryStructureElement = SecondaryStructureElement;
-            var SymmetryInfo = (function () {
+            var SymmetryInfo = /** @class */ (function () {
                 function SymmetryInfo(spacegroupName, cellSize, cellAngles, toFracTransform, isNonStandardCrytalFrame) {
                     this.spacegroupName = spacegroupName;
                     this.cellSize = cellSize;
@@ -61781,7 +61987,7 @@ var LiteMol;
             /**
              * Wraps _struct_conn mmCIF category.
              */
-            var StructConn = (function () {
+            var StructConn = /** @class */ (function () {
                 function StructConn(entries) {
                     this.entries = entries;
                     this._residuePairIndex = void 0;
@@ -61846,7 +62052,7 @@ var LiteMol;
             /**
              * Wraps an assembly operator.
              */
-            var AssemblyOperator = (function () {
+            var AssemblyOperator = /** @class */ (function () {
                 function AssemblyOperator(id, name, operator) {
                     this.id = id;
                     this.name = name;
@@ -61858,7 +62064,7 @@ var LiteMol;
             /**
              * Wraps a single assembly gen entry.
              */
-            var AssemblyGenEntry = (function () {
+            var AssemblyGenEntry = /** @class */ (function () {
                 function AssemblyGenEntry(operators, asymIds) {
                     this.operators = operators;
                     this.asymIds = asymIds;
@@ -61869,7 +62075,7 @@ var LiteMol;
             /**
              * Wraps an assembly generation template.
              */
-            var AssemblyGen = (function () {
+            var AssemblyGen = /** @class */ (function () {
                 function AssemblyGen(name) {
                     this.name = name;
                     this.gens = [];
@@ -61880,7 +62086,7 @@ var LiteMol;
             /**
              * Information about the assemblies.
              */
-            var AssemblyInfo = (function () {
+            var AssemblyInfo = /** @class */ (function () {
                 function AssemblyInfo(operators, assemblies) {
                     this.operators = operators;
                     this.assemblies = assemblies;
@@ -61966,7 +62172,7 @@ var LiteMol;
                     details: nullStr
                 };
             })(Tables = Structure.Tables || (Structure.Tables = {}));
-            var Operator = (function () {
+            var Operator = /** @class */ (function () {
                 function Operator(matrix, id, isIdentity) {
                     this.matrix = matrix;
                     this.id = id;
@@ -62288,7 +62494,7 @@ var LiteMol;
             "use strict";
             var Mat4 = Core.Geometry.LinearAlgebra.Matrix4;
             var Vec4 = Core.Geometry.LinearAlgebra.Vector4;
-            var Spacegroup = (function () {
+            var Spacegroup = /** @class */ (function () {
                 function Spacegroup(info) {
                     this.info = info;
                     this.temp = Mat4.zero();
@@ -64416,7 +64622,7 @@ var LiteMol;
                  * - the molecule itself.
                  *
                  */
-                var Context = (function () {
+                var Context = /** @class */ (function () {
                     function Context(structure, mask) {
                         this.mask = mask;
                         this.structure = structure;
@@ -64503,7 +64709,7 @@ var LiteMol;
                  * The basic element of the query language.
                  * Everything is represented as a fragment.
                  */
-                var Fragment = (function () {
+                var Fragment = /** @class */ (function () {
                     /**
                      * Create a fragment from an integer set.
                      */
@@ -64724,7 +64930,7 @@ var LiteMol;
                 /**
                  * A sequence of fragments the queries operate on.
                  */
-                var FragmentSeq = (function () {
+                var FragmentSeq = /** @class */ (function () {
                     function FragmentSeq(context, fragments) {
                         this.context = context;
                         this.fragments = fragments;
@@ -64783,7 +64989,7 @@ var LiteMol;
                 /**
                  * A builder that includes all fragments.
                  */
-                var FragmentSeqBuilder = (function () {
+                var FragmentSeqBuilder = /** @class */ (function () {
                     function FragmentSeqBuilder(ctx) {
                         this.ctx = ctx;
                         this.fragments = [];
@@ -64800,7 +65006,7 @@ var LiteMol;
                 /**
                  * A builder that includes only unique fragments.
                  */
-                var HashFragmentSeqBuilder = (function () {
+                var HashFragmentSeqBuilder = /** @class */ (function () {
                     function HashFragmentSeqBuilder(ctx) {
                         this.ctx = ctx;
                         this.fragments = [];
@@ -65040,7 +65246,7 @@ var LiteMol;
                  */
                 var Compiler;
                 (function (Compiler) {
-                    var OptimizedId = (function () {
+                    var OptimizedId = /** @class */ (function () {
                         function OptimizedId(id, arrays) {
                             this.columns = [];
                             for (var _i = 0, _a = Object.keys(id); _i < _a.length; _i++) {
@@ -65595,7 +65801,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        Visualization.VERSION = { number: "1.7.2", date: "July 1 2017" };
+        Visualization.VERSION = { number: "1.7.5", date: "Oct 26 2017" };
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -65615,7 +65821,7 @@ var LiteMol;
         var Utils;
         (function (Utils) {
             "use strict";
-            var Palette = (function () {
+            var Palette = /** @class */ (function () {
                 function Palette() {
                 }
                 Palette.getRandomColor = function (amountOfGrey) {
@@ -65687,7 +65893,7 @@ var LiteMol;
             }
         }
         Visualization.checkWebGL = checkWebGL;
-        var GeometryHelper = (function () {
+        var GeometryHelper = /** @class */ (function () {
             function GeometryHelper() {
             }
             GeometryHelper.setPickBase = function (objectId, objectIdWidth, elementId, color) {
@@ -65992,7 +66198,7 @@ var LiteMol;
                 };
             }
             Theme.createPalleteIndexMapping = createPalleteIndexMapping;
-            var PaletteIndexMapper = (function () {
+            var PaletteIndexMapper = /** @class */ (function () {
                 function PaletteIndexMapper(pallete) {
                     this.pallete = pallete;
                 }
@@ -66002,7 +66208,7 @@ var LiteMol;
                 };
                 return PaletteIndexMapper;
             }());
-            var PaletteMapper = (function () {
+            var PaletteMapper = /** @class */ (function () {
                 function PaletteMapper(pallete) {
                     this.pallete = pallete;
                     this.colorIndex = 0;
@@ -66019,7 +66225,7 @@ var LiteMol;
                 };
                 return PaletteMapper;
             }());
-            var ColorMapMapper = (function () {
+            var ColorMapMapper = /** @class */ (function () {
                 function ColorMapMapper(map, fallbackColor) {
                     this.map = map;
                     this.fallbackColor = fallbackColor;
@@ -66043,7 +66249,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        var MaterialsHelper = (function () {
+        var MaterialsHelper = /** @class */ (function () {
             function MaterialsHelper() {
             }
             MaterialsHelper.getPickMaterial = function () {
@@ -66315,13 +66521,13 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        var GeometryBase = (function () {
+        var GeometryBase = /** @class */ (function () {
             function GeometryBase() {
             }
             return GeometryBase;
         }());
         Visualization.GeometryBase = GeometryBase;
-        var Model = (function () {
+        var Model = /** @class */ (function () {
             function Model() {
                 this.id = -1; // assigned by "manager"
                 // base
@@ -66418,7 +66624,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        var ModelStore = (function () {
+        var ModelStore = /** @class */ (function () {
             function ModelStore(scene) {
                 this.scene = scene;
                 this.availableIds = [];
@@ -66526,7 +66732,7 @@ var LiteMol;
             CameraType[CameraType["Orthographic"] = 1] = "Orthographic";
         })(CameraType = Visualization.CameraType || (Visualization.CameraType = {}));
         var LA = LiteMol.Core.Geometry.LinearAlgebra;
-        var SlabControls = (function () {
+        var SlabControls = /** @class */ (function () {
             function SlabControls(element) {
                 var _this = this;
                 this.touchSlabOn = false;
@@ -66563,7 +66769,7 @@ var LiteMol;
                 this.subs.push(function () { return element.removeEventListener('touchend', events.touchEnd, false); });
                 this.subs.push(function () { return element.removeEventListener('touchmove', events.touchMove, false); });
             }
-            SlabControls.prototype.updateSize = function (w, h) { this.width = w; this.height = h; };
+            SlabControls.prototype.updateSize = function (w, h) { /* this.width = w;*/ this.height = h; };
             SlabControls.prototype.updateRadius = function (r) { this.radius = r; };
             SlabControls.prototype.destroy = function () {
                 for (var _i = 0, _a = this.subs; _i < _a.length; _i++) {
@@ -66649,7 +66855,7 @@ var LiteMol;
             return SlabControls;
         }());
         Visualization.SlabControls = SlabControls;
-        var Camera = (function () {
+        var Camera = /** @class */ (function () {
             function Camera(scene, domElement) {
                 this.scene = scene;
                 this.domElement = domElement;
@@ -66744,11 +66950,11 @@ var LiteMol;
                 this.focusPoint.x = center.x;
                 this.focusPoint.y = center.y;
                 this.focusPoint.z = center.z;
-                this.focusRadius = radius;
+                this.focusRadius = Math.max(radius, 1);
                 this.slabControls.updateRadius(this.focusRadius);
                 this.nearPlaneDelta = 0;
                 this.fogDelta = 0;
-                this.controls.panAndMoveToDistance(this.focusPoint, radius * 4);
+                this.controls.panAndMoveToDistance(this.focusPoint, this.focusRadius * 4);
             };
             Camera.prototype.move = function (target) {
                 this.controls.panTo(target);
@@ -66895,11 +67101,12 @@ var LiteMol;
         Visualization.DefaultSceneOptions = {
             alpha: false,
             clearColor: { r: 0, g: 0, b: 0 },
+            cameraSpeed: 6,
             cameraFOV: 30,
             cameraType: Visualization.CameraType.Perspective,
             enableFog: true
         };
-        var MouseInfo = (function () {
+        var MouseInfo = /** @class */ (function () {
             function MouseInfo(renderState, domElement) {
                 this.renderState = renderState;
                 this.domElement = domElement;
@@ -66948,7 +67155,7 @@ var LiteMol;
             return MouseInfo;
         }());
         Visualization.MouseInfo = MouseInfo;
-        var DefaultLighting = (function () {
+        var DefaultLighting = /** @class */ (function () {
             function DefaultLighting() {
                 this.lights = [];
             }
@@ -66968,7 +67175,7 @@ var LiteMol;
             return DefaultLighting;
         }());
         Visualization.DefaultLighting = DefaultLighting;
-        var RenderState = (function () {
+        var RenderState = /** @class */ (function () {
             function RenderState() {
                 this.width = 0.0;
                 this.height = 0.0;
@@ -66981,13 +67188,13 @@ var LiteMol;
             return RenderState;
         }());
         Visualization.RenderState = RenderState;
-        var Scene = (function () {
+        var Scene = /** @class */ (function () {
             function Scene(element, options) {
                 if (options === void 0) { options = {}; }
                 var _this = this;
                 this.renderState = new RenderState();
                 this.pickInfo = new Visualization.Selection.Pick();
-                this.selectInfo = null;
+                //private selectInfo: Selection.Info | null = null;
                 this.unbindEvents = [];
                 this.models = new Visualization.ModelStore(this);
                 this.events = new Visualization.THREE.EventDispatcher();
@@ -67043,6 +67250,10 @@ var LiteMol;
                 this.renderer.setClearColor(new Visualization.THREE.Color(cc.r, cc.g, cc.b));
                 this.renderer.setClearAlpha(options.alpha ? 0.0 : 1.0);
                 this.camera.fog.color.setRGB(cc.r, cc.g, cc.b);
+                if (this.camera.controls) {
+                    this.camera.controls.rotateSpeed = options.cameraSpeed;
+                    this.camera.controls.zoomSpeed = options.cameraSpeed;
+                }
                 this.options = options;
                 if (updateCamera)
                     this.camera.createCamera();
@@ -67073,7 +67284,7 @@ var LiteMol;
                         _this.handleSelectStart(e.clientX, e.clientY);
                     }
                     else {
-                        _this.selectInfo = null;
+                        //this.selectInfo = null;
                     }
                     _this.mouseInfo.isButtonDown = true;
                     _this.clearHighlights();
@@ -67123,14 +67334,14 @@ var LiteMol;
             };
             Scene.prototype.handleSelectStart = function (x, y) {
                 this.pickInfo.selectStart(x, y);
-                this.selectInfo = this.pickInfo.getPickInfo();
+                //this.selectInfo = this.pickInfo.getPickInfo();
             };
             Scene.prototype.handleSelectEnd = function (x, y) {
                 if (this.pickInfo.selectEnd(x, y)) {
                     var info = this.handlePick(true);
                     this.dispatchSelectEvent(info);
                 }
-                this.selectInfo = null;
+                // this.selectInfo = null;
             };
             Scene.prototype.handleResize = function () {
                 var w = this.parentElement.clientWidth, h = this.parentElement.clientHeight;
@@ -67262,8 +67473,21 @@ var LiteMol;
             Scene.prototype.clear = function () {
                 this.models.clear();
             };
-            Scene.prototype.screenshotAsDataURL = function () {
-                return this.renderer.domElement.toDataURL('image/png');
+            Scene.prototype.downloadScreenshot = function () {
+                var uri = this.renderer.domElement.toDataURL('image/png');
+                var a = document.createElement('a');
+                if ('download' in a) {
+                    a.style.visibility = 'hidden';
+                    a.href = uri;
+                    a.target = '_blank';
+                    a.download = 'litemol_screenshot.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
+                else {
+                    window.open(uri, '_blank');
+                }
             };
             Scene.prototype.destroy = function () {
                 //clearInterval(this.updateSizeInterval);
@@ -67309,7 +67533,7 @@ var LiteMol;
     (function (Visualization) {
         ;
         // ported and modified from threejs Trackball Controls
-        var CameraControls = (function () {
+        var CameraControls = /** @class */ (function () {
             function CameraControls(camera, domElement, scene) {
                 var _this = this;
                 this.camera = camera;
@@ -67317,8 +67541,8 @@ var LiteMol;
                 this.scene = scene;
                 this.enabled = true;
                 //private screen = { left: 0, top: 0, width: 0, height: 0 };
-                this.rotateSpeed = 3.33;
-                this.zoomSpeed = 3.33;
+                this.rotateSpeed = 6;
+                this.zoomSpeed = 6;
                 this.panSpeed = 1.0;
                 this.noRotate = false;
                 this.noZoom = false;
@@ -67328,7 +67552,7 @@ var LiteMol;
                 this.dynamicDampingFactor = 0.2;
                 this.minDistance = 1.5;
                 this.maxDistance = 100000;
-                this.keys = [65 /*A*/, 83 /*S*/, 68 /*D*/];
+                this.keys = [65 /*A*/, 16 /*S*/, 17 /*D*/];
                 this.target = new Visualization.THREE.Vector3();
                 // internals
                 this.EPS = 0.000001;
@@ -67756,7 +67980,7 @@ var LiteMol;
     (function (Visualization) {
         var Selection;
         (function (Selection) {
-            var Pick = (function () {
+            var Pick = /** @class */ (function () {
                 function Pick() {
                     this.current = null;
                     this.currentPickId = -1;
@@ -67766,6 +67990,8 @@ var LiteMol;
                 Pick.prototype.getPickInfo = function () {
                     if (!this.current)
                         return this.current;
+                    if (this.current.elements && !this.current.elements.length)
+                        return null;
                     return {
                         model: this.current.model,
                         elements: this.current.elements,
@@ -67825,7 +68051,7 @@ var LiteMol;
             })(Picking = Selection.Picking || (Selection.Picking = {}));
             ;
             var ChunkedArray = LiteMol.Core.Utils.ChunkedArray;
-            var VertexMapBuilder = (function () {
+            var VertexMapBuilder = /** @class */ (function () {
                 function VertexMapBuilder(elementCount) {
                     this.elementMap = LiteMol.Core.Utils.FastMap.create();
                     this.elementIndex = 0;
@@ -67858,7 +68084,7 @@ var LiteMol;
                 return VertexMapBuilder;
             }());
             Selection.VertexMapBuilder = VertexMapBuilder;
-            var VertexMap = (function () {
+            var VertexMap = /** @class */ (function () {
                 function VertexMap(elementIndices, elementMap, elementRanges, vertexRanges) {
                     this.elementIndices = elementIndices;
                     this.elementMap = elementMap;
@@ -68442,7 +68668,7 @@ var LiteMol;
                 });
             }
             Surface.buildGeometry = buildGeometry;
-            var Geometry = (function (_super) {
+            var Geometry = /** @class */ (function (_super) {
                 __extends(Geometry, _super);
                 function Geometry() {
                     var _this = _super.call(this) || this;
@@ -68478,12 +68704,15 @@ var LiteMol;
         (function (Surface) {
             "use strict";
             Surface.DefaultSurfaceModelParameters = {
-                isWireframe: false
+                isWireframe: false,
+                mapPickElements: void 0
             };
-            var Model = (function (_super) {
+            var Model = /** @class */ (function (_super) {
                 __extends(Model, _super);
                 function Model() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                    _this._mapPickElements = void 0;
+                    return _this;
                 }
                 Model.prototype.applySelectionInternal = function (indices, action) {
                     var buffer = this.geometry.vertexStateBuffer, array = buffer.array, map = this.geometry.elementToVertexMap, vertexRanges = map.vertexRanges, changed = false;
@@ -68506,7 +68735,7 @@ var LiteMol;
                 };
                 Model.prototype.highlightElement = function (pickId, highlight) {
                     if (this.surface.annotation) {
-                        return this.applySelection(this.getPickElements(pickId), highlight ? 3 /* Highlight */ : 4 /* RemoveHighlight */);
+                        return this.applySelection([pickId - 1], highlight ? 3 /* Highlight */ : 4 /* RemoveHighlight */);
                     }
                     else {
                         return this.highlightInternal(highlight);
@@ -68517,7 +68746,10 @@ var LiteMol;
                 };
                 Model.prototype.getPickElements = function (pickId) {
                     if (!pickId)
-                        return [];
+                        return [0];
+                    if (this._mapPickElements) {
+                        return this._mapPickElements(pickId - 1) || [];
+                    }
                     return [pickId - 1];
                 };
                 Model.prototype.getBoundingSphereOfSelection = function (indices) {
@@ -68639,6 +68871,7 @@ var LiteMol;
                                 case 1:
                                     geometry = _a.sent();
                                     ret = new Model();
+                                    ret._mapPickElements = parameters.mapPickElements;
                                     ret.surface = surface;
                                     ret.material = Visualization.MaterialsHelper.getMeshMaterial(Visualization.THREE.FlatShading, !!parameters.isWireframe); //new THREE.MeshPhongMaterial({ specular: 0xAAAAAA, /*ambient: 0xffffff, */shininess: 1, shading: THREE.FlatShading, side: THREE.DoubleSide, vertexColors: THREE.VertexColors });
                                     ret.geometry = geometry;
@@ -68676,7 +68909,7 @@ var LiteMol;
         var Lines;
         (function (Lines) {
             "use strict";
-            var Geometry = (function (_super) {
+            var Geometry = /** @class */ (function (_super) {
                 __extends(Geometry, _super);
                 function Geometry() {
                     var _this = _super.call(this) || this;
@@ -68731,7 +68964,7 @@ var LiteMol;
         var Lines;
         (function (Lines) {
             "use strict";
-            var Model = (function (_super) {
+            var Model = /** @class */ (function (_super) {
                 __extends(Model, _super);
                 function Model() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -68822,7 +69055,7 @@ var LiteMol;
                 return atlas;
             }
             Labels.getTextAtlas = getTextAtlas;
-            var TextAtlas = (function () {
+            var TextAtlas = /** @class */ (function () {
                 function TextAtlas(params) {
                     this.gamma = 1;
                     this.mapped = LiteMol.Core.Utils.FastMap.create();
@@ -69275,11 +69508,12 @@ var LiteMol;
                 attachment: 'middle-center',
                 backgroundMargin: 1.0
             };
-            var Model = (function (_super) {
+            var Model = /** @class */ (function (_super) {
                 __extends(Model, _super);
                 function Model() {
                     return _super !== null && _super.apply(this, arguments) || this;
                 }
+                //private options: LabelsOptions;
                 Model.prototype.applySelectionInternal = function (indices, action) { return false; };
                 Model.prototype.getPickElements = function (pickId) { return []; };
                 ;
@@ -69325,18 +69559,18 @@ var LiteMol;
                 Model.create = function (entity, params) {
                     var _this = this;
                     return LiteMol.Core.computation(function (ctx) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, geometry, texture, options, model;
+                        var _a, geometry, texture /*, options*/, model;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0: return [4 /*yield*/, ctx.updateProgress('Creating labels geometry...')];
                                 case 1:
                                     _b.sent();
-                                    _a = Labels.Geometry.create(params), geometry = _a.geometry, texture = _a.texture, options = _a.options;
+                                    _a = Labels.Geometry.create(params), geometry = _a.geometry, texture = _a.texture;
                                     return [4 /*yield*/, ctx.updateProgress('Creating labels model...')];
                                 case 2:
                                     _b.sent();
                                     model = new Model();
-                                    model.options = options;
+                                    //model.options = options;
                                     model.labels = params.labels;
                                     model.geometry = geometry;
                                     model.material = Labels.Material.create(texture);
@@ -69379,7 +69613,7 @@ var LiteMol;
                     bondRadius: 0.15,
                     customMaxBondLengths: void 0
                 };
-                var Model = (function (_super) {
+                var Model = /** @class */ (function (_super) {
                     __extends(Model, _super);
                     function Model() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -69443,7 +69677,7 @@ var LiteMol;
                                     case 1:
                                         geom = _a.sent();
                                         ret = new Model();
-                                        ret.molecule = model;
+                                        //ret.molecule = model;
                                         ret.ballsAndSticks = geom;
                                         ret.material = Visualization.MaterialsHelper.getMeshMaterial();
                                         ret.bondsMaterial = new Visualization.THREE.MeshPhongMaterial({ specular: 0xAAAAAA, shininess: 1, shading: Visualization.THREE.SmoothShading, side: Visualization.THREE.FrontSide, vertexColors: Visualization.THREE.VertexColors });
@@ -69540,7 +69774,7 @@ var LiteMol;
                         dashPartCount: dashPartCount
                     };
                 }
-                var BondModelState = (function () {
+                var BondModelState = /** @class */ (function () {
                     function BondModelState(bondTemplate, builder) {
                         this.bondTemplate = bondTemplate;
                         this.builder = builder;
@@ -69626,7 +69860,7 @@ var LiteMol;
                     }
                     Templates.getAtom = getAtom;
                 })(Templates || (Templates = {}));
-                var BuildState = (function () {
+                var BuildState = /** @class */ (function () {
                     function BuildState(model, atomIndices, params) {
                         this.model = model;
                         this.atomIndices = atomIndices;
@@ -69659,7 +69893,7 @@ var LiteMol;
                     }
                     return BuildState;
                 }());
-                var BondsBuildState = (function () {
+                var BondsBuildState = /** @class */ (function () {
                     function BondsBuildState(state) {
                         this.state = state;
                         this.info = getBondsInfo(this.state.model, this.state.atomIndices, this.state.params);
@@ -69672,7 +69906,7 @@ var LiteMol;
                     }
                     return BondsBuildState;
                 }());
-                var BallsAndSticksGeometryBuilder = (function () {
+                var BallsAndSticksGeometryBuilder = /** @class */ (function () {
                     function BallsAndSticksGeometryBuilder() {
                     }
                     BallsAndSticksGeometryBuilder.prototype.dispose = function () {
@@ -69912,7 +70146,7 @@ var LiteMol;
                     return BallsAndSticksGeometryBuilder.build(model, parameters, atomIndices, ctx);
                 }
                 BallsAndSticks.buildGeometry = buildGeometry;
-                var BallsAndSticksGeometry = (function (_super) {
+                var BallsAndSticksGeometry = /** @class */ (function (_super) {
                     __extends(BallsAndSticksGeometry, _super);
                     function BallsAndSticksGeometry() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -69948,7 +70182,7 @@ var LiteMol;
             (function (Cartoons) {
                 var Geometry;
                 (function (Geometry) {
-                    var Data = (function (_super) {
+                    var Data = /** @class */ (function (_super) {
                         __extends(Data, _super);
                         function Data() {
                             var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -70038,7 +70272,7 @@ var LiteMol;
                 var Geometry;
                 (function (Geometry) {
                     var ArrayBuilder = LiteMol.Core.Utils.ArrayBuilder;
-                    var CartoonAsymUnit = (function () {
+                    var CartoonAsymUnit = /** @class */ (function () {
                         function CartoonAsymUnit(model, elements, linearSegmentCount) {
                             this.model = model;
                             this.elements = elements;
@@ -70270,7 +70504,7 @@ var LiteMol;
                         }
                         CartoonAsymUnit.spline = spline;
                         function maskSplit(element, mask, target) {
-                            var current = element, start = element.startResidueIndex, end = element.endResidueIndex;
+                            var current = new LiteMol.Core.Structure.SecondaryStructureElement(element.type, element.startResidueId, element.endResidueId), start = element.startResidueIndex, end = element.endResidueIndex;
                             for (var i = start; i < end; i++) {
                                 if (!mask[i])
                                     continue;
@@ -70520,7 +70754,7 @@ var LiteMol;
                         }
                         CartoonAsymUnit.buildUnits = buildUnits;
                     })(CartoonAsymUnit = Geometry.CartoonAsymUnit || (Geometry.CartoonAsymUnit = {}));
-                    var ContolPointsBuilder = (function () {
+                    var ContolPointsBuilder = /** @class */ (function () {
                         function ContolPointsBuilder(residueCount) {
                             this.typeBuilder = ArrayBuilder.forArray(10000);
                             this.residueType = [];
@@ -70648,7 +70882,7 @@ var LiteMol;
             (function (Cartoons) {
                 var Geometry;
                 (function (Geometry) {
-                    var CartoonsGeometryParams = (function () {
+                    var CartoonsGeometryParams = /** @class */ (function () {
                         function CartoonsGeometryParams() {
                             this.radialSegmentCount = 10;
                             this.turnWidth = 0.1;
@@ -70666,7 +70900,7 @@ var LiteMol;
                     }());
                     Geometry.CartoonsGeometryParams = CartoonsGeometryParams;
                     var GB = Visualization.Geometry.Builder;
-                    var CartoonsGeometryState = (function () {
+                    var CartoonsGeometryState = /** @class */ (function () {
                         function CartoonsGeometryState(params, residueCount) {
                             this.params = params;
                             this.residueCount = residueCount;
@@ -70918,7 +71152,7 @@ var LiteMol;
                         ctx.geom.pickGeometry = pickGeometry;
                     }
                     Geometry.createGeometry = createGeometry;
-                    var Builder = (function () {
+                    var Builder = /** @class */ (function () {
                         function Builder() {
                             this.tempVectors = [
                                 new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(), new Visualization.THREE.Vector3(),
@@ -71119,7 +71353,7 @@ var LiteMol;
                     tessalation: 3,
                     drawingType: CartoonsModelType.Default
                 };
-                var Model = (function (_super) {
+                var Model = /** @class */ (function (_super) {
                     __extends(Model, _super);
                     function Model() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -71599,7 +71833,7 @@ var LiteMol;
                     });
                 }); });
             }
-            var Builder = (function () {
+            var Builder = /** @class */ (function () {
                 function Builder() {
                     this.shapes = [];
                 }
@@ -71656,7 +71890,7 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        Bootstrap.VERSION = { number: "1.4.1", date: "June 22 2017" };
+        Bootstrap.VERSION = { number: "1.4.3", date: "Nov 28 2017" };
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -71833,7 +72067,7 @@ var LiteMol;
                     });
                 }); }));
             }
-            var RequestPool = (function () {
+            var RequestPool = /** @class */ (function () {
                 function RequestPool() {
                 }
                 RequestPool.get = function () {
@@ -71970,7 +72204,7 @@ var LiteMol;
             var Query;
             (function (Query) {
                 "use strict";
-                var ValueOrError = (function () {
+                var ValueOrError = /** @class */ (function () {
                     function ValueOrError(isError, value, error) {
                         this.isError = isError;
                         this.value = value;
@@ -72008,7 +72242,7 @@ var LiteMol;
         var Utils;
         (function (Utils) {
             "use strict";
-            var LinkedList = (function () {
+            var LinkedList = /** @class */ (function () {
                 function LinkedList() {
                     this.count = 0;
                     this.first = null;
@@ -72373,7 +72607,7 @@ var LiteMol;
         var Service;
         (function (Service) {
             "use strict";
-            var Dispatcher = (function () {
+            var Dispatcher = /** @class */ (function () {
                 function Dispatcher() {
                     this.LOG_DISPATCH_STREAM = false;
                     this.lanes = [];
@@ -72435,7 +72669,7 @@ var LiteMol;
         var Service;
         (function (Service) {
             "use strict";
-            var Logger = (function () {
+            var Logger = /** @class */ (function () {
                 function Logger(context) {
                     this.context = context;
                 }
@@ -72491,7 +72725,7 @@ var LiteMol;
     (function (Bootstrap) {
         "use strict";
         var Computation = LiteMol.Core.Computation;
-        var Task = (function () {
+        var Task = /** @class */ (function () {
             function Task(name, type, computation) {
                 this.name = name;
                 this.type = type;
@@ -72529,7 +72763,7 @@ var LiteMol;
         var serialTaskId = 0;
         (function (Task) {
             Task.__DEBUG_MODE__ = false;
-            var Running = (function () {
+            var Running = /** @class */ (function () {
                 function Running(context, computation, info) {
                     this.context = context;
                     this.computation = computation;
@@ -72668,6 +72902,7 @@ var LiteMol;
             var Common;
             (function (Common) {
                 Common.LayoutChanged = Event.create('bs.Common.LayoutChanged', Lane.Slow);
+                Common.ComponentsChanged = Event.create('bs.Common.ComponentsChanged', Lane.Slow);
             })(Common = Event.Common || (Event.Common = {}));
             var Task;
             (function (Task) {
@@ -73233,7 +73468,7 @@ var LiteMol;
             "use strict";
             var Transformer;
             (function (Transformer) {
-                var TransformerImpl = (function () {
+                var TransformerImpl = /** @class */ (function () {
                     function TransformerImpl(info, transform, updater) {
                         this.info = info;
                         this.transform = transform;
@@ -73432,7 +73667,7 @@ var LiteMol;
             "use strict";
             var Transform;
             (function (Transform) {
-                var TransformImpl = (function () {
+                var TransformImpl = /** @class */ (function () {
                     function TransformImpl(params, props, transformer) {
                         this.params = params;
                         this.props = props;
@@ -73598,7 +73833,7 @@ var LiteMol;
                 Transform.build = build;
                 var Builder;
                 (function (Builder) {
-                    var Impl = (function () {
+                    var Impl = /** @class */ (function () {
                         function Impl(last, transforms) {
                             this.last = last;
                             this.transforms = transforms;
@@ -73647,7 +73882,17 @@ var LiteMol;
                 Info.selection = selection;
             })(Info = Interactivity.Info || (Interactivity.Info = {}));
             function isEmpty(info) {
-                return info.kind === 0 /* Empty */ || !info.source.tree;
+                if (info.kind === 0 /* Empty */ || !info.source.tree)
+                    return true;
+                if (info.source.type.info.typeClass === Bootstrap.Entity.VisualClass && info.source.type === Bootstrap.Entity.Molecule.Visual) {
+                    var modelOrSelection = Bootstrap.Utils.Molecule.findModelOrSelection(info.source);
+                    if (modelOrSelection) {
+                        if (!info.elements || !info.elements.length) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
             Interactivity.isEmpty = isEmpty;
             function isSelection(info) {
@@ -73699,7 +73944,7 @@ var LiteMol;
         var Interactivity;
         (function (Interactivity) {
             "use strict";
-            var HighlightManager = (function () {
+            var HighlightManager = /** @class */ (function () {
                 function HighlightManager(context) {
                     var _this = this;
                     this.context = context;
@@ -73883,13 +74128,14 @@ var LiteMol;
         var Visualization;
         (function (Visualization) {
             "use strict";
-            var DisplayList = (function () {
+            var DisplayList = /** @class */ (function () {
                 function DisplayList(context, scene) {
                     var _this = this;
                     this.context = context;
                     this.scene = scene;
                     this.entries = new Map();
                     this.originalThemes = new Map();
+                    this.lastParent = NaN;
                     Bootstrap.Event.Tree.NodeAdded.getStream(context).subscribe(function (e) {
                         if (!Bootstrap.Entity.isClass(e.data, Bootstrap.Entity.VisualClass))
                             return;
@@ -73906,9 +74152,9 @@ var LiteMol;
                         var m = _this.entries.get(e.data.id);
                         if (!m)
                             return;
-                        var vis = m.state.visibility !== 2 /* None */;
-                        if (m.props.model.getVisibility() !== vis) {
-                            m.props.model.updateVisibility(vis);
+                        var vis = m.visual.state.visibility !== 2 /* None */;
+                        if (m.visual.props.model.getVisibility() !== vis) {
+                            m.visual.props.model.updateVisibility(vis);
                         }
                     });
                     Bootstrap.Command.Visual.UpdateBasicTheme.getStream(context).subscribe(function (e) {
@@ -73932,8 +74178,9 @@ var LiteMol;
                 DisplayList.prototype.add = function (v) {
                     if (this.entries.has(v.id) || !v.props.model)
                         return false;
-                    this.entries.set(v.id, v);
-                    this.scene.scene.models.add(v.props.model, this.entries.size === 1);
+                    var parentId = v.parent.id;
+                    this.entries.set(v.id, { visual: v, parentId: parentId });
+                    this.scene.scene.models.add(v.props.model, this.entries.size === 1 && this.lastParent !== parentId);
                     var vis = v.state.visibility !== 2 /* None */;
                     if (v.props.model.getVisibility() !== vis) {
                         v.props.model.updateVisibility(vis);
@@ -73944,6 +74191,7 @@ var LiteMol;
                 DisplayList.prototype.remove = function (v) {
                     if (!this.entries.has(v.id))
                         return false;
+                    this.lastParent = this.entries.get(v.id).parentId;
                     this.entries.delete(v.id);
                     this.originalThemes.delete(v.id);
                     this.scene.scene.models.removeAndDispose(v.props.model);
@@ -73958,7 +74206,7 @@ var LiteMol;
                     var _this = this;
                     if (!sel) {
                         this.originalThemes.forEach(function (t, id) {
-                            var model = _this.entries.get(id).props.model;
+                            var model = _this.entries.get(id).visual.props.model;
                             if (!model.theme.isSticky) {
                                 model.applyTheme(t);
                                 _this.originalThemes.delete(id);
@@ -73967,7 +74215,7 @@ var LiteMol;
                                 _this.originalThemes.set(id, model.theme);
                             }
                         });
-                        this.entries.forEach(function (v) { return v.props.model.highlight(false); });
+                        this.entries.forEach(function (v) { return v.visual.props.model.highlight(false); });
                         this.scene.scene.forceRender();
                         return;
                     }
@@ -74016,7 +74264,7 @@ var LiteMol;
                 return DisplayList;
             }());
             Visualization.DisplayList = DisplayList;
-            var SceneWrapper = (function () {
+            var SceneWrapper = /** @class */ (function () {
                 function SceneWrapper(element, context, options) {
                     var _this = this;
                     this.context = context;
@@ -74259,7 +74507,7 @@ var LiteMol;
                     };
                 }
                 Molecule.createCachedColorMapThemeProvider = createCachedColorMapThemeProvider;
-                var RainbowMapping = (function () {
+                var RainbowMapping = /** @class */ (function () {
                     function RainbowMapping(model, _a) {
                         var r = _a.r, g = _a.g, b = _a.b;
                         this.residueIndex = model.data.atoms.residueIndex;
@@ -74994,7 +75242,7 @@ var LiteMol;
             Entity.SelectionClass = 'Selection';
             Entity.ActionClass = 'Action';
             Entity.BehaviourClass = 'Behaviour';
-            var TypeImpl = (function () {
+            var TypeImpl = /** @class */ (function () {
                 function TypeImpl(id, infoBase, traits) {
                     this.id = id;
                     this.info = Bootstrap.Utils.assign({}, infoBase, { traits: traits });
@@ -75210,7 +75458,7 @@ var LiteMol;
         var Entity;
         (function (Entity) {
             "use strict";
-            var Cache = (function () {
+            var Cache = /** @class */ (function () {
                 function Cache(context) {
                     var _this = this;
                     this.data = LiteMol.Core.Utils.FastMap.create();
@@ -76321,7 +76569,7 @@ var LiteMol;
                     };
                 }
                 Molecule.getBox = getBox;
-                var CentroidHelper = (function () {
+                var CentroidHelper = /** @class */ (function () {
                     function CentroidHelper(model) {
                         this.center = { x: 0, y: 0, z: 0 };
                         this.radiusSquared = 0;
@@ -76443,7 +76691,7 @@ var LiteMol;
         var Behaviour;
         (function (Behaviour) {
             "use strict";
-            var Streams = (function () {
+            var Streams = /** @class */ (function () {
                 function Streams(context) {
                     this.context = context;
                     this.subjects = {
@@ -76531,10 +76779,10 @@ var LiteMol;
                 });
             }
             Behaviour.ApplySelectionToVisual = ApplySelectionToVisual;
-            function ApplyInteractivitySelection(context) {
+            function _applyInteractivitySelection(stream, context) {
                 var latestIndices = void 0;
                 var latestModel = void 0;
-                context.behaviours.click.subscribe(function (info) {
+                stream.subscribe(function (info) {
                     if (latestModel) {
                         latestModel.applySelection(latestIndices, 2 /* RemoveSelect */);
                         latestModel = void 0;
@@ -76547,7 +76795,16 @@ var LiteMol;
                     latestModel.applySelection(latestIndices, 1 /* Select */);
                 });
             }
+            function ApplyInteractivitySelection(context) {
+                _applyInteractivitySelection(context.behaviours.click, context);
+            }
             Behaviour.ApplyInteractivitySelection = ApplyInteractivitySelection;
+            function FilteredApplyInteractivitySelection(filter) {
+                return function (context) {
+                    _applyInteractivitySelection(context.behaviours.click.filter(function (e) { return filter(e, context); }), context);
+                };
+            }
+            Behaviour.FilteredApplyInteractivitySelection = FilteredApplyInteractivitySelection;
             function UnselectElementOnRepeatedClick(context) {
                 var latest = Bootstrap.Interactivity.Info.empty;
                 Bootstrap.Event.Visual.VisualSelectElement.getStream(context).subscribe(function (e) {
@@ -76598,15 +76855,24 @@ var LiteMol;
                     context.scene.camera.focusOnModel(m);
                 }
             }
-            function FocusCameraOnSelect(context) {
-                context.behaviours.click.subscribe(function (e) {
+            function focusCamera(stream, context) {
+                stream.subscribe(function (e) {
                     if (Bootstrap.Interactivity.Molecule.isMoleculeModelInteractivity(e))
                         updateCameraModel(context, e);
                     else
                         updateCameraVisual(context, e);
                 });
             }
+            function FocusCameraOnSelect(context) {
+                focusCamera(context.behaviours.click, context);
+            }
             Behaviour.FocusCameraOnSelect = FocusCameraOnSelect;
+            function FilteredFocusCameraOnSelect(filter) {
+                return function (context) {
+                    focusCamera(context.behaviours.click.filter(function (e) { return filter(e, context); }), context);
+                };
+            }
+            Behaviour.FilteredFocusCameraOnSelect = FilteredFocusCameraOnSelect;
         })(Behaviour = Bootstrap.Behaviour || (Bootstrap.Behaviour = {}));
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
@@ -76750,7 +77016,7 @@ var LiteMol;
             (function (Density) {
                 "use strict";
                 var ToastKey = '__ShowDynamicDensity-toast';
-                var ShowDynamicDensity = (function () {
+                var ShowDynamicDensity = /** @class */ (function () {
                     function ShowDynamicDensity(context, params) {
                         this.context = context;
                         this.params = params;
@@ -76853,7 +77119,7 @@ var LiteMol;
             (function (Molecule) {
                 "use strict";
                 var Transforms = Bootstrap.Entity.Transformer;
-                var CoordinateStreaming = (function () {
+                var CoordinateStreaming = /** @class */ (function () {
                     function CoordinateStreaming(context, server, radius) {
                         if (radius === void 0) { radius = 5; }
                         this.context = context;
@@ -77083,7 +77349,7 @@ var LiteMol;
         var Components;
         (function (Components) {
             "use strict";
-            var Component = (function () {
+            var Component = /** @class */ (function () {
                 function Component(context, initialState) {
                     this.context = context;
                     this._state = new Bootstrap.Rx.Subject();
@@ -77153,7 +77419,7 @@ var LiteMol;
                 CollapsedControlsLayout[CollapsedControlsLayout["Landscape"] = 1] = "Landscape";
                 CollapsedControlsLayout[CollapsedControlsLayout["Portrait"] = 2] = "Portrait";
             })(CollapsedControlsLayout = Components.CollapsedControlsLayout || (Components.CollapsedControlsLayout = {}));
-            var LayoutTarget = (function () {
+            var LayoutTarget = /** @class */ (function () {
                 function LayoutTarget(cssClass) {
                     this.cssClass = cssClass;
                     this.components = [];
@@ -77169,7 +77435,7 @@ var LiteMol;
                 return ret;
             }
             Components.makeEmptyTargets = makeEmptyTargets;
-            var Layout = (function (_super) {
+            var Layout = /** @class */ (function (_super) {
                 __extends(Layout, _super);
                 function Layout(context, targets, root) {
                     var _this = _super.call(this, context, {
@@ -77297,6 +77563,11 @@ var LiteMol;
                         console.log('Layout change error, you might have to reload the page.', e);
                     }
                 };
+                Layout.prototype.updateTargets = function (targets) {
+                    var _this = this;
+                    this.targets = targets;
+                    this.dispatcher.schedule(function () { return Bootstrap.Event.Common.ComponentsChanged.dispatch(_this.context, {}); });
+                };
                 return Layout;
             }(Components.Component));
             Components.Layout = Layout;
@@ -77315,7 +77586,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var Controller = (function (_super) {
+                var Controller = /** @class */ (function (_super) {
                     __extends(Controller, _super);
                     function Controller(context, transformer, entity) {
                         var _this = _super.call(this, context, {
@@ -77419,7 +77690,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var View = (function (_super) {
+                var View = /** @class */ (function (_super) {
                     __extends(View, _super);
                     function View(context) {
                         var _this = _super.call(this, context, { update: void 0, transforms: [] }) || this;
@@ -77470,7 +77741,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var VisualStyle = (function (_super) {
+                var VisualStyle = /** @class */ (function (_super) {
                     __extends(VisualStyle, _super);
                     function VisualStyle() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -77551,7 +77822,7 @@ var LiteMol;
                     return VisualStyle;
                 }(Transform.Controller));
                 Transform.VisualStyle = VisualStyle;
-                var MoleculeVisual = (function (_super) {
+                var MoleculeVisual = /** @class */ (function (_super) {
                     __extends(MoleculeVisual, _super);
                     function MoleculeVisual() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -77559,7 +77830,7 @@ var LiteMol;
                     return MoleculeVisual;
                 }(VisualStyle));
                 Transform.MoleculeVisual = MoleculeVisual;
-                var MoleculeLabels = (function (_super) {
+                var MoleculeLabels = /** @class */ (function (_super) {
                     __extends(MoleculeLabels, _super);
                     function MoleculeLabels() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -77567,7 +77838,7 @@ var LiteMol;
                     return MoleculeLabels;
                 }(VisualStyle));
                 Transform.MoleculeLabels = MoleculeLabels;
-                var GenericLabels = (function (_super) {
+                var GenericLabels = /** @class */ (function (_super) {
                     __extends(GenericLabels, _super);
                     function GenericLabels() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -77575,7 +77846,7 @@ var LiteMol;
                     return GenericLabels;
                 }(VisualStyle));
                 Transform.GenericLabels = GenericLabels;
-                var DensityVisual = (function (_super) {
+                var DensityVisual = /** @class */ (function (_super) {
                     __extends(DensityVisual, _super);
                     function DensityVisual() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -77655,7 +77926,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var Updater = (function (_super) {
+                var Updater = /** @class */ (function (_super) {
                     __extends(Updater, _super);
                     function Updater(ctx, selector, header) {
                         var _this = _super.call(this, ctx, { controller: void 0 }) || this;
@@ -77702,7 +77973,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var Action = (function (_super) {
+                var Action = /** @class */ (function (_super) {
                     __extends(Action, _super);
                     function Action(ctx, selector, transformer, header) {
                         var _this = _super.call(this, ctx, { controller: void 0 }) || this;
@@ -77750,7 +78021,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
-                var Log = (function (_super) {
+                var Log = /** @class */ (function (_super) {
                     __extends(Log, _super);
                     function Log(context) {
                         var _this = _super.call(this, context, { entries: Bootstrap.Immutable.List() }) || this;
@@ -77777,7 +78048,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
-                var Toast = (function (_super) {
+                var Toast = /** @class */ (function (_super) {
                     __extends(Toast, _super);
                     function Toast(context) {
                         var _this = _super.call(this, context, { entries: Bootstrap.Immutable.Map() }) || this;
@@ -77861,7 +78132,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
-                var TaskWatcher = (function (_super) {
+                var TaskWatcher = /** @class */ (function (_super) {
                     __extends(TaskWatcher, _super);
                     function TaskWatcher(context, type) {
                         var _this = _super.call(this, context, {
@@ -77925,7 +78196,7 @@ var LiteMol;
             var Visualization;
             (function (Visualization) {
                 "use strict";
-                var HighlightInfo = (function (_super) {
+                var HighlightInfo = /** @class */ (function (_super) {
                     __extends(HighlightInfo, _super);
                     function HighlightInfo(context) {
                         var _this = _super.call(this, context, { info: [] }) || this;
@@ -77952,7 +78223,7 @@ var LiteMol;
             (function (Visualization) {
                 "use strict";
                 var Vis = LiteMol.Visualization;
-                var Viewport = (function (_super) {
+                var Viewport = /** @class */ (function (_super) {
                     __extends(Viewport, _super);
                     function Viewport(context) {
                         var _this = _super.call(this, context, Bootstrap.Utils.shallowClone(Vis.DefaultSceneOptions)) || this;
@@ -78006,7 +78277,7 @@ var LiteMol;
     var Bootstrap;
     (function (Bootstrap) {
         "use strict";
-        var Settings = (function () {
+        var Settings = /** @class */ (function () {
             function Settings() {
                 this.settings = LiteMol.Core.Utils.FastMap.create();
             }
@@ -78019,7 +78290,7 @@ var LiteMol;
             return Settings;
         }());
         Bootstrap.Settings = Settings;
-        var Context = (function () {
+        var Context = /** @class */ (function () {
             function Context(plugin) {
                 this.plugin = plugin;
                 this.id = Bootstrap.Utils.generateUUID();
@@ -78124,7 +78395,7 @@ var LiteMol;
     var Bootstrap;
     (function (Bootstrap) {
         "use strict";
-        var TransformManager = (function () {
+        var TransformManager = /** @class */ (function () {
             function TransformManager(context) {
                 var _this = this;
                 this.context = context;
@@ -78250,7 +78521,7 @@ var LiteMol;
 (function (LiteMol) {
     var Plugin;
     (function (Plugin) {
-        Plugin.VERSION = { number: "1.3.3", date: "June 18 2017" };
+        Plugin.VERSION = { number: "1.3.4", date: "September 7 2017" };
     })(Plugin = LiteMol.Plugin || (LiteMol.Plugin = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -78262,7 +78533,6 @@ var LiteMol;
     (function (Plugin) {
         "use strict";
         Plugin.React = __LiteMolReact;
-        //declare var __LiteMolReactDOM: typeof __LiteMolReact.__DOM;
         Plugin.ReactDOM = __LiteMolReactDOM;
         var Controls;
         (function (Controls) {
@@ -78283,7 +78553,7 @@ var LiteMol;
         (function (Controls) {
             "use strict";
             var shallowEqual = LiteMol.Bootstrap.Utils.shallowEqual;
-            var Pure = (function (_super) {
+            var Pure = /** @class */ (function (_super) {
                 __extends(Pure, _super);
                 function Pure() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -78294,7 +78564,7 @@ var LiteMol;
                 return Pure;
             }(Plugin.React.Component));
             Controls.Pure = Pure;
-            var Button = (function (_super) {
+            var Button = /** @class */ (function (_super) {
                 __extends(Button, _super);
                 function Button() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -78386,7 +78656,7 @@ var LiteMol;
         var Controls;
         (function (Controls) {
             "use strict";
-            var OptionsBox = (function (_super) {
+            var OptionsBox = /** @class */ (function (_super) {
                 __extends(OptionsBox, _super);
                 function OptionsBox() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -78436,7 +78706,7 @@ var LiteMol;
         var Controls;
         (function (Controls) {
             "use strict";
-            var Panel = (function (_super) {
+            var Panel = /** @class */ (function (_super) {
                 __extends(Panel, _super);
                 function Panel() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -78496,7 +78766,7 @@ var LiteMol;
         var Controls;
         (function (Controls) {
             "use strict";
-            var Slider = (function (_super) {
+            var Slider = /** @class */ (function (_super) {
                 __extends(Slider, _super);
                 function Slider() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -78623,7 +78893,7 @@ var LiteMol;
                 e.stopPropagation();
                 e.preventDefault();
             }
-            var Handle = (function (_super) {
+            var Handle = /** @class */ (function (_super) {
                 __extends(Handle, _super);
                 function Handle() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -78636,7 +78906,7 @@ var LiteMol;
                 return Handle;
             }(Plugin.React.Component));
             Controls.Handle = Handle;
-            var SliderBase = (function (_super) {
+            var SliderBase = /** @class */ (function (_super) {
                 __extends(SliderBase, _super);
                 function SliderBase(props) {
                     var _this = _super.call(this, props) || this;
@@ -79173,7 +79443,7 @@ var LiteMol;
         (function (Controls) {
             "use strict";
             var shallowEqual = LiteMol.Bootstrap.Utils.shallowEqual;
-            var ColorPicker = (function (_super) {
+            var ColorPicker = /** @class */ (function (_super) {
                 __extends(ColorPicker, _super);
                 function ColorPicker() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -79196,7 +79466,7 @@ var LiteMol;
                 return ColorPicker;
             }(Plugin.React.Component));
             Controls.ColorPicker = ColorPicker;
-            var ToggleColorPicker = (function (_super) {
+            var ToggleColorPicker = /** @class */ (function (_super) {
                 __extends(ToggleColorPicker, _super);
                 function ToggleColorPicker() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -79256,7 +79526,7 @@ var LiteMol;
         (function (Views) {
             "use strict";
             var shallowEqual = LiteMol.Bootstrap.Utils.shallowEqual;
-            var PureView = (function (_super) {
+            var PureView = /** @class */ (function (_super) {
                 __extends(PureView, _super);
                 function PureView() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -79272,7 +79542,7 @@ var LiteMol;
                 return PureView;
             }(Plugin.React.Component));
             Views.PureView = PureView;
-            var Component = (function (_super) {
+            var Component = /** @class */ (function (_super) {
                 __extends(Component, _super);
                 function Component() {
                     // shouldComponentUpdate(nextProps: any, nextState: any) {
@@ -79305,7 +79575,7 @@ var LiteMol;
                 return Component;
             }(Plugin.React.Component));
             Views.Component = Component;
-            var ObserverView = (function (_super) {
+            var ObserverView = /** @class */ (function (_super) {
                 __extends(ObserverView, _super);
                 function ObserverView() {
                     var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -79335,7 +79605,7 @@ var LiteMol;
                 return ObserverView;
             }(Plugin.React.Component));
             Views.ObserverView = ObserverView;
-            var View = (function (_super) {
+            var View = /** @class */ (function (_super) {
                 __extends(View, _super);
                 function View() {
                     return _super !== null && _super.apply(this, arguments) || this;
@@ -79370,11 +79640,15 @@ var LiteMol;
         (function (Views) {
             "use strict";
             var LayoutRegion = LiteMol.Bootstrap.Components.LayoutRegion;
-            var Layout = (function (_super) {
+            var Layout = /** @class */ (function (_super) {
                 __extends(Layout, _super);
                 function Layout() {
                     return _super !== null && _super.apply(this, arguments) || this;
                 }
+                Layout.prototype.componentDidMount = function () {
+                    var _this = this;
+                    this.subscribe(LiteMol.Bootstrap.Event.Common.ComponentsChanged.getStream(this.controller.context), function () { return _this.forceUpdate(); });
+                };
                 Layout.prototype.renderTarget = function (name, target) {
                     var statics = [];
                     var scrollable = [];
@@ -79467,7 +79741,7 @@ var LiteMol;
             var Transform;
             (function (Transform) {
                 "use strict";
-                var ControllerBase = (function (_super) {
+                var ControllerBase = /** @class */ (function (_super) {
                     __extends(ControllerBase, _super);
                     function ControllerBase() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -79547,7 +79821,7 @@ var LiteMol;
                     return ControllerBase;
                 }(Views.View));
                 Transform.ControllerBase = ControllerBase;
-                var Empty = (function (_super) {
+                var Empty = /** @class */ (function (_super) {
                     __extends(Empty, _super);
                     function Empty() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -79558,7 +79832,7 @@ var LiteMol;
                     return Empty;
                 }(Transform.ControllerBase));
                 Transform.Empty = Empty;
-                var View = (function (_super) {
+                var View = /** @class */ (function (_super) {
                     __extends(View, _super);
                     function View() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -79585,7 +79859,7 @@ var LiteMol;
                     var d = props.definition.alpha;
                     return Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Opacity', onChange: function (v) { return props.onChange({ alpha: v, writeDepth: props.definition.writeDepth }); }, min: 0, max: 1, step: 0.01, value: d });
                 };
-                var Updater = (function (_super) {
+                var Updater = /** @class */ (function (_super) {
                     __extends(Updater, _super);
                     function Updater() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -79616,7 +79890,7 @@ var LiteMol;
                     return Updater;
                 }(Views.View));
                 Transform.Updater = Updater;
-                var Action = (function (_super) {
+                var Action = /** @class */ (function (_super) {
                     __extends(Action, _super);
                     function Action() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -79655,7 +79929,7 @@ var LiteMol;
                 var Data;
                 (function (Data) {
                     "use strict";
-                    var Download = (function (_super) {
+                    var Download = /** @class */ (function (_super) {
                         __extends(Download, _super);
                         function Download() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79673,7 +79947,7 @@ var LiteMol;
                         return Download;
                     }(Transform.ControllerBase));
                     Data.Download = Download;
-                    var OpenFile = (function (_super) {
+                    var OpenFile = /** @class */ (function (_super) {
                         __extends(OpenFile, _super);
                         function OpenFile() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79692,7 +79966,7 @@ var LiteMol;
                         return OpenFile;
                     }(Transform.ControllerBase));
                     Data.OpenFile = OpenFile;
-                    var WithIdField = (function (_super) {
+                    var WithIdField = /** @class */ (function (_super) {
                         __extends(WithIdField, _super);
                         function WithIdField() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79706,7 +79980,7 @@ var LiteMol;
                         return WithIdField;
                     }(Transform.ControllerBase));
                     Data.WithIdField = WithIdField;
-                    var WithUrlIdField = (function (_super) {
+                    var WithUrlIdField = /** @class */ (function (_super) {
                         __extends(WithUrlIdField, _super);
                         function WithUrlIdField() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79739,7 +80013,7 @@ var LiteMol;
                 var Molecule;
                 (function (Molecule) {
                     "use strict";
-                    var CreateFromData = (function (_super) {
+                    var CreateFromData = /** @class */ (function (_super) {
                         __extends(CreateFromData, _super);
                         function CreateFromData() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79753,7 +80027,7 @@ var LiteMol;
                         return CreateFromData;
                     }(Transform.ControllerBase));
                     Molecule.CreateFromData = CreateFromData;
-                    var DownloadFromUrl = (function (_super) {
+                    var DownloadFromUrl = /** @class */ (function (_super) {
                         __extends(DownloadFromUrl, _super);
                         function DownloadFromUrl() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79768,7 +80042,7 @@ var LiteMol;
                         return DownloadFromUrl;
                     }(Transform.ControllerBase));
                     Molecule.DownloadFromUrl = DownloadFromUrl;
-                    var OpenFile = (function (_super) {
+                    var OpenFile = /** @class */ (function (_super) {
                         __extends(OpenFile, _super);
                         function OpenFile() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79787,7 +80061,7 @@ var LiteMol;
                         return OpenFile;
                     }(Transform.ControllerBase));
                     Molecule.OpenFile = OpenFile;
-                    var InitCoordinateStreaming = (function (_super) {
+                    var InitCoordinateStreaming = /** @class */ (function (_super) {
                         __extends(InitCoordinateStreaming, _super);
                         function InitCoordinateStreaming() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79802,7 +80076,7 @@ var LiteMol;
                         return InitCoordinateStreaming;
                     }(Transform.ControllerBase));
                     Molecule.InitCoordinateStreaming = InitCoordinateStreaming;
-                    var CreateFromMmCif = (function (_super) {
+                    var CreateFromMmCif = /** @class */ (function (_super) {
                         __extends(CreateFromMmCif, _super);
                         function CreateFromMmCif() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79817,7 +80091,7 @@ var LiteMol;
                         return CreateFromMmCif;
                     }(Transform.ControllerBase));
                     Molecule.CreateFromMmCif = CreateFromMmCif;
-                    var CreateModel = (function (_super) {
+                    var CreateModel = /** @class */ (function (_super) {
                         __extends(CreateModel, _super);
                         function CreateModel() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79831,7 +80105,7 @@ var LiteMol;
                         return CreateModel;
                     }(Transform.ControllerBase));
                     Molecule.CreateModel = CreateModel;
-                    var CreateAssembly = (function (_super) {
+                    var CreateAssembly = /** @class */ (function (_super) {
                         __extends(CreateAssembly, _super);
                         function CreateAssembly() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79851,7 +80125,7 @@ var LiteMol;
                         return CreateAssembly;
                     }(Transform.ControllerBase));
                     Molecule.CreateAssembly = CreateAssembly;
-                    var CreateSymmetryMates = (function (_super) {
+                    var CreateSymmetryMates = /** @class */ (function (_super) {
                         __extends(CreateSymmetryMates, _super);
                         function CreateSymmetryMates() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79867,7 +80141,7 @@ var LiteMol;
                         return CreateSymmetryMates;
                     }(Transform.ControllerBase));
                     Molecule.CreateSymmetryMates = CreateSymmetryMates;
-                    var CreateSelection = (function (_super) {
+                    var CreateSelection = /** @class */ (function (_super) {
                         __extends(CreateSelection, _super);
                         function CreateSelection() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79883,7 +80157,7 @@ var LiteMol;
                         return CreateSelection;
                     }(Transform.ControllerBase));
                     Molecule.CreateSelection = CreateSelection;
-                    var CreateMacromoleculeVisual = (function (_super) {
+                    var CreateMacromoleculeVisual = /** @class */ (function (_super) {
                         __extends(CreateMacromoleculeVisual, _super);
                         function CreateMacromoleculeVisual() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79899,7 +80173,7 @@ var LiteMol;
                         return CreateMacromoleculeVisual;
                     }(Transform.ControllerBase));
                     Molecule.CreateMacromoleculeVisual = CreateMacromoleculeVisual;
-                    var CreateVisual = (function (_super) {
+                    var CreateVisual = /** @class */ (function (_super) {
                         __extends(CreateVisual, _super);
                         function CreateVisual() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -79979,7 +80253,7 @@ var LiteMol;
                         return CreateVisual;
                     }(Transform.ControllerBase));
                     Molecule.CreateVisual = CreateVisual;
-                    var CreateLabels = (function (_super) {
+                    var CreateLabels = /** @class */ (function (_super) {
                         __extends(CreateLabels, _super);
                         function CreateLabels() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -80033,7 +80307,7 @@ var LiteMol;
                             return data.valuesInfo.min;
                         return ret;
                     }
-                    var ParseData = (function (_super) {
+                    var ParseData = /** @class */ (function (_super) {
                         __extends(ParseData, _super);
                         function ParseData() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -80056,7 +80330,7 @@ var LiteMol;
                         return ParseData;
                     }(Transform.ControllerBase));
                     Density.ParseData = ParseData;
-                    var CreateVisual = (function (_super) {
+                    var CreateVisual = /** @class */ (function (_super) {
                         __extends(CreateVisual, _super);
                         function CreateVisual() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -80108,7 +80382,7 @@ var LiteMol;
                         return CreateVisual;
                     }(Transform.ControllerBase));
                     Density.CreateVisual = CreateVisual;
-                    var CreateVisualBehaviour = (function (_super) {
+                    var CreateVisualBehaviour = /** @class */ (function (_super) {
                         __extends(CreateVisualBehaviour, _super);
                         function CreateVisualBehaviour() {
                             return _super !== null && _super.apply(this, arguments) || this;
@@ -80216,7 +80490,7 @@ var LiteMol;
             (function (Context) {
                 "use strict";
                 var EntryType = LiteMol.Bootstrap.Service.Logger.EntryType;
-                var Log = (function (_super) {
+                var Log = /** @class */ (function (_super) {
                     __extends(Log, _super);
                     function Log() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80242,31 +80516,22 @@ var LiteMol;
                         return Plugin.React.createElement("div", { className: 'lm-log-wrap' },
                             Plugin.React.createElement("div", { className: 'lm-log', ref: function (log) { return _this.wrapper = log; } },
                                 Plugin.React.createElement("ul", { className: 'lm-list-unstyled' }, entries.map(function (entry, i, arr) {
-                                    var msg;
+                                    // let msg: any;
+                                    // switch (e.type) {
+                                    //     case EntryType.Message:
+                                    //     msg = <div className='lm-log-entry'>{e.message}</div>;
+                                    //     break;
+                                    //     case EntryType.Error:
+                                    //     msg = <div className='lm-log-entry'><span className='label label-danger'>Error</span> {e.message}</div>;
+                                    //     break;
+                                    //     case EntryType.Warning:
+                                    //     msg = <div className='lm-log-entry'><span className='label label-warning'>Warning</span> {e.message}</div>;
+                                    //     break;
+                                    //     case EntryType.Info:
+                                    //     msg = <div className='lm-log-entry'><span className='label label-info'>Info</span> {e.message}</div>;
+                                    //     break;
+                                    // }
                                     var e = entry;
-                                    switch (e.type) {
-                                        case EntryType.Message:
-                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' }, e.message);
-                                            break;
-                                        case EntryType.Error:
-                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
-                                                Plugin.React.createElement("span", { className: 'label label-danger' }, "Error"),
-                                                " ",
-                                                e.message);
-                                            break;
-                                        case EntryType.Warning:
-                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
-                                                Plugin.React.createElement("span", { className: 'label label-warning' }, "Warning"),
-                                                " ",
-                                                e.message);
-                                            break;
-                                        case EntryType.Info:
-                                            msg = Plugin.React.createElement("div", { className: 'lm-log-entry' },
-                                                Plugin.React.createElement("span", { className: 'label label-info' }, "Info"),
-                                                " ",
-                                                e.message);
-                                            break;
-                                    }
                                     var t = LiteMol.Bootstrap.Utils.formatTime(e.timestamp);
                                     return Plugin.React.createElement("li", { key: i },
                                         Plugin.React.createElement("div", { className: 'lm-log-entry-badge lm-log-entry-' + EntryType[e.type].toLowerCase() }),
@@ -80293,7 +80558,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
-                var TaskState = (function (_super) {
+                var TaskState = /** @class */ (function (_super) {
                     __extends(TaskState, _super);
                     function TaskState() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80310,7 +80575,7 @@ var LiteMol;
                     };
                     return TaskState;
                 }(Plugin.React.Component));
-                var Overlay = (function (_super) {
+                var Overlay = /** @class */ (function (_super) {
                     __extends(Overlay, _super);
                     function Overlay() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80334,7 +80599,7 @@ var LiteMol;
                     return Overlay;
                 }(Views.View));
                 Context.Overlay = Overlay;
-                var BackgroundTasks = (function (_super) {
+                var BackgroundTasks = /** @class */ (function (_super) {
                     __extends(BackgroundTasks, _super);
                     function BackgroundTasks() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80369,7 +80634,7 @@ var LiteMol;
             var Context;
             (function (Context) {
                 "use strict";
-                var ToastEntry = (function (_super) {
+                var ToastEntry = /** @class */ (function (_super) {
                     __extends(ToastEntry, _super);
                     function ToastEntry() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80393,7 +80658,7 @@ var LiteMol;
                     };
                     return ToastEntry;
                 }(Plugin.React.Component));
-                var Toast = (function (_super) {
+                var Toast = /** @class */ (function (_super) {
                     __extends(Toast, _super);
                     function Toast() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80452,7 +80717,7 @@ var LiteMol;
                     }
                     return Plugin.React.createElement(Plugin.Controls.Button, { title: title, onClick: command, icon: 'visual-visibility', style: 'link', customClass: "lm-entity-tree-entry-toggle-visible lm-entity-tree-entry-toggle-visible-" + cls });
                 };
-                var Entity = (function (_super) {
+                var Entity = /** @class */ (function (_super) {
                     __extends(Entity, _super);
                     function Entity() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80592,7 +80857,7 @@ var LiteMol;
                     };
                     return Entity;
                 }(Views.ObserverView));
-                var Tree = (function (_super) {
+                var Tree = /** @class */ (function (_super) {
                     __extends(Tree, _super);
                     function Tree() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80668,7 +80933,7 @@ var LiteMol;
             (function (Entity) {
                 "use strict";
                 Entity.Remove = function (props) { return Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(props.entity.tree.context, props.entity); props.onRemove.call(null); }, style: 'link', icon: 'remove', customClass: 'lm-remove-entity lm-btn-icon' }); };
-                var Badge = (function (_super) {
+                var Badge = /** @class */ (function (_super) {
                     __extends(Badge, _super);
                     function Badge() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80701,7 +80966,7 @@ var LiteMol;
                     return Badge;
                 }(Plugin.React.Component));
                 Entity.Badge = Badge;
-                var CurrentEntityControl = (function (_super) {
+                var CurrentEntityControl = /** @class */ (function (_super) {
                     __extends(CurrentEntityControl, _super);
                     function CurrentEntityControl() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80745,7 +81010,7 @@ var LiteMol;
                             Plugin.React.createElement("span", { className: 'lm-icon lm-icon-info' }),
                             "The application operates on an entity tree structure that can be manipulated using the controls on the panel to the right.");
                     };
-                    var ClassInfo = (function (_super) {
+                    var ClassInfo = /** @class */ (function (_super) {
                         __extends(ClassInfo, _super);
                         function ClassInfo() {
                             var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80795,7 +81060,7 @@ var LiteMol;
             var Visualization;
             (function (Visualization) {
                 "use strict";
-                var ViewportControls = (function (_super) {
+                var ViewportControls = /** @class */ (function (_super) {
                     __extends(ViewportControls, _super);
                     function ViewportControls() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80827,6 +81092,7 @@ var LiteMol;
                             options = Plugin.React.createElement("div", { className: 'lm-viewport-controls-scene-options lm-control' },
                                 Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return _this.controller.setState({ enableFog: v }); }, value: state.enableFog, label: 'Fog' }),
                                 Plugin.React.createElement(Plugin.Controls.Slider, { label: 'FOV', min: 30, max: 90, onChange: function (v) { return _this.controller.setState({ cameraFOV: v }); }, value: state.cameraFOV }),
+                                Plugin.React.createElement(Plugin.Controls.Slider, { label: 'Camera Speed', min: 1, max: 10, step: 0.01, onChange: function (v) { return _this.controller.setState({ cameraSpeed: v }); }, value: state.cameraSpeed }),
                                 Plugin.React.createElement(Plugin.Controls.ToggleColorPicker, { color: state.clearColor, label: 'Background', position: 'below', onChange: function (c) { return _this.controller.setState({ clearColor: c }); } }));
                         }
                         else if (this.state.showHelp) {
@@ -80837,7 +81103,7 @@ var LiteMol;
                             Plugin.React.createElement("div", { className: 'lm-viewport-controls-buttons' },
                                 Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', active: this.state.showHelp, customClass: 'lm-btn-link-toggle-' + (this.state.showHelp ? 'on' : 'off'), icon: 'help-circle', onClick: function (e) { return _this.setState({ showHelp: !_this.state.showHelp, showSceneOptions: false }); }, title: 'Controls Help' }),
                                 Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', active: this.state.showSceneOptions, customClass: 'lm-btn-link-toggle-' + (this.state.showSceneOptions ? 'on' : 'off'), icon: 'settings', onClick: function (e) { return _this.setState({ showSceneOptions: !_this.state.showSceneOptions, showHelp: false }); }, title: 'Scene Options' }),
-                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'screenshot', onClick: function (e) { window.open(_this.controller.scene.scene.screenshotAsDataURL(), '_blank'); }, title: 'Screenshot' }),
+                                Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'screenshot', onClick: function (e) { return _this.controller.scene.scene.downloadScreenshot(); }, title: 'Screenshot' }),
                                 Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { layoutController.update({ hideControls: controlsShown }); _this.forceUpdate(); }, icon: 'tools', title: controlsShown ? 'Hide Controls' : 'Show Controls', active: controlsShown, customClass: 'lm-btn-link-toggle-' + (controlsShown ? 'on' : 'off'), style: 'link' }),
                                 Plugin.React.createElement(Plugin.Controls.Button, { onClick: function () { return layoutController.update({ isExpanded: !layoutState.isExpanded }); }, icon: 'expand-layout', title: layoutState.isExpanded ? 'Collapse' : 'Expand', active: layoutState.isExpanded, customClass: 'lm-btn-link-toggle-' + (layoutState.isExpanded ? 'on' : 'off'), style: 'link' }),
                                 Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'reset-scene', onClick: function (e) { return LiteMol.Bootstrap.Command.Visual.ResetScene.dispatch(_this.controller.context, void 0); }, title: 'Reset scene' })),
@@ -80846,7 +81112,7 @@ var LiteMol;
                     return ViewportControls;
                 }(Views.View));
                 Visualization.ViewportControls = ViewportControls;
-                var HighlightInfo = (function (_super) {
+                var HighlightInfo = /** @class */ (function (_super) {
                     __extends(HighlightInfo, _super);
                     function HighlightInfo() {
                         return _super !== null && _super.apply(this, arguments) || this;
@@ -80871,7 +81137,7 @@ var LiteMol;
                                 Plugin.React.createElement("div", null),
                                 Plugin.React.createElement("div", { className: 'lm-logo-image' }))));
                 };
-                var Viewport = (function (_super) {
+                var Viewport = /** @class */ (function (_super) {
                     __extends(Viewport, _super);
                     function Viewport() {
                         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80959,7 +81225,7 @@ var LiteMol;
                 }); }); };
             }
             Components.create = create;
-            var AppInfo = (function (_super) {
+            var AppInfo = /** @class */ (function (_super) {
                 __extends(AppInfo, _super);
                 function AppInfo(ctx, appName, appVersion) {
                     var _this = _super.call(this, ctx, {}) || this;
@@ -81003,11 +81269,10 @@ var LiteMol;
         "use strict";
         Plugin.Context = LiteMol.Bootstrap.Context;
         var LayoutRegion = LiteMol.Bootstrap.Components.LayoutRegion;
-        var Instance = (function () {
+        var Instance = /** @class */ (function () {
             function Instance(spec, target) {
                 this.spec = spec;
                 this.target = target;
-                this.componentMap = LiteMol.Core.Utils.FastMap.create();
                 this.transformersInfo = LiteMol.Core.Utils.FastMap.create();
                 this.context = new LiteMol.Bootstrap.Context(this);
                 this.init();
@@ -81021,7 +81286,6 @@ var LiteMol;
                         continue;
                     this.context.settings.set(s, this.spec.settings[s]);
                 }
-                var targets = LiteMol.Bootstrap.Components.makeEmptyTargets();
                 for (var _b = 0, _c = (this.spec.behaviours || []); _b < _c.length; _b++) {
                     var b = _c[_b];
                     b(this.context);
@@ -81031,30 +81295,19 @@ var LiteMol;
                     this.context.transforms.add(t.transformer);
                     this.transformersInfo.set(t.transformer.info.id, t);
                 }
-                for (var _f = 0, _g = this.spec.components; _f < _g.length; _f++) {
-                    var cs = _g[_f];
+            };
+            Instance.prototype.prepareTargets = function () {
+                var targets = LiteMol.Bootstrap.Components.makeEmptyTargets();
+                var componentMap = LiteMol.Core.Utils.FastMap.create();
+                for (var _i = 0, _a = this.spec.components; _i < _a.length; _i++) {
+                    var cs = _a[_i];
                     var info = cs(this.context);
-                    if (this.componentMap.has(info.key)) {
+                    if (componentMap.has(info.key)) {
                         throw "Component with key '" + info.key + "' was already added. Fix your spec.";
                     }
                     targets[info.region].components.push(info);
-                    this.componentMap.set(info.key, info);
+                    componentMap.set(info.key, info);
                 }
-                return targets;
-            };
-            Instance.prototype.getTransformerInfo = function (transformer) {
-                return this.transformersInfo.get(transformer.info.id);
-            };
-            Instance.prototype.destroy = function () {
-                this.context.dispatcher.finished();
-                Plugin.ReactDOM.unmountComponentAtNode(this.target);
-                this.context = void 0;
-                this.componentMap = void 0;
-                this.spec = void 0;
-                this.target = void 0;
-            };
-            Instance.prototype.init = function () {
-                var targets = this.compose();
                 if (this.spec.tree) {
                     targets[this.spec.tree.region].components.push({
                         key: 'lm-internal-tree',
@@ -81071,6 +81324,26 @@ var LiteMol;
                     view: this.spec.viewport.view,
                     isStatic: true
                 });
+                return targets;
+            };
+            Instance.prototype.getTransformerInfo = function (transformer) {
+                return this.transformersInfo.get(transformer.info.id);
+            };
+            Instance.prototype.destroy = function () {
+                this.context.dispatcher.finished();
+                Plugin.ReactDOM.unmountComponentAtNode(this.target);
+                this.context = void 0;
+                this.spec = void 0;
+                this.target = void 0;
+            };
+            Instance.prototype.setComponents = function (components) {
+                this.spec.components = components;
+                var targets = this.prepareTargets();
+                this.context.layout.updateTargets(targets);
+            };
+            Instance.prototype.init = function () {
+                this.compose();
+                var targets = this.prepareTargets();
                 this.context.createLayout(targets, this.target);
             };
             return Instance;
@@ -81177,7 +81450,7 @@ var LiteMol;
         "use strict";
         var Entity = LiteMol.Bootstrap.Entity;
         var Transformer = Entity.Transformer;
-        var Controller = (function () {
+        var Controller = /** @class */ (function () {
             function Controller(optionsOrInstance) {
                 if (optionsOrInstance.getTransformerInfo) {
                     this.ofInstace(optionsOrInstance);
