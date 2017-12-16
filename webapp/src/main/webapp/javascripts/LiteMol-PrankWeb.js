@@ -1,3 +1,136 @@
+/*
+ * Copyright (c) 2017 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var LiteMol;
+(function (LiteMol) {
+    var Extensions;
+    (function (Extensions) {
+        var ParticleColoring;
+        (function (ParticleColoring) {
+            'use strict';
+            var _this = this;
+            var Vec3 = LiteMol.Core.Geometry.LinearAlgebra.Vector3;
+            var Tree = LiteMol.Bootstrap.Tree;
+            var Entity = LiteMol.Bootstrap.Entity;
+            ParticleColoring.Coloring = Entity.create({ name: 'Particle Coloring', typeClass: 'Object', shortName: 'PC', description: 'Atom coloring based on distance from the molecule\' centroid.' });
+            ParticleColoring.Apply = Tree.Transformer.create({
+                id: 'particle-coloring-apply',
+                name: 'Particle Coloring',
+                description: 'Apply atom coloring based on distance from the molecule\' centroid.',
+                from: [Entity.Molecule.Visual],
+                to: [ParticleColoring.Coloring],
+                isUpdatable: true,
+                defaultParams: function () { return ({ min: 0, max: 1e10, steps: 66, opacity: 1.0 }); }
+            }, function (context, a, t) {
+                return LiteMol.Bootstrap.Task.create('Complex', 'Normal', function (ctx) { return __awaiter(_this, void 0, void 0, function () {
+                    var model, info, coloring;
+                    return __generator(this, function (_a) {
+                        model = LiteMol.Bootstrap.Utils.Molecule.findModel(a);
+                        info = getAtomParticleDistances(model.props.model);
+                        coloring = ParticleColoring.Coloring.create(t, { info: info, label: 'Particle Coloring', description: Math.round(10 * t.params.min) / 10 + " - " + Math.round(10 * t.params.max) / 10 });
+                        applyTheme(context, coloring, a, t.params);
+                        return [2 /*return*/, coloring];
+                    });
+                }); });
+            }, function (ctx, b, t) {
+                applyTheme(ctx, b, b.parent, t.params);
+                return LiteMol.Bootstrap.Task.resolve(t.transformer.info.name, 'Background', Tree.Node.Null);
+            });
+            function getAtomParticleDistances(model) {
+                var _a = model.positions, x = _a.x, y = _a.y, z = _a.z, count = _a.count;
+                var center = Vec3();
+                LiteMol.Bootstrap.Utils.Molecule.getCentroidAndRadius(model, model.data.atoms.indices, center);
+                var distances = new Float32Array(count);
+                var t = Vec3();
+                var min = 1e20, max = 0;
+                for (var i = 0; i < count; i++) {
+                    Vec3.set(t, x[i], y[i], z[i]);
+                    var d = Vec3.distance(t, center);
+                    distances[i] = d;
+                    if (d < min)
+                        min = d;
+                    else if (d > max)
+                        max = d;
+                }
+                return { min: min, max: max, distances: distances };
+            }
+            function createColorMapping(distances, min, max, maxColorIndex) {
+                var mapping = new Int32Array(distances.length);
+                var delta = (max - min) / maxColorIndex;
+                for (var i = 0, __i = distances.length; i < __i; i++) {
+                    if (distances[i] < min)
+                        mapping[i] = 0;
+                    else if (distances[i] > max)
+                        mapping[i] = maxColorIndex;
+                    else
+                        mapping[i] = Math.round((distances[i] - min) / delta);
+                }
+                return mapping;
+            }
+            function makeRainbow(steps) {
+                var rainbow = [];
+                var pal = LiteMol.Bootstrap.Visualization.Molecule.RainbowPalette;
+                for (var i = steps - 1; i >= 0; i--) {
+                    var t = (pal.length - 1) * i / (steps - 1);
+                    var low = Math.floor(t), high = Math.min(Math.ceil(t), pal.length - 1);
+                    var color = LiteMol.Visualization.Color.fromRgb(0, 0, 0);
+                    LiteMol.Visualization.Color.interpolate(pal[low], pal[high], t - low, color);
+                    rainbow.push(color);
+                }
+                return rainbow;
+            }
+            ParticleColoring.makeRainbow = makeRainbow;
+            function applyTheme(ctx, coloring, visual, _a) {
+                var min = _a.min, max = _a.max, stps = _a.steps, alpha = _a.opacity;
+                var distInfo = coloring.props.info;
+                var steps = Math.ceil(stps);
+                var atomMapping = createColorMapping(distInfo.distances, Math.max(min, distInfo.min), Math.min(max, distInfo.max), steps - 1);
+                var rainbow = makeRainbow(steps);
+                var mapping = LiteMol.Visualization.Theme.createPalleteIndexMapping(function (i) { return atomMapping[i]; }, rainbow);
+                var theme = LiteMol.Visualization.Theme.createMapping(mapping, { transparency: { alpha: alpha }, isSticky: true });
+                LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme.dispatch(ctx, { visual: visual, theme: theme });
+            }
+        })(ParticleColoring = Extensions.ParticleColoring || (Extensions.ParticleColoring = {}));
+    })(Extensions = LiteMol.Extensions || (LiteMol.Extensions = {}));
+})(LiteMol || (LiteMol = {}));
+/*
+ * Copyright (c) 2016 - now David Sehnal, licensed under Apache 2.0, See LICENSE file for more info.
+ */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -8,6 +141,46 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var LiteMol;
+(function (LiteMol) {
+    var Extensions;
+    (function (Extensions) {
+        var ParticleColoring;
+        (function (ParticleColoring) {
+            var UI;
+            (function (UI) {
+                'use strict';
+                var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
+                var Controls = LiteMol.Plugin.Controls;
+                var Apply = /** @class */ (function (_super) {
+                    __extends(Apply, _super);
+                    function Apply() {
+                        return _super !== null && _super.apply(this, arguments) || this;
+                    }
+                    Apply.prototype.rainbow = function () {
+                        var grad = "linear-gradient(to left," + LiteMol.Bootstrap.Visualization.Molecule.RainbowPalette.map(function (c) { return "rgb(" + 255 * c.r + "," + 255 * c.g + "," + 255 * c.b + ")"; }).join(',') + ")";
+                        return React.createElement("div", { style: { background: grad, height: '8px', marginTop: '1px' } });
+                    };
+                    Apply.prototype.renderControls = function () {
+                        var _this = this;
+                        var params = this.params;
+                        if (!this.isUpdate)
+                            return React.createElement("div", null);
+                        var max = this.controller.entity.props.info.max;
+                        var min = this.controller.entity.props.info.min;
+                        return React.createElement("div", null,
+                            this.rainbow(),
+                            React.createElement(Controls.Slider, { label: 'Low Radius', onChange: function (min) { return _this.autoUpdateParams({ min: min }); }, min: min, max: max, step: 0.1, value: Math.max(params.min, min) }),
+                            React.createElement(Controls.Slider, { label: 'High Radius', onChange: function (max) { return _this.autoUpdateParams({ max: max }); }, min: params.min, max: max, step: 0.1, value: Math.min(params.max, max) }),
+                            React.createElement(Controls.Slider, { label: 'Opacity', onChange: function (opacity) { return _this.autoUpdateParams({ opacity: opacity }); }, min: 0, max: 1, step: 0.01, value: params.opacity }));
+                    };
+                    return Apply;
+                }(LiteMol.Plugin.Views.Transform.ControllerBase));
+                UI.Apply = Apply;
+            })(UI = ParticleColoring.UI || (ParticleColoring.UI = {}));
+        })(ParticleColoring = Extensions.ParticleColoring || (Extensions.ParticleColoring = {}));
+    })(Extensions = LiteMol.Extensions || (LiteMol.Extensions = {}));
+})(LiteMol || (LiteMol = {}));
 var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
@@ -98,41 +271,6 @@ var LiteMol;
         PrankWeb.ControlButtons = ControlButtons;
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var LiteMol;
 (function (LiteMol) {
     var PrankWeb;
@@ -726,27 +864,38 @@ var LiteMol;
                 });
             };
             Pocket.prototype.toggleColoring = function (isVisible) {
-                var mapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, false);
+                var atomMapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, false);
+                var residueMapping = PrankWeb.DataLoader.getResidueColorMapping(this.props.plugin, this.props.model);
                 var pocketQuery = Query.atomsById.apply(null, this.props.pocket.surfAtomIds).compile();
-                if (!mapping)
+                var pocketResQuery = PrankWeb.DataLoader.residuesBySeqNums.apply(PrankWeb.DataLoader, this.props.pocket.residueIds).compile();
+                if (!atomMapping || !residueMapping)
                     return;
                 if (isVisible) {
                     var colorIndex = (this.props.index % PrankWeb.Colors.size) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%Colors.size);
                     for (var _i = 0, _a = pocketQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                         var atom = _a[_i];
-                        mapping[atom] = colorIndex;
+                        atomMapping[atom] = colorIndex;
+                    }
+                    for (var _b = 0, _c = pocketResQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _b < _c.length; _b++) {
+                        var atom = _c[_b];
+                        residueMapping[atom] = colorIndex;
                     }
                 }
                 else {
                     var originalMapping = PrankWeb.DataLoader.getAtomColorMapping(this.props.plugin, this.props.model, true);
                     if (!originalMapping)
                         return;
-                    for (var _b = 0, _c = pocketQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _b < _c.length; _b++) {
-                        var atom = _c[_b];
-                        mapping[atom] = originalMapping[atom];
+                    for (var _d = 0, _e = pocketQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _d < _e.length; _d++) {
+                        var atom = _e[_d];
+                        atomMapping[atom] = originalMapping[atom];
+                    }
+                    for (var _f = 0, _g = pocketResQuery(this.props.model.props.model.queryContext).unionAtomIndices(); _f < _g.length; _f++) {
+                        var atom = _g[_f];
+                        residueMapping[atom] = originalMapping[atom];
                     }
                 }
-                PrankWeb.DataLoader.setAtomColorMapping(this.props.plugin, this.props.model, mapping, false);
+                PrankWeb.DataLoader.setAtomColorMapping(this.props.plugin, this.props.model, atomMapping, false);
+                PrankWeb.DataLoader.setResidueColorMapping(this.props.plugin, this.props.model, residueMapping);
                 PrankWeb.DataLoader.colorProtein(this.props.plugin);
             };
             Pocket.prototype.getPocket = function () {
@@ -866,6 +1015,7 @@ var LiteMol;
             function initColorMapping(model, prediction, sequence) {
                 var atomColorMapConservation = new Uint8Array(model.props.model.data.atoms.count);
                 var atomColorMap = new Uint8Array(model.props.model.data.atoms.count);
+                var residueColorMap = new Uint8Array(model.props.model.data.atoms.count);
                 var seq = sequence.props.seq;
                 var seqIndices = seq.indices;
                 var seqScores = seq.scores;
@@ -877,19 +1027,25 @@ var LiteMol;
                             var atom = _a[_i];
                             atomColorMap[atom] = shade + PrankWeb.Colors.size + 1; // First there is fallbackColor(0), then pocketColors(1-9) and lastly conservation colors.
                             atomColorMapConservation[atom] = shade + PrankWeb.Colors.size + 1; // First there is fallbackColor(0), then pocketColors(1-9) and lastly conservation colors.
+                            residueColorMap[atom] = shade + PrankWeb.Colors.size + 1;
                         }
                     });
                 }
                 var pockets = prediction.props.pockets;
                 pockets.forEach(function (pocket, i) {
                     var pocketQuery = Query.atomsById.apply(null, pocket.surfAtomIds).compile();
+                    var pocketResQuery = residuesBySeqNums.apply(void 0, pocket.residueIds).compile();
                     var colorIndex = (i % PrankWeb.Colors.size) + 1; // Index of color that we want for the particular atom. i.e. Colors.get(i%Colors.size);
                     for (var _i = 0, _a = pocketQuery(model.props.model.queryContext).unionAtomIndices(); _i < _a.length; _i++) {
                         var atom = _a[_i];
                         atomColorMap[atom] = colorIndex;
                     }
+                    for (var _b = 0, _c = pocketResQuery(model.props.model.queryContext).unionAtomIndices(); _b < _c.length; _b++) {
+                        var atom = _c[_b];
+                        residueColorMap[atom] = colorIndex;
+                    }
                 });
-                return { atomColorMap: atomColorMap, atomColorMapConservation: atomColorMapConservation };
+                return { atomColorMap: atomColorMap, atomColorMapConservation: atomColorMapConservation, residueColorMap: residueColorMap };
             }
             function loadData(plugin, inputType, inputId) {
                 return new LiteMol.Promise(function (res, rej) {
@@ -926,8 +1082,9 @@ var LiteMol;
                         var prediction = plugin.context.select('pockets')[0];
                         var sequence = plugin.context.select('sequence')[0];
                         var mappings = initColorMapping(model, prediction, sequence);
-                        DataLoader.setAtomColorMapping(plugin, model, mappings.atomColorMap);
+                        DataLoader.setAtomColorMapping(plugin, model, mappings.atomColorMap, false);
                         DataLoader.setAtomColorMapping(plugin, model, mappings.atomColorMapConservation, true);
+                        DataLoader.setResidueColorMapping(plugin, model, mappings.residueColorMap);
                         if (!prediction)
                             rej("Unable to load predictions.");
                         else if (!sequence)
@@ -969,22 +1126,28 @@ var LiteMol;
                     // Create visuals for protein, ligand and water.
                     // Protein.
                     var polymer = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.nonHetPolymer(), name: 'Polymer', silent: true }, { isBinding: true, ref: 'polymer' });
-                    polymer.then(Transformer.Molecule.CreateVisual, { style: cartoonStyle }, { ref: 'polymer-cartoon' });
-                    polymer.then(Transformer.Molecule.CreateVisual, { style: surfaceStyle }, { ref: 'polymer-surface' });
+                    var colPolymerGroup = polymer.then(Transformer.Basic.CreateGroup, { label: 'Color view', description: "Colored views" });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: cartoonStyle }, { ref: 'polymer-cartoon-col' });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: surfaceStyle }, { ref: 'polymer-surface-col' });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: 'polymer-atoms-col' });
                     // Ligand.
                     var het = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true });
                     het.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') });
                     // Water.
-                    var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true });
+                    var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true, isHidden: true });
                     water.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyle });
                     // Create a group for all pockets.
-                    var pocketGroup = action.add(data.model, Transformer.Basic.CreateGroup, { label: 'Group', description: 'Pockets' });
+                    var pocketGroup = action.add(data.model, Transformer.Basic.CreateGroup, { label: 'Pockets', description: 'Pockets' }, { ref: "pockets" });
                     // For each pocket create selections, but don't create any visuals for them. 
+                    var allPocketsAtoms;
                     pockets.forEach(function (pocket, i) {
+                        var pocketSubGroup = pocketGroup.then(Transformer.Basic.CreateGroup, { label: pockets[i].name, description: pockets[i].name }, { ref: pockets[i].name });
                         var query = Query.atomsById.apply(null, pocket.surfAtomIds);
+                        var resQuery = residuesBySeqNums.apply(void 0, pocket.residueIds);
                         // Create selection.
-                        var sel = pocketGroup.then(Transformer.Molecule.CreateSelectionFromQuery, { query: query, name: pockets[i].name, silent: true }, { ref: pockets[i].name });
-                        //sel.then(<any>Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false });
+                        var atomSel = pocketGroup.then(Transformer.Molecule.CreateSelectionFromQuery, { query: query, name: pockets[i].name + "-atoms", silent: true }, { ref: pockets[i].name + "-atoms" });
+                        var resSel = pocketGroup.then(Transformer.Molecule.CreateSelectionFromQuery, { query: resQuery, name: pockets[i].name + "-res", silent: true }, { ref: pockets[i].name + "-res" });
+                        resSel.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { isHidden: false, ref: pockets[i].name + "-res-vis" });
                         //sel.then(<any>Transformer.Molecule.CreateVisual, { style: selectionStyle }, { isHidden: false });
                     });
                     plugin.applyTransform(action)
@@ -993,22 +1156,36 @@ var LiteMol;
                 });
             }
             DataLoader.visualizeData = visualizeData;
-            function setAtomColorMapping(plugin, model, mapping, conservation) {
-                if (conservation === void 0) { conservation = false; }
+            function setAtomColorMapping(plugin, model, mapping, original) {
+                if (original === void 0) { original = false; }
                 var ctx = plugin.context;
                 var cache = ctx.entityCache;
-                var cacheId = conservation ? '__PrankWeb__atomColorMapping__conservation__' : '__PrankWeb__atomColorMapping__';
+                var cacheId = original ? '__PrankWeb__atomColorMapping__original__' : '__PrankWeb__atomColorMapping__';
                 cache.set(model, cacheId, mapping);
             }
             DataLoader.setAtomColorMapping = setAtomColorMapping;
-            function getAtomColorMapping(plugin, model, conservation) {
-                if (conservation === void 0) { conservation = false; }
+            function getAtomColorMapping(plugin, model, original) {
+                if (original === void 0) { original = false; }
                 var ctx = plugin.context;
                 var cache = ctx.entityCache;
-                var cacheId = conservation ? '__PrankWeb__atomColorMapping__conservation__' : '__PrankWeb__atomColorMapping__';
+                var cacheId = original ? '__PrankWeb__atomColorMapping__original__' : '__PrankWeb__atomColorMapping__';
                 return cache.get(model, cacheId);
             }
             DataLoader.getAtomColorMapping = getAtomColorMapping;
+            function setResidueColorMapping(plugin, model, mapping) {
+                var ctx = plugin.context;
+                var cache = ctx.entityCache;
+                var cacheId = '__PrankWeb__residueColorMapping__';
+                cache.set(model, cacheId, mapping);
+            }
+            DataLoader.setResidueColorMapping = setResidueColorMapping;
+            function getResidueColorMapping(plugin, model) {
+                var ctx = plugin.context;
+                var cache = ctx.entityCache;
+                var cacheId = '__PrankWeb__residueColorMapping__';
+                return cache.get(model, cacheId);
+            }
+            DataLoader.getResidueColorMapping = getResidueColorMapping;
             function colorProteinFuture(plugin, data) {
                 return new LiteMol.Promise(function (res, rej) {
                     if (colorProtein(plugin)) {
@@ -1027,6 +1204,9 @@ var LiteMol;
                 var atomColorMapping = getAtomColorMapping(plugin, model);
                 if (!atomColorMapping)
                     return false;
+                var residueColorMapping = getResidueColorMapping(plugin, model);
+                if (!residueColorMapping)
+                    return false;
                 var colorMap = LiteMol.Core.Utils.FastMap.create();
                 var fallbackColor = LiteMol.Visualization.Color.fromHex(0xffffff); // white
                 colorMap.set(0, fallbackColor);
@@ -1042,14 +1222,24 @@ var LiteMol;
                 colors.set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor);
                 colors.set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
                 // Create mapping, theme and apply to all protein visuals.
-                var mapping = LiteMol.Visualization.Theme.createColorMapMapping(function (i) { return atomColorMapping[i]; }, colorMap, fallbackColor);
+                var atomMapping = LiteMol.Visualization.Theme.createColorMapMapping(function (i) { return atomColorMapping[i]; }, colorMap, fallbackColor);
+                var residueMapping = LiteMol.Visualization.Theme.createColorMapMapping(function (i) { return residueColorMapping[i]; }, colorMap, fallbackColor);
                 // make the theme "sticky" so that it persist "ResetScene" command.
-                var themeTransparent = LiteMol.Visualization.Theme.createMapping(mapping, { colors: colors, isSticky: true, transparency: { alpha: 1 } });
-                //const theme = Visualization.Theme.createMapping(mapping, { colors, isSticky: true });
-                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-surface').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                //const cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-cartoon').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: surface, theme: themeTransparent });
-                //plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: cartoon as any, theme });
+                var theme = LiteMol.Visualization.Theme.createMapping(atomMapping, { colors: colors, isSticky: true, transparency: { alpha: 1 } });
+                var residueTheme = LiteMol.Visualization.Theme.createMapping(residueMapping, { colors: colors, isSticky: true });
+                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-surface-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-cartoon-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-atoms-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: surface, theme: theme });
+                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
+                plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: cartoon, theme: residueTheme });
+                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
+                plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: atoms, theme: theme });
+                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: false });
+                plugin.selectEntities(Bootstrap.Tree.Selection.byRef('pockets').subtree().ofType(Bootstrap.Entity.Molecule.Visual)).forEach(function (selection) {
+                    ;
+                    plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: selection, theme: theme });
+                });
                 return true;
             }
             DataLoader.colorProtein = colorProtein;
@@ -1136,7 +1326,9 @@ var LiteMol;
                 { transformer: Transformer.Molecule.CreateAssembly, view: Views.Transform.Molecule.CreateAssembly, initiallyCollapsed: true },
                 { transformer: Transformer.Molecule.CreateSymmetryMates, view: Views.Transform.Molecule.CreateSymmetryMates, initiallyCollapsed: true },
                 { transformer: Transformer.Molecule.CreateMacromoleculeVisual, view: Views.Transform.Empty },
-                { transformer: Transformer.Molecule.CreateVisual, view: Views.Transform.Molecule.CreateVisual }
+                { transformer: Transformer.Molecule.CreateVisual, view: Views.Transform.Molecule.CreateVisual },
+                { transformer: Transformer.Molecule.CreateLabels, view: Views.Transform.Molecule.CreateLabels },
+                { transformer: LiteMol.Extensions.ParticleColoring.Apply, view: LiteMol.Extensions.ParticleColoring.UI.Apply, initiallyCollapsed: true },
             ],
             behaviours: [
                 // you will find the source of all behaviours in the Bootstrap/Behaviour directory
@@ -1153,9 +1345,11 @@ var LiteMol;
                 Bootstrap.Behaviour.UnselectElementOnRepeatedClick,
                 // distance to the last "clicked" element
                 Bootstrap.Behaviour.Molecule.DistanceToLastClickedElement,
+                Bootstrap.Behaviour.Molecule.HighlightElementInfo,
+                Bootstrap.Behaviour.Molecule.DistanceToLastClickedElement,
                 // when somethinh is selected, this will create an "overlay visual" of the selected residue and show every other residue within 5ang
                 // you will not want to use this for the ligand pages, where you create the same thing this does at startup
-                //Bootstrap.Behaviour.Molecule.ShowInteractionOnSelect(5),                
+                Bootstrap.Behaviour.Molecule.ShowInteractionOnSelect(5),
                 // this tracks what is downloaded and some basic actions. Does not send any private data etc.
                 // While it is not required for any functionality, we as authors are very much interested in basic 
                 // usage statistics of the application and would appriciate if this behaviour is used.
