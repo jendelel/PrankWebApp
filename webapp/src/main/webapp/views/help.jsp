@@ -87,16 +87,16 @@
                 visualization, structural visualization and the control panel.</p>
             <h3 id="structural-visualization-1">Structural visualization</h3>
             <p>The largest panel contains the three-dimensional visualization of the protein. By
-                default, the protein surface is displayed, and individual pocket areas are
+                default, the protein cartoon is displayed, and individual pocket areas are
                 highlighted
-                with different colors. If conservation is available, the protein surface is colored
+                with different colors. If conservation is available, the protein atoms is colored
                 with
                 11 shades of gray according to the conservation score of each residue. Darker color
-                depicts higher conservation score. To display the protein in cartoon style, the
-                protein
-                surface can be hidden completely in the advanced control panel (explained below), or
-                one
-                can slab the protein view by scrolling the mouse wheel.</p>
+                depicts higher conservation score. To switch between the views of the protein
+                (surface, cartoon, atoms style), click the rightmost button from the control panel
+                on the right.
+                In the surface view, one can also display the cartoon using the slab feature
+                by scrolling the mouse wheel.</p>
             <h4 id="controls">Controls</h4>
             <p>The molecule can be rotated by moving mouse while holding left mouse button. On a
                 touch
@@ -153,8 +153,9 @@
             <h2 id="pocket-panel">Pocket panel</h2>
             <p>The right panel contains several control buttons and a list of predicted pockets. Use
                 the
-                control buttons to download PrankWeb report, share the website or hide the sequence
-                view. PrankWeb report is a ZIP package containing all following files:</p>
+                control buttons to download PrankWeb report, share the website, hide the sequence
+                view or switch between the structural views. PrankWeb report is a ZIP package
+                containing all following files:</p>
             <ul>
                 <li><p>Original pdb file uploaded, or the protein file downloaded from RCSB PDB.</p>
                 </li>

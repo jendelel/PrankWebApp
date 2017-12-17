@@ -187,10 +187,18 @@ var LiteMol;
     (function (PrankWeb) {
         var Bootstrap = LiteMol.Bootstrap;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
+        var ColoredView;
+        (function (ColoredView) {
+            ColoredView[ColoredView["Cartoon"] = 0] = "Cartoon";
+            ColoredView[ColoredView["Surface"] = 1] = "Surface";
+            ColoredView[ColoredView["Atoms"] = 2] = "Atoms";
+        })(ColoredView || (ColoredView = {}));
         var ControlButtons = /** @class */ (function (_super) {
             __extends(ControlButtons, _super);
             function ControlButtons() {
-                return _super !== null && _super.apply(this, arguments) || this;
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.state = { coloredView: ColoredView.Cartoon };
+                return _this;
             }
             // http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
             ControlButtons.prototype.copyTextToClipboard = function (text) {
@@ -250,6 +258,35 @@ var LiteMol;
                 });
                 var _a;
             };
+            ControlButtons.prototype.toggleStructuralView = function () {
+                var plugin = this.props.plugin;
+                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_SURFACE).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_CARTOON).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_ATOMS).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                this.setState({ coloredView: (this.state.coloredView + 1) % 3 });
+                if (!surface || !cartoon || !atoms)
+                    return;
+                switch (this.state.coloredView) {
+                    case ColoredView.Atoms: {
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: true });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
+                        break;
+                    }
+                    case ColoredView.Cartoon: {
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: false });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
+                        break;
+                    }
+                    case ColoredView.Surface: {
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: false });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: true });
+                        Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
+                        break;
+                    }
+                }
+            };
             ControlButtons.prototype.render = function () {
                 var _this = this;
                 var type = this.props.inputType == "pdb" ? "id" : "upload";
@@ -263,8 +300,10 @@ var LiteMol;
                         React.createElement("span", { className: "button-icon mail-icon" })),
                     React.createElement("button", { className: "control-btn", title: "Copy URL to clipboard", onClick: function () { _this.copyTextToClipboard(window.location.href); } },
                         React.createElement("span", { className: "button-icon clipboard-icon" })),
-                    React.createElement("button", { className: "control-btn", title: "Toogle sequence view", onClick: function () { _this.toggleSequenceView(); } },
-                        React.createElement("span", { className: "button-icon seq-icon" }))));
+                    React.createElement("button", { className: "control-btn", title: "Show/hide sequence view", onClick: function () { _this.toggleSequenceView(); } },
+                        React.createElement("span", { className: "button-icon seq-icon" })),
+                    React.createElement("button", { className: "control-btn", title: "Toogle structural view (cartoon, surface, atoms)", onClick: function () { _this.toggleStructuralView(); } },
+                        React.createElement("span", { className: "button-icon struct-icon" }))));
             };
             return ControlButtons;
         }(React.Component));
@@ -992,6 +1031,9 @@ var LiteMol;
             var Bootstrap = LiteMol.Bootstrap;
             var Transformer = Bootstrap.Entity.Transformer;
             var Query = LiteMol.Core.Structure.Query;
+            DataLoader.TREE_REF_SURFACE = 'polymer-surface-col';
+            DataLoader.TREE_REF_ATOMS = 'polymer-atoms-col';
+            DataLoader.TREE_REF_CARTOON = 'polymer-cartoon-col';
             function residuesBySeqNums() {
                 var seqNums = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
@@ -1127,14 +1169,14 @@ var LiteMol;
                     // Protein.
                     var polymer = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.nonHetPolymer(), name: 'Polymer', silent: true }, { isBinding: true, ref: 'polymer' });
                     var colPolymerGroup = polymer.then(Transformer.Basic.CreateGroup, { label: 'Color view', description: "Colored views" });
-                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: cartoonStyle }, { ref: 'polymer-cartoon-col' });
-                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: surfaceStyle }, { ref: 'polymer-surface-col' });
-                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: 'polymer-atoms-col' });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: cartoonStyle }, { ref: DataLoader.TREE_REF_CARTOON });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: surfaceStyle }, { ref: DataLoader.TREE_REF_SURFACE });
+                    colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: DataLoader.TREE_REF_ATOMS });
                     // Ligand.
                     var het = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true });
                     het.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') });
                     // Water.
-                    var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true, isHidden: true });
+                    var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true, ref: 'water' });
                     water.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyle });
                     // Create a group for all pockets.
                     var pocketGroup = action.add(data.model, Transformer.Basic.CreateGroup, { label: 'Pockets', description: 'Pockets' }, { ref: "pockets" });
@@ -1227,15 +1269,17 @@ var LiteMol;
                 // make the theme "sticky" so that it persist "ResetScene" command.
                 var theme = LiteMol.Visualization.Theme.createMapping(atomMapping, { colors: colors, isSticky: true, transparency: { alpha: 1 } });
                 var residueTheme = LiteMol.Visualization.Theme.createMapping(residueMapping, { colors: colors, isSticky: true });
-                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-surface-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-cartoon-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('polymer-atoms-col').subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_SURFACE).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_CARTOON).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_ATOMS).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
+                var water = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('water'))[0];
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: surface, theme: theme });
                 Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: cartoon, theme: residueTheme });
                 Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: atoms, theme: theme });
                 Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: false });
+                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: water, visible: false }); // Hide water balls and sticks.
                 plugin.selectEntities(Bootstrap.Tree.Selection.byRef('pockets').subtree().ofType(Bootstrap.Entity.Molecule.Visual)).forEach(function (selection) {
                     ;
                     plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: selection, theme: theme });
@@ -1392,7 +1436,13 @@ var LiteMol;
                 customSpecification: PrankWeb.PrankWebSpec
             });
             plugin.context.logger.message("LiteMol " + Plugin.VERSION.number);
+            plugin.command(Bootstrap.Command.Layout.SetState, {
+                regionStates: (_a = {},
+                    _a[Bootstrap.Components.LayoutRegion.Top] = 'Sticky',
+                    _a)
+            });
             return plugin;
+            var _a;
         }
         PrankWeb.create = create;
         // Div that LiteMol mounts into.
@@ -1402,6 +1452,7 @@ var LiteMol;
         // Specify what data to display.
         var inputType = appNode.getAttribute("data-input-type");
         var inputId = appNode.getAttribute("data-input-id");
-        PrankWeb.App.render(create(appNode), inputType, inputId, pocketNode);
+        var plugin = create(appNode);
+        PrankWeb.App.render(plugin, inputType, inputId, pocketNode);
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
