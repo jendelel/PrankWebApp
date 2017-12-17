@@ -118,6 +118,11 @@
 .seq-icon:before {
     content: '\e86d'; /*Sequence icon*/
 }
+
+.struct-icon:before {
+    content: '\e839'; /*Retweet icon*/
+}
+
 .mail-icon:before {
     content: '\e805'; /*Mail icon*/
 }
