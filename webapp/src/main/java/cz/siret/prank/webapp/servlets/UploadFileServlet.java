@@ -51,6 +51,32 @@ public class UploadFileServlet extends HttpServlet {
        return fileName.replaceFirst("\\.pdb\\.gz$", "");
     }
 
+    private File downloadUploadedFile(Part filePart, HttpServletResponse response) throws IOException {
+        File tempFile;
+        Path predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
+        try (InputStream fileContent = filePart.getInputStream()) {
+            String uploadId =dateTimeFormatter.format(LocalDateTime.now());
+            File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
+            tempFile = File.createTempFile(String.format("upload_%s_", uploadId),
+                    ".pdb.gz", uploadsFolder);
+            try {
+                try (GZIPOutputStream outputStream = new GZIPOutputStream(
+                        new FileOutputStream(tempFile, false))) {
+                    Utils.INSTANCE.copyStream(fileContent, outputStream);
+                    fileContent.close();
+                    outputStream.close();
+                }
+                PrankUtils.INSTANCE.updateStatus(tempFile, predictionDir, "File uploaded.");
+                return tempFile;
+            } catch (Exception e) {
+                e.printStackTrace(response.getWriter());
+                return null;
+            }
+        }
+    }
+
+
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
@@ -58,7 +84,6 @@ public class UploadFileServlet extends HttpServlet {
         String pdbId = request.getParameter("pdbId");
         Path predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
 
-        Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
         Collection<Part> files = request.getParts();
         Map<String, File> msas = new HashMap<>();
         Character counter = 'A';
@@ -75,23 +100,12 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         File tempFile;
-        try (InputStream fileContent = filePart.getInputStream()) {
-            String uploadId =dateTimeFormatter.format(LocalDateTime.now());
-            File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
-            tempFile = File.createTempFile(String.format("upload_%s_", uploadId),
-                    ".pdb.gz", uploadsFolder);
-            try {
-                try (GZIPOutputStream outputStream = new GZIPOutputStream(
-                        new FileOutputStream(tempFile, false))) {
-                    Utils.INSTANCE.copyStream(fileContent, outputStream);
-                    fileContent.close();
-                    outputStream.close();
-                }
-                PrankUtils.INSTANCE.updateStatus(tempFile, predictionDir, "File uploaded.");
-            } catch (Exception e) {
-                e.printStackTrace(response.getWriter());
-                return;
-            }
+        if (files.contains("pdbFile")) {
+            Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
+            tempFile = downloadUploadedFile(filePart, response);
+        } else {
+            tempFile = AnalyzeIdServlet.downloadFileFromPDB(
+                    pdbId, new DataGetter("id", pdbId), logger);
         }
 
         try {

@@ -24,23 +24,30 @@ public class DataGetter {
     public DataGetter(String inputType, String inputId) {
         this.inputId = inputId;
         this.inputType = inputType;
+        logger.info("Creaing new DataGetter with params: {}, {}", inputId, inputType);
     }
 
     public Path pdbFile() {
-        if (inputType.equals("id")) {
+        if (inputType.equals("id") || inputType.equals("id_noconser")) {
+            logger.info("Outputing path to pdb file: {}", Paths.get(AppSettings.INSTANCE
+                            .getPdbDataPath(),
+                    String.format("pdb%s_%s.ent.gz", inputType, inputId)).toString());
+
             return Paths.get(AppSettings.INSTANCE.getPdbDataPath(),
-                    String.format("pdb%s.ent.gz", inputId));
+                    String.format("pdb%s_%s.ent.gz", inputType, inputId));
         } else {
             return Paths.get(AppSettings.INSTANCE.getUploadsDir(), inputId.concat(".pdb.gz"));
         }
     }
 
     public Path csvFile() {
-        return inputType.equals("id") ?
-                Paths.get(AppSettings.INSTANCE.getCsvDataPath(),
-                        String.format("pdb%s.ent.gz_predictions.csv", inputId)) :
-                Paths.get(AppSettings.INSTANCE.getPredictionDir(),
-                        String.format("%s.pdb.gz_predictions.csv", inputId));
+        String csvDir = inputType.startsWith("id") ?
+                AppSettings.INSTANCE.getCsvDataPath() :
+                AppSettings.INSTANCE.getPredictionDir();
+        String pdbFile = pdbFile().getFileName().toString();
+        logger.info("Outputing path to csv file: {}", Paths.get(csvDir, String.format
+                ("%s_predictions.csv", pdbFile)).toString());
+        return Paths.get(csvDir, String.format("%s_predictions.csv", pdbFile));
     }
 
     public Map<String, File> conservationOrMsaFiles(String extension) {
@@ -83,14 +90,16 @@ public class DataGetter {
     }
 
     public Path statusFile() {
-        assert inputType.equals("id");
+        assert inputType.startsWith("id");
         String fileName = pdbFile().toFile().getName().concat(".status");
+        logger.info("Outputting path to csv file: {}", pdbFile().getParent().resolve(fileName)
+                .toString());
         return csvFile().getParent().resolve(fileName);
     }
 
     public Path visualizationZip() {
         Path predictionDir;
-        if (inputType.equals("id")) {
+        if (inputType.startsWith("id")) {
             predictionDir = Paths.get(AppSettings.INSTANCE.getCsvDataPath(), "visualizations");
         } else {
             predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir(), "visualizations");

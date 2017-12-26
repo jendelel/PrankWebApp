@@ -26,6 +26,18 @@
                 </div>
 
                 <div class="form-group">
+                    <div class="form-inline text-center" style="margin: 0 auto; width: 350px;">
+                        <label for="pdbId">PDB code
+                            <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                               title="PrankWeb will download the protein file from PDB and calculate conservation using HSSP database (if possible) or from MSA of similar proteins.">
+                                <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
+                            </a>
+                            :</label>
+                        <input type="text" id="pdbId" placeholder="2SRC" class="form-control"/>
+                    </div>
+
+                    <p class="text-center">OR</p>
+
                     <label>PDB file
                         <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                       title="Protein file to analyze.">
@@ -39,8 +51,8 @@
                     <%--<br>--%>
                 <div class="checkbox">
                     <label> <input id="conservation-checkbox" name="doConservation"
-                                   type="checkbox" onclick="doConservationClicked()"
-                                   value="1" style="margin-right: 4px;">Run conservation analysis
+                                   type="checkbox" onclick="doConservationClicked()" checked="checked"
+                                   style="margin-right: 4px;">Run conservation analysis
                         <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                            title="If checked, a model that exploits conservation will be used to classify protein binding sites. If neither MSA nor PDB code is provided, PrankWeb will calculate conservation from MSA of similar proteins.">
                             <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
@@ -76,20 +88,6 @@
                 </button>
             </div>
 
-            <p class="text-center">OR</p>
-
-            <div class="form-group form-inline text-center" style="margin: 0 auto; width: 350px;">
-                <label for="pdbId">PDB code
-                    <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
-                       title="PrankWeb will download the protein file from PDB and calculate conservation using HSSP database (if possible) or from MSA of similar proteins.">
-                        <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
-                    </a>
-                :</label>
-                <input type="text" id="pdbId" placeholder="2SRC" class="form-control"/>
-                <button id="pdbIdSumbit" type="submit" class="btn btn-default"
-                        onclick="submitPdbId()">Submit
-                </button>
-            </div>
         </div>
         <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:body>

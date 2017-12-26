@@ -251,6 +251,7 @@ var LiteMol;
                 if (!regionStates)
                     return;
                 var regionState = regionStates[Bootstrap.Components.LayoutRegion.Top];
+                var hide = true;
                 this.props.plugin.command(Bootstrap.Command.Layout.SetState, {
                     regionStates: (_a = {},
                         _a[Bootstrap.Components.LayoutRegion.Top] = regionState == 'Sticky' ? 'Hidden' : 'Sticky',
@@ -263,10 +264,11 @@ var LiteMol;
                 var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_SURFACE).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
                 var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_CARTOON).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
                 var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(PrankWeb.DataLoader.TREE_REF_ATOMS).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                this.setState({ coloredView: (this.state.coloredView + 1) % 3 });
                 if (!surface || !cartoon || !atoms)
                     return;
-                switch (this.state.coloredView) {
+                var newStateView = (this.state.coloredView + 1) % 3;
+                this.setState({ coloredView: newStateView });
+                switch (newStateView) {
                     case ColoredView.Atoms: {
                         Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: true });
                         Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
@@ -667,6 +669,7 @@ var LiteMol;
                 this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-expanded .lm-layout-top"), function (el) { el.style.height = height; });
                 this.forEachNodeInSelector(document.querySelectorAll(".lm-plugin .lm-layout-expanded .lm-layout-bottom"), function (el) { el.style.height = height; });
                 this.controller.context.scene.scene.resized();
+                this.selectAndDisplayToastLetter(this.lastNumber, false);
             };
             SequenceView.prototype.onLetterMouseEnter = function (seqNumber) {
                 if (!seqNumber && seqNumber != 0)
@@ -1152,6 +1155,10 @@ var LiteMol;
                         .set('Uniform', LiteMol.Visualization.Color.fromHex(0xffffff))
                         .set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor)
                         .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
+                    var ligandColors = Bootstrap.Immutable.Map()
+                        .set('Uniform', LiteMol.Visualization.Color.fromHex(0xe5cf42))
+                        .set('Selection', LiteMol.Visualization.Theme.Default.SelectionColor)
+                        .set('Highlight', LiteMol.Visualization.Theme.Default.HighlightColor);
                     // Style for protein surface.
                     var surfaceStyle = {
                         type: 'Surface',
@@ -1159,10 +1166,15 @@ var LiteMol;
                         theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: surfaceColors, transparency: { alpha: 0.6 } }
                     };
                     // Style for water.
-                    var ballsAndSticksStyle = {
+                    var ballsAndSticksStyleWater = {
                         type: 'BallsAndSticks',
                         params: { useVDW: false, atomRadius: 0.23, bondRadius: 0.09, detail: 'Automatic' },
                         theme: { template: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate, colors: Bootstrap.Visualization.Molecule.Default.ElementSymbolThemeTemplate.colors, transparency: { alpha: 0.25 } }
+                    };
+                    var ballsAndSticksStyleLigand = {
+                        type: 'BallsAndSticks',
+                        params: Bootstrap.Visualization.Molecule.Default.BallsAndSticksParams,
+                        theme: { template: Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate, colors: ligandColors, transparency: { alpha: 1 } }
                     };
                     var action = plugin.createTransform();
                     // Create visuals for protein, ligand and water.
@@ -1174,10 +1186,10 @@ var LiteMol;
                     colPolymerGroup.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') }, { ref: DataLoader.TREE_REF_ATOMS });
                     // Ligand.
                     var het = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.hetGroups(), name: 'HET', silent: true }, { isBinding: true });
-                    het.then(Transformer.Molecule.CreateVisual, { style: Bootstrap.Visualization.Molecule.Default.ForType.get('BallsAndSticks') });
+                    het.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyleLigand });
                     // Water.
                     var water = action.add(data.model, Transformer.Molecule.CreateSelectionFromQuery, { query: LiteMol.Core.Structure.Query.entities({ type: 'water' }), name: 'Water', silent: true }, { isBinding: true, ref: 'water' });
-                    water.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyle });
+                    water.then(Transformer.Molecule.CreateVisual, { style: ballsAndSticksStyleWater });
                     // Create a group for all pockets.
                     var pocketGroup = action.add(data.model, Transformer.Basic.CreateGroup, { label: 'Pockets', description: 'Pockets' }, { ref: "pockets" });
                     // For each pocket create selections, but don't create any visuals for them. 
@@ -1452,7 +1464,6 @@ var LiteMol;
         // Specify what data to display.
         var inputType = appNode.getAttribute("data-input-type");
         var inputId = appNode.getAttribute("data-input-id");
-        var plugin = create(appNode);
-        PrankWeb.App.render(plugin, inputType, inputId, pocketNode);
+        PrankWeb.App.render(create(appNode), inputType, inputId, pocketNode);
     })(PrankWeb = LiteMol.PrankWeb || (LiteMol.PrankWeb = {}));
 })(LiteMol || (LiteMol = {}));
