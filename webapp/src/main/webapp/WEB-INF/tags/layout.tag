@@ -71,7 +71,11 @@
 <jsp:doBody/>
 
 <footer>
-    <p class="text-center">PrankWeb, Siret group, Charles University 2017</p>
+    <p class="text-center">
+        <small>
+            <span class="glyphicon glyphicon-copyright-mark"></span> PrankWeb, Charles University 2017
+        </small>
+    </p>
 </footer>
 </body>
 </html>
