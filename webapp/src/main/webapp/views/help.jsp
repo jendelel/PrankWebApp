@@ -87,7 +87,7 @@
                 visualization, structural visualization and the control panel.</p>
             <h3 id="structural-visualization-1">Structural visualization</h3>
             <p>The largest panel contains the three-dimensional visualization of the protein. By
-                default, the protein cartoon is displayed, and individual pocket areas are
+                default, the protein surface is displayed, and individual pocket areas are
                 highlighted
                 with different colors. If conservation is available, the protein atoms is colored
                 with
@@ -133,14 +133,21 @@
                 figure above was achived by hiding the default protein surface and creating a
                 small surface for the individual pockets.</p>
             <h3 id="sequence-visualization-1">Sequence visualization</h3>
-            <p>The panel above protein 3D visualization displays protein sequence. All chains are
+            <p>The panel above protein 3D visualization displays protein sequence. </p>
+                <ul>
+                <li>All chains are
                 concatenated and visualized at once. Chains can be identified by regions marked on
                 the
-                main sequence. Colored rectangles depict areas with predicted pockets and real
+                    main sequence. </li>
+                <li> Colored rectangles depict areas with predicted pockets and real
                 binding
-                areas (if available). Real binding sites are residues within 4 &#8491;
-                from any ligand atom. If available, conservation scores are portrayed using a bar
-                chart.
+                areas (if available). </li>
+                <li>Real binding sites are residues within 4 &#8491;
+                    from any ligand atom. </li>
+                <li>If available, conservation scores are portrayed
+                    using a bar chart. </li>
+                </ul>
+            <p>
                 As one hovers over the sequence with mouse, the residues are highlighted in the 3D
                 visualization. This feature allows to analyze the protein both from the structural
                 and
@@ -149,7 +156,8 @@
                 protein is displayed. You can use the trackbar control to zoom in, or select the
                 area
                 with mouse and zoom to the selection. A snapshot of the sequence can be captured and
-                exported to SVG (Scalable Vector Graphics) file using the rightmost button.</p>
+                exported to SVG (Scalable Vector Graphics) file using the rightmost button.
+            </p>
             <h2 id="pocket-panel">Pocket panel</h2>
             <p>The right panel contains several control buttons and a list of predicted pockets. Use
                 the

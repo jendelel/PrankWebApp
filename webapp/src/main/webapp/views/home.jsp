@@ -29,7 +29,7 @@
                     <div class="form-inline text-center" style="margin: 0 auto; width: 350px;">
                         <label for="pdbId">PDB code
                             <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
-                               title="PrankWeb will download the protein file from PDB and calculate conservation using HSSP database (if possible) or from MSA of similar proteins.">
+                               title="PrankWeb will download the protein file from PDB.">
                                 <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
                             </a>
                             :</label>
@@ -71,7 +71,7 @@
                     <label id="msa_opt_lbl">MSA files (optional)
                         <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                title="Provide your custom MSA file and PrankWeb will calculate the conservation scores from that MSA file.
-                               Alignments in FASTA and CLUSTAL formats are supported.">
+                               Alignments in FASTA formats are supported.">
                             <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
                         </a>
                         :
