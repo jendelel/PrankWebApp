@@ -67,7 +67,7 @@ public class AnalyzeIdServlet extends HttpServlet {
             DataGetter data = new DataGetter(inputType, pdbId);
 
             if (data.csvFile().toFile().exists()) {
-                req.setAttribute("inputType", "pdb");
+                req.setAttribute("inputType", inputType);
                 req.setAttribute("inputId", pdbId);
                 RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/visualize.jsp");
                 rd.forward(req, resp);

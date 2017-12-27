@@ -45,7 +45,7 @@ public class DataGetter {
                 AppSettings.INSTANCE.getCsvDataPath() :
                 AppSettings.INSTANCE.getPredictionDir();
         String pdbFile = pdbFile().getFileName().toString();
-        logger.info("Outputing path to csv file: {}", Paths.get(csvDir, String.format
+        logger.info("Outputting path to csv file: {}", Paths.get(csvDir, String.format
                 ("%s_predictions.csv", pdbFile)).toString());
         return Paths.get(csvDir, String.format("%s_predictions.csv", pdbFile));
     }
@@ -56,7 +56,8 @@ public class DataGetter {
         if (inputType.equals("id")) {
             conservationDir = Paths.get(AppSettings.INSTANCE.getCsvDataPath()).toFile();
             filter = (dir, name) ->
-                    (name.startsWith("pdb" + inputId) && name.endsWith(extension));
+                    (name.startsWith("pdb" + inputType + "_" + inputId) &&
+                            name.endsWith(extension));
         } else {
             conservationDir = Paths.get(AppSettings.INSTANCE.getPredictionDir()).toFile();
             logger.info("dir: {}, inputId: {}, extension: {}", conservationDir.getAbsolutePath(),
