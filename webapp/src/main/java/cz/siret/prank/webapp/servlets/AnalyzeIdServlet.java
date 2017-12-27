@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
@@ -30,25 +31,24 @@ public class AnalyzeIdServlet extends HttpServlet {
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-    public static File downloadFileFromPDB(String pdbId, DataGetter data, Logger logger) {
-        PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
-                data.csvFile().getParent(), "Downloading file from PDB.");
+    public static File downloadFileFromPDB(String pdbId, Path targetFile, Path csvDir) {
+        PrankUtils.INSTANCE.updateStatus(targetFile.toFile(),
+                csvDir, "Downloading file from PDB.");
         String middleChars = pdbId.substring(1, 3);
         try {
             URL url = new URL(String.format("ftp://ftp.wwpdb" +
                             ".org/pub/pdb/data/structures/divided/pdb/%s/pdb%s.ent.gz",
                     middleChars, pdbId));
             try (InputStream in = url.openStream()) {
-                Files.copy(in, data.pdbFile(), StandardCopyOption.REPLACE_EXISTING);
-                PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
-                        data.csvFile().getParent(), "File downloaded.");
+                Files.copy(in, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                PrankUtils.INSTANCE.updateStatus(targetFile.toFile(),
+                        csvDir, "File downloaded.");
 
-                return data.pdbFile().toFile();
+                return targetFile.toFile();
             }
         } catch (Exception e) {
-            PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
-                    data.csvFile().getParent(),
-                    "ERROR: Failed to download or analyze PDB file. ".concat(e.toString()));
+            PrankUtils.INSTANCE.updateStatus(targetFile.toFile(),
+                    csvDir, "ERROR: Failed to download or analyze PDB file. ".concat(e.toString()));
         }
         return null;
     }
@@ -96,7 +96,9 @@ public class AnalyzeIdServlet extends HttpServlet {
                 }
             } else {
                 // Download and analyze the file.
-                File downloadedFile = downloadFileFromPDB(pdbId, data, logger);
+                File downloadedFile = downloadFileFromPDB(pdbId,
+                        data.pdbFile(),
+                        data.csvFile().getParent());
                 if (downloadedFile != null) {
                     String errors = BioUtils.INSTANCE.checkForPdbFileErrors(data.pdbFile().toFile());
                     if (errors != null) {

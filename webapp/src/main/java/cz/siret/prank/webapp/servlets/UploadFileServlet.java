@@ -51,14 +51,17 @@ public class UploadFileServlet extends HttpServlet {
        return fileName.replaceFirst("\\.pdb\\.gz$", "");
     }
 
+    private File createTempFile() throws IOException{
+        String uploadId =dateTimeFormatter.format(LocalDateTime.now());
+        File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
+        return File.createTempFile(String.format("upload_%s_", uploadId),
+                ".pdb.gz", uploadsFolder);
+    }
+
     private File downloadUploadedFile(Part filePart, HttpServletResponse response) throws IOException {
-        File tempFile;
         Path predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
         try (InputStream fileContent = filePart.getInputStream()) {
-            String uploadId =dateTimeFormatter.format(LocalDateTime.now());
-            File uploadsFolder = new File(AppSettings.INSTANCE.getUploadsDir());
-            tempFile = File.createTempFile(String.format("upload_%s_", uploadId),
-                    ".pdb.gz", uploadsFolder);
+            File tempFile = createTempFile();
             try {
                 try (GZIPOutputStream outputStream = new GZIPOutputStream(
                         new FileOutputStream(tempFile, false))) {
@@ -100,12 +103,13 @@ public class UploadFileServlet extends HttpServlet {
         }
 
         File tempFile;
-        if (files.contains("pdbFile")) {
+        if (files.stream().anyMatch(part->part.getName().equals("pdbFile"))) {
             Part filePart = request.getPart("pdbFile"); // Retrieves <input type="file" name="pdbFile">
             tempFile = downloadUploadedFile(filePart, response);
         } else {
             tempFile = AnalyzeIdServlet.downloadFileFromPDB(
-                    pdbId, new DataGetter("id", pdbId), logger);
+                    pdbId, createTempFile().toPath(),
+                    Paths.get(AppSettings.INSTANCE.getPredictionDir()));
         }
 
         try {
