@@ -21,8 +21,11 @@ function uploadPdbFile() {
 
         if (doConservation) {
             var pdbIdOpt = $("#pdbId_opt").val();
-            if (isValidPdbId(pdbIdOpt)) {
+            if (isValidPdbId(pdbIdOpt) && msaFiles.length === 0) {
                 formData.append('pdbId', pdbIdOpt);
+            }
+            if (msaFiles.length > 0 && isValidPdbId(pdbId)) {
+                formData.append('pdbId', pdbId);
             }
             for (i = 0; i < msaFiles.length; i++) {
                 file = msaFiles[i];

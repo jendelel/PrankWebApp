@@ -251,7 +251,6 @@ var LiteMol;
                 if (!regionStates)
                     return;
                 var regionState = regionStates[Bootstrap.Components.LayoutRegion.Top];
-                var hide = true;
                 this.props.plugin.command(Bootstrap.Command.Layout.SetState, {
                     regionStates: (_a = {},
                         _a[Bootstrap.Components.LayoutRegion.Top] = regionState == 'Sticky' ? 'Hidden' : 'Sticky',
@@ -291,7 +290,7 @@ var LiteMol;
             };
             ControlButtons.prototype.render = function () {
                 var _this = this;
-                var type = this.props.inputType == "pdb" ? "id" : "upload";
+                var type = this.props.inputType;
                 var downloadUrl = "/api/" + type + "/all/" + this.props.inputId;
                 var mail = "mailto:?subject=PrankWeb".concat(encodeURIComponent(" - " + window.location.href));
                 return (React.createElement("div", { className: "control-buttons" },
@@ -1095,19 +1094,9 @@ var LiteMol;
             function loadData(plugin, inputType, inputId) {
                 return new LiteMol.Promise(function (res, rej) {
                     plugin.clear();
-                    var pdbUrl;
-                    var seqUrl;
-                    var csvUrl;
-                    if (inputType == "pdb") {
-                        pdbUrl = "/api/id/pdb/" + inputId;
-                        csvUrl = "/api/id/csv/" + inputId;
-                        seqUrl = "/api/id/seq/" + inputId;
-                    }
-                    else {
-                        pdbUrl = "/api/upload/pdb/" + inputId;
-                        csvUrl = "/api/upload/csv/" + inputId;
-                        seqUrl = "/api/upload/seq/" + inputId;
-                    }
+                    var pdbUrl = "/api/" + inputType + "/pdb/" + inputId;
+                    var seqUrl = "/api/" + inputType + "/seq/" + inputId;
+                    var csvUrl = "/api/" + inputType + "/csv/" + inputId;
                     // Download pdb and create a model.
                     var model = plugin.createTransform()
                         .add(plugin.root, Transformer.Data.Download, { url: pdbUrl, type: 'String', id: inputType })
