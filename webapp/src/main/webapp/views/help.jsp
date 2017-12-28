@@ -84,19 +84,22 @@
             <h2 id="visualization">Visualization</h2>
             <img src="/images/vis.png" class="img-responsive center-block"/>
             <p>Once the protein visualization is loaded, three main panels appear: sequence
-                visualization, structural visualization and the control panel.</p>
+                visualization, structural visualization and the pocket panel.</p>
             <h3 id="structural-visualization-1">Structural visualization</h3>
-            <p>The largest panel contains the three-dimensional visualization of the protein. By
-                default, the protein surface is displayed, and individual pocket areas are
+            <p>The largest panel contains the three-dimensional visualization of the protein. </p>
+                <ul>
+                    <li>
+                        By default, the protein surface is displayed, and individual pocket areas are
                 highlighted
-                with different colors. If conservation is available, the protein atoms is colored
-                with
-                11 shades of gray according to the conservation score of each residue. Darker color
-                depicts higher conservation score. To switch between the views of the protein
-                (surface, cartoon, atoms style), click the rightmost button from the control panel
-                on the right.
-                In the surface view, one can also display the cartoon using the slab feature
-                by scrolling the mouse wheel.</p>
+                        with different colors. Ligands (if available) are displayed with yellow. </li>
+                    <li> If conservation is available, the protein atoms is colored
+                with 11 shades of gray according to the conservation score of each residue. Darker color
+                        depicts higher conservation score. </li>
+                    <li>To switch between the views of the protein
+                (surface, cartoon, atoms style), click the rightmost button at top of the pocket
+                        panel on the right. </li>
+                <li>In the surface view, one can also display the cartoon using the slab feature
+                    by scrolling the mouse wheel.</li></ul>
             <h4 id="controls">Controls</h4>
             <p>The molecule can be rotated by moving mouse while holding left mouse button. On a
                 touch
