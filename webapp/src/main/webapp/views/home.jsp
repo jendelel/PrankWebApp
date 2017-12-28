@@ -35,8 +35,9 @@
     <jsp:body>
         <div class="container jumbotron" style="padding-top: 0px">
             <h1>Welcome to PrankWeb</h1><br/>
-            <div>Prank is a novel machine learning-based method for prediction of
-                ligand binding sites from protein structure.</div> <br/>
+            <div class="row">
+            <div class="col-sm-6">Prank is a novel machine learning-based method for prediction of
+                ligand binding sites from protein structure.</div></div>
             <div>Please upload your pdb protein file or enter PBD ID.</div><br/>
                 <div style="display: none;" class="progress">
                     <div role="progressbar" class="progress-bar"></div>
