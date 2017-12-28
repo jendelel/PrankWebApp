@@ -31,14 +31,15 @@
                 position: relative;
             }
         </style>
+        <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:attribute>
     <jsp:body>
         <div class="container jumbotron" style="padding-top: 0px">
-            <h1>Welcome to PrankWeb</h1><br/>
-            <div class="row">
-            <div class="col-sm-6">Prank is a novel machine learning-based method for prediction of
-                ligand binding sites from protein structure.</div></div>
-            <div>Please upload your pdb protein file or enter PBD ID.</div><br/>
+        <h1 class="text-center">Welcome to PrankWeb</h1>
+        <div style="padding-bottom: 10px; width: 75%; margin-left: 12%;">
+            Prank is a novel machine learning-based method for prediction of
+            ligand binding sites from protein structure.
+        </div>
                 <div style="display: none;" class="progress">
                     <div role="progressbar" class="progress-bar"></div>
                 </div>
@@ -47,47 +48,44 @@
                         class="fa fa-spinner fa-spin"></i><br/><span>Running analysis...</span>
                 </div>
 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="form-inline col-sm-6">
-                        <label for="pdbId">PDB code
+        <form class="form-horizontal">
+            <div class="panel panel-success" style="width:75%; margin-left:12%">
+                <div class="panel-heading">Please upload your pdb protein file or enter PBD ID.</div>
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="pdbId" class="col-sm-2 control-label">PDB code
                             <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                title="PrankWeb will download the protein file from PDB.">
                                 <i class='glyphicon glyphicon-question-sign' style="color:black;"></i>
                             </a>
-                            :</label>
-                            <input type="text" id="pdbId" placeholder="2SRC"
-                                   class="form-control pull-right text-right"/>
-                        </div>
+                            </label>
+                                    <div class="col-sm-10" style="padding-bottom:10px">
+                                        <input type="text" id="pdbId" placeholder="2SRC"
+                                               class="form-control" oninput="doConservationClicked()"/>
+                                    </div>
+                                    <div style="text-align:center;">OR</div>
                     </div>
-
-                    <div class="row justify-content-center">
-                        <div class="col-sm-6">
-                            <p class="text-center">OR</p>
-                        </div>
-                    </div>
-
-                    <div class="row justify-content-center">
-                        <div class="col-sm-6">
-                            <label>PDB file
+                                <div class="form-group">
+                                    <label for="upload-pdb" class="col-sm-2 control-label">PDB file
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                    title="Protein file to analyze.">
                                     <i class='glyphicon glyphicon-question-sign'
                                        style="color:black;"></i>
                                 </a>
-                                :</label>
-                            <label for="upload-pdb"
-                                   class="btn btn-default btn-file pull-right text-right">
-                                <input id="upload-pdb" name="pdbFile" accept=".pdb" type="file"/>
-                            </label>
-                        </div>
+                                </label>
+                                    <div class="col-sm-10">
+                                        <input id="upload-pdb" name="pdbFile" accept=".pdb"
+                                               type="file" oninput="doConservationClicked()"/>
+                                    </div>
                     </div>
                 </div>
+                        </div>
                     <%--<br>--%>
-            <div class="row justify-content-center">
-                <div class="col-sm-6">
-                    <div class="panel panel-default"
-                         style="background-color: transparent; padding: 10px;">
+                <div class="panel panel-success" style="width:75%; margin-left:12%">
+                    <div class="panel-heading">Conservation analysis</div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
                         <div class="checkbox">
                             <label> <input id="conservation-checkbox" name="doConservation"
                                            type="checkbox" onclick="doConservationClicked()"
@@ -100,47 +98,52 @@
                                 </a>
                             </label>
                         </div>
+                            </div>
+                        </div>
                             <%--<br>--%>
                         <div class="form-group">
-                            <div style="padding: 2px;">
-                            <label id="pdbId_opt_lbl" for="pdbId_opt">PDB code (optional)
+                            <label id="pdbId_opt_lbl" for="pdbId_opt"
+                                   class="col-sm-2 control-label">PDB code (optional)
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                    title="If PDB code of the uploaded protein is provided, MSA alignment from HSSP database for this protein will be used to calculate the conservation score.">
                                     <i class='glyphicon glyphicon-question-sign'
                                        style="color:black;"></i>
                                 </a>
-                                :</label>
-                            <input type="text" id="pdbId_opt" class="text-right pull-right"/> <br>
+                                </label>
+                            <div class="col-sm-10">
+                                <input type="text" id="pdbId_opt" class="form-control"/>
                             </div>
-                            <label id="msa_opt_lbl">MSA files (optional)
+                        </div>
+                        <div class="form-group">
+                            <label for="upload-msas" id="msa_opt_lbl"
+                                   class="col-sm-2 control-label">MSA files
+                                (optional)
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
                                title="Provide your custom MSA file and PrankWeb will calculate the conservation scores from that MSA file.
                                Alignments in FASTA formats are supported.">
                                     <i class='glyphicon glyphicon-question-sign'
                                        style="color:black;"></i>
                                 </a>
-                                :
+
                             </label>
-                            <label for="upload-msas"
-                                   class="btn btn-default btn-file pull-right text-right">
+                            <div class="col-sm-10">
                                 <input id="upload-msas" name="msaFiles" type="file"
                                        accept=".fasta, .aln" multiple>
                                 </input>
-                            </label>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-                    <%--<br>--%>
-            <div class="row justify-content-center">
-                <div class="col-sm-6 text-center">
+
+            <div class="form-group">
+                <div class="col-sm-offset-9 col-sm-2">
                     <button id="pdbUploadSumbit" type="submit"
-                            class="btn btn-default text-center" onclick="uploadPdbFile()">Submit
+                            class="btn btn-default" onclick="uploadPdbFile()">Submit
                     </button>
                 </div>
             </div>
 
+        </form>
         </div>
-        <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:body>
 </t:layout>
