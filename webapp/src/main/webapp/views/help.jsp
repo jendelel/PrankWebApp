@@ -98,6 +98,9 @@
                     <li>To switch between the views of the protein
                 (surface, cartoon, atoms style), click the rightmost button at top of the pocket
                         panel on the right. </li>
+                <li>In the cartoon view, the ligands (if present) appear in yellow.  The atoms of amino 
+                acids forming the binding site have the color of the pocket, the remaining atoms of 
+                interacting amino acids are in grey/white (depending if conservation scores are available).</li>
                 <li>In the surface view, one can also display the cartoon using the slab feature
                     by scrolling the mouse wheel.</li></ul>
             <h4 id="controls">Controls</h4>
