@@ -31,7 +31,6 @@
                 position: relative;
             }
         </style>
-        <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:attribute>
     <jsp:body>
         <div class="container jumbotron" style="padding-top: 0px">
@@ -48,7 +47,7 @@
                         class="fa fa-spinner fa-spin"></i><br/><span>Running analysis...</span>
                 </div>
 
-        <form class="form-horizontal">
+        <form class="form-horizontal" onsubmit="event.preventDefault(); return false;">
             <div class="panel panel-success" style="width:75%; margin-left:12%">
                 <div class="panel-heading">Please upload your pdb protein file or enter PBD ID.</div>
                             <div class="panel-body">
@@ -128,8 +127,7 @@
                             </label>
                             <div class="col-sm-10">
                                 <input id="upload-msas" name="msaFiles" type="file"
-                                       accept=".fasta, .aln" multiple>
-                                </input>
+                                       accept=".fasta, .aln" multiple/>
                             </div>
                         </div>
                     </div>
@@ -137,13 +135,14 @@
 
             <div class="form-group">
                 <div class="col-sm-offset-9 col-sm-2">
-                    <button id="pdbUploadSumbit" type="submit"
-                            class="btn btn-default" onclick="uploadPdbFile()">Submit
+                    <button id="pdbUploadSumbit"
+                            class="btn btn-default">Submit
                     </button>
                 </div>
             </div>
 
         </form>
         </div>
+        <script src="${pageContext.request.contextPath}/javascripts/upload.js"></script>
     </jsp:body>
 </t:layout>

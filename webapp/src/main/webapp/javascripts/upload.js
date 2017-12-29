@@ -88,6 +88,7 @@ function uploadPdbFile() {
         }
     } else {
         alert("Please select some files to upload or enter valid PDB ID.")
+        return false;
     }
 }
 
@@ -117,4 +118,5 @@ function isValidPdbId(pdbId) {
 $(document).ready(function () {
    doConservationClicked();
     $(".tooltip-hint").tooltip();
+    document.getElementById('pdbUploadSumbit').onclick = function() { uploadPdbFile(); };
 });
