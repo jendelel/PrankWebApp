@@ -70,6 +70,10 @@
 
 <jsp:doBody/>
 
+<div align="center" style="padding: 30px 25px 30px 25px;">
+    <img src="/images/logo_ELIXIR.png">
+</div>
+
 <footer>
     <p class="text-center">
         <small>
