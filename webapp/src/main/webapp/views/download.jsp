@@ -51,7 +51,7 @@
                 <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
                     <h4>PrankWeb</h4>
                     <ul>
-                        <li><a href="http://prank.projekty.ms.mff.cuni.cz/">Project website</a></li>
+                        <li><a href="http://siret.ms.mff.cuni.cz/prank">Project website</a></li>
                         <li><a href="https://github.com/jendelel/PrankWebApp" target="_blank">GitHub </a></li>
                     </ul>
                 </div>
