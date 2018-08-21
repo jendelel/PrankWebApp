@@ -71,7 +71,9 @@
 <jsp:doBody/>
 
 <div align="center" style="padding: 30px 25px 30px 25px;">
-    <img src="/images/logo_ELIXIR.png">
+<img src="/images/logo_ELIXIR.png">
+<br>
+<div><a href="/views/terms.jsp">Terms of use</a> | <a href="/views/privacy.jsp">Privacy</a></div>
 </div>
 
 <footer>
