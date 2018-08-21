@@ -81,7 +81,7 @@
 
     <h3 id="">Cookies</h3>
     <div class="contentBox">
-        We do not store any cookies for the website setter.projekty.ms.mff.cuni.cz.
+        We do not store any cookies for the website prank.projekty.ms.mff.cuni.cz.
     </div>
 
 
