@@ -56370,7 +56370,7 @@ var LiteMol;
             }
             var immediateActions = (function () {
                 if (typeof setImmediate !== 'undefined') {
-                    if (typeof window !== 'undefined') {
+                    if (typeof window !== 'undefined' && typeof window.setImmediate !== 'undefined') {
                         // this is because of IE
                         return { setImmediate: function (handler) {
                                 var args = [];
@@ -56413,8 +56413,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -58350,12 +58350,18 @@ var LiteMol;
                             models.push(model);
                             startRow = endRow;
                         }
-                        var experimentMethod = void 0;
+                        var experimentMethods = void 0;
                         var _exptl = data.getCategory('_exptl');
                         if (_exptl) {
-                            experimentMethod = _exptl.getColumn('method').getString(0) || void 0;
+                            experimentMethods = [];
+                            var method = _exptl.getColumn('method');
+                            for (var i = 0; i < _exptl.rowCount; i++) {
+                                if (method.getValuePresence(i) !== 0 /* Present */)
+                                    continue;
+                                experimentMethods.push(method.getString(i));
+                            }
                         }
-                        return Core.Structure.Molecule.create(id, models, { experimentMethod: experimentMethod });
+                        return Core.Structure.Molecule.create(id, models, { experimentMethods: experimentMethods });
                     }
                     mmCIF.ofDataBlock = ofDataBlock;
                 })(mmCIF = Molecule.mmCIF || (Molecule.mmCIF = {}));
@@ -58727,7 +58733,7 @@ var LiteMol;
                         Tokenizer.prototype.moveToEndOfLine = function () {
                             while (this.position < this.length) {
                                 var c = this.data.charCodeAt(this.position);
-                                if (c === 10 || c === 13) {
+                                if (c === 10 || c === 13) { //  /n | /r
                                     return this.position;
                                 }
                                 this.position++;
@@ -58772,7 +58778,7 @@ var LiteMol;
                             this.trim(start, start + 4);
                             Formats.TokenIndexBuilder.addToken(tokens, this.trimmedToken.start, this.trimmedToken.end);
                             //17             Character       Alternate location indicator. 
-                            if (this.data.charCodeAt(startPos + 16) === 32) {
+                            if (this.data.charCodeAt(startPos + 16) === 32) { // ' '
                                 Formats.TokenIndexBuilder.addToken(tokens, 0, 0);
                             }
                             else {
@@ -58789,7 +58795,7 @@ var LiteMol;
                             this.trim(start, start + 4);
                             Formats.TokenIndexBuilder.addToken(tokens, this.trimmedToken.start, this.trimmedToken.end);
                             //27             AChar           Code for insertion of residues.      
-                            if (this.data.charCodeAt(startPos + 26) === 32) {
+                            if (this.data.charCodeAt(startPos + 26) === 32) { // ' '
                                 Formats.TokenIndexBuilder.addToken(tokens, 0, 0);
                             }
                             else {
@@ -58862,7 +58868,7 @@ var LiteMol;
                             while (tokenizer.position < length) {
                                 var cont = true;
                                 switch (data.charCodeAt(tokenizer.position)) {
-                                    case 65:// A 
+                                    case 65: // A 
                                         if (tokenizer.startsWith(tokenizer.position, "ATOM")) {
                                             if (!modelAtomTokens) {
                                                 modelAtomTokens = Formats.TokenIndexBuilder.create(4096);
@@ -58873,14 +58879,14 @@ var LiteMol;
                                                 return err;
                                         }
                                         break;
-                                    case 67:// C
+                                    case 67: // C
                                         if (tokenizer.startsWith(tokenizer.position, "CRYST1")) {
                                             var start = tokenizer.position;
                                             var end = tokenizer.moveToEndOfLine();
                                             cryst = new PDB.CrystStructureInfo(data.substring(start, end));
                                         }
                                         break;
-                                    case 69:// E 
+                                    case 69: // E 
                                         if (tokenizer.startsWith(tokenizer.position, "ENDMDL") && atomCount > 0) {
                                             if (models.length === 0) {
                                                 modelIdToken = { start: data.length + 3, end: data.length + 4 };
@@ -58900,7 +58906,7 @@ var LiteMol;
                                             }
                                         }
                                         break;
-                                    case 72:// H 
+                                    case 72: // H 
                                         if (tokenizer.startsWith(tokenizer.position, "HETATM")) {
                                             if (!modelAtomTokens) {
                                                 modelAtomTokens = Formats.TokenIndexBuilder.create(4096);
@@ -58911,7 +58917,7 @@ var LiteMol;
                                                 return err;
                                         }
                                         break;
-                                    case 77://M
+                                    case 77: //M
                                         if (tokenizer.startsWith(tokenizer.position, "MODEL")) {
                                             if (atomCount > 0) {
                                                 if (models.length === 0) {
@@ -59988,7 +59994,7 @@ var LiteMol;
                         out[9] = a01 * b20 + a11 * b21 + a21 * b22;
                         out[10] = a02 * b20 + a12 * b21 + a22 * b22;
                         out[11] = a03 * b20 + a13 * b21 + a23 * b22;
-                        if (a !== out) {
+                        if (a !== out) { // If the source and destination differ, copy the unchanged last row
                             out[12] = a[12];
                             out[13] = a[13];
                             out[14] = a[14];
@@ -60341,22 +60347,29 @@ var LiteMol;
             "use strict";
             var Surface;
             (function (Surface) {
+                var Vec3 = Geometry.LinearAlgebra.Vector3;
                 function computeNormalsImmediate(surface) {
                     if (surface.normals)
                         return;
                     var normals = new Float32Array(surface.vertices.length), v = surface.vertices, triangles = surface.triangleIndices;
+                    var x = Vec3.zero(), y = Vec3.zero(), z = Vec3.zero(), d1 = Vec3.zero(), d2 = Vec3.zero(), n = Vec3.zero();
                     for (var i = 0; i < triangles.length; i += 3) {
                         var a = 3 * triangles[i], b = 3 * triangles[i + 1], c = 3 * triangles[i + 2];
-                        var nx = v[a + 2] * (v[b + 1] - v[c + 1]) + v[b + 2] * v[c + 1] - v[b + 1] * v[c + 2] + v[a + 1] * (-v[b + 2] + v[c + 2]), ny = -(v[b + 2] * v[c]) + v[a + 2] * (-v[b] + v[c]) + v[a] * (v[b + 2] - v[c + 2]) + v[b] * v[c + 2], nz = v[a + 1] * (v[b] - v[c]) + v[b + 1] * v[c] - v[b] * v[c + 1] + v[a] * (-v[b + 1] + v[b + 1]);
-                        normals[a] += nx;
-                        normals[a + 1] += ny;
-                        normals[a + 2] += nz;
-                        normals[b] += nx;
-                        normals[b + 1] += ny;
-                        normals[b + 2] += nz;
-                        normals[c] += nx;
-                        normals[c + 1] += ny;
-                        normals[c + 2] += nz;
+                        Vec3.set(x, v[a], v[a + 1], v[a + 2]);
+                        Vec3.set(y, v[b], v[b + 1], v[b + 2]);
+                        Vec3.set(z, v[c], v[c + 1], v[c + 2]);
+                        Vec3.sub(d1, z, y);
+                        Vec3.sub(d2, y, x);
+                        Vec3.cross(n, d1, d2);
+                        normals[a] += n[0];
+                        normals[a + 1] += n[1];
+                        normals[a + 2] += n[2];
+                        normals[b] += n[0];
+                        normals[b + 1] += n[1];
+                        normals[b + 2] += n[2];
+                        normals[c] += n[0];
+                        normals[c + 1] += n[1];
+                        normals[c + 2] += n[2];
                     }
                     for (var i = 0; i < normals.length; i += 3) {
                         var nx = normals[i];
@@ -64539,6 +64552,7 @@ var LiteMol;
                     state.entityCount += entityCount;
                 }
                 function buildAssemblyEntry(model, entry, state) {
+                    var _a;
                     var ops = [], currentOp = [];
                     for (var i_2 = 0; i_2 < entry.operators.length; i_2++)
                         currentOp[i_2] = '';
@@ -64555,7 +64569,6 @@ var LiteMol;
                         mask[i] = asymIds.has(residueAsymIds[i]);
                     }
                     getAssemblyParts(model, mask, transforms, state, transformOffset);
-                    var _a;
                 }
                 SymmetryHelpers.buildAssemblyEntry = buildAssemblyEntry;
                 function buildAssembly(model, assembly) {
@@ -65801,7 +65814,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        Visualization.VERSION = { number: "1.7.5", date: "Oct 26 2017" };
+        Visualization.VERSION = { number: "1.7.7", date: "Feb 27 2018" };
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -66090,10 +66103,10 @@ var LiteMol;
             function fromHexString(s) {
                 if (s[0] !== '#')
                     return fromHex(0);
-                if (s.length === 4) {
+                if (s.length === 4) { // #rgb
                     return fromHexString("#" + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]);
                 }
-                else if (s.length === 7) {
+                else if (s.length === 7) { // #rrggbb
                     return fromHex(parseInt(s.substr(1), 16));
                 }
                 return fromHex(0);
@@ -66790,10 +66803,10 @@ var LiteMol;
                     event.preventDefault();
                 }
                 var delta = 0;
-                if (event.wheelDelta) {
+                if (event.wheelDelta) { // WebKit / Opera / Explorer 9
                     delta = event.wheelDelta;
                 }
-                else if (event.detail) {
+                else if (event.detail) { // Firefox
                     delta = -event.detail;
                 }
                 //if (delta < -0.5) delta = -0.5;
@@ -66918,7 +66931,7 @@ var LiteMol;
             Camera.prototype.focus = function () {
                 this.controls.reset();
                 var target = this.focusPoint;
-                this.camera.position.set(target.x, target.y, target.z - 4 * this.focusRadius);
+                this.camera.position.set(target.x, target.y, target.z + 4 * this.focusRadius);
                 this.camera.lookAt(target);
                 this.controls.target.set(target.x, target.y, target.z);
                 this.cameraUpdated();
@@ -67867,7 +67880,7 @@ var LiteMol;
                     case 1:
                         this._state = 3 /* TOUCH_ROTATE */;
                         this.scene.mouseInfo.updatePosition(event.touches[0].clientX, event.touches[0].clientY);
-                        this._rotateStart.copy(this.getMouseProjectionOnBall());
+                        this._rotateStart.copy(this.getMouseProjectionOnBall( /*event.touches[0].clientX, event.touches[0].clientY*/));
                         this._rotateEnd.copy(this._rotateStart);
                         break;
                     case 2:
@@ -67878,7 +67891,7 @@ var LiteMol;
                         var x = (event.touches[0].clientX + event.touches[1].clientX) / 2;
                         var y = (event.touches[0].clientY + event.touches[1].clientY) / 2;
                         this.scene.mouseInfo.updatePosition(x, y);
-                        this._panStart.copy(this.getMouseOnScreen());
+                        this._panStart.copy(this.getMouseOnScreen( /*x, y*/));
                         this._panEnd.copy(this._panStart);
                         break;
                     default:
@@ -67894,7 +67907,7 @@ var LiteMol;
                 switch (event.touches.length) {
                     case 1:
                         this.scene.mouseInfo.updatePosition(event.touches[0].clientX, event.touches[0].clientY);
-                        this._rotateEnd.copy(this.getMouseProjectionOnBall());
+                        this._rotateEnd.copy(this.getMouseProjectionOnBall( /*event.touches[0].clientX, event.touches[0].clientY*/));
                         this.update();
                         break;
                     case 2:
@@ -67904,7 +67917,7 @@ var LiteMol;
                         var x = (event.touches[0].clientX + event.touches[1].clientX) / 2;
                         var y = (event.touches[0].clientY + event.touches[1].clientY) / 2;
                         this.scene.mouseInfo.updatePosition(x, y);
-                        this._panEnd.copy(this.getMouseOnScreen());
+                        this._panEnd.copy(this.getMouseOnScreen( /*x, y*/));
                         this.update();
                         break;
                     default:
@@ -67921,7 +67934,7 @@ var LiteMol;
                 switch (touches.length) {
                     case 1:
                         this.scene.mouseInfo.updatePosition(touches[0].clientX, touches[0].clientY);
-                        this._rotateEnd.copy(this.getMouseProjectionOnBall());
+                        this._rotateEnd.copy(this.getMouseProjectionOnBall( /*event.touches[0].clientX, event.touches[0].clientY*/));
                         this._rotateStart.copy(this._rotateEnd);
                         break;
                     case 2:
@@ -67929,7 +67942,7 @@ var LiteMol;
                         var x = (touches[0].clientX + touches[1].clientX) / 2;
                         var y = (touches[0].clientY + touches[1].clientY) / 2;
                         this.scene.mouseInfo.updatePosition(x, y);
-                        this._panEnd.copy(this.getMouseOnScreen());
+                        this._panEnd.copy(this.getMouseOnScreen( /*x, y*/));
                         this._panStart.copy(this._panEnd);
                         break;
                 }
@@ -68133,7 +68146,7 @@ var LiteMol;
                         }
                     }
                 }
-                else {
+                else { // clear
                     for (var i = start; i < end; i++) {
                         var v = array[i];
                         array[i] = 0;
@@ -70189,6 +70202,7 @@ var LiteMol;
                             _this.geometry = void 0;
                             _this.pickGeometry = void 0;
                             _this.gapsGeometry = void 0;
+                            _this.directionConesGeometry = void 0;
                             _this.vertexMap = void 0;
                             _this.vertexStateBuffer = void 0;
                             return _this;
@@ -70198,6 +70212,9 @@ var LiteMol;
                             this.pickGeometry.dispose();
                             if (this.gapsGeometry) {
                                 this.gapsGeometry.dispose();
+                            }
+                            if (this.directionConesGeometry) {
+                                this.directionConesGeometry.dispose();
                             }
                         };
                         return Data;
@@ -70220,7 +70237,12 @@ var LiteMol;
                                             params: params,
                                             state: new Geometry.CartoonsGeometryState(params, model.data.residues.count),
                                             units: void 0,
-                                            strandArrays: void 0,
+                                            strandArrays: {
+                                                startIndex: model.data.residues.atomStartIndex,
+                                                endIndex: model.data.residues.atomEndIndex,
+                                                x: model.positions.x, y: model.positions.y, z: model.positions.z,
+                                                name: model.data.atoms.name
+                                            },
                                             strandTemplate: void 0,
                                             builder: new Geometry.Builder(),
                                             geom: new Data()
@@ -70887,7 +70909,8 @@ var LiteMol;
                             this.radialSegmentCount = 10;
                             this.turnWidth = 0.1;
                             this.strandWidth = 0.15;
-                            this.strandLineWidth = 0.1;
+                            this.nucleotideStrandLineWidth = 0.15;
+                            this.nucleotideStrandFactor = 3;
                             this.helixWidth = 1.1;
                             this.helixHeight = 0.1;
                             this.sheetWidth = 1.1;
@@ -70909,6 +70932,8 @@ var LiteMol;
                             this.vs = this.builder.vertices;
                             this.is = this.builder.indices;
                             this.gapsBuilder = GB.createDynamic(256, 512);
+                            this.dCones = GB.createDynamic(1, 1);
+                            this.dConesInit = false;
                             this.translationMatrix = new Visualization.THREE.Matrix4();
                             this.scaleMatrix = new Visualization.THREE.Matrix4();
                             this.rotationMatrix = new Visualization.THREE.Matrix4();
@@ -70929,6 +70954,17 @@ var LiteMol;
                             enumerable: true,
                             configurable: true
                         });
+                        Object.defineProperty(CartoonsGeometryState.prototype, "directionConesBuilder", {
+                            get: function () {
+                                if (this.dConesInit)
+                                    return this.dCones;
+                                this.dConesInit = true;
+                                this.dCones = GB.createDynamic(this.residueCount, this.residueCount);
+                                return this.dCones;
+                            },
+                            enumerable: true,
+                            configurable: true
+                        });
                         CartoonsGeometryState.prototype.addVertex = function (v, n) {
                             GB.addVertex3d(this.builder, v.x, v.y, v.z);
                             GB.addNormal3d(this.builder, n.x, n.y, n.z);
@@ -70944,7 +70980,7 @@ var LiteMol;
                     }());
                     Geometry.CartoonsGeometryState = CartoonsGeometryState;
                     function makeStrandLineTemplate(ctx) {
-                        var radius = ctx.params.strandLineWidth, tessalation = ctx.params.tessalation;
+                        var radius = ctx.params.nucleotideStrandLineWidth, tessalation = ctx.params.tessalation;
                         var capPoints = 0, radiusPoints = 0, geom;
                         switch (tessalation) {
                             case 0:
@@ -70989,14 +71025,6 @@ var LiteMol;
                             index: templ.attributes.index.array,
                             geometry: templ
                         };
-                        var atoms = ctx.model.data.atoms, residues = ctx.model.data.residues;
-                        var positions = ctx.model.positions;
-                        ctx.strandArrays = {
-                            startIndex: residues.atomStartIndex,
-                            endIndex: residues.atomEndIndex,
-                            x: positions.x, y: positions.y, z: positions.z,
-                            name: atoms.name
-                        };
                     }
                     function buildUnit(unit, ctx) {
                         var state = ctx.state, params = ctx.params;
@@ -71010,7 +71038,7 @@ var LiteMol;
                             if (ctx.isTrace || unit.backboneOnly) {
                                 switch (unit.residueType[index]) {
                                     case 5 /* Strand */:
-                                        builder.addTube(unit, state, params.strandWidth, params.strandWidth);
+                                        builder.addTube(unit, state, params.strandWidth, params.strandWidth, builder.hasP(unit.residueIndex[index], ctx.strandArrays) ? params.nucleotideStrandFactor : 1);
                                         if (start || end) {
                                             builder.addTubeCap(unit, state, params.strandWidth, params.strandWidth, start, end);
                                         }
@@ -71020,7 +71048,7 @@ var LiteMol;
                                         builder.addStrandLine(unit, state, ctx.strandTemplate, ctx.strandArrays, unit.residueIndex[index]);
                                         break;
                                     default:
-                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth);
+                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth, params.turnWidth);
                                         if (start || end) {
                                             builder.addTubeCap(unit, state, params.turnWidth, params.turnWidth, start, end);
                                         }
@@ -71030,7 +71058,7 @@ var LiteMol;
                             else {
                                 switch (unit.residueType[index]) {
                                     case 1 /* Helix */:
-                                        builder.addTube(unit, state, params.helixWidth, params.helixHeight);
+                                        builder.addTube(unit, state, params.helixWidth, params.helixHeight, 1);
                                         if (start) {
                                             builder.addTubeCap(unit, state, params.helixWidth, params.helixHeight, true, false);
                                         }
@@ -71045,7 +71073,7 @@ var LiteMol;
                                         }
                                         break;
                                     case 5 /* Strand */:
-                                        builder.addTube(unit, state, params.strandWidth, params.strandWidth);
+                                        builder.addTube(unit, state, params.strandWidth, params.strandWidth, builder.hasP(unit.residueIndex[index], ctx.strandArrays) ? params.nucleotideStrandFactor : 1);
                                         if (start || end) {
                                             builder.addTubeCap(unit, state, params.strandWidth, params.strandWidth, start, end);
                                         }
@@ -71055,12 +71083,15 @@ var LiteMol;
                                         builder.addStrandLine(unit, state, ctx.strandTemplate, ctx.strandArrays, unit.residueIndex[index]);
                                         break;
                                     default:
-                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth);
+                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth, 1);
                                         if (start || end) {
                                             builder.addTubeCap(unit, state, params.turnWidth, params.turnWidth, start, end);
                                         }
                                         break;
                                 }
+                            }
+                            if (ctx.parameters.showDirectionCones && unit.residueType[index] !== 5 /* Strand */) {
+                                renderDirectionCone(ctx, unit, 2 * params.sheetHeight, index);
                             }
                             state.vertexMap.addVertexRange(numVertices, state.verticesDone);
                             state.vertexMap.endElement();
@@ -71072,12 +71103,40 @@ var LiteMol;
                         return chainIndex[a.endResidueIndex] === chainIndex[b.endResidueIndex];
                     }
                     var Vec3 = LiteMol.Core.Geometry.LinearAlgebra.Vector3;
+                    var Mat4 = LiteMol.Core.Geometry.LinearAlgebra.Matrix4;
                     function renderGap(ctx, unitA, unitB) {
                         var aL = unitA.controlPoints.length;
                         var cpA = unitA.controlPoints, cpB = unitB.controlPoints;
                         var a = Vec3.fromValues(cpA[aL - 3], cpA[aL - 2], cpA[aL - 1]), b = Vec3.fromValues(cpB[0], cpB[1], cpB[2]);
                         var r = ctx.state.params.turnWidth / 2;
                         GB.addDashedLine(ctx.state.gapsBuilder, a, b, 0.5, 0.5, r);
+                    }
+                    var coneTemplate = (function () {
+                        var geom = new Visualization.THREE.CylinderGeometry(0, 1, 1, 6, 1);
+                        var ret = Visualization.GeometryHelper.toRawGeometry(geom);
+                        geom.dispose();
+                        return ret;
+                    })();
+                    var coneDirection = Vec3.zero(), coneUp = Vec3.fromValues(0, 1, 0), coneA = Vec3.zero(), coneB = Vec3.zero(), coneTranslation = Vec3.zero(), coneScale = Vec3.zero(), coneRotation = Mat4.identity();
+                    function renderDirectionCone(ctx, unit, radius, residueIndex) {
+                        if (unit.residueCount <= 2)
+                            return;
+                        var cp = unit.controlPoints;
+                        var i = residueIndex * unit.linearSegmentCount + ((0.35 * unit.linearSegmentCount + 1) | 0);
+                        var j = residueIndex * unit.linearSegmentCount + ((0.85 * unit.linearSegmentCount + 1) | 0);
+                        if (i === j || 3 * j > cp.length)
+                            return;
+                        Vec3.set(coneTranslation, cp[3 * i], cp[3 * i + 1], cp[3 * i + 2]);
+                        Vec3.set(coneA, cp[3 * i], cp[3 * i + 1], cp[3 * i + 2]);
+                        Vec3.set(coneB, cp[3 * j], cp[3 * j + 1], cp[3 * j + 2]);
+                        Vec3.sub(coneA, coneB, coneA);
+                        var l = Vec3.magnitude(coneA);
+                        if (l <= 0.1)
+                            return;
+                        Vec3.set(coneScale, 2 * radius, l, 2 * radius);
+                        Vec3.normalize(coneA, coneA);
+                        Vec3.makeRotation(coneRotation, coneUp, coneA);
+                        GB.addRawTransformed(ctx.state.directionConesBuilder, coneTemplate, coneScale, coneTranslation, coneRotation);
                     }
                     function buildUnitsAsync(ctx) {
                         return __awaiter(this, void 0, void 0, function () {
@@ -71128,6 +71187,9 @@ var LiteMol;
                         if (state.gapsBuilder.vertices.elementCount) {
                             ctx.geom.gapsGeometry = GB.toBufferGeometry(state.gapsBuilder);
                         }
+                        if (state.directionConesBuilder.vertices.elementCount) {
+                            ctx.geom.directionConesGeometry = GB.toBufferGeometry(state.directionConesBuilder);
+                        }
                         var map = ctx.geom.vertexMap, color = { r: 0.45, g: 0.45, b: 0.45 }, vertexRanges = map.vertexRanges;
                         for (var _i = 0, _a = map.elementIndices; _i < _a.length; _i++) {
                             var elementIndex = _a[_i];
@@ -71164,19 +71226,23 @@ var LiteMol;
                             v.set(data[3 * i], data[3 * i + 1], data[3 * i + 2]);
                             return v;
                         };
-                        Builder.prototype.addTube = function (element, state, width, height) {
+                        Builder.prototype.addTube = function (element, state, width, height, waveFactor) {
                             var verticesDone = state.verticesDone, i = 0, j = 0, radialVector = this.tempVectors[0], normalVector = this.tempVectors[1], tempPos = this.tempVectors[2], a = this.tempVectors[3], b = this.tempVectors[4], u = this.tempVectors[5], v = this.tempVectors[6], elementOffsetStart = state.residueIndex * element.linearSegmentCount, elementOffsetEnd = elementOffsetStart + element.linearSegmentCount, elementPoints = element.controlPoints, elementPointsCount = element.linearSegmentCount + 1, torsionVectors = element.torsionVectors, normalVectors = element.normalVectors, radialSegmentCount = state.params.radialSegmentCount;
+                            var di = 1 / (elementOffsetEnd - elementOffsetStart);
                             for (i = elementOffsetStart; i <= elementOffsetEnd; i++) {
                                 this.setVector(torsionVectors, i, u);
                                 this.setVector(normalVectors, i, v);
+                                var tt = di * (i - elementOffsetStart) - 0.5;
+                                var ff = 1 + (waveFactor - 1) * (Math.cos(2 * Math.PI * tt) + 1);
+                                var w = ff * width, h = ff * height;
                                 for (j = 0; j < radialSegmentCount; j++) {
                                     var t = 2 * Math.PI * j / radialSegmentCount;
                                     a.copy(u);
                                     b.copy(v);
-                                    radialVector.addVectors(a.multiplyScalar(width * Math.cos(t)), b.multiplyScalar(height * Math.sin(t)));
+                                    radialVector.addVectors(a.multiplyScalar(w * Math.cos(t)), b.multiplyScalar(h * Math.sin(t)));
                                     a.copy(u);
                                     b.copy(v);
-                                    normalVector.addVectors(a.multiplyScalar(height * Math.cos(t)), b.multiplyScalar(width * Math.sin(t)));
+                                    normalVector.addVectors(a.multiplyScalar(h * Math.cos(t)), b.multiplyScalar(w * Math.sin(t)));
                                     normalVector.normalize();
                                     this.setVector(elementPoints, i, tempPos);
                                     tempPos.add(radialVector);
@@ -71302,6 +71368,14 @@ var LiteMol;
                             }
                             return found;
                         };
+                        Builder.prototype.hasP = function (index, arrays) {
+                            var start = arrays.startIndex[index], end = arrays.endIndex[index];
+                            for (var i = start; i < end; i++) {
+                                if (arrays.name[i] === "P")
+                                    return true;
+                            }
+                            return false;
+                        };
                         Builder.prototype.addStrandLine = function (element, state, template, arrays, residueIndex) {
                             if (!this.findN3(residueIndex, arrays, this.tempVectors[3]))
                                 return;
@@ -71351,7 +71425,8 @@ var LiteMol;
                 ;
                 Cartoons.DefaultCartoonsModelParameters = {
                     tessalation: 3,
-                    drawingType: CartoonsModelType.Default
+                    drawingType: CartoonsModelType.Default,
+                    showDirectionCones: true
                 };
                 var Model = /** @class */ (function (_super) {
                     __extends(Model, _super);
@@ -71444,24 +71519,30 @@ var LiteMol;
                         //     this.gapMaterial.color = new THREE.Color(gapColor.r, gapColor.g, gapColor.b);
                         //     this.gapMaterial.needsUpdate = true;
                         // }
+                        // const dcColor = Theme.getColor(theme, 'DirectionCone', Colors.DefaultCartoonDirectionConeColor);
+                        // const dc = this.gapMaterial.color;
+                        // if (dcColor.r !== dc.r || dcColor.g !== dc.g || dcColor.b !== dc.b) {
+                        //     this.directionConeMaterial.color = new THREE.Color(dcColor.r, dcColor.g, dcColor.b);
+                        //     this.directionConeMaterial.needsUpdate = true;
+                        // }
                     };
                     Model.prototype.applyThemeInternal = function (theme) {
                         this.applyColoring(theme);
                         Visualization.MaterialsHelper.updateMaterial(this.material, theme, this.object);
                         Visualization.MaterialsHelper.updateMaterial(this.gapMaterial, theme, this.object);
+                        Visualization.MaterialsHelper.updateMaterial(this.directionConeMaterial, theme, this.object);
                     };
                     Model.prototype.createObjects = function () {
-                        var main;
+                        var main = new Visualization.THREE.Object3D();
+                        main.add(new Visualization.THREE.Mesh(this.cartoons.geometry, this.material));
                         if (this.cartoons.gapsGeometry) {
-                            main = new Visualization.THREE.Object3D();
-                            main.add(new Visualization.THREE.Mesh(this.cartoons.geometry, this.material));
                             main.add(new Visualization.THREE.Mesh(this.cartoons.gapsGeometry, this.gapMaterial));
                         }
-                        else {
-                            main = new Visualization.THREE.Mesh(this.cartoons.geometry, this.material);
+                        if (this.cartoons.directionConesGeometry) {
+                            main.add(new Visualization.THREE.Mesh(this.cartoons.directionConesGeometry, this.directionConeMaterial));
                         }
                         return {
-                            main: main,
+                            main: main.children.length > 1 ? main : main.children[0],
                             pick: new Visualization.THREE.Mesh(this.cartoons.pickGeometry, this.pickMaterial)
                         };
                     };
@@ -71480,7 +71561,7 @@ var LiteMol;
                                         params = LiteMol.Core.Utils.extend({}, params, Cartoons.DefaultCartoonsModelParameters);
                                         switch (params.tessalation) {
                                             case 0:
-                                                linearSegments = 1;
+                                                linearSegments = 2;
                                                 radialSements = 2;
                                                 break;
                                             case 1:
@@ -71510,7 +71591,8 @@ var LiteMol;
                                         }
                                         return [4 /*yield*/, Cartoons.Geometry.create(model, atomIndices, linearSegments, {
                                                 radialSegmentCount: radialSements,
-                                                tessalation: params.tessalation
+                                                tessalation: +params.tessalation,
+                                                showDirectionCones: !!params.showDirectionCones
                                             }, params.drawingType === CartoonsModelType.AlphaTrace, ctx)];
                                     case 2:
                                         cartoons = _c.sent();
@@ -71519,6 +71601,7 @@ var LiteMol;
                                         ret.queryContext = queryContext;
                                         ret.material = Visualization.MaterialsHelper.getMeshMaterial();
                                         ret.gapMaterial = new Visualization.THREE.MeshPhongMaterial({ color: 0x777777, shading: Visualization.THREE.FlatShading });
+                                        ret.directionConeMaterial = new Visualization.THREE.MeshPhongMaterial({ color: 0x999999, shading: Visualization.THREE.FlatShading });
                                         ret.pickMaterial = Visualization.MaterialsHelper.getPickMaterial();
                                         if (props)
                                             ret.props = props;
@@ -71532,7 +71615,7 @@ var LiteMol;
                                         ret.pickBufferAttributes = [ret.cartoons.pickGeometry.attributes.pColor];
                                         ret.model = model;
                                         ret.applyTheme(theme);
-                                        ret.disposeList.push(ret.cartoons, ret.material, ret.pickMaterial, ret.gapMaterial);
+                                        ret.disposeList.push(ret.cartoons, ret.material, ret.pickMaterial, ret.gapMaterial, ret.directionConeMaterial);
                                         return [2 /*return*/, ret];
                                 }
                             });
@@ -71557,6 +71640,7 @@ var LiteMol;
             var Colors;
             (function (Colors) {
                 Colors.DefaultBondColor = { r: 0.6, g: 0.6, b: 0.6 };
+                Colors.DefaultCartoonDirectionConeColor = { r: 0.85, g: 0.85, b: 0.85 };
                 Colors.DefaultElementColor = { r: 0.6, g: 0.6, b: 0.6 };
                 Colors.DefaultElementColorMap = LiteMol.Core.Utils.FastMap.create();
                 Colors.DefaultPallete = [];
@@ -71890,7 +71974,7 @@ var LiteMol;
 (function (LiteMol) {
     var Bootstrap;
     (function (Bootstrap) {
-        Bootstrap.VERSION = { number: "1.4.3", date: "Nov 28 2017" };
+        Bootstrap.VERSION = { number: "1.4.4", date: "May 31 2018" };
     })(Bootstrap = LiteMol.Bootstrap || (LiteMol.Bootstrap = {}));
 })(LiteMol || (LiteMol = {}));
 /*
@@ -72183,9 +72267,9 @@ var LiteMol;
                 }
                 function parseAuthResidueId(ids, separator) {
                     if (separator === void 0) { separator = ','; }
+                    var _a;
                     var parts = ids.split(separator).map(function (p) { return getAuthResidueIdParams(p); }).filter(function (p) { return !!p; });
                     return LiteMol.Core.Structure.Query.Builder.toQuery((_a = LiteMol.Core.Structure.Query).residues.apply(_a, parts));
-                    var _a;
                 }
                 Query.parseAuthResidueId = parseAuthResidueId;
             })(Query = Utils.Query || (Utils.Query = {}));
@@ -72275,13 +72359,13 @@ var LiteMol;
                     if (item.previous !== null) {
                         item.previous.next = item.next;
                     }
-                    else if (item.previous === null) {
+                    else if ( /*first == item*/item.previous === null) {
                         this.first = item.next;
                     }
                     if (item.next !== null) {
                         item.next.previous = item.previous;
                     }
-                    else if (item.next === null) {
+                    else if ( /*last == item*/item.next === null) {
                         this.last = item.previous;
                     }
                     item.next = null;
@@ -73113,7 +73197,7 @@ var LiteMol;
             function remove(node) {
                 if (!node || !node.tree)
                     return;
-                if (node.parent === node) {
+                if (node.parent === node) { // root
                     clearRoot(node.tree);
                     return;
                 }
@@ -73573,13 +73657,16 @@ var LiteMol;
                 }
                 function resolveAction(src, context, resolve, reject, onDone, onError) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var e_2;
+                        var hadError, e_2;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, Tree.Transform.apply(context, src.action).run()];
+                                    hadError = false;
+                                    _a.label = 1;
                                 case 1:
+                                    _a.trys.push([1, 3, , 4]);
+                                    return [4 /*yield*/, Tree.Transform.apply(context, src.action).run()];
+                                case 2:
                                     _a.sent();
                                     try {
                                         resolve(Tree.Node.Null);
@@ -73587,16 +73674,18 @@ var LiteMol;
                                     finally {
                                         if (onDone) {
                                             if (typeof onDone === 'string') {
-                                                context.logger.message(onDone);
+                                                if (!hadError)
+                                                    context.logger.message(onDone);
                                             }
                                             else {
                                                 setTimeout(function () { return onDone.call(null, context, src.context); }, 0);
                                             }
                                         }
                                     }
-                                    return [3 /*break*/, 3];
-                                case 2:
+                                    return [3 /*break*/, 4];
+                                case 3:
                                     e_2 = _a.sent();
+                                    hadError = true;
                                     try {
                                         reject(e_2);
                                     }
@@ -73610,8 +73699,8 @@ var LiteMol;
                                             }
                                         }
                                     }
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
                             }
                         });
                     });
@@ -74281,6 +74370,7 @@ var LiteMol;
                     });
                     Bootstrap.Command.Entity.Focus.getStream(context)
                         .subscribe(function (e) {
+                        var _a;
                         if (e.data.length === 1) {
                             var t = e.data[0];
                             if (Bootstrap.Entity.isMoleculeSelection(t)) {
@@ -74293,7 +74383,6 @@ var LiteMol;
                         else {
                             (_a = _this.scene.camera).focusOnModel.apply(_a, e.data.filter(function (e) { return Bootstrap.Entity.isClass(e, Bootstrap.Entity.VisualClass); }).map(function (e) { return e.props.model; }));
                         }
-                        var _a;
                     });
                     Bootstrap.Command.Entity.Highlight.getStream(context)
                         .subscribe(function (e) {
@@ -74660,6 +74749,10 @@ var LiteMol;
                 var Default;
                 (function (Default) {
                     Default.DetailParams = { detail: 'Automatic' };
+                    Default.CartoonParams = {
+                        showDirectionCone: false,
+                        detail: 'Automatic'
+                    };
                     Default.BallsAndSticksParams = {
                         useVDW: true,
                         vdwScaling: 0.22,
@@ -74679,7 +74772,7 @@ var LiteMol;
                     Default.Transparency = { alpha: 1.0, writeDepth: false };
                     Default.ForType = (function () {
                         var types = {
-                            'Cartoons': { type: 'Cartoons', params: { detail: 'Automatic' }, theme: { template: Default.CartoonThemeTemplate, colors: Default.CartoonThemeTemplate.colors, transparency: Default.Transparency, interactive: true } },
+                            'Cartoons': { type: 'Cartoons', params: Default.CartoonParams, theme: { template: Default.CartoonThemeTemplate, colors: Default.CartoonThemeTemplate.colors, transparency: Default.Transparency, interactive: true } },
                             'Calpha': { type: 'Calpha', params: { detail: 'Automatic' }, theme: { template: Default.CartoonThemeTemplate, colors: Default.CartoonThemeTemplate.colors, transparency: Default.Transparency, interactive: true } },
                             'BallsAndSticks': { type: 'BallsAndSticks', params: Default.BallsAndSticksParams, theme: { template: Default.ElementSymbolThemeTemplate, colors: Default.ElementSymbolThemeTemplate.colors, transparency: Default.Transparency, interactive: true } },
                             'VDWBalls': { type: 'VDWBalls', params: { detail: 'Automatic' }, theme: { template: Default.ElementSymbolThemeTemplate, colors: Default.ElementSymbolThemeTemplate.colors, transparency: Default.Transparency, interactive: true } },
@@ -74743,15 +74836,20 @@ var LiteMol;
                         return +params.density;
                     return 1.0;
                 }
-                function createCartoonParams(tessalation, isAlphaTrace) {
+                function createCartoonParams(tessalation, isAlphaTrace, showCones) {
                     return {
                         tessalation: tessalation,
                         drawingType: isAlphaTrace
                             ? MolVis.Cartoons.CartoonsModelType.AlphaTrace
-                            : MolVis.Cartoons.CartoonsModelType.Default
+                            : MolVis.Cartoons.CartoonsModelType.Default,
+                        showDirectionCones: showCones
                     };
                 }
                 function makeRadiusFunc(model, parameters) {
+                    if (typeof parameters.vdwScaling === 'undefined')
+                        parameters.vdwScaling = Molecule.Default.BallsAndSticksParams.vdwScaling;
+                    if (typeof parameters.atomRadius === 'undefined')
+                        parameters.atomRadius = Molecule.Default.BallsAndSticksParams.atomRadius;
                     if (!parameters.useVDW) {
                         return function (r) {
                             return function () { return r; };
@@ -74800,9 +74898,9 @@ var LiteMol;
                     var tessalation = getTessalation(style.params.detail, atomIndices.length);
                     switch (style.type) {
                         case 'Cartoons':
-                            return MolVis.Cartoons.Model.create(source, { model: model, atomIndices: atomIndices, theme: theme, queryContext: Bootstrap.Utils.Molecule.findQueryContext(source), params: createCartoonParams(tessalation, false) });
+                            return MolVis.Cartoons.Model.create(source, { model: model, atomIndices: atomIndices, theme: theme, queryContext: Bootstrap.Utils.Molecule.findQueryContext(source), params: createCartoonParams(tessalation, false, style.params.showDirectionCone) });
                         case 'Calpha':
-                            return MolVis.Cartoons.Model.create(source, { model: model, atomIndices: atomIndices, theme: theme, queryContext: Bootstrap.Utils.Molecule.findQueryContext(source), params: createCartoonParams(tessalation, true) });
+                            return MolVis.Cartoons.Model.create(source, { model: model, atomIndices: atomIndices, theme: theme, queryContext: Bootstrap.Utils.Molecule.findQueryContext(source), params: createCartoonParams(tessalation, true, style.params.showDirectionCone) });
                         case 'BallsAndSticks':
                             return Vis.Molecule.BallsAndSticks.Model.create(source, { model: model, atomIndices: atomIndices, theme: theme, params: createBallsAndSticksParams(tessalation, model, style.params) });
                         case 'VDWBalls':
@@ -75471,6 +75569,7 @@ var LiteMol;
                     return void 0;
                 };
                 Cache.prototype.set = function (e, prop, value) {
+                    var _a;
                     var c = this.data.get(e.id);
                     if (c) {
                         c[prop] = value;
@@ -75479,7 +75578,6 @@ var LiteMol;
                         this.data.set(e.id, (_a = {}, _a[prop] = value, _a));
                     }
                     return value;
-                    var _a;
                 };
                 return Cache;
             }());
@@ -77858,8 +77956,8 @@ var LiteMol;
                         return this.latestState.params[prop || 'style'];
                     };
                     DensityVisual.prototype.setStyle = function (style, prop) {
-                        this.autoUpdateParams((_a = {}, _a[prop || 'style'] = style, _a));
                         var _a;
+                        this.autoUpdateParams((_a = {}, _a[prop || 'style'] = style, _a));
                     };
                     DensityVisual.prototype.updateStyleParams = function (params, styleProp) {
                         var s = this.cloneStyle(styleProp);
@@ -79275,19 +79373,20 @@ var LiteMol;
                 };
                 SliderBase.prototype.render = function () {
                     var _this = this;
-                    var _a = this.state, handle = _a.handle, bounds = _a.bounds;
-                    var _b = this.props, className = _b.className, prefixCls = _b.prefixCls, disabled = _b.disabled, vertical = _b.vertical, dots = _b.dots, included = _b.included, range = _b.range, step = _b.step, marks = _b.marks, max = _b.max, min = _b.min, tipFormatter = _b.tipFormatter, children = _b.children;
+                    var _a;
+                    var _b = this.state, handle = _b.handle, bounds = _b.bounds;
+                    var _c = this.props, className = _c.className, prefixCls = _c.prefixCls, disabled = _c.disabled, vertical = _c.vertical, dots = _c.dots, included = _c.included, range = _c.range, step = _c.step, marks = _c.marks, max = _c.max, min = _c.min, tipFormatter = _c.tipFormatter, children = _c.children;
                     var customHandle = this.props.handle;
                     var offsets = bounds.map(function (v) { return _this.calcOffset(v); });
                     var handleClassName = prefixCls + "-handle";
                     var handlesClassNames = bounds.map(function (v, i) {
+                        var _a;
                         return classNames((_a = {},
                             _a[handleClassName] = true,
                             _a[handleClassName + "-" + (i + 1)] = true,
                             _a[handleClassName + "-lower"] = i === 0,
                             _a[handleClassName + "-upper"] = i === bounds.length - 1,
                             _a));
-                        var _a;
                     });
                     var isNoTip = (step === null) || (tipFormatter === null);
                     var commonHandleProps = {
@@ -79315,13 +79414,13 @@ var LiteMol;
                     //             />
                     //     );
                     // }
-                    var sliderClassName = classNames((_c = {},
-                        _c[prefixCls] = true,
-                        _c[prefixCls + "-with-marks"] = Object.keys(marks).length,
-                        _c[prefixCls + "-disabled"] = disabled,
-                        _c[prefixCls + "-vertical"] = this.props.vertical,
-                        _c[className] = !!className,
-                        _c));
+                    var sliderClassName = classNames((_a = {},
+                        _a[prefixCls] = true,
+                        _a[prefixCls + "-with-marks"] = Object.keys(marks).length,
+                        _a[prefixCls + "-disabled"] = disabled,
+                        _a[prefixCls + "-vertical"] = this.props.vertical,
+                        _a[className] = !!className,
+                        _a));
                     return (Plugin.React.createElement("div", { ref: function (e) { return _this.sliderElement = e; }, className: sliderClassName, onTouchStart: disabled ? noop : this.onTouchStart.bind(this), onMouseDown: disabled ? noop : this.onMouseDown.bind(this) },
                         Plugin.React.createElement("div", { className: prefixCls + "-rail" }),
                         tracks,
@@ -79329,7 +79428,6 @@ var LiteMol;
                         handles,
                         Plugin.React.createElement(Marks, { className: prefixCls + "-mark", vertical: vertical, marks: marks, included: isIncluded, lowerBound: bounds[0], upperBound: bounds[bounds.length - 1], max: max, min: min }),
                         children));
-                    var _c;
                 };
                 SliderBase.defaultProps = {
                     prefixCls: 'lm-slider-base',
@@ -79362,6 +79460,7 @@ var LiteMol;
                 var markWidth = unit * 0.9;
                 var range = max - min;
                 var elements = marksKeys.map(parseFloat).sort(function (a, b) { return a - b; }).map(function (point) {
+                    var _a;
                     var isActived = (!included && point === upperBound) ||
                         (included && point <= upperBound && point >= lowerBound);
                     var markClassName = classNames((_a = {},
@@ -79384,7 +79483,6 @@ var LiteMol;
                     var markLabel = markPointIsObject ? markPoint.label : markPoint;
                     var markStyle = markPointIsObject ? __assign({}, style, markPoint.style) : style;
                     return (Plugin.React.createElement("span", { className: markClassName, style: markStyle, key: point }, markLabel));
-                    var _a;
                 });
                 return Plugin.React.createElement("div", { className: className }, elements);
             };
@@ -79403,6 +79501,7 @@ var LiteMol;
                 var prefixCls = _a.prefixCls, vertical = _a.vertical, marks = _a.marks, dots = _a.dots, step = _a.step, included = _a.included, lowerBound = _a.lowerBound, upperBound = _a.upperBound, max = _a.max, min = _a.min;
                 var range = max - min;
                 var elements = calcPoints(vertical, marks, dots, step, min, max).map(function (point) {
+                    var _a;
                     var offset = Math.abs(point - min) / range * 100 + "%";
                     var style = vertical ? { bottom: offset } : { left: offset };
                     var isActived = (!included && point === upperBound) ||
@@ -79412,7 +79511,6 @@ var LiteMol;
                         _a[prefixCls + "-dot-active"] = isActived,
                         _a));
                     return Plugin.React.createElement("span", { className: pointClassName, style: style, key: point });
-                    var _a;
                 });
                 return Plugin.React.createElement("div", { className: prefixCls + "-step" }, elements);
             };
@@ -80183,6 +80281,14 @@ var LiteMol;
                             var p = this.params.style.params;
                             return [Plugin.React.createElement(Plugin.Controls.OptionsGroup, { options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' })];
                         };
+                        CreateVisual.prototype.cartoons = function () {
+                            var _this = this;
+                            var p = this.params.style.params;
+                            return [
+                                Plugin.React.createElement(Plugin.Controls.Toggle, { key: 0, onChange: function (v) { return _this.controller.updateStyleParams({ showDirectionCone: v }); }, value: p.showDirectionCone, label: 'Dir. Cones' }),
+                                Plugin.React.createElement(Plugin.Controls.OptionsGroup, { key: 1, options: LiteMol.Bootstrap.Visualization.Molecule.DetailTypes, caption: function (s) { return s; }, current: p.detail, onChange: function (o) { return _this.controller.updateStyleParams({ detail: o }); }, label: 'Detail' })
+                            ];
+                        };
                         CreateVisual.prototype.ballsAndSticks = function () {
                             var _this = this;
                             var p = this.params.style.params;
@@ -80239,6 +80345,9 @@ var LiteMol;
                                 case 'BallsAndSticks':
                                     controls = this.ballsAndSticks();
                                     break;
+                                case 'Cartoons':
+                                    controls = this.cartoons();
+                                    break;
                                 default:
                                     controls = this.detail();
                                     break;
@@ -80289,7 +80398,7 @@ var LiteMol;
                 (function (Density) {
                     "use strict";
                     var IsoValue = function (props) {
-                        return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: Plugin.React.createElement(Plugin.Controls.Slider, { label: props.isSigma ? 'Iso Value (\u03C3)' : 'Iso Value', onChange: props.onChangeValue, min: props.min, max: props.max, value: props.value, step: 0.001 }), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: props.view.getPersistentState('showIsoValueType', false), onChange: function (e) { return props.view.setPersistentState('showIsoValueType', e); } }), options: [Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return props.onChangeType(v ? LiteMol.Bootstrap.Visualization.Density.IsoValueType.Sigma : LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute); }, value: props.isSigma, label: 'Relative (\u03C3)' })], isExpanded: props.view.getPersistentState('showIsoValueType', false) });
+                        return Plugin.React.createElement(Plugin.Controls.ExpandableGroup, { select: Plugin.React.createElement(Plugin.Controls.Slider, { label: props.isSigma ? 'Iso Value (\u03C3)' : 'Iso Value', onChange: props.onChangeValue, min: props.min, max: props.max, value: props.value, step: 0.001 }), expander: Plugin.React.createElement(Plugin.Controls.ControlGroupExpander, { isExpanded: props.view.getPersistentState('showIsoValueType', false), onChange: function (e) { return props.view.setPersistentState('showIsoValueType', e); } }), options: [Plugin.React.createElement(Plugin.Controls.Toggle, { onChange: function (v) { return props.onChangeType(v ? LiteMol.Bootstrap.Visualization.Density.IsoValueType.Sigma : LiteMol.Bootstrap.Visualization.Density.IsoValueType.Absolute); }, value: props.isSigma, label: 'Relative (\\u03C3)' })], isExpanded: props.view.getPersistentState('showIsoValueType', false) });
                     };
                     function isoValueAbsoluteToSigma(data, value, min, max) {
                         var ret = (value - data.valuesInfo.mean) / data.valuesInfo.sigma;
@@ -80695,7 +80804,6 @@ var LiteMol;
             var Entity;
             (function (Entity_2) {
                 "use strict";
-                var BEntity = LiteMol.Bootstrap.Entity;
                 Entity_2.VisibilityControl = function (props) {
                     var e = props.entity;
                     var command = function () {
@@ -80844,7 +80952,7 @@ var LiteMol;
                                 : Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', title: 'Collapse', onClick: function () { return LiteMol.Bootstrap.Command.Entity.ToggleExpanded.dispatch(_this.ctx, node); }, icon: 'collapse', customClass: 'lm-entity-tree-entry-toggle-group' });
                         }
                         else {
-                            if (node.state.visibility === 0 /* Full */ && node.type.info.traits.isFocusable) {
+                            if ( /*BEntity.isVisual(node) &&*/node.state.visibility === 0 /* Full */ && node.type.info.traits.isFocusable) {
                                 expander = Plugin.React.createElement(Plugin.Controls.Button, { style: 'link', icon: 'focus-on-visual', title: 'Focus', onClick: function () { return LiteMol.Bootstrap.Command.Entity.Focus.dispatch(_this.ctx, _this.ctx.select(node)); }, customClass: 'lm-entity-tree-entry-toggle-group' });
                             }
                         }
@@ -81592,7 +81700,7 @@ var LiteMol;
             };
             Controller.prototype.ofOptions = function (options) {
                 var spec = options.customSpecification ? options.customSpecification : Plugin.getDefaultSpecification();
-                if (!options.customSpecification) {
+                if (!!options.allowAnalytics && !options.customSpecification) {
                     spec.behaviours.push(LiteMol.Bootstrap.Behaviour.GoogleAnalytics(options.analyticsId ? options.analyticsId : 'UA-77062725-1'));
                 }
                 var target;

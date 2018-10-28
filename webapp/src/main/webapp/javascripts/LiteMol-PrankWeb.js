@@ -16,8 +16,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -189,15 +189,15 @@ var LiteMol;
         var React = LiteMol.Plugin.React; // this is to enable the HTML-like syntax
         var ColoredView;
         (function (ColoredView) {
-            ColoredView[ColoredView["Cartoon"] = 0] = "Cartoon";
+            ColoredView[ColoredView["Atoms"] = 0] = "Atoms";
             ColoredView[ColoredView["Surface"] = 1] = "Surface";
-            ColoredView[ColoredView["Atoms"] = 2] = "Atoms";
+            ColoredView[ColoredView["Cartoon"] = 2] = "Cartoon";
         })(ColoredView || (ColoredView = {}));
         var ControlButtons = /** @class */ (function (_super) {
             __extends(ControlButtons, _super);
             function ControlButtons() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.state = { coloredView: ColoredView.Cartoon };
+                _this.state = { coloredView: ColoredView.Atoms }; // So that surface is default.
                 return _this;
             }
             // http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
@@ -247,6 +247,7 @@ var LiteMol;
                 document.body.removeChild(textArea);
             };
             ControlButtons.prototype.toggleSequenceView = function () {
+                var _a;
                 var regionStates = this.props.plugin.context.layout.latestState.regionStates;
                 if (!regionStates)
                     return;
@@ -256,7 +257,6 @@ var LiteMol;
                         _a[Bootstrap.Components.LayoutRegion.Top] = regionState == 'Sticky' ? 'Hidden' : 'Sticky',
                         _a)
                 });
-                var _a;
             };
             ControlButtons.prototype.toggleStructuralView = function () {
                 var plugin = this.props.plugin;
@@ -287,6 +287,9 @@ var LiteMol;
                         break;
                     }
                 }
+            };
+            ControlButtons.prototype.componentDidMount = function () {
+                this.toggleStructuralView();
             };
             ControlButtons.prototype.render = function () {
                 var _this = this;
@@ -421,12 +424,18 @@ var LiteMol;
             return ProtaelFeature;
         }());
         var ProtaelRegion = /** @class */ (function () {
-            function ProtaelRegion(label, start, end) {
+            function ProtaelRegion(label, start, end, odd) {
                 this.color = "#DDD";
                 this.regionType = "Chain";
                 this.label = label;
                 this.start = start;
                 this.end = end;
+                if (!odd) {
+                    this.color = "#DDD";
+                }
+                else {
+                    this.color = "#B0B0B0";
+                }
             }
             return ProtaelRegion;
         }());
@@ -542,7 +551,7 @@ var LiteMol;
             SequenceView.prototype.getChainRegions = function () {
                 var result = [];
                 this.controller.latestState.seq.regions.forEach(function (region, i) {
-                    result.push(new ProtaelRegion("Chain " + region.regionName, region.start + 1, region.end + 1));
+                    result.push(new ProtaelRegion("Chain " + region.regionName, region.start + 1, region.end + 1, i % 2 != 0));
                 });
                 return result;
             };
@@ -639,7 +648,10 @@ var LiteMol;
                 var features = document.querySelectorAll(".pl-ftrack .pl-feature");
                 this.forEachNodeInSelector(features, function (el) {
                     if (el.parentElement.id == "Pockets") {
-                        var pocket_1 = _this.parsePocketName(el.attributes.getNamedItem("data-d").value);
+                        var attr = el.attributes.getNamedItem("data-d");
+                        if (!attr)
+                            return;
+                        var pocket_1 = _this.parsePocketName(attr.value);
                         el.onclick = function () { return _this.onPocketClick(pocket_1); };
                         el.onmouseover = function () { return _this.selectAndDisplayToastPocket(pocket_1, true); };
                         el.onmouseout = function () { return _this.selectAndDisplayToastPocket(pocket_1, false); };
@@ -1273,14 +1285,9 @@ var LiteMol;
                 var surface = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_SURFACE).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
                 var cartoon = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_CARTOON).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
                 var atoms = plugin.selectEntities(Bootstrap.Tree.Selection.byRef(DataLoader.TREE_REF_ATOMS).subtree().ofType(Bootstrap.Entity.Molecule.Visual))[0];
-                var water = plugin.selectEntities(Bootstrap.Tree.Selection.byRef('water'))[0];
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: surface, theme: theme });
-                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: surface, visible: false });
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: cartoon, theme: residueTheme });
-                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: cartoon, visible: true });
                 plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: atoms, theme: theme });
-                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: atoms, visible: false });
-                Bootstrap.Command.Entity.SetVisibility.dispatch(plugin.context, { entity: water, visible: false }); // Hide water balls and sticks.
                 plugin.selectEntities(Bootstrap.Tree.Selection.byRef('pockets').subtree().ofType(Bootstrap.Entity.Molecule.Visual)).forEach(function (selection) {
                     ;
                     plugin.command(Bootstrap.Command.Visual.UpdateBasicTheme, { visual: selection, theme: theme });
@@ -1317,9 +1324,13 @@ var LiteMol;
                     this.setState({ isLoading: true, error: void 0 });
                     // Load data.
                     PrankWeb.DataLoader.loadData(this.props.plugin, this.props.inputType, this.props.inputId)
+                        // Visualize the data.
                         .then(function (data) { return PrankWeb.DataLoader.visualizeData(_this.props.plugin, data); })
+                        // Color the protein surface and cartoon.
                         .then(function (data) { return PrankWeb.DataLoader.colorProteinFuture(_this.props.plugin, data); })
+                        // Everything went well, change the loading state.
                         .then(function (data) { return _this.setState({ isLoading: false, data: data }); })
+                        // Something went wrong, change the loading state and set the error msg.
                         .catch(function (e) { return _this.setState({ isLoading: false, error: '' + e }); });
                 };
                 App.prototype.render = function () {
@@ -1395,10 +1406,6 @@ var LiteMol;
                 // when somethinh is selected, this will create an "overlay visual" of the selected residue and show every other residue within 5ang
                 // you will not want to use this for the ligand pages, where you create the same thing this does at startup
                 Bootstrap.Behaviour.Molecule.ShowInteractionOnSelect(5),
-                // this tracks what is downloaded and some basic actions. Does not send any private data etc.
-                // While it is not required for any functionality, we as authors are very much interested in basic 
-                // usage statistics of the application and would appriciate if this behaviour is used.
-                Bootstrap.Behaviour.GoogleAnalytics('UA-77062725-1')
             ],
             components: [
                 LiteMol.Plugin.Components.Visualization.HighlightInfo(LayoutRegion.Main, true),
@@ -1426,6 +1433,7 @@ var LiteMol;
         var Plugin = LiteMol.Plugin;
         var Bootstrap = LiteMol.Bootstrap;
         function create(target) {
+            var _a;
             var plugin = Plugin.create({
                 target: target,
                 viewportBackground: '#e7e7e7',
@@ -1443,7 +1451,6 @@ var LiteMol;
                     _a)
             });
             return plugin;
-            var _a;
         }
         PrankWeb.create = create;
         // Div that LiteMol mounts into.

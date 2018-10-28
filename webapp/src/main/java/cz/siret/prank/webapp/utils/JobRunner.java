@@ -166,7 +166,7 @@ public enum JobRunner {
                     Map<String, String> colValues = new HashMap<>();
                     colValues.put(Dataset.getCOLUMN_CONSERVATION_FILES_PATTERN(),
                             conservationPattern);
-                    itemContext = new ProcessedItemContext(colValues);
+                    itemContext = new ProcessedItemContext(null, colValues);
                     setupP2Rank(true);
                 } else {
                     setupP2Rank(false);
@@ -214,7 +214,7 @@ public enum JobRunner {
             if (conservationAndMsas != null && conservationAndMsas.size() > 0) {
                 Map<String, String> colValues = new HashMap<>();
                 colValues.put(Dataset.getCOLUMN_CONSERVATION_FILES_PATTERN(), conservationPattern);
-                itemContext = new ProcessedItemContext(colValues);
+                itemContext = new ProcessedItemContext(null, colValues);
                 setupP2Rank(true);
             } else {
                 setupP2Rank(false);
