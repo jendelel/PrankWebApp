@@ -8,5 +8,5 @@
 	branch = master
 [submodule "p2rank"]
 	path = p2rank
-	url = https://github.com/jendelel/p2rank.git
-	branch = develop
+	url = https://github.com/rdk/p2rank.git
+	branch = peptides
