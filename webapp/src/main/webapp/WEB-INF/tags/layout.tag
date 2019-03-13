@@ -79,7 +79,7 @@
 <footer>
     <p class="text-center">
         <small>
-            <span class="glyphicon glyphicon-copyright-mark"></span> PrankWeb, Charles University 2017
+            <span class="glyphicon glyphicon-copyright-mark"></span> PrankWeb, Charles University 2017-2019
         </small>
     </p>
 </footer>

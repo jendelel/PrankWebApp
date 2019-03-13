@@ -36,7 +36,7 @@
         <div class="container jumbotron" style="padding-top: 0px">
         <h1 class="text-center">Welcome to PrankWeb</h1>
         <div style="padding-bottom: 10px; width: 75%; margin-left: 12%;">
-            Prank is a novel machine learning-based method for prediction of
+            P2Rank is a novel machine learning-based method for prediction of
             ligand binding sites from protein structure.
         </div>
                 <div style="display: none;" class="progress">
