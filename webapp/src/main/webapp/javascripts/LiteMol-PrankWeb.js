@@ -1054,17 +1054,23 @@ var LiteMol;
                     seqNums[_i] = arguments[_i];
                 }
                 return Query.residues.apply(Query, seqNums.map(function (seqNum) {
-                    var num = 0;
-                    var insCode = null;
-                    var parsedNum = seqNum.match(/^[0-9]*/);
-                    var parsedInsCode = seqNum.match(/[A-Z]+$/);
-                    if (parsedNum != null && parsedNum.length > 0) {
-                        num = parseInt(parsedNum[0]);
+                    var result = {};
+                    var parsedObject = seqNum.match(/^([A-Z]*)_?([0-9]+)([A-Z])*$/);
+                    if (parsedObject != null) {
+                        if (parsedObject[1]) { // Chain found
+                            result.authAsymId = parsedObject[1];
+                        }
+                        if (parsedObject[2]) { // ResId found
+                            result.authSeqNumber = parseInt(parsedObject[2]);
+                        }
+                        if (parsedObject[3]) { // InsCode found
+                            result.insCode = parsedObject[3];
+                        }
                     }
-                    if (parsedInsCode != null && parsedInsCode.length > 0) {
-                        insCode = parsedInsCode[0];
+                    else {
+                        console.log("Error: Cannot parse residue id.");
                     }
-                    return { authSeqNumber: num, insCode: insCode };
+                    return result;
                 }));
             }
             DataLoader.residuesBySeqNums = residuesBySeqNums;

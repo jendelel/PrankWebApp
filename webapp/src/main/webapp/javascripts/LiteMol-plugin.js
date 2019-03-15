@@ -65814,7 +65814,7 @@ var LiteMol;
 (function (LiteMol) {
     var Visualization;
     (function (Visualization) {
-        Visualization.VERSION = { number: "1.7.7", date: "Feb 27 2018" };
+        Visualization.VERSION = { number: "1.7.8", date: "Oct 26 2018" };
     })(Visualization = LiteMol.Visualization || (LiteMol.Visualization = {}));
 })(LiteMol || (LiteMol = {}));
 var LiteMol;
@@ -70338,15 +70338,21 @@ var LiteMol;
                         };
                         CartoonAsymUnit.prototype.initPositions = function (builder) {
                             var residues = this.model.data.residues, atoms = this.model.data.atoms, positions = this.model.positions, arrays = { atomStartIndex: residues.atomStartIndex, atomEndIndex: residues.atomEndIndex, name: atoms.name, x: positions.x, y: positions.y, z: positions.z }, residueType = [], offset = 0, i = 0;
+                            var bbOnlyCount = 0, residueCount = 0;
                             for (var _i = 0, _a = this.elements; _i < _a.length; _i++) {
                                 var e = _a[_i];
                                 this.structureStarts.add(e.startResidueIndex);
                                 this.structureEnds.add(e.endResidueIndex - 1);
                                 for (i = e.startResidueIndex; i < e.endResidueIndex; i++) {
-                                    this.backboneOnly = builder.addResidue(i, arrays, e.type);
+                                    residueCount++;
+                                    var bbOnly = builder.addResidue(i, arrays, e.type);
+                                    if (bbOnly && (e.type === 1 /* Helix */ || e.type === 3 /* Sheet */ || e.type === 5 /* Strand */)) {
+                                        bbOnlyCount++;
+                                    }
                                     residueType[residueType.length] = e.type;
                                 }
                             }
+                            this.backboneOnly = bbOnlyCount > (residueCount / 4 - 1);
                             this.residueIndex = new Int32Array(this.residueCount);
                             for (var _d = 0, _e = this.elements; _d < _e.length; _d++) {
                                 var e = _e[_d];
@@ -71048,7 +71054,7 @@ var LiteMol;
                                         builder.addStrandLine(unit, state, ctx.strandTemplate, ctx.strandArrays, unit.residueIndex[index]);
                                         break;
                                     default:
-                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth, params.turnWidth);
+                                        builder.addTube(unit, state, params.turnWidth, params.turnWidth, 1);
                                         if (start || end) {
                                             builder.addTubeCap(unit, state, params.turnWidth, params.turnWidth, start, end);
                                         }
