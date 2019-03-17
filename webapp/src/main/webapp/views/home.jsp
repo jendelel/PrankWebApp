@@ -34,7 +34,7 @@
     </jsp:attribute>
     <jsp:body>
         <div class="container jumbotron" style="padding-top: 0px">
-        <h1 class="text-center">PrankWeb: Ligand Binding Site Prediction and Conservation Exploration</h1>
+        <h2 class="text-center">PrankWeb: Ligand Binding Site Prediction and Conservation Exploration</h2>
         <div style="padding-bottom: 10px; width: 75%; margin-left: 12%;">
             P2Rank is a novel machine learning-based method for prediction of
             ligand binding sites from protein structure.
