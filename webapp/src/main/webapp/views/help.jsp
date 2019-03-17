@@ -206,8 +206,8 @@
             <div class="footnotes">
                 <hr/>
                 <ol>
-                    <li id="fn2"><p>For example: <a href="http://prank.projekty.ms.mff.cuni.cz"
-                                                    class="uri">http://prank.projekty.ms.mff.cuni.cz</a>.<a
+                    <li id="fn2"><p>For example: <a href="http://prankweb.cz"
+                                                    class="uri">http://prankweb.cz</a>.<a
                             href="#fnref2">↩</a></p></li>
                     <li id="fn3"><p>PDB Format specification available at: <a
                             href="http://www.wwpdb.org/documentation/file-format" class="uri">http://www.wwpdb.org/documentation/file-format</a>.<a

@@ -51,14 +51,14 @@
                 <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
                     <h4>PrankWeb</h4>
                     <ul>
-                        <li><a href="http://siret.ms.mff.cuni.cz/prank">Project website</a></li>
+                        <li><a href="http://prankweb.cz">Project website</a></li>
                         <li><a href="https://github.com/jendelel/PrankWebApp" target="_blank">GitHub </a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
                     <h4>P2Rank</h4>
                     <ul>
-                        <li><a href="https://link.springer.com/chapter/10.1007/978-3-319-21233-3_4" target="_blank">
+                        <li><a href="https://jcheminf.biomedcentral.com/articles/10.1186/s13321-018-0285-8" target="_blank">
                             Publication</a></li>
                         <li><a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">Project website</a></li>
                         <li><a href="https://github.com/rdk/p2rank" target="_blank">GitHub</a></li>

@@ -68,6 +68,8 @@
                     </div>
                     <h3>Mgr. Radoslav Krivák</h3>
                     <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p><span class="glyphicon glyphicon-envelope"></span> rkrivak (at)
+                        gmail.com </p>
                 </div>
                 <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
                     <div class="img-box">
@@ -75,6 +77,8 @@
                     </div>
                     <h3>Mgr. Marian Novotný, Ph.D.</h3>
                     <p>Faculty of Science, Charles University</p>
+                    <p><span class="glyphicon glyphicon-envelope"></span> marian.novotny (at)
+                        natur.cuni.cz </p>
                 </div>
             </div>
         </div>
