@@ -37,6 +37,9 @@
     </jsp:attribute>
     <jsp:body>
         <div class="container">
+            <h2 id="p2rank"> Underlying method </h2>
+            <p>PrankWeb is web interface based on P2Rank standalone method. For batch-processing, it is recommended to download standalone version (<a href="http://siret.ms.mff.cuni.cz/p2rank" target="_blank">link</a>) of P2Rank and run experiments locally.
+            </p>
             <h2 id="data"> Data </h2>
             <p>PrankWeb classification model has been trained and validated on publicly available
                 datasets. They are available at
