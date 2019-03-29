@@ -44,38 +44,50 @@
                 Here we present PrankWeb, a modern web application for structure and sequence visualization of a protein and its protein-ligand binding sites as well as evolutionary homology. We hope that it will provide a quick and convenient way for scientists to analyze proteins.</p>
             <h2 id="authors">Authors</h2>
             <div class="row pt-md">
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 profile">
                     <div class="img-box">
                         <img src="/images/jendelel.jpg">
                     </div>
-                    <h3>Bc. Lukas Jendele</h3>
+                    <h3>Lukas Jendele</h3>
                     <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p>Department of Computer Science, ETH Zurich</p>
                     <p><span class="glyphicon glyphicon-envelope"></span> lukas.jendele (at)
                         gmail.com</p>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 profile">
                     <div class="img-box">
                         <img src="/images/hokszad.jpg">
                     </div>
-                    <h3>RNDr. David Hoksza, PhD</h3>
+                    <h3>David Hoksza</h3>
                     <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p>Luxembourg Centre for Systems Biomedicine, University of Luxembourg</p>
                     <p><span class="glyphicon glyphicon-envelope"></span> david.hoksza (at)
                         mff.cuni.cz </p>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 profile">
                     <div class="img-box">
                         <img src="/images/krivakr.jpg">
                     </div>
-                    <h3>Mgr. Radoslav Krivák</h3>
+                    <h3>Radoslav Krivák</h3>
                     <p>Faculty of Mathematics and Physics, Charles University</p>
                     <p><span class="glyphicon glyphicon-envelope"></span> rkrivak (at)
                         gmail.com </p>
                 </div>
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 profile">
+                <div class="clearfix visible-md-block visible-lg-block"></div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 profile">
+                    <div class="img-box">
+                        <img src="/images/skodap.jpg">
+                    </div>
+                    <h3>Petr Škoda</h3>
+                    <p>Faculty of Mathematics and Physics, Charles University</p>
+                    <p><span class="glyphicon glyphicon-envelope"></span> skodapetr (at)
+                        gmail.com </p>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 profile">
                     <div class="img-box">
                         <img src="/images/novotnym.jpg">
                     </div>
-                    <h3>Mgr. Marian Novotný, Ph.D.</h3>
+                    <h3>Marian Novotný</h3>
                     <p>Faculty of Science, Charles University</p>
                     <p><span class="glyphicon glyphicon-envelope"></span> marian.novotny (at)
                         natur.cuni.cz </p>
