@@ -41,7 +41,25 @@ task('copy_p2rank_jar', type:Copy) {
 }
 tasks['copy_p2rank_jar'].dependsOn ':p2rank:assemble'
 
+
+// Setup copying p2rank distribution to P2RANK_DISTRO path
+task('copy_p2rank_dist', type:Copy) {
+    // Copy P2Rank dist to P2RANK_DIST
+    from '../p2rank/distro/'
+    into "$System.env.P2RANK_DIST"
+}
+tasks['copy_p2rank_dist'].dependsOn ':p2rank:assemble'
+
+// Check that P2RANK_DISTRO env variable is set.
+gradle.taskGraph.whenReady { taskGraph ->
+    logger.error(taskGraph.getAllTasks().toString())
+    if (taskGraph.hasTask(':webapp:copy_p2rank_dist') && System.getenv('P2RANK_DIST') == null) {
+       throw new GradleException("Please export 'P2RANK_DIST' variable, path for p2rank models and configs.")
+    }
+}
+
 compileJava.dependsOn 'copy_p2rank_jar'
+compileJava.dependsOn 'copy_p2rank_dist'
 processResources.dependsOn 'copy_LiteMol_css'
 processResources.dependsOn 'copy_LiteMol_js'
 
