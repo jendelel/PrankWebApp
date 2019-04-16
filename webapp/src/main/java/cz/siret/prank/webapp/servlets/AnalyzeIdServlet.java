@@ -79,7 +79,7 @@ public class AnalyzeIdServlet extends HttpServlet {
                 if (progress.toLowerCase().contains("error")) {
                     req.setAttribute("msg", progress.replace("\n", "<br/>"));
                     long elapsed = System.currentTimeMillis() - data.statusFile().toFile().lastModified();
-                    if (elapsed > 1000 * 30 * 60 * 60) {
+                    if (elapsed > 1000 * 30 * 60) {
                         // If the error file is older than 30 minutes, delete it.
                         data.statusFile().toFile().delete();
                     }
