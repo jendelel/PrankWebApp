@@ -74,6 +74,7 @@ public enum JobRunner {
     private void setupP2Rank(boolean conservation) {
         if (conservation) {
             prankPredictor.getParams().setModel("conservation.model");
+            prankPredictor.getParams().setLoad_conservation(true);
             prankPredictor.getParams().setResidue_table_features(new ArrayList<>());
             prankPredictor.getParams().setAtom_table_features(Arrays.asList
                     ("apRawValids", "apRawInvalids", "atomicHydrophobicity"));
@@ -81,6 +82,7 @@ public enum JobRunner {
                     ("chem", "volsite", "protrusion", "bfactor", "conservation"));
         } else {
             prankPredictor.getParams().setModel(model);
+            prankPredictor.getParams().setLoad_conservation(false);
             prankPredictor.getParams().setResidue_table_features(residue_table_features);
             prankPredictor.getParams().setAtom_table_features(atom_table_features);
             prankPredictor.getParams().setExtra_features(extra_features);
@@ -149,7 +151,7 @@ public enum JobRunner {
                                 "Getting conservation.");
                         String baseName = BioUtils.INSTANCE.removePdbExtension(fileToAnalyze.getName()).getItem1();
                         conservationPattern = BioUtils.CONSERVATION_FILENAME_PATTERN.replaceFirst
-                                ("%baseDir", baseName).replaceFirst("%ext", "hom.gz");
+                                ("%baseDir%", baseName).replaceFirst("%ext%", "hom.gz");
 
                         msaAndConservationForChain = BioUtils.INSTANCE.copyAndGzipConservationAndMSAsToDir(
                                 getConservationAndMSAs(BioUtils.INSTANCE.loadPdbFile
@@ -168,6 +170,7 @@ public enum JobRunner {
                             conservationPattern);
                     itemContext = new ProcessedItemContext(null, colValues);
                     setupP2Rank(true);
+                    prankPredictor.getParams().setConservation_dir(fileToAnalyze.toPath().getParent().relativize(outDir).toString());
                 } else {
                     setupP2Rank(false);
                 }
@@ -208,7 +211,7 @@ public enum JobRunner {
                             msaAndConservationForChain, baseName,
                             outDir);
             String conservationPattern = BioUtils.CONSERVATION_FILENAME_PATTERN.replaceFirst
-                    ("%baseDir", baseName).replaceFirst("%ext", "hom.gz");
+                    ("%baseDir%", baseName).replaceFirst("%ext%", "hom.gz");
 
             ProcessedItemContext itemContext = null;
             if (conservationAndMsas != null && conservationAndMsas.size() > 0) {
@@ -216,6 +219,7 @@ public enum JobRunner {
                 colValues.put(Dataset.getCOLUMN_CONSERVATION_FILES_PATTERN(), conservationPattern);
                 itemContext = new ProcessedItemContext(null, colValues);
                 setupP2Rank(true);
+                prankPredictor.getParams().setConservation_dir(fileToAnalyze.toPath().getParent().relativize(outDir).toString());
             } else {
                 setupP2Rank(false);
             }
