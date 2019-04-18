@@ -63,7 +63,7 @@
                                                class="form-control" oninput="doConservationClicked()"/>
                                     </div>
                                     <div style="text-align:center;">OR</div>
-                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="upload-pdb" class="col-sm-2 control-label">PDB file
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
@@ -76,9 +76,30 @@
                                         <input id="upload-pdb" name="pdbFile" accept=".pdb"
                                                type="file" oninput="doConservationClicked()"/>
                                     </div>
+                                </div>
+                            </div>
+            </div>
+
+            <%--<br>--%>
+            <div class="panel panel-success" style="width:75%; margin-left:12%">
+                <div class="panel-heading">Chain selection</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label id="chainIds_lbl" for="chainIds"
+                               class="col-sm-2 control-label">Select chain (optional)
+                            <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
+                               title="List of chains IDs that should be analysed. If omitted, the whole protein is analyzed. IDs are case sensitive and should be separated by commas.">
+                                <i class='glyphicon glyphicon-question-sign'
+                                   style="color:black;"></i>
+                            </a>
+                            </label>
+                        <div class="col-sm-10">
+                            <input type="text" id="chainIds" class="form-control"/>
+                        </div>
                     </div>
                 </div>
-                        </div>
+            </div>
+
                     <%--<br>--%>
                 <div class="panel panel-success" style="width:75%; margin-left:12%">
                     <div class="panel-heading">Conservation analysis</div>

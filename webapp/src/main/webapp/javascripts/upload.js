@@ -2,6 +2,7 @@ function uploadPdbFile() {
     var files = $('#upload-pdb').get(0).files;
     var msaFiles = $('#upload-msas').get(0).files;
     var pdbId = $('#pdbId').val();
+    var chainIds = $("#chainIds").val();
     var doConservation = $('#conservation-checkbox').prop('checked');
     if (pdbId === "") {
         pdbId = '2src'
@@ -13,6 +14,7 @@ function uploadPdbFile() {
 
         var formData = new FormData();
         formData.append('conservation', doConservation);
+        formData.append('chainIds', chainIds.trim())
 
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
@@ -81,11 +83,18 @@ function uploadPdbFile() {
                    }
                });
     } else if (isValidPdbId(pdbId)) {
+        var destUrl = ""
         if (doConservation) {
-            window.location.href = '/analyze/id/' + pdbId;
+            destUrl = '/analyze/id/' + pdbId;
         } else {
-            window.location.href = '/analyze/id_noconser/' + pdbId;
+            destUrl = '/analyze/id_noconser/' + pdbId;
         }
+
+        if (chainIds) {
+            destUrl = destUrl + "_" + chainIds.trim();
+        }
+        // Navigate to the address.
+        window.location.href = destUrl
     } else {
         alert("Please select some files to upload or enter valid PDB ID.")
         return false;
