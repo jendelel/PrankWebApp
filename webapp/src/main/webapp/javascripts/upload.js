@@ -46,7 +46,7 @@ function uploadPdbFile() {
                        var newUrl;
                        if (data.startsWith("/")) {
                            newUrl = data;
-                       } else if (data.length < 50) {
+                       } else if (data.startsWith("upload") && data.length < 50) {
                            newUrl = '/analyze/upload/'.concat(data);
                        } else {
                            document.write(data);

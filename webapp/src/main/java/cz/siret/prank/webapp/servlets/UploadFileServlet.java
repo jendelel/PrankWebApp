@@ -146,7 +146,11 @@ public class UploadFileServlet extends HttpServlet {
             response.getWriter().close();
             return;
         } catch (Exception e) {
+            tempFile.delete();
+            response.getWriter().write("Failed to run prediction. Error message: " + e.getMessage());
+            response.getWriter().close();
             logger.error("Failed to run prediction", e);
+            return;
         }
     }
 
