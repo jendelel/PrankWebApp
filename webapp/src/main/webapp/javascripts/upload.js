@@ -2,6 +2,7 @@ function uploadPdbFile() {
     var files = $('#upload-pdb').get(0).files;
     var msaFiles = $('#upload-msas').get(0).files;
     var pdbId = $('#pdbId').val();
+    var chainIds = $("#chainIds").val();
     var doConservation = $('#conservation-checkbox').prop('checked');
     if (pdbId === "") {
         pdbId = '2src'
@@ -45,7 +46,7 @@ function uploadPdbFile() {
                        var newUrl;
                        if (data.startsWith("/")) {
                            newUrl = data;
-                       } else if (data.length < 50) {
+                       } else if (data.startsWith("upload") && data.length < 50) {
                            newUrl = '/analyze/upload/'.concat(data);
                        } else {
                            document.write(data);

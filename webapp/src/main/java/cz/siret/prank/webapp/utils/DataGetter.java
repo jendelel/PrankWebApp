@@ -10,8 +10,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,6 +23,31 @@ public class DataGetter {
     private String inputId;
 
     private final transient Logger logger = LoggerFactory.getLogger(getClass());
+
+    public static class IdStruct {
+        public String pdbId;
+        public Set<String> chains;
+
+        @Override
+        public String toString() {
+            if (chains == null) {
+                return pdbId;
+            }
+            return pdbId + "_" + String.join(",", new TreeSet<>(chains));
+        }
+    }
+
+    public static IdStruct parseUrlSuffix(String urlSuffix) {
+        if (urlSuffix == null && !urlSuffix.contains("/")) return null;
+        IdStruct result = new IdStruct();
+        if (urlSuffix.length() == 5 && urlSuffix.charAt(0) == '/') {
+            result.pdbId = urlSuffix.substring(1).toLowerCase();
+        } else if (urlSuffix.length() > 5 && urlSuffix.charAt(0) == '/' && urlSuffix.charAt(5) == '_') {
+            result.pdbId = urlSuffix.substring(1, 5).toLowerCase();
+            result.chains = new HashSet<>(Arrays.asList(urlSuffix.substring(6).split(",")));
+        }
+        return result;
+    }
 
     public DataGetter(String inputType, String inputId) {
         this.inputId = inputId;
@@ -55,8 +83,11 @@ public class DataGetter {
         FilenameFilter filter;
         if (inputType.equals("id")) {
             conservationDir = Paths.get(AppSettings.INSTANCE.getCsvDataPath()).toFile();
+            String prefix = "pdb" + inputType + "_" + inputId;
+            // Files have the correct prefix, but they don't belong to chain-slices pdb.
             filter = (dir, name) ->
-                    (name.startsWith("pdb" + inputType + "_" + inputId) &&
+                    (name.startsWith(prefix) && name.length() > prefix.length() &&
+                            name.charAt(prefix.length()) != '_' && name.charAt(prefix.length()) != ',' && 
                             name.endsWith(extension));
         } else {
             conservationDir = Paths.get(AppSettings.INSTANCE.getPredictionDir()).toFile();

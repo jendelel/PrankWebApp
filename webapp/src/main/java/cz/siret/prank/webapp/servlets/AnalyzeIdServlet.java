@@ -23,6 +23,7 @@ import cz.siret.prank.lib.utils.BioUtils;
 import cz.siret.prank.lib.utils.Utils;
 import cz.siret.prank.webapp.utils.AppSettings;
 import cz.siret.prank.webapp.utils.DataGetter;
+import cz.siret.prank.webapp.utils.DataGetter.IdStruct;
 import cz.siret.prank.webapp.utils.JobRunner;
 import cz.siret.prank.webapp.utils.PrankUtils;
 
@@ -56,19 +57,19 @@ public class AnalyzeIdServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String urlSuffix = req.getPathInfo();
+        IdStruct idStruct = DataGetter.parseUrlSuffix(urlSuffix);
         logger.info(req.getServletPath());
-        if (urlSuffix != null && urlSuffix.length() == 5 && urlSuffix.charAt(0) == '/' ) {
-            String pdbId = urlSuffix.substring(1).toLowerCase();
+        if (idStruct != null) {
             String inputType = "id"; boolean runConservation = true;
             if (req.getServletPath().equals("/analyze/id_noconser")) {
                 inputType = "id_noconser";
                 runConservation = false;
             }
-            DataGetter data = new DataGetter(inputType, pdbId);
+            DataGetter data = new DataGetter(inputType, idStruct.toString());
 
             if (data.csvFile().toFile().exists()) {
                 req.setAttribute("inputType", inputType);
-                req.setAttribute("inputId", pdbId);
+                req.setAttribute("inputId", idStruct.toString());
                 RequestDispatcher rd = getServletContext().getRequestDispatcher("/views/visualize.jsp");
                 rd.forward(req, resp);
                 return;
@@ -96,7 +97,7 @@ public class AnalyzeIdServlet extends HttpServlet {
                 }
             } else {
                 // Download and analyze the file.
-                File downloadedFile = downloadFileFromPDB(pdbId,
+                File downloadedFile = downloadFileFromPDB(idStruct.pdbId,
                         data.pdbFile(),
                         data.csvFile().getParent());
                 if (downloadedFile != null) {
@@ -107,8 +108,19 @@ public class AnalyzeIdServlet extends HttpServlet {
                         PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
                                 data.csvFile().getParent(), "ERROR: ".concat(errors));
                     } else {
-                        JobRunner.INSTANCE.runPrediction(data.pdbFile().toFile(),
-                                Paths.get(AppSettings.INSTANCE.getCsvDataPath()), pdbId, runConservation);
+                        try {
+                            if (idStruct.chains != null) {
+                                // Replace the pdb file contents with only the selected chains.
+                                String pdbContents = BioUtils.INSTANCE.getChainsPDB(data.pdbFile().toFile(), idStruct.chains);
+                                Utils.INSTANCE.stringToGZipFile(pdbContents, data.pdbFile().toFile());
+                            }
+                            JobRunner.INSTANCE.runPrediction(data.pdbFile().toFile(),
+                                Paths.get(AppSettings.INSTANCE.getCsvDataPath()), idStruct.pdbId, runConservation);
+                        } catch (Exception e) {
+                            // It's possible that the chain specified won't be found.
+                            PrankUtils.INSTANCE.updateStatus(data.pdbFile().toFile(),
+                                    data.csvFile().getParent(), "ERROR: ".concat(e.getMessage()));
+                        }
                     }
                 }
 
@@ -117,7 +129,6 @@ public class AnalyzeIdServlet extends HttpServlet {
                         .getRequestDispatcher("/views/in_progress.jsp");
                 rd.forward(req, resp);
                 return;
-
             }
 
         } else {

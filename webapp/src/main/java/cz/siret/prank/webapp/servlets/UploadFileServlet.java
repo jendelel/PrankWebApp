@@ -14,9 +14,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.zip.GZIPOutputStream;
 
@@ -83,7 +86,7 @@ public class UploadFileServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         boolean doConservation = Boolean.parseBoolean(request.getParameter("conservation"));
-        String chain = request.getParameter("chain");
+        String chainIds = request.getParameter("chainIds");
         String pdbId = request.getParameter("pdbId");
         Path predictionDir = Paths.get(AppSettings.INSTANCE.getPredictionDir());
 
@@ -122,6 +125,12 @@ public class UploadFileServlet extends HttpServlet {
             }
 
             if (checkOK) {
+                if (chainIds != null && !chainIds.isEmpty()) {
+                    // Replace the pdb file contents with only the selected chains.
+                    Set<String> chainIdsSet = new HashSet<>(Arrays.asList(chainIds.split(",")));
+                    String pdbContents = BioUtils.INSTANCE.getChainsPDB(tempFile, chainIdsSet);
+                    Utils.INSTANCE.stringToGZipFile(pdbContents, tempFile);
+                }
                 if (msas.size() <= 0) {
                     JobRunner.INSTANCE.runPrediction(tempFile, predictionDir, pdbId, doConservation);
                 } else {
@@ -137,7 +146,11 @@ public class UploadFileServlet extends HttpServlet {
             response.getWriter().close();
             return;
         } catch (Exception e) {
+            tempFile.delete();
+            response.getWriter().write("Failed to run prediction. Error message: " + e.getMessage());
+            response.getWriter().close();
             logger.error("Failed to run prediction", e);
+            return;
         }
     }
 
