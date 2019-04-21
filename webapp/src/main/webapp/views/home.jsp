@@ -60,10 +60,10 @@
                             </label>
                                     <div class="col-sm-10" style="padding-bottom:10px">
                                         <input type="text" id="pdbId" placeholder="2SRC"
-                                               class="form-control" oninput="doConservationClicked()"/>
+                                               class="form-control" oninput="doConservationClicked()" onkeyup="updateChainSelector()"/>
                                     </div>
+                                    <div id="chain-selector" class="col-sm-10 col-sm-offset-2"></div>
                                     <div style="text-align:center;">OR</div>
-                                </div>
                                 <div class="form-group">
                                     <label for="upload-pdb" class="col-sm-2 control-label">PDB file
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
