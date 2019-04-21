@@ -13,6 +13,7 @@ function uploadPdbFile() {
 
         var formData = new FormData();
         formData.append('conservation', doConservation);
+        formData.append('chainIds', $('#fileChains').val());
 
         for (var i = 0; i < files.length; i++) {
             var file = files[i];
@@ -81,10 +82,19 @@ function uploadPdbFile() {
                    }
                });
     } else if (isValidPdbId(pdbId)) {
+        var chains = getSelectedChains();
+        if (chains.length === 0) {
+            alert('At least one chain need to be selected.');
+            return false;
+        }
+        var chainsStr = chains.join(',');
+
         if (doConservation) {
-            window.location.href = '/analyze/id/' + pdbId;
+            window.location.href =
+              '/analyze/id/' + pdbId + '_' + chainsStr;
         } else {
-            window.location.href = '/analyze/id_noconser/' + pdbId;
+            window.location.href =
+              '/analyze/id_noconser/' + pdbId + '_' + chainsStr;
         }
     } else {
         alert("Please select some files to upload or enter valid PDB ID.")
@@ -120,3 +130,75 @@ $(document).ready(function () {
     $(".tooltip-hint").tooltip();
     document.getElementById('pdbUploadSumbit').onclick = function() { uploadPdbFile(); };
 });
+
+function updateChainSelector() {
+    var pdbId = $('#pdbId').val().toLowerCase();
+    var chainSelector = $('#chain-selector');
+    if (!isValidPdbId(pdbId)) {
+        chainSelector.hide();
+        return;
+    }
+    var url = 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/' + pdbId;
+    fetch(url).then(function(response) {
+        console.log(response);
+        if (response.status !== 200) {
+            throw new Error('Invalid response.');
+        }
+        return response.json();
+    }).then(function(response) {
+        var chains = collectChainsFromPdbMoleculeResponse(response[pdbId]);
+        var html = generateHtmlForChainSelectors(chains);
+        chainSelector.html(html).show();
+    }).catch(function (error) {
+        console.warn('Can\'t fetch chains:' , error);
+        chainSelector.html('Can\'t fetch chains for given PDB ID.').show();
+    });
+}
+
+function collectChainsFromPdbMoleculeResponse(entities) {
+    var chains = new Set();
+    entities.forEach(function(entity) {
+      if (!entity['sequence']) {
+          return;
+      }
+      entity['in_chains'].forEach(function (chain) {
+        chains.add(chain);
+      });
+    });
+    return chains;
+}
+
+function generateHtmlForChainSelectors(chains) {
+    var checkBoxTemplate =
+        '<div class="checkbox col-sm-1">\n' +
+        '    <label>\n' +
+        '        <input type="checkbox" onclick="doConservationClicked()" checked="checked" style="margin-right: 4px;" chain="{name}"" class="chain-checkbox">\n' +
+        '        {name}\n' +
+        '</label>\n' +
+        '</div>\n';
+    var content = '';
+    chains.forEach(function (chain) {
+        // Version of replaceAll.
+        content += checkBoxTemplate.split('{name}').join(chain);
+    });
+    var html = (
+        '<div>\n' +
+        '  <b>Restrict to chains</b>\n' +
+        '</div>\n' +
+        '<div>\n' +
+        '  {content}\n' +
+        '</div>'
+    ).replace('{content}', content);
+    return html;
+}
+
+function getSelectedChains() {
+    var chains = [];
+    $('.chain-checkbox').each(function () {
+        var checkbox = $(this);
+        if (checkbox.prop('checked')) {
+            chains.push(checkbox.attr('chain'));
+        }
+    });
+    return chains;
+}

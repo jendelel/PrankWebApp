@@ -60,10 +60,11 @@
                             </label>
                                     <div class="col-sm-10" style="padding-bottom:10px">
                                         <input type="text" id="pdbId" placeholder="2SRC"
-                                               class="form-control" oninput="doConservationClicked()"/>
+                                               class="form-control" oninput="doConservationClicked()" onkeyup="updateChainSelector()"/>
                                     </div>
-                                    <div style="text-align:center;">OR</div>
+                                    <div id="chain-selector" class="col-sm-10 col-sm-offset-2">
                     </div>
+                    <div style="text-align:center;">OR</div>
                                 <div class="form-group">
                                     <label for="upload-pdb" class="col-sm-2 control-label">PDB file
                                 <a class='tooltip-hint' data-toggle="tooltip" data-placement="top"
@@ -76,6 +77,18 @@
                                         <input id="upload-pdb" name="pdbFile" accept=".pdb"
                                                type="file" oninput="doConservationClicked()"/>
                                     </div>
+                            <div class="col-sm-10 col-sm-offset-2">
+                                <div>
+                                    <b>Restrict to chains</b>
+                                    <a class="tooltip-hint" data-toggle="tooltip" data-placement="top"
+                                        title="Optional. Comma separated list of chains to analyze.">
+                                        <i class="glyphicon glyphicon-question-sign" style="color:black;"></i>
+                                    </a>
+                                </div>
+                                <div>
+                                    <input type="text" id="fileChains" placeholder="A,B" class="form-control">
+                                </div>
+                            </div>
                     </div>
                 </div>
                         </div>
