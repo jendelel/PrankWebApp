@@ -1,3 +1,6 @@
+| WARNING: This repository has been deprecated in favor of https://github.com/cusbg/prankweb ! Please file any issues there! |
+| --- |
+
 # PrankWeb
 This repositary contains PrankWeb web application. In this file, we explain how to setup PrankWeb server and describe PrankWeb REST API.
 
